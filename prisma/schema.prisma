@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  image         String?
+  role          Role      @default(REGULAR)
+  regatista     Regatista? @relation(fields: [regatistaId], references: [id])
+  regatistaId   String?   @unique
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+}
+
+enum Role {
+  ADMIN
+  REGULAR
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Regatista {
+  id              String      @id @default(cuid())
+  nombre          String
+  club            Club?       @relation(fields: [clubId], references: [id])
+  clubId          String?
+  pais            String?     @default("Argentina")
+  fechaNacimiento DateTime?
+  fuenteIds       Json?       // { "sailwave": "PEREZ Juan", "fay": "123" }
+  user            User?
+  resultados      Resultado[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([nombre])
+}
+
+model Club {
+  id          String       @id @default(cuid())
+  nombre      String       @unique
+  ciudad      String?
+  regatistas  Regatista[]
+  campeonatos Campeonato[]
+}
+
+model Clase {
+  id          String       @id @default(cuid())
+  nombre      String       @unique
+  campeonatos Campeonato[]
+}
+
+model Campeonato {
+  id          String             @id @default(cuid())
+  nombre      String
+  anio        Int
+  clase       Clase              @relation(fields: [claseId], references: [id])
+  claseId     String
+  sede        Club?              @relation(fields: [sedeId], references: [id])
+  sedeId      String?
+  fechaInicio DateTime?
+  fechaFin    DateTime?
+  fuenteUrl   String?
+  estado      EstadoCampeonato   @default(BORRADOR)
+  descartes   Int                @default(0)
+  regatas     Regata[]
+  staging     StagingImport[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([anio])
+  @@index([claseId])
+}
+
+enum EstadoCampeonato {
+  BORRADOR
+  PUBLICADO
+}
+
+model Regata {
+  id            String      @id @default(cuid())
+  campeonato    Campeonato  @relation(fields: [campeonatoId], references: [id], onDelete: Cascade)
+  campeonatoId  String
+  numero        Int
+  fecha         DateTime?
+  condiciones   String?
+  resultados    Resultado[]
+
+  @@unique([campeonatoId, numero])
+}
+
+model Resultado {
+  id           String    @id @default(cuid())
+  regata       Regata    @relation(fields: [regataId], references: [id], onDelete: Cascade)
+  regataId     String
+  regatista    Regatista @relation(fields: [regatistaId], references: [id])
+  regatistaId  String
+  puesto       Int
+  puntos       Float
+  descartado   Boolean   @default(false)
+  observacion  String?
+
+  @@unique([regataId, regatistaId])
+  @@index([regatistaId])
+}
+
+model StagingImport {
+  id            String        @id @default(cuid())
+  campeonato    Campeonato?   @relation(fields: [campeonatoId], references: [id])
+  campeonatoId  String?
+  datosCrudos   Json
+  estado        EstadoStaging @default(PENDIENTE)
+  fuente        String?
+  notas         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+enum EstadoStaging {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}

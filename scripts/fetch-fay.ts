@@ -1,0 +1,1 @@
+fetch('https://fay.org/calendarios/').then(r=>r.text()).then(t => { const links = t.match(/href=[\"'](http[^\"']+)[\"']/g); console.log(links?.filter(l => l.includes('yca.org.ar') || l.includes('resultados')).slice(0,20).join('\n'))})
