@@ -85,12 +85,14 @@ export default function AdminDashboardPage() {
           </Card>
 
           <Card className="bg-surface border-border hover:border-primary transition-colors cursor-pointer group">
-            <CardHeader>
-              <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
-                Cola de Staging <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </CardTitle>
-              <CardDescription>Revisar campeonatos en borrador antes de publicar</CardDescription>
-            </CardHeader>
+            <Link href="/admin/solicitudes">
+              <CardHeader>
+                <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
+                  Solicitudes de Vinculación <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </CardTitle>
+                <CardDescription>Revisar y aprobar reclamos de perfiles</CardDescription>
+              </CardHeader>
+            </Link>
           </Card>
         </div>
       </div>

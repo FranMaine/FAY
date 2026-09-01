@@ -21,6 +21,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
+  solicitudes   SolicitudVinculacion[]
 }
 
 enum Role {
@@ -72,6 +73,7 @@ model Regatista {
   fuenteIds       Json?       // { "sailwave": "PEREZ Juan", "fay": "123" }
   user            User?
   resultados      Resultado[]
+  solicitudes     SolicitudVinculacion[]
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -163,3 +165,23 @@ enum EstadoStaging {
   APROBADO
   RECHAZADO
 }
+
+model SolicitudVinculacion {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  regatista   Regatista @relation(fields: [regatistaId], references: [id], onDelete: Cascade)
+  regatistaId String
+  estado      EstadoSolicitud @default(PENDIENTE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, regatistaId])
+}
+
+enum EstadoSolicitud {
+  PENDIENTE
+  APROBADA
+  RECHAZADA
+}
+
