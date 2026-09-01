@@ -25,10 +25,9 @@ export async function POST(
     const resolvedParams = await params;
     const campeonatoId = resolvedParams.id;
 
-    // Obtener la claseId del campeonato
     const campeonato = await prisma.campeonato.findUnique({
       where: { id: campeonatoId },
-      select: { claseId: true }
+      select: { id: true }
     });
 
     if (!campeonato) {
@@ -45,11 +44,7 @@ export async function POST(
       parseResult = parseSailwaveCSV(fileContent);
     }
 
-    const result = await importCampeonatoResults(
-      campeonatoId,
-      campeonato.claseId,
-      parseResult.regatistas
-    );
+    const result = await importCampeonatoResults(campeonatoId, parseResult);
 
     return NextResponse.json(result);
   } catch (error: any) {
