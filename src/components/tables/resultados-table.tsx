@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export interface ClasificacionRegatista {
   id: string;
@@ -42,7 +43,9 @@ export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps
                   {row.posicion}
                 </Badge>
                 <div>
-                  <div className="font-semibold text-foreground">{row.nombre}</div>
+                  <Link href={`/regatistas/${row.id}`} className="font-semibold text-foreground hover:text-primary transition-colors">
+                    {row.nombre}
+                  </Link>
                   <div className="text-xs text-muted">{row.club}</div>
                 </div>
               </div>
@@ -96,7 +99,9 @@ export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps
                   </Badge>
                 </td>
                 <td className="px-4 py-3 sticky left-[60px] bg-surface z-10 font-medium text-foreground whitespace-nowrap">
-                  {row.nombre}
+                  <Link href={`/regatistas/${row.id}`} className="hover:text-primary transition-colors hover:underline">
+                    {row.nombre}
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-muted whitespace-nowrap">{row.club}</td>
                 {regatas.map((r) => {

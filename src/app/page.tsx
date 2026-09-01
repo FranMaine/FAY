@@ -1,101 +1,126 @@
 import Link from "next/link";
-import { Trophy, BarChart3, Medal, Sailboat, ArrowRight } from "lucide-react";
+import { Trophy, BarChart3, Medal, Sailboat, ArrowRight, ActivityIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { prisma } from "@/lib/db";
+import { SailorSearch } from "@/components/search/sailor-search";
 
-export default function LandingPage() {
+// Obtener los últimos 3 campeonatos para la home
+async function getUltimosCampeonatos() {
+  return prisma.campeonato.findMany({
+    take: 3,
+    orderBy: { updatedAt: 'desc' },
+    include: { clase: true, sede: true },
+  });
+}
+
+// Obtener estadísticas globales
+async function getStats() {
+  const [totalRegatistas, totalCampeonatos] = await Promise.all([
+    prisma.regatista.count(),
+    prisma.campeonato.count(),
+  ]);
+  return { totalRegatistas, totalCampeonatos };
+}
+
+export default async function LandingPage() {
+  const campeonatos = await getUltimosCampeonatos();
+  const stats = await getStats();
+
   return (
     <main className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Hero Section */}
-      <section className="relative px-6 py-24 md:py-32 flex flex-col items-center text-center overflow-hidden">
+      <section className="relative px-6 py-20 md:py-32 flex flex-col items-center text-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-surface z-0"></div>
-        <div className="relative z-10 max-w-4xl mx-auto space-y-6 flex flex-col items-center">
-          <div className="p-3 bg-surface rounded-full shadow-xl shadow-blue-900/20 mb-4 ring-1 ring-border">
+        <div className="relative z-10 max-w-4xl mx-auto space-y-8 flex flex-col items-center w-full">
+          <div className="p-3 bg-surface rounded-full shadow-xl shadow-blue-900/20 mb-2 ring-1 ring-border">
             <Sailboat className="w-10 h-10 text-primary" />
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">FAY Stats</h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
-            Todas las estadísticas de la vela argentina en un solo lugar
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full sm:w-auto">
-            <Link href="/campeonatos" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-lg">
-                Ver Campeonatos <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-            <Link href="/registro" className="w-full sm:w-auto">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto text-lg">
-                Crear Cuenta
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="px-6 py-20 bg-surface/50 border-y border-border">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-surface border-border">
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <Trophy className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Resultados</CardTitle>
-                <CardDescription>
-                  Consultá los resultados de todos los campeonatos FAY
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-surface border-border">
-              <CardHeader>
-                <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
-                  <BarChart3 className="w-6 h-6 text-accent" />
-                </div>
-                <CardTitle>Estadísticas</CardTitle>
-                <CardDescription>
-                  Seguí tu evolución y compará tu rendimiento
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-surface border-border">
-              <CardHeader>
-                <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-4">
-                  <Medal className="w-6 h-6 text-green-500" />
-                </div>
-                <CardTitle>Rankings</CardTitle>
-                <CardDescription>
-                  Mirá los rankings generales por clase y temporada
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Últimos Campeonatos */}
-      <section className="px-6 py-20 flex-1">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold tracking-tight">Últimos Campeonatos</h2>
-            <Link href="/campeonatos">
-              <Button variant="ghost">
-                Ver Todos <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center justify-center p-12 text-center bg-surface border border-dashed border-border rounded-xl">
-            <Trophy className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-medium mb-2">Próximamente</h3>
-            <p className="text-muted-foreground max-w-md">
-              Los campeonatos publicados aparecerán aquí una vez que haya datos disponibles en el sistema.
+          
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+              FAY <span className="text-primary">Stats</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-light">
+              Ranking Nacional, resultados históricos y perfiles de regatistas de Argentina.
             </p>
           </div>
+
+          <div className="w-full py-6">
+            <SailorSearch />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+            <Link href="/rankings">
+              <Button size="lg" className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto">
+                <Trophy className="w-5 h-5 mr-2" />
+                Ver Rankings Oficiales
+              </Button>
+            </Link>
+            <Link href="/campeonatos">
+              <Button variant="outline" size="lg" className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto">
+                Explorar Campeonatos
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Bar */}
+      <section className="border-y border-border bg-surface/50 py-10 px-6 relative z-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-border">
+          <div className="flex flex-col items-center pt-4 md:pt-0">
+            <div className="text-4xl font-bold text-foreground mb-2">{stats.totalRegatistas}</div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider font-medium">Regatistas</div>
+          </div>
+          <div className="flex flex-col items-center pt-4 md:pt-0">
+            <div className="text-4xl font-bold text-primary mb-2">{stats.totalCampeonatos}</div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider font-medium">Campeonatos</div>
+          </div>
+          <div className="flex flex-col items-center pt-4 md:pt-0">
+            <div className="text-4xl font-bold text-amber-500 mb-2">ISAF</div>
+            <div className="text-sm text-muted-foreground uppercase tracking-wider font-medium">Scoring System</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Latest Championships */}
+      <section className="py-20 px-6 max-w-7xl mx-auto w-full relative z-10">
+        <div className="flex items-center justify-between mb-10">
+          <h2 className="text-3xl font-bold tracking-tight">Últimos Resultados</h2>
+          <Link href="/campeonatos" className="text-primary hover:underline font-medium flex items-center">
+            Ver todos <ArrowRight className="w-4 h-4 ml-1" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {campeonatos.map((camp) => (
+            <Card key={camp.id} className="bg-surface border-border hover:border-primary/50 transition-colors group">
+              <Link href={`/campeonatos/${camp.id}`}>
+                <CardHeader>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-1 rounded-md">
+                      {camp.clase.nombre}
+                    </span>
+                    <span className="text-sm text-muted-foreground font-medium">{camp.anio}</span>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors line-clamp-2">
+                    {camp.nombre}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-1 mt-2">
+                    {camp.sede?.nombre || "Sin sede"}
+                  </CardDescription>
+                </CardHeader>
+              </Link>
+            </Card>
+          ))}
+          {campeonatos.length === 0 && (
+            <div className="col-span-3 text-center py-12 text-muted-foreground bg-surface rounded-xl border border-dashed border-border">
+              Aún no hay campeonatos publicados.
+            </div>
+          )}
         </div>
       </section>
     </main>
   );
 }
-
