@@ -1,19 +1,24 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { MedalIcon, ArrowRightIcon } from "lucide-react";
+import { MedalIcon, ArrowRightIcon, AlertCircleIcon } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { generarClasificacion } from "@/lib/scoring";
+import { RankingFilters } from "@/components/filters/ranking-filters";
 
 export const metadata: Metadata = {
-  title: "Rankings | FAY Stats",
+  title: "Rankings Oficiales | FAY Stats",
 };
 
 export const revalidate = 60; // Revalidar cada 60 segundos
 
-async function getRankingGeneral() {
+async function getRankingGeneral(claseId: string, anio: number) {
   const campeonatos = await prisma.campeonato.findMany({
-    where: { estado: 'PUBLICADO' },
+    where: { 
+      estado: 'PUBLICADO',
+      claseId,
+      anio
+    },
     include: {
       regatas: {
         include: {
@@ -30,7 +35,6 @@ async function getRankingGeneral() {
   const regatistasStats = new Map<string, { id: string, nombre: string, club: string, campeonatos: number, puntosRanking: number }>();
 
   for (const camp of campeonatos) {
-    // Generar clasificación
     const regMap = new Map();
     camp.regatas.forEach(reg => {
       reg.resultados.forEach(res => {
@@ -68,8 +72,7 @@ async function getRankingGeneral() {
       const stats = regatistasStats.get(c.regatistaId)!;
       stats.campeonatos += 1;
       
-      // Fórmula simple para el ranking: (Total Inscriptos - Posición + 1)
-      // Otorga más puntos por ganar en flotas más grandes
+      // Fórmula de Puntos FAY = (Total Inscriptos - Posición Final) + 1
       const puntosObtenidos = (totalInscriptos - c.posicionFinal) + 1;
       stats.puntosRanking += puntosObtenidos;
     });
@@ -79,8 +82,49 @@ async function getRankingGeneral() {
   return Array.from(regatistasStats.values()).sort((a, b) => b.puntosRanking - a.puntosRanking);
 }
 
-export default async function RankingsPage() {
-  const ranking = await getRankingGeneral();
+export default async function RankingsPage({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedParams = await searchParams;
+
+  // Obtener datos base para los filtros
+  const clases = await prisma.clase.findMany({ orderBy: { nombre: 'asc' } });
+  
+  const currentYear = new Date().getFullYear();
+  // Obtener años únicos de los campeonatos
+  const campeonatosAnios = await prisma.campeonato.findMany({
+    select: { anio: true },
+    distinct: ['anio'],
+    orderBy: { anio: 'desc' }
+  });
+  const anios = campeonatosAnios.map(c => c.anio);
+  if (!anios.includes(currentYear)) anios.unshift(currentYear);
+
+  if (clases.length === 0) {
+    return (
+      <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+        <div className="max-w-5xl mx-auto space-y-8">
+          <header>
+            <h1 className="text-4xl font-bold tracking-tight mb-2">Rankings Generales</h1>
+          </header>
+          <Card className="bg-surface border-border text-center py-12">
+            <CardContent>
+              <div className="text-muted-foreground">No hay clases configuradas en el sistema.</div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
+
+  // Si no hay params, buscar el default (el que tenga más regatas o el primero)
+  let activeClaseId = typeof resolvedParams.clase === 'string' ? resolvedParams.clase : clases[0].id;
+  let activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
+
+  const ranking = await getRankingGeneral(activeClaseId, activeAnio);
+  const selectedClaseNombre = clases.find(c => c.id === activeClaseId)?.nombre || '';
 
   return (
     <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
@@ -90,12 +134,19 @@ export default async function RankingsPage() {
           <p className="text-muted-foreground text-lg">Clasificaciones calculadas en base a resultados de los campeonatos oficiales de FAY.</p>
         </header>
 
+        <RankingFilters 
+          clases={clases} 
+          anios={anios} 
+          currentClaseId={activeClaseId} 
+          currentAnio={activeAnio} 
+        />
+
         {ranking.length === 0 ? (
-          <Card className="bg-surface border-border text-center py-12">
-            <CardContent>
-              <div className="text-muted-foreground">Aún no hay campeonatos suficientes para calcular el ranking.</div>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
+            <AlertCircleIcon className="w-8 h-8 mb-3 opacity-50" />
+            <p className="text-lg font-medium">Sin resultados</p>
+            <p className="text-sm">No hay campeonatos publicados de {selectedClaseNombre} para el año {activeAnio}.</p>
+          </div>
         ) : (
           <Card className="bg-surface border-border overflow-hidden">
             <CardContent className="p-0">
