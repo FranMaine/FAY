@@ -26,6 +26,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
   const [claseId, setClaseId] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
+  const [descartes, setDescartes] = useState("1");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +38,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
     setClaseId("");
     setFechaInicio("");
     setFechaFin("");
+    setDescartes("1");
     setError(null);
     onClose();
   };
@@ -64,6 +66,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
           claseId,
           fechaInicio: fechaInicio || undefined,
           fechaFin: fechaFin || undefined,
+          descartes: parseInt(descartes, 10) || 0,
         }),
       });
 
@@ -134,6 +137,20 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
               onChange={(e) => setFechaFin(e.target.value)}
               disabled={isSaving}
             />
+          </div>
+
+          <div>
+            <Input
+              label="Descartes"
+              type="number"
+              min="0"
+              value={descartes}
+              onChange={(e) => setDescartes(e.target.value)}
+              disabled={isSaving}
+            />
+            <p className="text-xs text-muted mt-1">
+              Cuántas de las peores regatas de cada regatista se descuentan del total (según la convocatoria del evento). Se puede corregir después.
+            </p>
           </div>
 
           {error && (

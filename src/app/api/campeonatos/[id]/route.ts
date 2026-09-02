@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
-import { campeonatoSchema, campeonatoEstadoSchema } from '@/lib/validators';
+import { campeonatoSchema, campeonatoPatchSchema } from '@/lib/validators';
 import { generarClasificacion } from '@/lib/scoring';
 
 export async function GET(
@@ -98,8 +98,8 @@ export async function PUT(
   }
 }
 
-// Cambio puntual de estado (publicar / volver a borrador), sin tener que
-// reenviar el formulario completo del campeonato.
+// Cambio puntual de estado y/o descartes, sin tener que reenviar el
+// formulario completo del campeonato.
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -112,16 +112,19 @@ export async function PATCH(
     }
 
     const json = await request.json();
-    const body = campeonatoEstadoSchema.parse(json);
+    const body = campeonatoPatchSchema.parse(json);
 
     const campeonato = await prisma.campeonato.update({
       where: { id },
-      data: { estado: body.estado },
+      data: {
+        ...(body.estado !== undefined ? { estado: body.estado } : {}),
+        ...(body.descartes !== undefined ? { descartes: body.descartes } : {}),
+      },
     });
 
     return NextResponse.json(campeonato);
   } catch (error) {
-    console.error('Error updating campeonato estado:', error);
+    console.error('Error updating campeonato:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

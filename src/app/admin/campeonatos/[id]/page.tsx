@@ -30,6 +30,7 @@ interface Campeonato {
   nombre: string;
   anio: number;
   estado: "BORRADOR" | "PUBLICADO";
+  descartes: number;
   clase: { nombre: string };
   regatas: Regata[];
 }
@@ -76,6 +77,9 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveOk, setSaveOk] = useState(false);
 
+  const [descartesInput, setDescartesInput] = useState("0");
+  const [isSavingDescartes, setIsSavingDescartes] = useState(false);
+
   const fetchCampeonato = useCallback(
     async (selectRegataId?: string) => {
       try {
@@ -83,6 +87,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
         if (!res.ok) throw new Error("No se pudo cargar el campeonato");
         const data = await res.json();
         setCampeonato(data.campeonato);
+        setDescartesInput(String(data.campeonato.descartes));
 
         const regatas: Regata[] = data.campeonato.regatas;
         const target = selectRegataId
@@ -210,6 +215,31 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
     }
   };
 
+  const handleGuardarDescartes = async () => {
+    if (!campeonato) return;
+    const valor = parseInt(descartesInput, 10);
+    if (isNaN(valor) || valor < 0) {
+      setSaveError("Descartes tiene que ser un número mayor o igual a 0");
+      return;
+    }
+    setIsSavingDescartes(true);
+    setSaveError(null);
+    try {
+      const res = await fetch(`/api/campeonatos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ descartes: valor }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo guardar el descarte");
+      setCampeonato((prev) => (prev ? { ...prev, descartes: data.descartes } : prev));
+    } catch (err: any) {
+      setSaveError(err.message);
+    } finally {
+      setIsSavingDescartes(false);
+    }
+  };
+
   const handlePublicar = async () => {
     if (!campeonato) return;
     setIsPublishing(true);
@@ -284,6 +314,22 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
             </Button>
           </div>
         </header>
+
+        <div className="flex items-center gap-3 bg-surface border border-border rounded-lg px-4 py-3 w-fit">
+          <label className="text-sm text-muted-foreground whitespace-nowrap">
+            Descartes (peores regatas que no cuentan en el total)
+          </label>
+          <Input
+            type="number"
+            min="0"
+            value={descartesInput}
+            onChange={(e) => setDescartesInput(e.target.value)}
+            className="h-8 w-20 bg-background border-border"
+          />
+          <Button size="sm" variant="secondary" onClick={handleGuardarDescartes} disabled={isSavingDescartes}>
+            {isSavingDescartes ? <Loader2Icon className="w-4 h-4 animate-spin" /> : "Guardar"}
+          </Button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 space-y-4">
