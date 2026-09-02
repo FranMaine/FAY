@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parseSailwaveCSV } from "@/lib/extractors/csv-parser";
 import { parsePdfToResult } from "@/lib/extractors/pdf-extractor";
+import { parseSailwaveXLSX } from "@/lib/extractors/xlsx-parser";
 import { importCampeonatoResults } from "@/lib/extractors/import-service";
 
 export async function POST(
@@ -34,11 +35,15 @@ export async function POST(
       return NextResponse.json({ error: "Campeonato no encontrado" }, { status: 404 });
     }
 
+    const fileName = file.name.toLowerCase();
     let parseResult;
 
-    if (file.name.toLowerCase().endsWith('.pdf')) {
+    if (fileName.endsWith('.pdf')) {
       const arrayBuffer = await file.arrayBuffer();
       parseResult = await parsePdfToResult(Buffer.from(arrayBuffer));
+    } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+      const arrayBuffer = await file.arrayBuffer();
+      parseResult = parseSailwaveXLSX(Buffer.from(arrayBuffer));
     } else {
       const fileContent = await file.text();
       parseResult = parseSailwaveCSV(fileContent);

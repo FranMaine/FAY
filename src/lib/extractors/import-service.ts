@@ -1,6 +1,5 @@
 import prisma from '@/lib/db';
 import { ParseResult } from './csv-parser';
-import { calcularPuntosPenalidad, esPenalidad } from '@/lib/scoring';
 
 export async function importCampeonatoResults(campeonatoId: string, parsedData: ParseResult[]) {
   // Encontramos el campeonato para validar
@@ -73,14 +72,16 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
           regatasNuevas++;
         }
 
-        // Determinar puntos
+        // Determinar puntos. Cuando la fuente (CSV/Excel) ya trae un puntaje
+        // bruto junto al código de observación (ej: "74 DNF"), confiamos en
+        // ese número -Sailwave ya lo calculó correctamente contra el tamaño
+        // real de esa flota/regata puntual, que puede no coincidir con
+        // `totalInscritos` (el total de ESTE import, que puede combinar
+        // varias flotas). Solo recurrimos al estándar de bajo puntaje
+        // (inscriptos + 1) cuando la fuente no trajo ningún número (999).
         let puntos = regataData.puntajeBruto;
-        const penalidad = esPenalidad(regataData.observacion);
-        if (penalidad) {
-          puntos = calcularPuntosPenalidad(penalidad, totalInscritos);
-        } else if (puntos === 999) {
-          // Si era 999 pero no fue detectado como penalidad oficial, fallback al último + 1
-          puntos = totalInscritos + 1; 
+        if (puntos === 999) {
+          puntos = totalInscritos + 1;
         }
 
         // Insertar o actualizar resultado

@@ -63,7 +63,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
       <div className="bg-surface border border-border rounded-xl w-full max-w-md shadow-xl overflow-hidden flex flex-col">
         
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-semibold">Importar Resultados (CSV / PDF)</h2>
+          <h2 className="text-lg font-semibold">Importar Resultados (CSV / Excel / PDF)</h2>
           <Button variant="ghost" size="icon" onClick={onClose} disabled={isUploading}>
             <XIcon className="w-5 h-5" />
           </Button>
@@ -73,14 +73,14 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
           {!success ? (
             <>
               <p className="text-sm text-muted-foreground">
-                Sube un archivo `.csv` o `.pdf` generado por Sailwave para importar los resultados automáticamente.
+                Sube un archivo `.csv`, `.xlsx` o `.pdf` generado por Sailwave para importar los resultados automáticamente. Si el campeonato usa flotas divididas (Gold/Silver/Bronze), `.xlsx` es el formato más confiable.
               </p>
 
               <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-6 bg-background">
                 <UploadIcon className="w-10 h-10 text-muted-foreground mb-4" />
                 <input
                   type="file"
-                  accept=".csv,.pdf,application/pdf,text/csv"
+                  accept=".csv,.xlsx,.xls,.pdf,application/pdf,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                   onChange={handleFileChange}
                   className="block w-full text-sm text-foreground
                     file:mr-4 file:py-2 file:px-4
