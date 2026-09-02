@@ -1,8 +1,20 @@
 import prisma from '@/lib/db';
 import { ParseResult } from './csv-parser';
 
+// Corre un lote de promesas con concurrencia limitada, en vez de secuencial
+// (demasiado lento) o todas juntas (satura el pool de conexiones de Neon).
+async function runWithConcurrency<T>(items: T[], concurrency: number, fn: (item: T) => Promise<void>) {
+  let index = 0;
+  async function worker() {
+    while (index < items.length) {
+      const item = items[index++];
+      await fn(item);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+}
+
 export async function importCampeonatoResults(campeonatoId: string, parsedData: ParseResult[]) {
-  // Encontramos el campeonato para validar
   const campeonato = await prisma.campeonato.findUnique({
     where: { id: campeonatoId },
   });
@@ -12,113 +24,151 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
   }
 
   const totalInscritos = parsedData.length;
+  let regatistasNuevos = 0;
+  let regatasNuevas = 0;
+  let resultadosInsertados = 0;
 
-  return await prisma.$transaction(async (tx: any) => {
-    let regatistasNuevos = 0;
-    let regatasNuevas = 0;
-    let resultadosInsertados = 0;
+  // Nota: a propósito NO envolvemos todo esto en un prisma.$transaction().
+  // Con importaciones grandes (cientos de regatistas x varias regatas cada
+  // uno) una única transacción interactiva mantiene una conexión abierta
+  // durante demasiado tiempo; sobre la conexión pooleada de Neon, el pooler
+  // la recicla antes de terminar y Prisma tira "Transaction not found".
+  // Todas las escrituras de acá abajo son upserts o find-or-create
+  // idempotentes, así que es seguro correrlas sueltas: si algo se corta a
+  // mitad de camino, reimportar el mismo archivo retoma donde quedó sin
+  // duplicar nada.
 
-    // Procesar cada regatista
-    for (const row of parsedData) {
-      // 1. Buscar o crear el Club
-      let clubId = null;
-      if (row.club) {
-        const clubStr = row.club.toUpperCase().trim();
-        let club = await tx.club.findFirst({
-          where: { nombre: { equals: clubStr, mode: 'insensitive' } },
+  // 1. Precargar clubes y regatistas existentes en una sola consulta cada
+  // uno, en vez de un findFirst por fila (que con 200+ regatistas eran
+  // cientos de round-trips solo para esto).
+  const clubesExistentes = await prisma.club.findMany();
+  const clubPorNombre = new Map(clubesExistentes.map(c => [c.nombre.toUpperCase(), c]));
+
+  const regatistasExistentes = await prisma.regatista.findMany();
+  const regatistaPorNombre = new Map(regatistasExistentes.map(r => [r.nombre.toLowerCase(), r]));
+
+  // 2. Resolver (o crear) el Club y el Regatista de cada fila. Estas
+  // creaciones son inherentemente secuenciales por fila -necesitamos el id
+  // de cada una-, pero al estar contra una tabla precargada solo pegan a la
+  // base cuando el club/regatista es realmente nuevo.
+  const filasResueltas: { regatistaId: string; regatas: ParseResult['regatas'] }[] = [];
+
+  for (const row of parsedData) {
+    let clubId: string | null = null;
+    if (row.club) {
+      const clubStr = row.club.toUpperCase().trim();
+      let club = clubPorNombre.get(clubStr);
+      if (!club) {
+        club = await prisma.club.upsert({
+          where: { nombre: clubStr },
+          update: {},
+          create: { nombre: clubStr },
         });
-        if (!club) {
-          club = await tx.club.create({ data: { nombre: clubStr } });
-        }
-        clubId = club.id;
+        clubPorNombre.set(clubStr, club);
       }
-
-      // 2. Buscar o crear el Regatista (Fase 2 simplificada: match por nombre exacto o crea nuevo)
-      const nombreLimpio = row.nombre.trim();
-      let regatista = await tx.regatista.findFirst({
-        where: { nombre: { equals: nombreLimpio, mode: 'insensitive' } },
-      });
-
-      if (!regatista) {
-        regatista = await tx.regatista.create({
-          data: {
-            nombre: nombreLimpio,
-            clubId: clubId,
-            fuenteIds: { vela: row.vela },
-          },
-        });
-        regatistasNuevos++;
-      }
-
-      // 3. Crear Regatas e insertar Resultados
-      for (const regataData of row.regatas) {
-        // Buscar o crear la regata para este campeonato
-        let regata = await tx.regata.findUnique({
-          where: {
-            campeonatoId_numero: {
-              campeonatoId,
-              numero: regataData.numero,
-            },
-          },
-        });
-
-        if (!regata) {
-          regata = await tx.regata.create({
-            data: {
-              campeonatoId,
-              numero: regataData.numero,
-            },
-          });
-          regatasNuevas++;
-        }
-
-        // Determinar puntos. Cuando la fuente (CSV/Excel) ya trae un puntaje
-        // bruto junto al código de observación (ej: "74 DNF"), confiamos en
-        // ese número -Sailwave ya lo calculó correctamente contra el tamaño
-        // real de esa flota/regata puntual, que puede no coincidir con
-        // `totalInscritos` (el total de ESTE import, que puede combinar
-        // varias flotas). Solo recurrimos al estándar de bajo puntaje
-        // (inscriptos + 1) cuando la fuente no trajo ningún número (999).
-        let puntos = regataData.puntajeBruto;
-        if (puntos === 999) {
-          puntos = totalInscritos + 1;
-        }
-
-        // Insertar o actualizar resultado
-        await tx.resultado.upsert({
-          where: {
-            regataId_regatistaId: {
-              regataId: regata.id,
-              regatistaId: regatista.id,
-            },
-          },
-          update: {
-            puesto: puntos, // aproxima el puesto al puntaje en regatas normales
-            puntos: puntos,
-            observacion: regataData.observacion,
-          },
-          create: {
-            regataId: regata.id,
-            regatistaId: regatista.id,
-            puesto: puntos,
-            puntos: puntos,
-            observacion: regataData.observacion,
-          },
-        });
-        resultadosInsertados++;
-      }
+      clubId = club.id;
     }
 
-    return {
-      success: true,
-      stats: {
-        totalInscritos,
-        regatistasNuevos,
-        regatasNuevas,
-        resultadosInsertados,
+    const nombreLimpio = row.nombre.trim();
+    const nombreKey = nombreLimpio.toLowerCase();
+    let regatista = regatistaPorNombre.get(nombreKey);
+
+    if (!regatista) {
+      regatista = await prisma.regatista.create({
+        data: {
+          nombre: nombreLimpio,
+          clubId,
+          fuenteIds: { vela: row.vela },
+        },
+      });
+      regatistaPorNombre.set(nombreKey, regatista);
+      regatistasNuevos++;
+    }
+
+    filasResueltas.push({ regatistaId: regatista.id, regatas: row.regatas });
+  }
+
+  // 3. Resolver (o crear) las Regatas de este campeonato una sola vez,
+  // fuera del loop de regatistas -antes era un find-or-create por cada
+  // (regatista x regata), miles de round-trips de más.
+  const numerosNecesarios = new Set<number>();
+  for (const fila of filasResueltas) {
+    for (const r of fila.regatas) numerosNecesarios.add(r.numero);
+  }
+
+  const regatasExistentes = await prisma.regata.findMany({ where: { campeonatoId } });
+  const regataPorNumero = new Map(regatasExistentes.map(r => [r.numero, r]));
+
+  for (const numero of numerosNecesarios) {
+    if (!regataPorNumero.has(numero)) {
+      const regata = await prisma.regata.create({ data: { campeonatoId, numero } });
+      regataPorNumero.set(numero, regata);
+      regatasNuevas++;
+    }
+  }
+
+  // 4. Insertar/actualizar los Resultados. Es el grueso de las escrituras
+  // (regatistas x regatas), así que las corremos con concurrencia acotada
+  // en vez de una por una.
+  const resultadosAInsertar: { regataId: string; regatistaId: string; puesto: number; puntos: number; observacion: string | null }[] = [];
+
+  for (const fila of filasResueltas) {
+    for (const regataData of fila.regatas) {
+      const regata = regataPorNumero.get(regataData.numero)!;
+
+      // Determinar puntos. Cuando la fuente (CSV/Excel) ya trae un puntaje
+      // bruto junto al código de observación (ej: "74 DNF"), confiamos en
+      // ese número -Sailwave ya lo calculó correctamente contra el tamaño
+      // real de esa flota/regata puntual, que puede no coincidir con
+      // `totalInscritos` (el total de ESTE import, que puede combinar
+      // varias flotas). Solo recurrimos al estándar de bajo puntaje
+      // (inscriptos + 1) cuando la fuente no trajo ningún número (999).
+      let puntos = regataData.puntajeBruto;
+      if (puntos === 999) {
+        puntos = totalInscritos + 1;
+      }
+
+      resultadosAInsertar.push({
+        regataId: regata.id,
+        regatistaId: fila.regatistaId,
+        puesto: puntos,
+        puntos,
+        observacion: regataData.observacion,
+      });
+    }
+  }
+
+  await runWithConcurrency(resultadosAInsertar, 20, async (r) => {
+    await prisma.resultado.upsert({
+      where: {
+        regataId_regatistaId: {
+          regataId: r.regataId,
+          regatistaId: r.regatistaId,
+        },
       },
-    };
-  }, {
-    timeout: 30000, // Dar más tiempo a la transacción por ser carga masiva
+      update: {
+        puesto: r.puesto, // aproxima el puesto al puntaje en regatas normales
+        puntos: r.puntos,
+        observacion: r.observacion,
+      },
+      create: {
+        regataId: r.regataId,
+        regatistaId: r.regatistaId,
+        puesto: r.puesto,
+        puntos: r.puntos,
+        observacion: r.observacion,
+      },
+    });
+    resultadosInsertados++;
   });
+
+  return {
+    success: true,
+    stats: {
+      totalInscritos,
+      regatistasNuevos,
+      regatasNuevas,
+      resultadosInsertados,
+    },
+  };
 }

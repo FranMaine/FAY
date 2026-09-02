@@ -6,6 +6,10 @@ import { parsePdfToResult } from "@/lib/extractors/pdf-extractor";
 import { parseSailwaveXLSX } from "@/lib/extractors/xlsx-parser";
 import { importCampeonatoResults } from "@/lib/extractors/import-service";
 
+// Un campeonato grande (200+ regatistas x varias regatas) puede tardar más
+// que el límite por defecto de las funciones serverless de Vercel.
+export const maxDuration = 60;
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
