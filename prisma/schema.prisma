@@ -143,6 +143,14 @@ model Resultado {
   puntos       Float
   descartado   Boolean   @default(false)
   observacion  String?
+  // Nombre de la flota/split (Gold/Silver/Bronze, etc.) en la que compitió
+  // este regatista, cuando el campeonato divide la flota por nivel. En la
+  // clasificación combinada, TODA una flota va antes que la siguiente, sin
+  // importar el puntaje (se solapan los rangos de puntos entre flotas) -
+  // flotaOrden guarda ese orden (0 = la mejor), tomado del orden en que
+  // aparece cada flota en el archivo importado.
+  flota        String?
+  flotaOrden   Int?
 
   @@unique([regataId, regatistaId])
   @@index([regatistaId])

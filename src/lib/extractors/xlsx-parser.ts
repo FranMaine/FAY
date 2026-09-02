@@ -39,6 +39,7 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
   const sailCol = findCol('Sail', 'Vela', 'SailNo');
   const nombreCol = findCol('Skipper', 'Helm', 'HelmName', 'Nombre', 'Regatista');
   const clubCol = findCol('From', 'Club');
+  const flotaCol = findCol('Split #4', 'Split # 4', 'Split#4', 'Split', 'Flota', 'Fleet', 'Grupo');
 
   if (sailCol === -1 || nombreCol === -1 || clubCol === -1) {
     throw new Error(
@@ -56,6 +57,14 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
     throw new Error('No se encontraron columnas de regatas (encabezados numéricos: 1, 2, 3...) en el Excel.');
   }
 
+  // El orden de la clasificación combinada por flotas no es "quien tiene
+  // más puntos": TODA una flota (ej: Gold) va antes que la siguiente (ej:
+  // Silver), aunque sus rangos de puntos se solapen -así lo arma Sailwave.
+  // Como las filas ya vienen en ese orden correcto, la flota que aparece
+  // primero en el archivo es la de mejor nivel; no hace falta (ni conviene)
+  // asumir nombres fijos como "Gold"/"Silver"/"Bronze".
+  const ordenFlota = new Map<string, number>();
+
   const regatistas: ParseResult[] = [];
 
   for (const row of rows.slice(1)) {
@@ -64,6 +73,17 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
 
     const vela = row[sailCol];
     const club = row[clubCol];
+
+    let flota: string | undefined;
+    let flotaOrden: number | undefined;
+    if (flotaCol !== -1) {
+      const flotaRaw = row[flotaCol];
+      if (flotaRaw !== null && flotaRaw !== undefined && String(flotaRaw).trim()) {
+        flota = String(flotaRaw).trim();
+        if (!ordenFlota.has(flota)) ordenFlota.set(flota, ordenFlota.size);
+        flotaOrden = ordenFlota.get(flota);
+      }
+    }
 
     const regatas: ParseResult['regatas'] = [];
 
@@ -99,6 +119,8 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
       vela: vela !== null && vela !== undefined ? String(vela).trim() : '',
       nombre: nombre.trim(),
       club: club !== null && club !== undefined ? String(club).trim() : '',
+      flota,
+      flotaOrden,
       regatas,
     });
   }

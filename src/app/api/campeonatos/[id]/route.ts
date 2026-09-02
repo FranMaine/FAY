@@ -48,10 +48,19 @@ export async function GET(
             regatistaId: regatista.id,
             nombre: regatista.nombre,
             club: regatista.clubId || null,
+            flota: null,
+            flotaOrden: null,
             resultados: []
           });
         }
-        regatistasMap.get(regatista.id).resultados.push({
+        const entry = regatistasMap.get(regatista.id);
+        // La flota es la misma para todas las regatas de este regatista en
+        // este campeonato; nos quedamos con la primera que aparezca.
+        if (entry.flota === null && resultado.flota) {
+          entry.flota = resultado.flota;
+          entry.flotaOrden = resultado.flotaOrden;
+        }
+        entry.resultados.push({
           regataNumero: regata.numero,
           puesto: resultado.puesto,
           puntos: resultado.puntos,

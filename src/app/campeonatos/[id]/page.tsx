@@ -55,10 +55,17 @@ export default async function CampeonatoDetailPage({ params }: Props) {
           regatistaId: regatista.id,
           nombre: regatista.nombre,
           club: regatista.club?.nombre || null,
+          flota: null,
+          flotaOrden: null,
           resultados: []
         });
       }
-      regatistasMap.get(regatista.id).resultados.push({
+      const entry = regatistasMap.get(regatista.id);
+      if (entry.flota === null && res.flota) {
+        entry.flota = res.flota;
+        entry.flotaOrden = res.flotaOrden;
+      }
+      entry.resultados.push({
         regataNumero: regata.numero,
         puesto: res.puesto,
         puntos: res.puntos,

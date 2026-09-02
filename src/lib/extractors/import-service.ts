@@ -51,7 +51,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
   // creaciones son inherentemente secuenciales por fila -necesitamos el id
   // de cada una-, pero al estar contra una tabla precargada solo pegan a la
   // base cuando el club/regatista es realmente nuevo.
-  const filasResueltas: { regatistaId: string; regatas: ParseResult['regatas'] }[] = [];
+  const filasResueltas: { regatistaId: string; flota?: string; flotaOrden?: number; regatas: ParseResult['regatas'] }[] = [];
 
   for (const row of parsedData) {
     let clubId: string | null = null;
@@ -85,7 +85,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
       regatistasNuevos++;
     }
 
-    filasResueltas.push({ regatistaId: regatista.id, regatas: row.regatas });
+    filasResueltas.push({ regatistaId: regatista.id, flota: row.flota, flotaOrden: row.flotaOrden, regatas: row.regatas });
   }
 
   // 3. Resolver (o crear) las Regatas de este campeonato una sola vez,
@@ -110,7 +110,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
   // 4. Insertar/actualizar los Resultados. Es el grueso de las escrituras
   // (regatistas x regatas), así que las corremos con concurrencia acotada
   // en vez de una por una.
-  const resultadosAInsertar: { regataId: string; regatistaId: string; puesto: number; puntos: number; observacion: string | null }[] = [];
+  const resultadosAInsertar: { regataId: string; regatistaId: string; puesto: number; puntos: number; observacion: string | null; flota?: string; flotaOrden?: number }[] = [];
 
   for (const fila of filasResueltas) {
     for (const regataData of fila.regatas) {
@@ -134,6 +134,8 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         puesto: puntos,
         puntos,
         observacion: regataData.observacion,
+        flota: fila.flota,
+        flotaOrden: fila.flotaOrden,
       });
     }
   }
@@ -150,6 +152,8 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         puesto: r.puesto, // aproxima el puesto al puntaje en regatas normales
         puntos: r.puntos,
         observacion: r.observacion,
+        flota: r.flota,
+        flotaOrden: r.flotaOrden,
       },
       create: {
         regataId: r.regataId,
@@ -157,6 +161,8 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         puesto: r.puesto,
         puntos: r.puntos,
         observacion: r.observacion,
+        flota: r.flota,
+        flotaOrden: r.flotaOrden,
       },
     });
     resultadosInsertados++;

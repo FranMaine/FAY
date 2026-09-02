@@ -4,6 +4,13 @@ export interface ParseResult {
   vela: string;
   nombre: string;
   club: string;
+  // Flota/split (Gold/Silver/Bronze, etc.) cuando la fuente distingue
+  // niveles dentro del mismo campeonato. `flotaOrden` es el orden de esa
+  // flota (0 = la mejor) tal como aparece en la fuente -en la clasificación
+  // combinada toda una flota va antes que la siguiente, sin importar el
+  // puntaje. undefined en ambos para fuentes sin flotas (ej: CSV simple).
+  flota?: string;
+  flotaOrden?: number;
   regatas: {
     numero: number;
     puntajeBruto: number;

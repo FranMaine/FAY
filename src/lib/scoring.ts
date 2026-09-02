@@ -11,6 +11,7 @@ export interface ClasificacionRegatista {
   regatistaId: string;
   nombre: string;
   club: string | null;
+  flota: string | null;
   resultados: ResultadoRegata[];
   totalBruto: number;
   totalNeto: number;
@@ -116,6 +117,12 @@ export function generarClasificacion(
     regatistaId: string;
     nombre: string;
     club: string | null;
+    // Flota/split (Gold/Silver/Bronze, etc.) cuando el campeonato divide la
+    // flota por nivel, y su orden (0 = la mejor). null/undefined para
+    // campeonatos sin flotas -todos quedan en el mismo nivel y compiten
+    // solo por puntaje, como antes.
+    flota?: string | null;
+    flotaOrden?: number | null;
     resultados: Array<{
       regataNumero: number;
       puesto: number;
@@ -135,6 +142,8 @@ export function generarClasificacion(
       regatistaId: r.regatistaId,
       nombre: r.nombre,
       club: r.club,
+      flota: r.flota ?? null,
+      flotaOrden: r.flotaOrden ?? 0,
       resultados: resultadosConDescartes,
       totalBruto: calcularTotalBruto(resultadosConDescartes),
       totalNeto: calcularTotalNeto(resultadosConDescartes),
@@ -142,8 +151,14 @@ export function generarClasificacion(
     };
   });
 
-  // 2. Sort by net total, then tiebreaker
+  // 2. Sort by flota first -en una clasificación combinada por flotas, TODA
+  // una flota (ej: Gold) va antes que la siguiente (ej: Silver), aunque sus
+  // rangos de puntos se solapen; no es una comparación directa de puntaje
+  // entre flotas distintas. Dentro de la misma flota (o cuando no hay
+  // flotas: todos con flotaOrden 0), se ordena por puntaje neto y
+  // desempate como siempre.
   clasificacion.sort((a, b) => {
+    if (a.flotaOrden !== b.flotaOrden) return a.flotaOrden - b.flotaOrden;
     if (a.totalNeto !== b.totalNeto) return a.totalNeto - b.totalNeto;
     return desempatar(a.resultados, b.resultados);
   });
@@ -153,5 +168,5 @@ export function generarClasificacion(
     c.posicionFinal = idx + 1;
   });
 
-  return clasificacion;
+  return clasificacion.map(({ flotaOrden, ...c }) => c);
 }
