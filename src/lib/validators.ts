@@ -26,6 +26,10 @@ export const campeonatoSchema = z.object({
   descartes: z.number().int().min(0).default(0),
 });
 
+export const campeonatoEstadoSchema = z.object({
+  estado: z.enum(['BORRADOR', 'PUBLICADO']),
+});
+
 export const regataSchema = z.object({
   numero: z.number().int().min(1),
   fecha: z.string().optional(),
@@ -39,9 +43,40 @@ export const resultadoSchema = z.object({
   observacion: z.string().optional(),
 });
 
+// Para carga manual desde el editor de admin: el regatista puede venir por
+// id (uno ya existente, elegido de la lista) o por nombre (se busca por
+// coincidencia exacta insensible a mayúsculas, o se crea si no existe) -
+// igual que hace el importador de CSV/Excel/PDF.
+export const resultadoManualSchema = z.object({
+  regatistaId: z.string().optional(),
+  nombre: z.string().optional(),
+  vela: z.string().optional(),
+  club: z.string().optional(),
+  puesto: z.number().int().min(1),
+  puntos: z.number().min(0),
+  observacion: z.string().optional().nullable(),
+}).refine((data) => !!data.regatistaId || !!(data.nombre && data.nombre.trim()), {
+  message: 'Cada resultado necesita un regatista (id o nombre)',
+  path: ['nombre'],
+});
+
+export const regataResultadosSchema = z.object({
+  fecha: z.string().optional().nullable(),
+  condiciones: z.string().optional().nullable(),
+  resultados: z.array(resultadoManualSchema),
+});
+
 export const regatistaSchema = z.object({
   nombre: z.string().min(2, 'Mínimo 2 caracteres'),
   clubId: z.string().optional(),
+  pais: z.string().optional(),
+});
+
+// Para el editor de admin: el club se escribe por nombre (se resuelve o
+// crea del lado del servidor), no por id.
+export const regatistaEditSchema = z.object({
+  nombre: z.string().min(2, 'Mínimo 2 caracteres'),
+  club: z.string().optional(),
   pais: z.string().optional(),
 });
 
@@ -49,7 +84,7 @@ export const resultadosBulkSchema = z.object({
   regataNumero: z.number().int().min(1),
   fecha: z.string().optional(),
   condiciones: z.string().optional(),
-  resultados: z.array(resultadoSchema).min(1, 'Al menos un resultado'),
+  resultados: z.array(resultadoSchema),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

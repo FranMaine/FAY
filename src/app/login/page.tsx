@@ -106,7 +106,12 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-6">
-            <Button variant="secondary" className="w-full bg-background border border-border">
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full bg-background border border-border"
+              onClick={() => signIn("google", { callbackUrl: "/" })}
+            >
               Continuar con Google
             </Button>
           </div>

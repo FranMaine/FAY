@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
-import { campeonatoSchema } from '@/lib/validators';
+import { campeonatoSchema, campeonatoEstadoSchema } from '@/lib/validators';
 import { generarClasificacion } from '@/lib/scoring';
 
 export async function GET(
@@ -94,6 +94,34 @@ export async function PUT(
     return NextResponse.json(campeonato);
   } catch (error) {
     console.error('Error updating campeonato:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+// Cambio puntual de estado (publicar / volver a borrador), sin tener que
+// reenviar el formulario completo del campeonato.
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const json = await request.json();
+    const body = campeonatoEstadoSchema.parse(json);
+
+    const campeonato = await prisma.campeonato.update({
+      where: { id },
+      data: { estado: body.estado },
+    });
+
+    return NextResponse.json(campeonato);
+  } catch (error) {
+    console.error('Error updating campeonato estado:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
