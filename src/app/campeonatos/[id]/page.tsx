@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { ResultadosTable } from "@/components/tables/resultados-table";
 import { CalendarIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import prisma from "@/lib/db";
-import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
+import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
 import { notFound } from "next/navigation";
 
 type Props = {
@@ -50,8 +50,10 @@ export default async function CampeonatoDetailPage({ params }: Props) {
 
   const regatas = campeonato.regatas.map(r => r.numero);
 
-  // Mapear al formato de la tabla
-  const clasificacionTabla = clasificacion.map((c) => ({
+  // Mapear al formato de la tabla, agrupando tripulaciones de más de una
+  // persona (ej: 29er) en una sola fila -"Fulano & Mengano"- en vez de
+  // mostrar dos botes idénticos con el mismo puntaje.
+  const clasificacionTabla = agruparTripulaciones(clasificacion).map((c) => ({
     id: c.regatistaId,
     posicion: c.posicionFinal,
     nombre: c.nombre,

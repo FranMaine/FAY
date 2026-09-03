@@ -271,3 +271,45 @@ export function generarClasificacion(
 
   return clasificacion.map(({ flotaOrden, ...c }) => c);
 }
+
+/**
+ * Para tablas de posiciones: junta en una sola fila a los regatistas que
+ * navegaron el mismo bote (clases de doble tripulación como 29er, 420,
+ * etc., donde cada tripulante queda como su propio Regatista -tiene su
+ * propio historial- pero deberían verse juntos, no como dos botes
+ * distintos con la misma puntuación calcada).
+ *
+ * Se detectan por tener EXACTAMENTE el mismo puntaje en cada regata -algo
+ * prácticamente imposible salvo que hayan competido en el mismo bote-, en
+ * vez de depender de algún campo separado que habría que mantener
+ * sincronizado.
+ */
+export function agruparTripulaciones(clasificacion: ClasificacionRegatista[]): ClasificacionRegatista[] {
+  const firma = (c: ClasificacionRegatista) =>
+    c.resultados
+      .map((r) => `${r.regataNumero}:${r.puntos}`)
+      .sort()
+      .join('|');
+
+  const procesados = new Set<string>();
+  const agrupado: ClasificacionRegatista[] = [];
+
+  for (const c of clasificacion) {
+    if (procesados.has(c.regatistaId)) continue;
+
+    const suFirma = c.resultados.length > 0 ? firma(c) : null;
+    const companeros = suFirma
+      ? clasificacion.filter((otro) => !procesados.has(otro.regatistaId) && firma(otro) === suFirma)
+      : [c];
+
+    companeros.forEach((g) => procesados.add(g.regatistaId));
+
+    agrupado.push(
+      companeros.length > 1
+        ? { ...companeros[0], nombre: companeros.map((g) => g.nombre).join(' & ') }
+        : c
+    );
+  }
+
+  return agrupado.sort((a, b) => a.posicionFinal - b.posicionFinal);
+}
