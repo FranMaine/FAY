@@ -2,22 +2,27 @@ import * as XLSX from 'xlsx';
 import { ParseResult } from './csv-parser';
 
 /**
- * Parses a spreadsheet (.xlsx) export of a Sailwave "Class Series Summary"
- * report into the same ParseResult[] shape produced by parseSailwaveCSV.
+ * Columnas esperadas del Excel, en este orden:
+ *   puesto | vela | navegante | Subgroup division | club | Total puntos | regata 1 | regata 2 | ...
  *
- * Unlike the PDF export of the same report -where Sailwave renders every
- * cell with no separating whitespace and skips blank cells entirely, making
- * it impossible to reliably tell which race a value belongs to once a
- * sailor is missing a result in the middle of the row (common when the
- * event splits into Gold/Silver/Bronze fleets that don't all sail the same
- * number of races)- a spreadsheet has real cells: each race's value (or
- * blank, as null) sits in its own column regardless of neighboring gaps.
- *
- * Column layout is resolved from the header row by name rather than fixed
- * position, since the exact column order can vary between exports (e.g. a
- * "Total" column before or after "Pl"). Race columns are whichever headers
- * are plain numbers (1, 2, 3, ...), taken in that numeric order.
+ * A propósito NO se interpreta ni recalcula nada: "puesto" y "Total puntos"
+ * son los valores finales tal cual los trae el archivo (no los recalculamos
+ * con descartes/desempates/orden de flota nuestro), y cada celda "regata N"
+ * se toma literal si es un número. Esto evita justamente los bugs que
+ * tuvimos antes tratando de reproducir el cálculo de puntaje de Sailwave
+ * (descartes, flotas superpuestas, códigos de penalidad) -acá la fuente ya
+ * trae el resultado final calculado, así que la app solo lo lee y lo
+ * guarda.
  */
+export const XLSX_TEMPLATE_COLUMNS = [
+  'puesto',
+  'vela',
+  'navegante',
+  'Subgroup division',
+  'club',
+  'Total puntos',
+] as const;
+
 export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -36,34 +41,34 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
     return -1;
   };
 
-  const sailCol = findCol('Sail', 'Vela', 'SailNo');
-  const nombreCol = findCol('Skipper', 'Helm', 'HelmName', 'Nombre', 'Regatista');
-  const clubCol = findCol('From', 'Club');
-  const flotaCol = findCol('Split #4', 'Split # 4', 'Split#4', 'Split', 'Flota', 'Fleet', 'Grupo');
+  const puestoCol = findCol('puesto', 'pl', 'pl.');
+  const velaCol = findCol('vela', 'sail');
+  const nombreCol = findCol('navegante', 'skipper', 'nombre');
+  const flotaCol = findCol('Subgroup division', 'subgroup division', 'flota', 'split', 'split #4');
+  const clubCol = findCol('club', 'from');
+  const totalCol = findCol('Total puntos', 'total puntos', 'total');
 
-  if (sailCol === -1 || nombreCol === -1 || clubCol === -1) {
+  if (puestoCol === -1 || velaCol === -1 || nombreCol === -1 || clubCol === -1 || totalCol === -1) {
     throw new Error(
-      'No se reconocieron las columnas del Excel. Se esperan al menos "Sail", "Skipper" y "From" (o "Vela", "Nombre" y "Club").'
+      'El Excel no tiene las columnas esperadas. Deben ser, en este orden: puesto, vela, navegante, Subgroup division, club, Total puntos, regata 1, regata 2...'
     );
   }
 
   const raceCols = header
     .map((h, colIndex) => ({ h, colIndex }))
-    .filter(({ h }) => /^\d+$/.test(h))
-    .map(({ h, colIndex }) => ({ numero: parseInt(h, 10), colIndex }))
-    .sort((a, b) => a.numero - b.numero);
+    .filter(({ h, colIndex }) => colIndex > totalCol && h.length > 0)
+    .map(({ h, colIndex }, i) => ({ numero: i + 1, colIndex, etiqueta: h }));
 
   if (raceCols.length === 0) {
-    throw new Error('No se encontraron columnas de regatas (encabezados numéricos: 1, 2, 3...) en el Excel.');
+    throw new Error('No se encontraron columnas de regatas después de "Total puntos" (ej: "regata 1", "regata 2"...).');
   }
 
-  // El orden de la clasificación combinada por flotas no es "quien tiene
-  // más puntos": TODA una flota (ej: Gold) va antes que la siguiente (ej:
-  // Silver), aunque sus rangos de puntos se solapen -así lo arma Sailwave.
-  // Como las filas ya vienen en ese orden correcto, la flota que aparece
-  // primero en el archivo es la de mejor nivel; no hace falta (ni conviene)
-  // asumir nombres fijos como "Gold"/"Silver"/"Bronze".
-  const ordenFlota = new Map<string, number>();
+  const numero = (v: any): number | null => {
+    if (v === null || v === undefined || v === '') return null;
+    if (typeof v === 'number') return v;
+    const match = String(v).match(/-?\d+(\.\d+)?/);
+    return match ? parseFloat(match[0]) : null;
+  };
 
   const regatistas: ParseResult[] = [];
 
@@ -71,48 +76,18 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
     const nombre = row[nombreCol];
     if (!nombre || typeof nombre !== 'string' || !nombre.trim()) continue;
 
-    const vela = row[sailCol];
+    const puestoOficial = numero(row[puestoCol]);
+    const totalOficial = numero(row[totalCol]);
+    const vela = row[velaCol];
     const club = row[clubCol];
-
-    let flota: string | undefined;
-    let flotaOrden: number | undefined;
-    if (flotaCol !== -1) {
-      const flotaRaw = row[flotaCol];
-      if (flotaRaw !== null && flotaRaw !== undefined && String(flotaRaw).trim()) {
-        flota = String(flotaRaw).trim();
-        if (!ordenFlota.has(flota)) ordenFlota.set(flota, ordenFlota.size);
-        flotaOrden = ordenFlota.get(flota);
-      }
-    }
+    const flotaRaw = flotaCol !== -1 ? row[flotaCol] : null;
+    const flota = flotaRaw !== null && flotaRaw !== undefined && String(flotaRaw).trim() ? String(flotaRaw).trim() : undefined;
 
     const regatas: ParseResult['regatas'] = [];
-
-    for (const { numero, colIndex } of raceCols) {
-      const raw = row[colIndex];
-      if (raw === null || raw === undefined || raw === '') continue; // no navegó esta regata
-
-      let puntajeBruto = 0;
-      let observacion: string | null = null;
-
-      if (typeof raw === 'number') {
-        // Un valor negativo marca una regata descartada por Sailwave; el
-        // propio motor de puntaje (scoring.ts) recalcula sus descartes
-        // desde cero, así que solo nos interesa el puntaje real.
-        puntajeBruto = Math.abs(raw);
-      } else {
-        // Texto tipo "74 DNF" o "(74 BFD)" (descartada)
-        const clean = String(raw).replace(/^\(|\)$/g, '').trim();
-        const numMatch = clean.match(/\d+/);
-        const charsMatch = clean.match(/[a-zA-Z]+/);
-        if (numMatch && !charsMatch) {
-          puntajeBruto = parseFloat(numMatch[0]);
-        } else if (charsMatch) {
-          observacion = charsMatch[0].toUpperCase();
-          puntajeBruto = numMatch ? parseFloat(numMatch[0]) : 999;
-        }
-      }
-
-      regatas.push({ numero, puntajeBruto, observacion });
+    for (const { numero: numeroRegata, colIndex } of raceCols) {
+      const valor = numero(row[colIndex]);
+      if (valor === null) continue; // celda vacía: no navegó esta regata
+      regatas.push({ numero: numeroRegata, puntajeBruto: Math.abs(valor), observacion: null });
     }
 
     regatistas.push({
@@ -120,7 +95,8 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
       nombre: nombre.trim(),
       club: club !== null && club !== undefined ? String(club).trim() : '',
       flota,
-      flotaOrden,
+      puestoOficial: puestoOficial !== null ? Math.round(puestoOficial) : undefined,
+      totalOficial: totalOficial !== null ? totalOficial : undefined,
       regatas,
     });
   }

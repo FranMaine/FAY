@@ -151,6 +151,14 @@ model Resultado {
   // aparece cada flota en el archivo importado.
   flota        String?
   flotaOrden   Int?
+  // Puesto y puntos totales YA calculados por la fuente (columnas "puesto"
+  // y "Total puntos" del Excel), para cuando queremos mostrar exactamente
+  // eso -sin que la app recalcule descartes, desempates u orden de flota-
+  // en vez de reconstruir la clasificación a partir de las regatas. Cuando
+  // están presentes para todos los regatistas de un campeonato, mandan por
+  // sobre el cálculo propio (ver generarClasificacion en scoring.ts).
+  puestoOficial Int?
+  totalOficial  Float?
 
   @@unique([regataId, regatistaId])
   @@index([regatistaId])

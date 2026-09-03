@@ -57,6 +57,8 @@ export default async function CampeonatoDetailPage({ params }: Props) {
           club: regatista.club?.nombre || null,
           flota: null,
           flotaOrden: null,
+          puestoOficial: null,
+          totalOficial: null,
           resultados: []
         });
       }
@@ -64,6 +66,10 @@ export default async function CampeonatoDetailPage({ params }: Props) {
       if (entry.flota === null && res.flota) {
         entry.flota = res.flota;
         entry.flotaOrden = res.flotaOrden;
+      }
+      if (entry.puestoOficial === null && res.puestoOficial !== null) {
+        entry.puestoOficial = res.puestoOficial;
+        entry.totalOficial = res.totalOficial;
       }
       entry.resultados.push({
         regataNumero: regata.numero,

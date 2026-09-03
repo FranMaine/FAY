@@ -50,15 +50,22 @@ export async function GET(
             club: regatista.clubId || null,
             flota: null,
             flotaOrden: null,
+            puestoOficial: null,
+            totalOficial: null,
             resultados: []
           });
         }
         const entry = regatistasMap.get(regatista.id);
-        // La flota es la misma para todas las regatas de este regatista en
-        // este campeonato; nos quedamos con la primera que aparezca.
+        // La flota y el puesto/total oficial son los mismos para todas las
+        // regatas de este regatista en este campeonato; nos quedamos con
+        // los de la primera que aparezca.
         if (entry.flota === null && resultado.flota) {
           entry.flota = resultado.flota;
           entry.flotaOrden = resultado.flotaOrden;
+        }
+        if (entry.puestoOficial === null && resultado.puestoOficial !== null) {
+          entry.puestoOficial = resultado.puestoOficial;
+          entry.totalOficial = resultado.totalOficial;
         }
         entry.resultados.push({
           regataNumero: regata.numero,

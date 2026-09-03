@@ -123,6 +123,14 @@ export function generarClasificacion(
     // solo por puntaje, como antes.
     flota?: string | null;
     flotaOrden?: number | null;
+    // Puesto y puntos totales ya calculados por la fuente (ej: columnas
+    // "puesto"/"Total puntos" del Excel importado). Cuando TODOS los
+    // regatistas de la lista los traen, se usan tal cual -sin recalcular
+    // descartes, desempates ni orden de flota- para evitar justamente el
+    // tipo de discrepancias que tuvimos tratando de reproducir el cálculo
+    // de puntaje de Sailwave nosotros mismos.
+    puestoOficial?: number | null;
+    totalOficial?: number | null;
     resultados: Array<{
       regataNumero: number;
       puesto: number;
@@ -132,6 +140,26 @@ export function generarClasificacion(
   }>,
   cantidadDescartes: number
 ): ClasificacionRegatista[] {
+  const todosConOficial = regatistas.length > 0 && regatistas.every(
+    r => r.puestoOficial !== null && r.puestoOficial !== undefined
+      && r.totalOficial !== null && r.totalOficial !== undefined
+  );
+
+  if (todosConOficial) {
+    const clasificacion = regatistas.map(r => ({
+      regatistaId: r.regatistaId,
+      nombre: r.nombre,
+      club: r.club,
+      flota: r.flota ?? null,
+      resultados: r.resultados.map(res => ({ ...res, descartado: false })),
+      totalBruto: r.totalOficial as number,
+      totalNeto: r.totalOficial as number,
+      posicionFinal: r.puestoOficial as number,
+    }));
+    clasificacion.sort((a, b) => a.posicionFinal - b.posicionFinal);
+    return clasificacion;
+  }
+
   // 1. Apply discards to each sailor's results
   const clasificacion = regatistas.map(r => {
     const resultadosConDescartes = aplicarDescartes(

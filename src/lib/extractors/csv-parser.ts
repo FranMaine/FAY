@@ -11,6 +11,11 @@ export interface ParseResult {
   // puntaje. undefined en ambos para fuentes sin flotas (ej: CSV simple).
   flota?: string;
   flotaOrden?: number;
+  // Puesto y puntos totales ya calculados por la fuente (ej: columnas
+  // "puesto"/"Total puntos" del Excel). Cuando vienen presentes, mandan por
+  // sobre lo que la app calcularía por su cuenta -ver generarClasificacion.
+  puestoOficial?: number;
+  totalOficial?: number;
   regatas: {
     numero: number;
     puntajeBruto: number;
