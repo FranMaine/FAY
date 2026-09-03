@@ -96,7 +96,7 @@ export async function PUT(
     const regata = await prisma.regata.update({
       where: { id },
       data: {
-        fecha: body.fecha ? new Date(body.fecha) : body.fecha === null ? null : undefined,
+        fecha: body.fecha,
         condiciones: body.condiciones === undefined ? undefined : body.condiciones,
       },
       include: {

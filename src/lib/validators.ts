@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+// Los inputs <input type="date"> mandan solo la fecha ("2026-08-22"), pero
+// Prisma (desde la v6) exige un datetime ISO-8601 completo para los campos
+// DateTime y rechaza esa cadena con "premature end of input, expected
+// ISO-8601 DateTime". Este transform la convierte a Date acá, una sola vez,
+// en vez de tener que acordarse de hacerlo en cada endpoint que recibe una
+// fecha.
+const fechaOpcional = z.string().optional().transform((v) => (v ? new Date(v) : undefined));
+// Variante que además distingue "no la mandaron" (undefined, no tocar el
+// campo) de "la mandaron vacía" (null, borrar la fecha que hubiera).
+const fechaOpcionalNullable = z.string().optional().nullable().transform((v) => (v ? new Date(v) : v === null ? null : undefined));
+
 export const loginSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Mínimo 6 caracteres'),
@@ -20,8 +31,8 @@ export const campeonatoSchema = z.object({
   anio: z.number().int().min(2000).max(2100),
   claseId: z.string().min(1, 'Seleccionar una clase'),
   sedeId: z.string().optional(),
-  fechaInicio: z.string().optional(),
-  fechaFin: z.string().optional(),
+  fechaInicio: fechaOpcional,
+  fechaFin: fechaOpcional,
   fuenteUrl: z.string().url().optional().or(z.literal('')),
   descartes: z.number().int().min(0).default(0),
 });
@@ -36,7 +47,7 @@ export const campeonatoPatchSchema = z.object({
 
 export const regataSchema = z.object({
   numero: z.number().int().min(1),
-  fecha: z.string().optional(),
+  fecha: fechaOpcional,
   condiciones: z.string().optional(),
 });
 
@@ -65,7 +76,7 @@ export const resultadoManualSchema = z.object({
 });
 
 export const regataResultadosSchema = z.object({
-  fecha: z.string().optional().nullable(),
+  fecha: fechaOpcionalNullable,
   condiciones: z.string().optional().nullable(),
   resultados: z.array(resultadoManualSchema),
 });
@@ -86,7 +97,7 @@ export const regatistaEditSchema = z.object({
 
 export const resultadosBulkSchema = z.object({
   regataNumero: z.number().int().min(1),
-  fecha: z.string().optional(),
+  fecha: fechaOpcional,
   condiciones: z.string().optional(),
   resultados: z.array(resultadoSchema),
 });
