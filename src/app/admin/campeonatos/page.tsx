@@ -25,6 +25,7 @@ export default function AdminCampeonatosPage() {
   const [clases, setClases] = useState<Clase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -43,6 +44,27 @@ export default function AdminCampeonatosPage() {
       console.error(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleEliminar = async (c: Campeonato) => {
+    const ok = window.confirm(
+      `¿Seguro que querés eliminar "${c.nombre}"?\n\nEsto borra también todas sus regatas y resultados cargados. No se puede deshacer.`
+    );
+    if (!ok) return;
+
+    setDeletingId(c.id);
+    try {
+      const res = await fetch(`/api/campeonatos/${c.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "No se pudo eliminar el campeonato");
+      }
+      await fetchData();
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -108,8 +130,18 @@ export default function AdminCampeonatosPage() {
                             <EditIcon className="w-4 h-4" />
                           </Button>
                         </Link>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" disabled>
-                          <TrashIcon className="w-4 h-4" />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                          onClick={() => handleEliminar(c)}
+                          disabled={deletingId === c.id}
+                        >
+                          {deletingId === c.id ? (
+                            <Loader2Icon className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <TrashIcon className="w-4 h-4" />
+                          )}
                         </Button>
                       </td>
                     </tr>

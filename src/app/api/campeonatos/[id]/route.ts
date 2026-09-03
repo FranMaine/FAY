@@ -107,6 +107,28 @@ export async function PUT(
   }
 }
 
+// Borra el campeonato y, en cascada (a nivel de base de datos), todas sus
+// regatas y resultados. Irreversible: no hay soft-delete ni papelera.
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    await prisma.campeonato.delete({ where: { id } });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting campeonato:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
 // Cambio puntual de estado y/o descartes, sin tener que reenviar el
 // formulario completo del campeonato.
 export async function PATCH(
