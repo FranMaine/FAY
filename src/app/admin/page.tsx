@@ -1,14 +1,32 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Trophy, Users, AlertCircle, ArrowRight } from "lucide-react";
+import { prisma } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | FAY Stats",
 };
 
-export default function AdminDashboardPage() {
+// Estas tarjetas antes mostraban números fijos ("45 campeonatos", etc.) -
+// forzamos que esta página siempre pegue a la base al abrirse, en vez de
+// quedar cacheada, para que el conteo esté siempre al día.
+export const dynamic = "force-dynamic";
+
+async function getStats() {
+  const [campeonatos, regatistas, clases, solicitudesPendientes] = await Promise.all([
+    prisma.campeonato.count(),
+    prisma.regatista.count(),
+    prisma.clase.count(),
+    prisma.solicitudVinculacion.count({ where: { estado: "PENDIENTE" } }),
+  ]);
+
+  return { campeonatos, regatistas, clases, solicitudesPendientes };
+}
+
+export default async function AdminDashboardPage() {
+  const stats = await getStats();
+
   return (
     <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -25,7 +43,7 @@ export default function AdminDashboardPage() {
               <Trophy className="w-4 h-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">45</div>
+              <div className="text-3xl font-bold">{stats.campeonatos.toLocaleString("es-AR")}</div>
             </CardContent>
           </Card>
           <Card className="bg-surface border-border">
@@ -34,7 +52,7 @@ export default function AdminDashboardPage() {
               <Users className="w-4 h-4 text-accent" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">1,204</div>
+              <div className="text-3xl font-bold">{stats.regatistas.toLocaleString("es-AR")}</div>
             </CardContent>
           </Card>
           <Card className="bg-surface border-border">
@@ -45,16 +63,20 @@ export default function AdminDashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">8</div>
+              <div className="text-3xl font-bold">{stats.clases.toLocaleString("es-AR")}</div>
             </CardContent>
           </Card>
-          <Card className="bg-surface border-border border-l-4 border-l-amber-500">
+          <Card className={`bg-surface border-border ${stats.solicitudesPendientes > 0 ? "border-l-4 border-l-amber-500" : ""}`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-amber-500">Revisión Pendiente</CardTitle>
-              <AlertCircle className="w-4 h-4 text-amber-500" />
+              <CardTitle className={`text-sm font-medium ${stats.solicitudesPendientes > 0 ? "text-amber-500" : "text-muted-foreground"}`}>
+                Revisión Pendiente
+              </CardTitle>
+              <AlertCircle className={`w-4 h-4 ${stats.solicitudesPendientes > 0 ? "text-amber-500" : "text-muted-foreground"}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-amber-500">3</div>
+              <div className={`text-3xl font-bold ${stats.solicitudesPendientes > 0 ? "text-amber-500" : ""}`}>
+                {stats.solicitudesPendientes}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -79,7 +101,7 @@ export default function AdminDashboardPage() {
                 <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
                   Gestión de Regatistas <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </CardTitle>
-                <CardDescription>Administrar perfiles y resolver duplicados</CardDescription>
+                <CardDescription>Administrar perfiles</CardDescription>
               </CardHeader>
             </Link>
           </Card>

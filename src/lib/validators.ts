@@ -29,7 +29,8 @@ export const campeonatoSchema = z.object({
 export const campeonatoPatchSchema = z.object({
   estado: z.enum(['BORRADOR', 'PUBLICADO']).optional(),
   descartes: z.number().int().min(0).optional(),
-}).refine((data) => data.estado !== undefined || data.descartes !== undefined, {
+  nombre: z.string().min(3, 'Mínimo 3 caracteres').optional(),
+}).refine((data) => data.estado !== undefined || data.descartes !== undefined || data.nombre !== undefined, {
   message: 'Nada para actualizar',
 });
 

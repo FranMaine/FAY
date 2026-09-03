@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PlusIcon, SaveIcon, UploadIcon, CheckCircleIcon, Loader2Icon, TrashIcon, AlertCircleIcon } from "lucide-react";
+import { PlusIcon, SaveIcon, UploadIcon, CheckCircleIcon, Loader2Icon, TrashIcon, AlertCircleIcon, PencilIcon, XIcon } from "lucide-react";
 
 import { CsvUploadModal } from "@/components/admin/csv-upload-modal";
 
@@ -79,6 +79,10 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
 
   const [descartesInput, setDescartesInput] = useState("0");
   const [isSavingDescartes, setIsSavingDescartes] = useState(false);
+
+  const [isEditingNombre, setIsEditingNombre] = useState(false);
+  const [nombreInput, setNombreInput] = useState("");
+  const [isSavingNombre, setIsSavingNombre] = useState(false);
 
   const fetchCampeonato = useCallback(
     async (selectRegataId?: string) => {
@@ -240,6 +244,32 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
     }
   };
 
+  const handleGuardarNombre = async () => {
+    if (!campeonato) return;
+    const nombre = nombreInput.trim();
+    if (nombre.length < 3) {
+      setSaveError("El nombre debe tener al menos 3 caracteres");
+      return;
+    }
+    setIsSavingNombre(true);
+    setSaveError(null);
+    try {
+      const res = await fetch(`/api/campeonatos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo renombrar el campeonato");
+      setCampeonato((prev) => (prev ? { ...prev, nombre: data.nombre } : prev));
+      setIsEditingNombre(false);
+    } catch (err: any) {
+      setSaveError(err.message);
+    } finally {
+      setIsSavingNombre(false);
+    }
+  };
+
   const handlePublicar = async () => {
     if (!campeonato) return;
     setIsPublishing(true);
@@ -291,7 +321,38 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                 {campeonato.estado}
               </Badge>
             </div>
-            <p className="text-muted-foreground">{campeonato.nombre} • {campeonato.clase.nombre}</p>
+            {isEditingNombre ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={nombreInput}
+                  onChange={(e) => setNombreInput(e.target.value)}
+                  className="h-8 max-w-xs bg-background border-border"
+                  disabled={isSavingNombre}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleGuardarNombre();
+                    if (e.key === "Escape") setIsEditingNombre(false);
+                  }}
+                />
+                <Button size="sm" variant="secondary" onClick={handleGuardarNombre} disabled={isSavingNombre}>
+                  {isSavingNombre ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <SaveIcon className="w-4 h-4" />}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setIsEditingNombre(false)} disabled={isSavingNombre}>
+                  <XIcon className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <p className="text-muted-foreground flex items-center gap-2 group">
+                {campeonato.nombre} • {campeonato.clase.nombre}
+                <button
+                  onClick={() => { setNombreInput(campeonato.nombre); setIsEditingNombre(true); }}
+                  className="text-muted-foreground hover:text-primary opacity-60 hover:opacity-100 transition-opacity"
+                  title="Renombrar campeonato"
+                >
+                  <PencilIcon className="w-3.5 h-3.5" />
+                </button>
+              </p>
+            )}
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button variant="secondary" onClick={handleNuevaRegata} disabled={isCreatingRegata}>

@@ -100,7 +100,7 @@ export async function DELETE(
   }
 }
 
-// Cambio puntual de estado y/o descartes, sin tener que reenviar el
+// Cambio puntual de estado, descartes y/o nombre, sin tener que reenviar el
 // formulario completo del campeonato.
 export async function PATCH(
   request: Request,
@@ -121,6 +121,7 @@ export async function PATCH(
       data: {
         ...(body.estado !== undefined ? { estado: body.estado } : {}),
         ...(body.descartes !== undefined ? { descartes: body.descartes } : {}),
+        ...(body.nombre !== undefined ? { nombre: body.nombre } : {}),
       },
     });
 
