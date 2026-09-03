@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { generarClasificacion } from "@/lib/scoring";
+import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { PosicionHistorica } from "@/components/charts/posicion-historica";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,28 +58,7 @@ async function getRegatistaProfile(id: string) {
 
     if (!campeonato || campeonato.estado !== "PUBLICADO") continue;
 
-    // Armar estructura para generarClasificacion
-    const regatistasMap = new Map<string, any>();
-    campeonato.regatas.forEach(regata => {
-      regata.resultados.forEach(res => {
-        if (!regatistasMap.has(res.regatistaId)) {
-          regatistasMap.set(res.regatistaId, {
-            regatistaId: res.regatista.id,
-            nombre: res.regatista.nombre,
-            club: res.regatista.club?.nombre || null,
-            resultados: []
-          });
-        }
-        regatistasMap.get(res.regatistaId).resultados.push({
-          regataNumero: regata.numero,
-          puesto: res.puesto,
-          puntos: res.puntos,
-          observacion: res.observacion
-        });
-      });
-    });
-
-    const clasificacion = generarClasificacion(Array.from(regatistasMap.values()), campeonato.descartes);
+    const clasificacion = generarClasificacion(agruparPorRegatista(campeonato.regatas), campeonato.descartes);
     const miClasificacion = clasificacion.find(c => c.regatistaId === id);
 
     if (miClasificacion) {

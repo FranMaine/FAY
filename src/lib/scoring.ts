@@ -18,6 +18,79 @@ export interface ClasificacionRegatista {
   posicionFinal: number;
 }
 
+// Forma mínima de Regata/Resultado que necesita agruparPorRegatista -así
+// sirve tanto para lo que devuelve Prisma directo como para datos armados
+// a mano, sin acoplarse al tipo exacto que genera el cliente.
+export interface RegataConResultados {
+  numero: number;
+  resultados: Array<{
+    regatistaId: string;
+    regatista: { id: string; nombre: string; club?: { nombre: string } | null; clubId?: string | null };
+    puesto: number;
+    puntos: number;
+    observacion: string | null;
+    flota?: string | null;
+    flotaOrden?: number | null;
+    puestoOficial?: number | null;
+    totalOficial?: number | null;
+  }>;
+}
+
+/**
+ * Agrupa las Regatas/Resultados de un campeonato por regatista, en la forma
+ * que espera generarClasificacion. Centraliza esto en un solo lugar porque
+ * se repetía (con copy-paste, y algún olvido) en cada página/endpoint que
+ * arma una clasificación: /campeonatos/[id], /admin/api/campeonatos/[id],
+ * /regatistas/[id], /mi-perfil, /rankings, /api/regatistas/[id]/stats.
+ */
+export function agruparPorRegatista(regatas: RegataConResultados[]) {
+  const map = new Map<string, {
+    regatistaId: string;
+    nombre: string;
+    club: string | null;
+    flota: string | null;
+    flotaOrden: number | null;
+    puestoOficial: number | null;
+    totalOficial: number | null;
+    resultados: Array<{ regataNumero: number; puesto: number; puntos: number; observacion: string | null }>;
+  }>();
+
+  for (const regata of regatas) {
+    for (const res of regata.resultados) {
+      const { regatista } = res;
+      if (!map.has(regatista.id)) {
+        map.set(regatista.id, {
+          regatistaId: regatista.id,
+          nombre: regatista.nombre,
+          club: regatista.club?.nombre ?? regatista.clubId ?? null,
+          flota: null,
+          flotaOrden: null,
+          puestoOficial: null,
+          totalOficial: null,
+          resultados: [],
+        });
+      }
+      const entry = map.get(regatista.id)!;
+      if (entry.flota === null && res.flota) {
+        entry.flota = res.flota;
+        entry.flotaOrden = res.flotaOrden ?? null;
+      }
+      if (entry.puestoOficial === null && res.puestoOficial !== null && res.puestoOficial !== undefined) {
+        entry.puestoOficial = res.puestoOficial;
+        entry.totalOficial = res.totalOficial ?? null;
+      }
+      entry.resultados.push({
+        regataNumero: regata.numero,
+        puesto: res.puesto,
+        puntos: res.puntos,
+        observacion: res.observacion,
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
 // Constants for penalty codes
 export const PENALTY_CODES = ['DNF', 'DNS', 'DNC', 'DSQ', 'OCS', 'BFD', 'UFD', 'RET'] as const;
 export type PenaltyCode = typeof PENALTY_CODES[number];

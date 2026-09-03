@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { ResultadosTable } from "@/components/tables/resultados-table";
 import { CalendarIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import prisma from "@/lib/db";
-import { generarClasificacion } from "@/lib/scoring";
+import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { notFound } from "next/navigation";
 
 type Props = {
@@ -45,42 +45,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
     notFound();
   }
 
-  // Agrupar por regatista
-  const regatistasMap = new Map();
-  campeonato.regatas.forEach((regata) => {
-    regata.resultados.forEach((res) => {
-      const { regatista } = res;
-      if (!regatistasMap.has(regatista.id)) {
-        regatistasMap.set(regatista.id, {
-          regatistaId: regatista.id,
-          nombre: regatista.nombre,
-          club: regatista.club?.nombre || null,
-          flota: null,
-          flotaOrden: null,
-          puestoOficial: null,
-          totalOficial: null,
-          resultados: []
-        });
-      }
-      const entry = regatistasMap.get(regatista.id);
-      if (entry.flota === null && res.flota) {
-        entry.flota = res.flota;
-        entry.flotaOrden = res.flotaOrden;
-      }
-      if (entry.puestoOficial === null && res.puestoOficial !== null) {
-        entry.puestoOficial = res.puestoOficial;
-        entry.totalOficial = res.totalOficial;
-      }
-      entry.resultados.push({
-        regataNumero: regata.numero,
-        puesto: res.puesto,
-        puntos: res.puntos,
-        observacion: res.observacion
-      });
-    });
-  });
-
-  const regatistasList = Array.from(regatistasMap.values());
+  const regatistasList = agruparPorRegatista(campeonato.regatas);
   const clasificacion = generarClasificacion(regatistasList, campeonato.descartes);
 
   const regatas = campeonato.regatas.map(r => r.numero);

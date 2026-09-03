@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { MedalIcon, ArrowRightIcon, AlertCircleIcon } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { generarClasificacion } from "@/lib/scoring";
+import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 
 export const metadata: Metadata = {
@@ -35,27 +35,7 @@ async function getRankingGeneral(claseId: string, anio: number) {
   const regatistasStats = new Map<string, { id: string, nombre: string, club: string, campeonatos: number, puntosRanking: number }>();
 
   for (const camp of campeonatos) {
-    const regMap = new Map();
-    camp.regatas.forEach(reg => {
-      reg.resultados.forEach(res => {
-        if (!regMap.has(res.regatista.id)) {
-          regMap.set(res.regatista.id, {
-            regatistaId: res.regatista.id,
-            nombre: res.regatista.nombre,
-            club: res.regatista.club?.nombre || 'Sin club',
-            resultados: []
-          });
-        }
-        regMap.get(res.regatista.id).resultados.push({
-          regataNumero: reg.numero,
-          puesto: res.puesto,
-          puntos: res.puntos,
-          observacion: res.observacion
-        });
-      });
-    });
-
-    const clasificacion = generarClasificacion(Array.from(regMap.values()), camp.descartes);
+    const clasificacion = generarClasificacion(agruparPorRegatista(camp.regatas), camp.descartes);
     const totalInscriptos = clasificacion.length;
 
     clasificacion.forEach(c => {

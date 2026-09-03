@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { campeonatoSchema, campeonatoPatchSchema } from '@/lib/validators';
-import { generarClasificacion } from '@/lib/scoring';
+import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
 
 export async function GET(
   request: Request,
@@ -39,43 +39,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const regatistasMap = new Map();
-    campeonato.regatas.forEach((regata: any) => {
-      regata.resultados.forEach((resultado: any) => {
-        const { regatista } = resultado;
-        if (!regatistasMap.has(regatista.id)) {
-          regatistasMap.set(regatista.id, {
-            regatistaId: regatista.id,
-            nombre: regatista.nombre,
-            club: regatista.clubId || null,
-            flota: null,
-            flotaOrden: null,
-            puestoOficial: null,
-            totalOficial: null,
-            resultados: []
-          });
-        }
-        const entry = regatistasMap.get(regatista.id);
-        // La flota y el puesto/total oficial son los mismos para todas las
-        // regatas de este regatista en este campeonato; nos quedamos con
-        // los de la primera que aparezca.
-        if (entry.flota === null && resultado.flota) {
-          entry.flota = resultado.flota;
-          entry.flotaOrden = resultado.flotaOrden;
-        }
-        if (entry.puestoOficial === null && resultado.puestoOficial !== null) {
-          entry.puestoOficial = resultado.puestoOficial;
-          entry.totalOficial = resultado.totalOficial;
-        }
-        entry.resultados.push({
-          regataNumero: regata.numero,
-          puesto: resultado.puesto,
-          puntos: resultado.puntos,
-          observacion: resultado.observacion
-        });
-      });
-    });
-    const regatistas = Array.from(regatistasMap.values());
+    const regatistas = agruparPorRegatista(campeonato.regatas);
     const clasificacion = generarClasificacion(regatistas, campeonato.descartes);
 
     return NextResponse.json({

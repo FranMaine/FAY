@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { generarClasificacion } from '@/lib/scoring';
+import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
 
 export async function GET(
   request: Request,
@@ -48,28 +48,7 @@ export async function GET(
     let posiciones: number[] = [];
 
     for (const [_, campeonato] of campeonatosMap) {
-      const regatistasMap = new Map();
-      campeonato.regatas.forEach((regata: any) => {
-        regata.resultados.forEach((resultado: any) => {
-          const { regatista } = resultado;
-          if (!regatistasMap.has(regatista.id)) {
-            regatistasMap.set(regatista.id, {
-              regatistaId: regatista.id,
-              nombre: regatista.nombre,
-              club: regatista.clubId || null,
-              resultados: []
-            });
-          }
-          regatistasMap.get(regatista.id).resultados.push({
-            regataNumero: regata.numero,
-            puesto: resultado.puesto,
-            puntos: resultado.puntos,
-            observacion: resultado.observacion
-          });
-        });
-      });
-      const regatistas = Array.from(regatistasMap.values());
-      const clasificacion = generarClasificacion(regatistas, campeonato.descartes);
+      const clasificacion = generarClasificacion(agruparPorRegatista(campeonato.regatas), campeonato.descartes);
       
       const regatistaPos = clasificacion.find((c: any) => c.regatistaId === id);
       
