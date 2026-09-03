@@ -43,10 +43,10 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
 
   const puestoCol = findCol('puesto', 'pl', 'pl.');
   const velaCol = findCol('vela', 'sail');
-  const nombreCol = findCol('navegante', 'skipper', 'nombre');
-  const flotaCol = findCol('Subgroup division', 'subgroup division', 'flota', 'split', 'split #4');
+  const nombreCol = findCol('navegante', 'skipper', 'nombre', 'crew', 'helm', 'helmname');
+  const flotaCol = findCol('Subgroup division', 'subgroup division', 'subgroup', 'flota', 'split', 'split #4');
   const clubCol = findCol('club', 'from');
-  const totalCol = findCol('Total puntos', 'total puntos', 'total');
+  const totalCol = findCol('Total puntos', 'total puntos', 'total', 'tot', 'tot.');
 
   if (puestoCol === -1 || velaCol === -1 || nombreCol === -1 || clubCol === -1 || totalCol === -1) {
     throw new Error(
