@@ -1,5 +1,6 @@
 import prisma from '@/lib/db';
 import { ParseResult } from './csv-parser';
+import { splitNombreTripulacion } from '@/lib/nombres';
 
 // Corre un lote de promesas con concurrencia limitada, en vez de secuencial
 // (demasiado lento) o todas juntas (satura el pool de conexiones de Neon).
@@ -76,30 +77,38 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
       clubId = club.id;
     }
 
-    const nombreLimpio = row.nombre.trim();
-    const nombreKey = nombreLimpio.toLowerCase();
-    let regatista = regatistaPorNombre.get(nombreKey);
+    // En clases de doble tripulación (29er, 420, etc.) la fuente trae a
+    // los dos regatistas en una sola celda ("Fulano & Mengano"). Cada uno
+    // es una persona real con su propio historial, así que quedan como
+    // regatistas separados -ambos con el mismo resultado en cada regata,
+    // ya que compitieron juntos en el mismo bote.
+    const nombresTripulacion = splitNombreTripulacion(row.nombre.trim());
 
-    if (!regatista) {
-      regatista = await prisma.regatista.create({
-        data: {
-          nombre: nombreLimpio,
-          clubId,
-          fuenteIds: { vela: row.vela },
-        },
+    for (const nombreLimpio of nombresTripulacion) {
+      const nombreKey = nombreLimpio.toLowerCase();
+      let regatista = regatistaPorNombre.get(nombreKey);
+
+      if (!regatista) {
+        regatista = await prisma.regatista.create({
+          data: {
+            nombre: nombreLimpio,
+            clubId,
+            fuenteIds: { vela: row.vela },
+          },
+        });
+        regatistaPorNombre.set(nombreKey, regatista);
+        regatistasNuevos++;
+      }
+
+      filasResueltas.push({
+        regatistaId: regatista.id,
+        flota: row.flota,
+        flotaOrden: row.flotaOrden,
+        puestoOficial: row.puestoOficial,
+        totalOficial: row.totalOficial,
+        regatas: row.regatas,
       });
-      regatistaPorNombre.set(nombreKey, regatista);
-      regatistasNuevos++;
     }
-
-    filasResueltas.push({
-      regatistaId: regatista.id,
-      flota: row.flota,
-      flotaOrden: row.flotaOrden,
-      puestoOficial: row.puestoOficial,
-      totalOficial: row.totalOficial,
-      regatas: row.regatas,
-    });
   }
 
   // 3. Resolver (o crear) las Regatas de este campeonato una sola vez,
