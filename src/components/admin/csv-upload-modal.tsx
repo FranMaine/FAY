@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UploadIcon, CheckCircleIcon, AlertCircleIcon, XIcon, Loader2Icon } from "lucide-react";
+import { UploadIcon, CheckCircleIcon, AlertCircleIcon, XIcon, Loader2Icon, ArrowLeftIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface CsvUploadModalProps {
@@ -11,107 +11,214 @@ interface CsvUploadModalProps {
   onClose: () => void;
 }
 
+type RolColumna = 'puesto' | 'vela' | 'navegante' | 'club' | 'flota' | 'total' | 'regata' | 'ignorar';
+
+interface ColumnaSugerida {
+  index: number;
+  header: string;
+  rol: RolColumna;
+  muestra: string[];
+}
+
+const ROLES: { value: RolColumna; label: string }[] = [
+  { value: 'puesto', label: 'Puesto' },
+  { value: 'vela', label: 'Vela' },
+  { value: 'navegante', label: 'Navegante' },
+  { value: 'club', label: 'Club' },
+  { value: 'flota', label: 'Flota / Subgrupo' },
+  { value: 'total', label: 'Total de puntos' },
+  { value: 'regata', label: 'Regata' },
+  { value: 'ignorar', label: 'Ignorar esta columna' },
+];
+
+// Roles que solo puede tener UNA columna -si el admin le pone "Puesto" a
+// una segunda columna, la que la tenía pasa a "Ignorar" para no mandar dos
+// columnas con el mismo rol al importador.
+const ROLES_UNICOS: RolColumna[] = ['puesto', 'vela', 'navegante', 'club', 'flota', 'total'];
+
+type Etapa = 'seleccionar' | 'confirmar' | 'importando' | 'exito';
+
 export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModalProps) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [etapa, setEtapa] = useState<Etapa>('seleccionar');
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [columnas, setColumnas] = useState<ColumnaSugerida[]>([]);
+  const [roles, setRoles] = useState<Record<number, RolColumna>>({});
+  const [totalFilas, setTotalFilas] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<any>(null);
 
   if (!isOpen) return null;
 
+  const reset = () => {
+    setFile(null);
+    setEtapa('seleccionar');
+    setColumnas([]);
+    setRoles({});
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
       setError(null);
-      setSuccess(null);
     }
   };
 
-  const handleUpload = async () => {
+  const esExcel = (f: File) => /\.xlsx?$/i.test(f.name);
+
+  // Excel: primero mostramos qué detectamos en cada columna para que el
+  // admin confirme o corrija antes de tocar la base. CSV/PDF siguen el
+  // camino directo de siempre -su formato es más rígido y no vale la pena
+  // el paso extra.
+  const handleContinuar = async () => {
     if (!file) return;
 
-    setIsUploading(true);
+    if (!esExcel(file)) {
+      await importar();
+      return;
+    }
+
+    setIsLoadingPreview(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/campeonatos/${campeonatoId}/import/preview`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo leer el archivo");
+
+      setColumnas(data.columnas);
+      setTotalFilas(data.totalFilas);
+      const rolesIniciales: Record<number, RolColumna> = {};
+      data.columnas.forEach((c: ColumnaSugerida) => { rolesIniciales[c.index] = c.rol; });
+      setRoles(rolesIniciales);
+      setEtapa('confirmar');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  const cambiarRol = (index: number, rol: RolColumna) => {
+    setRoles((prev) => {
+      const next = { ...prev };
+      if (ROLES_UNICOS.includes(rol)) {
+        // Sacamos ese rol de cualquier otra columna que lo tuviera.
+        Object.keys(next).forEach((k) => {
+          if (Number(k) !== index && next[Number(k)] === rol) next[Number(k)] = 'ignorar';
+        });
+      }
+      next[index] = rol;
+      return next;
+    });
+  };
+
+  const construirMapping = () => {
+    const buscar = (rol: RolColumna) => {
+      const idx = Object.entries(roles).find(([, r]) => r === rol)?.[0];
+      return idx !== undefined ? Number(idx) : -1;
+    };
+
+    const puestoCol = buscar('puesto');
+    const velaCol = buscar('vela');
+    const nombreCol = buscar('navegante');
+    const clubCol = buscar('club');
+    const totalCol = buscar('total');
+    const flotaColRaw = buscar('flota');
+
+    if ([puestoCol, velaCol, nombreCol, clubCol, totalCol].includes(-1)) {
+      return { error: 'Faltan columnas: Puesto, Vela, Navegante, Club y Total de puntos son obligatorias.' };
+    }
+
+    const regataCols = Object.entries(roles)
+      .filter(([, r]) => r === 'regata')
+      .map(([idx]) => Number(idx))
+      .sort((a, b) => a - b)
+      .map((colIndex, i) => ({ colIndex, numero: i + 1 }));
+
+    if (regataCols.length === 0) {
+      return { error: 'Asigná al menos una columna como "Regata".' };
+    }
+
+    return {
+      mapping: {
+        puestoCol, velaCol, nombreCol, clubCol, totalCol,
+        flotaCol: flotaColRaw === -1 ? null : flotaColRaw,
+        regataCols,
+      },
+    };
+  };
+
+  const importar = async (mapping?: object) => {
+    if (!file) return;
+    setEtapa('importando');
     setError(null);
 
     const formData = new FormData();
     formData.append("file", file);
+    if (mapping) formData.append("mapping", JSON.stringify(mapping));
 
     try {
       const res = await fetch(`/api/campeonatos/${campeonatoId}/import`, {
         method: "POST",
         body: formData,
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Error al subir el archivo");
-      }
+      if (!res.ok) throw new Error(data.error || "Error al subir el archivo");
 
       setSuccess(data.stats);
-      router.refresh(); // Refrescar la página para ver los nuevos datos
+      setEtapa('exito');
+      router.refresh();
     } catch (err: any) {
       setError(err.message);
-    } finally {
-      setIsUploading(false);
+      setEtapa(mapping ? 'confirmar' : 'seleccionar');
     }
   };
 
+  const handleConfirmarImportacion = () => {
+    const { mapping, error: mappingError } = construirMapping();
+    if (mappingError) {
+      setError(mappingError);
+      return;
+    }
+    importar(mapping);
+  };
+
+  const isBusy = isLoadingPreview || etapa === 'importando';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-surface border border-border rounded-xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-surface border border-border rounded-xl w-full max-w-4xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
 
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-semibold">Importar Resultados (CSV / Excel / PDF)</h2>
-          <Button variant="ghost" size="icon" onClick={onClose} disabled={isUploading}>
+          <h2 className="text-lg font-semibold">
+            {etapa === 'confirmar' ? 'Confirmá las columnas detectadas' : 'Importar Resultados (CSV / Excel / PDF)'}
+          </h2>
+          <Button variant="ghost" size="icon" onClick={handleClose} disabled={isBusy}>
             <XIcon className="w-5 h-5" />
           </Button>
         </div>
 
         <div className="p-6 space-y-4 overflow-y-auto">
-          {!success ? (
+          {etapa === 'seleccionar' && (
             <>
               <p className="text-sm text-muted-foreground">
                 Sube un archivo `.csv`, `.xlsx` o `.pdf` generado por Sailwave para importar los resultados automáticamente.
+                Para Excel, en el próximo paso vas a poder revisar y corregir qué detectó en cada columna antes de importar
+                nada -no hace falta que el archivo tenga nombres de columna exactos.
               </p>
-
-              <div className="border border-border rounded-lg overflow-hidden">
-                <div className="px-4 py-2 bg-background/50 border-b border-border text-sm font-medium">
-                  Formato esperado para <code>.xlsx</code> (recomendado)
-                </div>
-                <div className="p-3 space-y-3">
-                  <p className="text-xs text-muted-foreground">
-                    La primera fila tiene que ser el encabezado, con estas columnas en este orden. El puesto y el total de puntos se toman tal cual vienen en el archivo -la app no los recalcula-; las columnas de regata también se importan literal, y quedan vacías si ese regatista no navegó esa regata.
-                  </p>
-                  <div className="overflow-x-auto">
-                    <table className="text-xs text-left border-collapse w-full">
-                      <thead>
-                        <tr className="bg-background">
-                          {["puesto", "vela", "navegante", "Subgroup division", "club", "Total puntos", "regata 1", "regata 2", "regata 3", "…"].map((h) => (
-                            <th key={h} className="border border-border px-2 py-1 font-medium whitespace-nowrap">{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="text-muted-foreground">
-                        <tr>
-                          {["1", "4165", "Tomas Molinari", "Gold-yellow", "CVB", "34", "3", "7", "1", "…"].map((v, i) => (
-                            <td key={i} className="border border-border px-2 py-1 whitespace-nowrap">{v}</td>
-                          ))}
-                        </tr>
-                        <tr>
-                          {["2", "4260", "Gino Pichetti", "Gold-yellow", "CNSP", "49", "18", "3", "22", "…"].map((v, i) => (
-                            <td key={i} className="border border-border px-2 py-1 whitespace-nowrap">{v}</td>
-                          ))}
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    &quot;Subgroup division&quot; es opcional (solo si el campeonato usa flotas Gold/Silver/Bronze). Podés agregar tantas columnas &quot;regata N&quot; como regatas tenga el campeonato.
-                  </p>
-                </div>
-              </div>
 
               <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-6 bg-background">
                 <UploadIcon className="w-10 h-10 text-muted-foreground mb-4" />
@@ -125,7 +232,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
                     file:text-sm file:font-semibold
                     file:bg-primary file:text-primary-foreground
                     hover:file:bg-primary/90 cursor-pointer"
-                  disabled={isUploading}
+                  disabled={isBusy}
                 />
               </div>
 
@@ -136,7 +243,66 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
                 </div>
               )}
             </>
-          ) : (
+          )}
+
+          {etapa === 'confirmar' && (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Detectamos {totalFilas} filas de datos. Revisá que cada columna tenga asignado lo correcto -marcamos nuestra
+                mejor sugerencia, pero nada se guarda hasta que confirmes.
+              </p>
+
+              <div className="overflow-x-auto border border-border rounded-lg">
+                <table className="text-xs text-left border-collapse w-full">
+                  <thead>
+                    <tr className="bg-background">
+                      {columnas.map((c) => (
+                        <th key={c.index} className="border border-border px-2 py-2 align-top min-w-[140px]">
+                          <div className="font-medium mb-1 truncate" title={c.header}>{c.header || `Columna ${c.index + 1}`}</div>
+                          <select
+                            value={roles[c.index] || 'ignorar'}
+                            onChange={(e) => cambiarRol(c.index, e.target.value as RolColumna)}
+                            className="w-full text-xs bg-surface border border-border rounded px-1 py-1 focus:outline-none focus:ring-1 focus:ring-primary"
+                          >
+                            {ROLES.map((r) => (
+                              <option key={r.value} value={r.value}>{r.label}</option>
+                            ))}
+                          </select>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="text-muted-foreground">
+                    {[0, 1, 2].map((fila) => (
+                      <tr key={fila}>
+                        {columnas.map((c) => (
+                          <td key={c.index} className="border border-border px-2 py-1 whitespace-nowrap">
+                            {c.muestra[fila] ?? ''}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {error && (
+                <div className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 p-3 rounded-md">
+                  <AlertCircleIcon className="w-4 h-4 flex-shrink-0" />
+                  <p>{error}</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {etapa === 'importando' && (
+            <div className="flex flex-col items-center justify-center py-10">
+              <Loader2Icon className="w-8 h-8 animate-spin text-primary mb-3" />
+              <p className="text-sm text-muted-foreground">Importando...</p>
+            </div>
+          )}
+
+          {etapa === 'exito' && success && (
             <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
               <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-2">
                 <CheckCircleIcon className="w-10 h-10" />
@@ -152,22 +318,34 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
           )}
         </div>
 
-        <div className="p-4 border-t border-border flex justify-end gap-3 bg-muted/20">
-          <Button variant="secondary" onClick={onClose} disabled={isUploading}>
-            {success ? "Cerrar" : "Cancelar"}
-          </Button>
-          {!success && (
-            <Button onClick={handleUpload} disabled={!file || isUploading}>
-              {isUploading ? (
-                <>
-                  <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
-                  Procesando...
-                </>
-              ) : (
-                "Importar Datos"
-              )}
+        <div className="p-4 border-t border-border flex justify-between gap-3 bg-muted/20">
+          <div>
+            {etapa === 'confirmar' && (
+              <Button variant="ghost" onClick={() => setEtapa('seleccionar')} disabled={isBusy} className="gap-2">
+                <ArrowLeftIcon className="w-4 h-4" /> Volver
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <Button variant="secondary" onClick={handleClose} disabled={isBusy}>
+              {etapa === 'exito' ? "Cerrar" : "Cancelar"}
             </Button>
-          )}
+            {etapa === 'seleccionar' && (
+              <Button onClick={handleContinuar} disabled={!file || isBusy}>
+                {isLoadingPreview ? (
+                  <>
+                    <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
+                    Leyendo archivo...
+                  </>
+                ) : file && esExcel(file) ? "Continuar" : "Importar Datos"}
+              </Button>
+            )}
+            {etapa === 'confirmar' && (
+              <Button onClick={handleConfirmarImportacion} disabled={isBusy}>
+                Confirmar e Importar
+              </Button>
+            )}
+          </div>
         </div>
 
       </div>

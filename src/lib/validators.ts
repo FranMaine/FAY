@@ -102,6 +102,23 @@ export const resultadosBulkSchema = z.object({
   resultados: z.array(resultadoSchema),
 });
 
+// Mapeo de columnas confirmado por el admin en la pantalla de vista previa
+// de importación de Excel (ver column-detector.ts). flotaCol puede faltar
+// -no todos los campeonatos usan flotas- pero puesto/vela/navegante/club/
+// total y al menos una regata son obligatorios para poder armar algo útil.
+export const columnMappingSchema = z.object({
+  puestoCol: z.number().int().min(0),
+  velaCol: z.number().int().min(0),
+  nombreCol: z.number().int().min(0),
+  clubCol: z.number().int().min(0),
+  flotaCol: z.number().int().min(0).nullable(),
+  totalCol: z.number().int().min(0),
+  regataCols: z.array(z.object({
+    colIndex: z.number().int().min(0),
+    numero: z.number().int().min(1),
+  })).min(1, 'Hay que asignar al menos una columna de regata'),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegistroInput = z.infer<typeof registroSchema>;
 export type CampeonatoInput = z.infer<typeof campeonatoSchema>;

@@ -3,8 +3,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parseSailwaveCSV } from "@/lib/extractors/csv-parser";
 import { parsePdfToResult } from "@/lib/extractors/pdf-extractor";
-import { parseSailwaveXLSX } from "@/lib/extractors/xlsx-parser";
+import { parseSailwaveXLSX, leerGridXLSX, armarParseResult, ColumnMapping } from "@/lib/extractors/xlsx-parser";
 import { importCampeonatoResults } from "@/lib/extractors/import-service";
+import { columnMappingSchema } from "@/lib/validators";
 
 // Un campeonato grande (200+ regatistas x varias regatas) puede tardar más
 // que el límite por defecto de las funciones serverless de Vercel.
@@ -42,12 +43,25 @@ export async function POST(
     const fileName = file.name.toLowerCase();
     let parseResult;
 
+    // Si viene un "mapping" (el admin confirmó/corrigió las columnas en la
+    // pantalla de vista previa), lo usamos tal cual en vez de volver a
+    // adivinar -evita que una segunda detección automática, corriendo
+    // sobre el mismo archivo, contradiga lo que el admin ya confirmó.
+    const mappingRaw = formData.get("mapping") as string | null;
+
     if (fileName.endsWith('.pdf')) {
       const arrayBuffer = await file.arrayBuffer();
       parseResult = await parsePdfToResult(Buffer.from(arrayBuffer));
     } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
       const arrayBuffer = await file.arrayBuffer();
-      parseResult = parseSailwaveXLSX(Buffer.from(arrayBuffer));
+      const buffer = Buffer.from(arrayBuffer);
+      if (mappingRaw) {
+        const mapping = columnMappingSchema.parse(JSON.parse(mappingRaw)) as ColumnMapping;
+        const { header, rows } = leerGridXLSX(buffer);
+        parseResult = armarParseResult(header, rows, mapping);
+      } else {
+        parseResult = parseSailwaveXLSX(buffer);
+      }
     } else {
       const fileContent = await file.text();
       parseResult = parseSailwaveCSV(fileContent);
