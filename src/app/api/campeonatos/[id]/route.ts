@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { campeonatoSchema, campeonatoPatchSchema } from '@/lib/validators';
 import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
+import { handleApiError } from '@/lib/api-error';
 
 export async function GET(
   request: Request,
@@ -47,8 +48,7 @@ export async function GET(
       clasificacion,
     });
   } catch (error) {
-    console.error('Error fetching campeonato detail:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'GET /api/campeonatos/[id]');
   }
 }
 
@@ -73,8 +73,7 @@ export async function PUT(
 
     return NextResponse.json(campeonato);
   } catch (error) {
-    console.error('Error updating campeonato:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'PUT /api/campeonatos/[id]');
   }
 }
 
@@ -95,8 +94,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting campeonato:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'DELETE /api/campeonatos/[id]');
   }
 }
 
@@ -127,7 +125,6 @@ export async function PATCH(
 
     return NextResponse.json(campeonato);
   } catch (error) {
-    console.error('Error updating campeonato:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'PATCH /api/campeonatos/[id]');
   }
 }

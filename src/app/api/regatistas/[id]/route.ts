@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { regatistaEditSchema } from '@/lib/validators';
+import { handleApiError } from '@/lib/api-error';
 
 export async function PUT(
   request: Request,
@@ -44,7 +45,6 @@ export async function PUT(
 
     return NextResponse.json(regatista);
   } catch (error) {
-    console.error('Error updating regatista:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'PUT /api/regatistas/[id]');
   }
 }

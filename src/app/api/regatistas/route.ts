@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { regatistaEditSchema } from '@/lib/validators';
+import { handleApiError } from '@/lib/api-error';
 
 export async function GET(request: Request) {
   try {
@@ -33,8 +34,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ regatistas, total, page, pageSize });
   } catch (error) {
-    console.error('Error fetching regatistas:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'GET /api/regatistas');
   }
 }
 
@@ -66,7 +66,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(regatista, { status: 201 });
   } catch (error) {
-    console.error('Error creating regatista:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'POST /api/regatistas');
   }
 }

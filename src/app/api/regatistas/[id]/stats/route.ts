@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
+import { handleApiError } from '@/lib/api-error';
 
 export async function GET(
   request: Request,
@@ -74,7 +75,6 @@ export async function GET(
 
     return NextResponse.json(summary);
   } catch (error) {
-    console.error('Error fetching regatista stats:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'GET /api/regatistas/[id]/stats');
   }
 }

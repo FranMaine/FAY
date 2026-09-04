@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { regataResultadosSchema } from '@/lib/validators';
 import { splitNombreTripulacion } from '@/lib/nombres';
+import { handleApiError } from '@/lib/api-error';
 
 // Reemplaza el set de resultados de una regata existente: crea/actualiza los
 // enviados y borra los que ya no vienen en el body (así "Guardar" en el
@@ -113,7 +114,6 @@ export async function PUT(
 
     return NextResponse.json(regata);
   } catch (error) {
-    console.error('Error updating regata resultados:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'PUT /api/regatas/[id]');
   }
 }

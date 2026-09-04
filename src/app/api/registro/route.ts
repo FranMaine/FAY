@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { registroSchema } from '@/lib/validators';
+import { handleApiError } from '@/lib/api-error';
 
 export async function POST(request: Request) {
   try {
@@ -31,10 +32,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json(user, { status: 201 });
   } catch (error) {
+    // Mensaje más específico que el genérico de handleApiError para este
+    // caso puntual (es, por lejos, el motivo más común de que falle el
+    // registro).
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return NextResponse.json({ error: 'Ya existe una cuenta con ese email' }, { status: 400 });
     }
-    console.error('Error registering user:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'POST /api/registro');
   }
 }

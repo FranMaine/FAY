@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { campeonatoSchema } from '@/lib/validators';
+import { handleApiError } from '@/lib/api-error';
 
 export async function GET(request: Request) {
   try {
@@ -40,8 +41,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(campeonatos);
   } catch (error) {
-    console.error('Error fetching campeonatos:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'GET /api/campeonatos');
   }
 }
 
@@ -61,7 +61,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(campeonato, { status: 201 });
   } catch (error) {
-    console.error('Error creating campeonato:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleApiError(error, 'POST /api/campeonatos');
   }
 }

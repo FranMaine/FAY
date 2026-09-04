@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { handleApiError } from "@/lib/api-error";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -28,7 +29,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json(regatistas);
   } catch (error) {
-    console.error("[SEARCH_ERROR]", error);
-    return NextResponse.json({ error: "Error en búsqueda" }, { status: 500 });
+    return handleApiError(error, 'GET /api/search');
   }
 }

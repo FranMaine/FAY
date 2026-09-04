@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { handleApiError } from '@/lib/api-error';
 
 export async function POST(request: Request) {
   try {
@@ -46,8 +47,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(solicitud);
   } catch (error) {
-    console.error('Error linking regatista:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return handleApiError(error, 'POST /api/vincular');
   }
 }
 
@@ -68,7 +68,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json(solicitud || null);
   } catch (error) {
-    console.error('Error fetching solicitud:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+    return handleApiError(error, 'GET /api/vincular');
   }
 }
