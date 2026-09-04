@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parseSailwaveCSV } from "@/lib/extractors/csv-parser";
 import { parsePdfToResult } from "@/lib/extractors/pdf-extractor";
+import { leerGridPDF } from "@/lib/extractors/pdf-grid-reader";
 import { parseSailwaveXLSX, leerGridXLSX, armarParseResult, ColumnMapping } from "@/lib/extractors/xlsx-parser";
 import { importCampeonatoResults } from "@/lib/extractors/import-service";
 import { columnMappingSchema } from "@/lib/validators";
@@ -51,7 +52,14 @@ export async function POST(
 
     if (fileName.endsWith('.pdf')) {
       const arrayBuffer = await file.arrayBuffer();
-      parseResult = await parsePdfToResult(Buffer.from(arrayBuffer));
+      const buffer = Buffer.from(arrayBuffer);
+      if (mappingRaw) {
+        const mapping = columnMappingSchema.parse(JSON.parse(mappingRaw)) as ColumnMapping;
+        const { header, rows } = await leerGridPDF(buffer);
+        parseResult = armarParseResult(header, rows, mapping);
+      } else {
+        parseResult = await parsePdfToResult(buffer);
+      }
     } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);

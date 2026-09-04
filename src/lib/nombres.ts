@@ -15,3 +15,19 @@ export function splitNombreTripulacion(nombre: string): string[] {
     .map((n) => n.trim())
     .filter((n) => n.length > 0);
 }
+
+/**
+ * En una tripulación de más de una persona, el club a veces viene como
+ * "CUBA-CVB" -no es un club compuesto, es que cada tripulante navega para
+ * un club distinto. Si separar por "-" da exactamente tantas partes como
+ * personas hay, le asignamos una a cada uno; si no (un club normal sin
+ * guión, o cualquier otro caso que no cierre la cuenta), todos quedan con
+ * el valor completo tal cual vino -es preferible eso a adivinar mal.
+ */
+export function splitClubPorTripulante(club: string, cantidadPersonas: number): string[] {
+  const partes = club.trim().split('-').map((p) => p.trim()).filter(Boolean);
+  if (partes.length === cantidadPersonas && partes.length > 1) {
+    return partes;
+  }
+  return Array(cantidadPersonas).fill(club.trim());
+}

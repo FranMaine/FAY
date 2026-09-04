@@ -1,6 +1,6 @@
 import prisma from '@/lib/db';
 import { ParseResult } from './csv-parser';
-import { splitNombreTripulacion } from '@/lib/nombres';
+import { splitNombreTripulacion, splitClubPorTripulante } from '@/lib/nombres';
 
 // Corre un lote de promesas con concurrencia limitada, en vez de secuencial
 // (demasiado lento) o todas juntas (satura el pool de conexiones de Neon).
@@ -62,29 +62,38 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
   }[] = [];
 
   for (const row of parsedData) {
-    let clubId: string | null = null;
-    if (row.club) {
-      const clubStr = row.club.toUpperCase().trim();
-      let club = clubPorNombre.get(clubStr);
-      if (!club) {
-        club = await prisma.club.upsert({
-          where: { nombre: clubStr },
-          update: {},
-          create: { nombre: clubStr },
-        });
-        clubPorNombre.set(clubStr, club);
-      }
-      clubId = club.id;
-    }
-
     // En clases de doble tripulación (29er, 420, etc.) la fuente trae a
     // los dos regatistas en una sola celda ("Fulano & Mengano"). Cada uno
     // es una persona real con su propio historial, así que quedan como
     // regatistas separados -ambos con el mismo resultado en cada regata,
     // ya que compitieron juntos en el mismo bote.
     const nombresTripulacion = splitNombreTripulacion(row.nombre.trim());
+    // El club a veces viene como "CUBA-CVB" -cada tripulante navega para
+    // un club distinto, no es un club compuesto- así que resolvemos el
+    // club de cada persona por separado, no uno solo para toda la fila.
+    const clubesTripulacion = row.club
+      ? splitClubPorTripulante(row.club, nombresTripulacion.length)
+      : nombresTripulacion.map(() => '');
 
-    for (const nombreLimpio of nombresTripulacion) {
+    for (let i = 0; i < nombresTripulacion.length; i++) {
+      const nombreLimpio = nombresTripulacion[i];
+      const clubPersona = clubesTripulacion[i];
+
+      let clubId: string | null = null;
+      if (clubPersona) {
+        const clubStr = clubPersona.toUpperCase().trim();
+        let club = clubPorNombre.get(clubStr);
+        if (!club) {
+          club = await prisma.club.upsert({
+            where: { nombre: clubStr },
+            update: {},
+            create: { nombre: clubStr },
+          });
+          clubPorNombre.set(clubStr, club);
+        }
+        clubId = club.id;
+      }
+
       const nombreKey = nombreLimpio.toLowerCase();
       let regatista = regatistaPorNombre.get(nombreKey);
 

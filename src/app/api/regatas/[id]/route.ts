@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { regataResultadosSchema } from '@/lib/validators';
-import { splitNombreTripulacion } from '@/lib/nombres';
+import { splitNombreTripulacion, splitClubPorTripulante } from '@/lib/nombres';
 import { handleApiError } from '@/lib/api-error';
 
 // Reemplaza el set de resultados de una regata existente: crea/actualiza los
@@ -38,36 +38,44 @@ export async function PUT(
       // tipeado, puede ser una tripulación de dos personas ("Fulano &
       // Mengano") -cada una queda como su propio regatista, con el mismo
       // resultado en esta regata.
-      const regatistaIds = r.regatistaId
-        ? [r.regatistaId]
-        : await Promise.all(
-            splitNombreTripulacion((r.nombre || '').trim()).map(async (nombreLimpio) => {
-              const existente = await prisma.regatista.findFirst({
-                where: { nombre: { equals: nombreLimpio, mode: 'insensitive' } },
-              });
+      let regatistaIds: string[];
+      if (r.regatistaId) {
+        regatistaIds = [r.regatistaId];
+      } else {
+        const nombres = splitNombreTripulacion((r.nombre || '').trim());
+        // El club a veces viene como "CUBA-CVB" -cada tripulante navega
+        // para un club distinto, no es un club compuesto.
+        const clubes = r.club ? splitClubPorTripulante(r.club, nombres.length) : nombres.map(() => '');
 
-              if (existente) return existente.id;
+        regatistaIds = await Promise.all(
+          nombres.map(async (nombreLimpio, i) => {
+            const existente = await prisma.regatista.findFirst({
+              where: { nombre: { equals: nombreLimpio, mode: 'insensitive' } },
+            });
 
-              let clubId: string | undefined;
-              if (r.club) {
-                const clubStr = r.club.toUpperCase().trim();
-                const club = await prisma.club.upsert({
-                  where: { nombre: clubStr },
-                  update: {},
-                  create: { nombre: clubStr },
-                });
-                clubId = club.id;
-              }
-              const nuevo = await prisma.regatista.create({
-                data: {
-                  nombre: nombreLimpio,
-                  clubId,
-                  fuenteIds: r.vela ? { vela: r.vela } : undefined,
-                },
+            if (existente) return existente.id;
+
+            let clubId: string | undefined;
+            if (clubes[i]) {
+              const clubStr = clubes[i].toUpperCase().trim();
+              const club = await prisma.club.upsert({
+                where: { nombre: clubStr },
+                update: {},
+                create: { nombre: clubStr },
               });
-              return nuevo.id;
-            })
-          );
+              clubId = club.id;
+            }
+            const nuevo = await prisma.regatista.create({
+              data: {
+                nombre: nombreLimpio,
+                clubId,
+                fuenteIds: r.vela ? { vela: r.vela } : undefined,
+              },
+            });
+            return nuevo.id;
+          })
+        );
+      }
 
       for (const regatistaId of regatistaIds) {
         await prisma.resultado.upsert({

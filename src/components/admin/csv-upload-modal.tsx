@@ -72,16 +72,17 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
     }
   };
 
-  const esExcel = (f: File) => /\.xlsx?$/i.test(f.name);
+  // Excel y PDF: primero mostramos qué detectamos en cada columna para que
+  // el admin confirme o corrija antes de tocar la base -en un PDF no hay
+  // celdas reales, así que vale doblemente la pena revisar antes de subir.
+  // CSV sigue el camino directo de siempre: su formato es más rígido y no
+  // hace falta el paso extra.
+  const necesitaConfirmacion = (f: File) => /\.(xlsx?|pdf)$/i.test(f.name);
 
-  // Excel: primero mostramos qué detectamos en cada columna para que el
-  // admin confirme o corrija antes de tocar la base. CSV/PDF siguen el
-  // camino directo de siempre -su formato es más rígido y no vale la pena
-  // el paso extra.
   const handleContinuar = async () => {
     if (!file) return;
 
-    if (!esExcel(file)) {
+    if (!necesitaConfirmacion(file)) {
       await importar();
       return;
     }
@@ -337,7 +338,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
                     <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
                     Leyendo archivo...
                   </>
-                ) : file && esExcel(file) ? "Continuar" : "Importar Datos"}
+                ) : file && necesitaConfirmacion(file) ? "Continuar" : "Importar Datos"}
               </Button>
             )}
             {etapa === 'confirmar' && (
