@@ -20,11 +20,18 @@ export interface ClasificacionRegatista {
     observacion?: string; // DNF, DSQ, etc.
   }>;
   totalNeto: number;
+  // Columnas "personalizadas" que el admin conservó al importar (ej:
+  // "Categoría", "DNI"). No todas las filas tienen las mismas claves -una
+  // fila sin valor para una columna extra simplemente no la trae.
+  datosExtra?: Record<string, string> | null;
 }
 
 interface ResultadosTableProps {
   clasificacion: ClasificacionRegatista[];
   regatas: number[];
+  // Nombres de las columnas personalizadas a mostrar, en orden -la unión de
+  // las que trae cada fila, calculada por quien arma `clasificacion`.
+  columnasExtra?: string[];
 }
 
 function NombreRegatista({ row, className }: { row: ClasificacionRegatista; className?: string }) {
@@ -50,7 +57,7 @@ function NombreRegatista({ row, className }: { row: ClasificacionRegatista; clas
   );
 }
 
-export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps) {
+export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: ResultadosTableProps) {
   const getPositionBadgeVariant = (pos: number) => {
     if (pos === 1) return 'accent'; // Gold
     if (pos === 2) return 'default'; // Silver/Blue
@@ -96,6 +103,19 @@ export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps
                 </div>
               ))}
             </div>
+
+            {columnasExtra.length > 0 && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border pt-3 mt-3 text-xs">
+                {columnasExtra.map((campo) => (
+                  row.datosExtra?.[campo] ? (
+                    <div key={campo}>
+                      <span className="text-muted">{campo}: </span>
+                      <span className="text-foreground">{row.datosExtra[campo]}</span>
+                    </div>
+                  ) : null
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -112,6 +132,9 @@ export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps
                 <th key={r} scope="col" className="px-4 py-3 text-center">R{r}</th>
               ))}
               <th scope="col" className="px-4 py-3 text-right">Neto</th>
+              {columnasExtra.map((campo) => (
+                <th key={campo} scope="col" className="px-4 py-3 whitespace-nowrap">{campo}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -149,6 +172,11 @@ export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps
                 <td className="px-4 py-3 text-right font-mono font-bold text-primary">
                   {row.totalNeto}
                 </td>
+                {columnasExtra.map((campo) => (
+                  <td key={campo} className="px-4 py-3 text-muted whitespace-nowrap">
+                    {row.datosExtra?.[campo] ?? '-'}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>

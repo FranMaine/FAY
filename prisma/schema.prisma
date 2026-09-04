@@ -159,6 +159,12 @@ model Resultado {
   // sobre el cálculo propio (ver generarClasificacion en scoring.ts).
   puestoOficial Int?
   totalOficial  Float?
+  // Columnas "personalizadas" que el admin eligió conservar al importar
+  // (ej: "Categoría", "DNI", "Edad") pero que no son ninguno de los campos
+  // fijos de arriba -guardadas tal cual como {nombreDeColumna: valor}, para
+  // mostrarlas como columnas extra en la tabla de posiciones sin tener que
+  // agregar una columna nueva a la base por cada campeonato distinto.
+  datosExtra    Json?
 
   @@unique([regataId, regatistaId])
   @@index([regatistaId])

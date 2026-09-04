@@ -33,6 +33,10 @@ export interface ColumnMapping {
   // Cada columna de regata, en el orden en que deben numerarse (no
   // necesariamente el orden del archivo, aunque normalmente coincide).
   regataCols: { colIndex: number; numero: number }[];
+  // Columnas que no son ninguno de los campos fijos de arriba pero el
+  // admin eligió conservar igual, con el nombre que les quiera poner (ej:
+  // "Categoría", "DNI") -se guardan tal cual en Resultado.datosExtra.
+  columnasPersonalizadas?: { colIndex: number; nombre: string }[];
 }
 
 /** Extrae el primer número de una celda ("(16 BFD)" -> 16, "-20" -> -20). */
@@ -82,7 +86,7 @@ export function detectarPorEncabezado(header: string[]) {
 
 /** Arma el ParseResult[] de un grid ya leído, dado un mapeo de columnas confirmado. */
 export function armarParseResult(header: string[], rows: any[][], mapping: ColumnMapping): ParseResult[] {
-  const { puestoCol, velaCol, nombreCol, clubCol, flotaCol, totalCol, regataCols } = mapping;
+  const { puestoCol, velaCol, nombreCol, clubCol, flotaCol, totalCol, regataCols, columnasPersonalizadas } = mapping;
 
   const regatistas: ParseResult[] = [];
 
@@ -104,6 +108,16 @@ export function armarParseResult(header: string[], rows: any[][], mapping: Colum
       regatas.push({ numero, puntajeBruto: Math.abs(valor), observacion: null });
     }
 
+    let datosExtra: Record<string, string> | undefined;
+    if (columnasPersonalizadas && columnasPersonalizadas.length > 0) {
+      for (const { colIndex, nombre: nombreCampo } of columnasPersonalizadas) {
+        const valor = row[colIndex];
+        if (valor === null || valor === undefined || String(valor).trim() === '') continue;
+        if (!datosExtra) datosExtra = {};
+        datosExtra[nombreCampo] = String(valor).trim();
+      }
+    }
+
     regatistas.push({
       vela: vela !== null && vela !== undefined ? String(vela).trim() : '',
       nombre: nombre.trim(),
@@ -111,6 +125,7 @@ export function armarParseResult(header: string[], rows: any[][], mapping: Colum
       flota,
       puestoOficial: puestoOficial !== null ? Math.round(puestoOficial) : undefined,
       totalOficial: totalOficial !== null ? totalOficial : undefined,
+      datosExtra,
       regatas,
     });
   }

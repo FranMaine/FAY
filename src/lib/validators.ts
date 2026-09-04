@@ -117,6 +117,10 @@ export const columnMappingSchema = z.object({
     colIndex: z.number().int().min(0),
     numero: z.number().int().min(1),
   })).min(1, 'Hay que asignar al menos una columna de regata'),
+  columnasPersonalizadas: z.array(z.object({
+    colIndex: z.number().int().min(0),
+    nombre: z.string().trim().min(1),
+  })).optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

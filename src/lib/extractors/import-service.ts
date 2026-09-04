@@ -58,6 +58,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
     flotaOrden?: number;
     puestoOficial?: number;
     totalOficial?: number;
+    datosExtra?: Record<string, string>;
     regatas: ParseResult['regatas'];
   }[] = [];
 
@@ -115,6 +116,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         flotaOrden: row.flotaOrden,
         puestoOficial: row.puestoOficial,
         totalOficial: row.totalOficial,
+        datosExtra: row.datosExtra,
         regatas: row.regatas,
       });
     }
@@ -152,6 +154,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
     flotaOrden?: number;
     puestoOficial?: number;
     totalOficial?: number;
+    datosExtra?: Record<string, string>;
   }[] = [];
 
   for (const fila of filasResueltas) {
@@ -180,6 +183,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         flotaOrden: fila.flotaOrden,
         puestoOficial: fila.puestoOficial,
         totalOficial: fila.totalOficial,
+        datosExtra: fila.datosExtra,
       });
     }
   }
@@ -200,6 +204,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         flotaOrden: r.flotaOrden,
         puestoOficial: r.puestoOficial,
         totalOficial: r.totalOficial,
+        datosExtra: r.datosExtra ?? undefined,
       },
       create: {
         regataId: r.regataId,
@@ -211,6 +216,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         flotaOrden: r.flotaOrden,
         puestoOficial: r.puestoOficial,
         totalOficial: r.totalOficial,
+        datosExtra: r.datosExtra ?? undefined,
       },
     });
     resultadosInsertados++;

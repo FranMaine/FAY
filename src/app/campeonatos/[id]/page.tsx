@@ -53,13 +53,16 @@ export default async function CampeonatoDetailPage({ params }: Props) {
   // Mapear al formato de la tabla, agrupando tripulaciones de más de una
   // persona (ej: 29er) en una sola fila -"Fulano & Mengano"- en vez de
   // mostrar dos botes idénticos con el mismo puntaje.
-  const clasificacionTabla = agruparTripulaciones(clasificacion).map((c) => ({
+  const clasificacionAgrupada = agruparTripulaciones(clasificacion);
+
+  const clasificacionTabla = clasificacionAgrupada.map((c) => ({
     id: c.regatistaId,
     integrantes: c.integrantes,
     posicion: c.posicionFinal,
     nombre: c.nombre,
     club: c.club || 'Sin Club',
     totalNeto: c.totalNeto,
+    datosExtra: c.datosExtra,
     puntajes: c.resultados.map((r) => ({
       regata: r.regataNumero,
       puntos: r.puntos,
@@ -67,6 +70,13 @@ export default async function CampeonatoDetailPage({ params }: Props) {
       observacion: r.observacion || undefined
     }))
   }));
+
+  // Unión de los nombres de columnas personalizadas presentes en cualquier
+  // fila -no todos los regatistas tienen las mismas (ej: solo algunos
+  // traían "Categoría" en el archivo importado).
+  const columnasExtra = Array.from(
+    new Set(clasificacionAgrupada.flatMap((c) => Object.keys(c.datosExtra || {})))
+  );
 
   return (
     <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
@@ -106,7 +116,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
 
         <div className="space-y-4">
           <h2 className="text-2xl font-bold">Clasificación General</h2>
-          <ResultadosTable clasificacion={clasificacionTabla} regatas={regatas} />
+          <ResultadosTable clasificacion={clasificacionTabla} regatas={regatas} columnasExtra={columnasExtra} />
         </div>
       </div>
     </main>

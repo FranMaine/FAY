@@ -1,6 +1,6 @@
 import { numeroDeCelda, detectarPorEncabezado } from './xlsx-parser';
 
-export type RolColumna = 'puesto' | 'vela' | 'navegante' | 'club' | 'flota' | 'total' | 'regata' | 'ignorar';
+export type RolColumna = 'puesto' | 'vela' | 'navegante' | 'club' | 'flota' | 'total' | 'regata' | 'personalizada' | 'ignorar';
 
 export interface ColumnaSugerida {
   index: number;
@@ -9,6 +9,10 @@ export interface ColumnaSugerida {
   // Solo para rol "regata": el número que le corresponde (1, 2, 3...),
   // según el orden de las columnas de regata detectadas.
   numeroRegata?: number;
+  // Solo para rol "personalizada": el nombre bajo el que se va a guardar
+  // esta columna (por defecto, el propio encabezado del archivo). El admin
+  // lo puede editar en la pantalla de confirmación.
+  nombrePersonalizada?: string;
   muestra: string[];
 }
 
@@ -159,21 +163,29 @@ export function detectarColumnas(header: string[], rows: any[][]): ColumnaSugeri
   const resultado: ColumnaSugerida[] = [];
   for (let c = 0; c < numCols; c++) {
     const muestra = rows.slice(0, 5).map((r) => (r[c] === null || r[c] === undefined ? '' : String(r[c])));
-    let rol: RolColumna = 'ignorar';
+    const headerTexto = header[c] || `Columna ${c + 1}`;
+    // Por defecto, una columna que no matchea ningún campo fijo se propone
+    // como "personalizada" (se guarda con su propio nombre) en vez de
+    // "ignorar" -así no se pierden datos como "Categoría" o "DNI" que el
+    // archivo traiga de más; el admin la puede pasar a "Ignorar" a mano si
+    // realmente no sirve.
+    let rol: RolColumna = 'personalizada';
     let numeroRegata: number | undefined;
+    let nombrePersonalizada: string | undefined = headerTexto;
 
-    if (c === puestoCol) rol = 'puesto';
-    else if (c === velaCol) rol = 'vela';
-    else if (c === nombreCol) rol = 'navegante';
-    else if (c === clubCol) rol = 'club';
-    else if (c === flotaCol) rol = 'flota';
-    else if (c === totalCol) rol = 'total';
+    if (c === puestoCol) { rol = 'puesto'; nombrePersonalizada = undefined; }
+    else if (c === velaCol) { rol = 'vela'; nombrePersonalizada = undefined; }
+    else if (c === nombreCol) { rol = 'navegante'; nombrePersonalizada = undefined; }
+    else if (c === clubCol) { rol = 'club'; nombrePersonalizada = undefined; }
+    else if (c === flotaCol) { rol = 'flota'; nombrePersonalizada = undefined; }
+    else if (c === totalCol) { rol = 'total'; nombrePersonalizada = undefined; }
     else if (regataIdxs.includes(c)) {
       rol = 'regata';
       numeroRegata = regataIdxs.indexOf(c) + 1;
+      nombrePersonalizada = undefined;
     }
 
-    resultado.push({ index: c, header: header[c] || `Columna ${c + 1}`, rol, numeroRegata, muestra });
+    resultado.push({ index: c, header: headerTexto, rol, numeroRegata, nombrePersonalizada, muestra });
   }
 
   return resultado;

@@ -21,6 +21,10 @@ export interface ClasificacionRegatista {
   // propio id, para poder linkear al perfil de cada una en vez de solo al
   // de la primera.
   integrantes?: { regatistaId: string; nombre: string }[];
+  // Columnas "personalizadas" que el admin conservó al importar (ej:
+  // "Categoría", "DNI") -se muestran como columnas extra en la tabla de
+  // posiciones. null/undefined cuando el campeonato no tiene ninguna.
+  datosExtra?: Record<string, string> | null;
 }
 
 // Forma mínima de Regata/Resultado que necesita agruparPorRegatista -así
@@ -38,6 +42,10 @@ export interface RegataConResultados {
     flotaOrden?: number | null;
     puestoOficial?: number | null;
     totalOficial?: number | null;
+    // Prisma tipa las columnas Json como JsonValue (unknown en la práctica)
+    // -acá siempre son un objeto {nombreDeColumna: valor} o null, armado por
+    // armarParseResult(), pero el tipo del cliente no puede saber eso.
+    datosExtra?: unknown;
   }>;
 }
 
@@ -57,6 +65,7 @@ export function agruparPorRegatista(regatas: RegataConResultados[]) {
     flotaOrden: number | null;
     puestoOficial: number | null;
     totalOficial: number | null;
+    datosExtra: Record<string, string> | null;
     resultados: Array<{ regataNumero: number; puesto: number; puntos: number; observacion: string | null }>;
   }>();
 
@@ -72,6 +81,7 @@ export function agruparPorRegatista(regatas: RegataConResultados[]) {
           flotaOrden: null,
           puestoOficial: null,
           totalOficial: null,
+          datosExtra: null,
           resultados: [],
         });
       }
@@ -83,6 +93,9 @@ export function agruparPorRegatista(regatas: RegataConResultados[]) {
       if (entry.puestoOficial === null && res.puestoOficial !== null && res.puestoOficial !== undefined) {
         entry.puestoOficial = res.puestoOficial;
         entry.totalOficial = res.totalOficial ?? null;
+      }
+      if (entry.datosExtra === null && res.datosExtra && typeof res.datosExtra === 'object') {
+        entry.datosExtra = res.datosExtra as Record<string, string>;
       }
       entry.resultados.push({
         regataNumero: regata.numero,
@@ -209,6 +222,7 @@ export function generarClasificacion(
     // de puntaje de Sailwave nosotros mismos.
     puestoOficial?: number | null;
     totalOficial?: number | null;
+    datosExtra?: Record<string, string> | null;
     resultados: Array<{
       regataNumero: number;
       puesto: number;
@@ -229,6 +243,7 @@ export function generarClasificacion(
       nombre: r.nombre,
       club: r.club,
       flota: r.flota ?? null,
+      datosExtra: r.datosExtra ?? null,
       resultados: r.resultados.map(res => ({ ...res, descartado: false })),
       totalBruto: r.totalOficial as number,
       totalNeto: r.totalOficial as number,
@@ -250,6 +265,7 @@ export function generarClasificacion(
       club: r.club,
       flota: r.flota ?? null,
       flotaOrden: r.flotaOrden ?? 0,
+      datosExtra: r.datosExtra ?? null,
       resultados: resultadosConDescartes,
       totalBruto: calcularTotalBruto(resultadosConDescartes),
       totalNeto: calcularTotalNeto(resultadosConDescartes),

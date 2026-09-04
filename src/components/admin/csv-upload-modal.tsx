@@ -11,12 +11,13 @@ interface CsvUploadModalProps {
   onClose: () => void;
 }
 
-type RolColumna = 'puesto' | 'vela' | 'navegante' | 'club' | 'flota' | 'total' | 'regata' | 'ignorar';
+type RolColumna = 'puesto' | 'vela' | 'navegante' | 'club' | 'flota' | 'total' | 'regata' | 'personalizada' | 'ignorar';
 
 interface ColumnaSugerida {
   index: number;
   header: string;
   rol: RolColumna;
+  nombrePersonalizada?: string;
   muestra: string[];
 }
 
@@ -28,6 +29,7 @@ const ROLES: { value: RolColumna; label: string }[] = [
   { value: 'flota', label: 'Flota / Subgrupo' },
   { value: 'total', label: 'Total de puntos' },
   { value: 'regata', label: 'Regata' },
+  { value: 'personalizada', label: 'Personalizada...' },
   { value: 'ignorar', label: 'Ignorar esta columna' },
 ];
 
@@ -45,6 +47,10 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [columnas, setColumnas] = useState<ColumnaSugerida[]>([]);
   const [roles, setRoles] = useState<Record<number, RolColumna>>({});
+  // Nombre que va a tener cada columna marcada como "Personalizada" -por
+  // defecto el propio encabezado del archivo, editable en la pantalla de
+  // confirmación.
+  const [nombresPersonalizados, setNombresPersonalizados] = useState<Record<number, string>>({});
   const [totalFilas, setTotalFilas] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<any>(null);
@@ -56,6 +62,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
     setEtapa('seleccionar');
     setColumnas([]);
     setRoles({});
+    setNombresPersonalizados({});
     setError(null);
     setSuccess(null);
   };
@@ -102,8 +109,15 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
       setColumnas(data.columnas);
       setTotalFilas(data.totalFilas);
       const rolesIniciales: Record<number, RolColumna> = {};
-      data.columnas.forEach((c: ColumnaSugerida) => { rolesIniciales[c.index] = c.rol; });
+      const nombresIniciales: Record<number, string> = {};
+      data.columnas.forEach((c: ColumnaSugerida) => {
+        rolesIniciales[c.index] = c.rol;
+        if (c.rol === 'personalizada') {
+          nombresIniciales[c.index] = c.nombrePersonalizada || c.header || `Columna ${c.index + 1}`;
+        }
+      });
       setRoles(rolesIniciales);
+      setNombresPersonalizados(nombresIniciales);
       setEtapa('confirmar');
     } catch (err: any) {
       setError(err.message);
@@ -124,6 +138,17 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
       next[index] = rol;
       return next;
     });
+    if (rol === 'personalizada' && !nombresPersonalizados[index]?.trim()) {
+      const columna = columnas.find((c) => c.index === index);
+      setNombresPersonalizados((prev) => ({
+        ...prev,
+        [index]: columna?.header || `Columna ${index + 1}`,
+      }));
+    }
+  };
+
+  const cambiarNombrePersonalizada = (index: number, nombre: string) => {
+    setNombresPersonalizados((prev) => ({ ...prev, [index]: nombre }));
   };
 
   const construirMapping = () => {
@@ -153,11 +178,24 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
       return { error: 'Asigná al menos una columna como "Regata".' };
     }
 
+    const columnasPersonalizadas = Object.entries(roles)
+      .filter(([, r]) => r === 'personalizada')
+      .map(([idx]) => Number(idx))
+      .map((colIndex) => ({
+        colIndex,
+        nombre: (nombresPersonalizados[colIndex] || columnas.find((c) => c.index === colIndex)?.header || `Columna ${colIndex + 1}`).trim(),
+      }));
+
+    if (columnasPersonalizadas.some((c) => c.nombre.length === 0)) {
+      return { error: 'Las columnas personalizadas necesitan un nombre.' };
+    }
+
     return {
       mapping: {
         puestoCol, velaCol, nombreCol, clubCol, totalCol,
         flotaCol: flotaColRaw === -1 ? null : flotaColRaw,
         regataCols,
+        columnasPersonalizadas,
       },
     };
   };
@@ -250,7 +288,9 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
             <>
               <p className="text-sm text-muted-foreground">
                 Detectamos {totalFilas} filas de datos. Revisá que cada columna tenga asignado lo correcto -marcamos nuestra
-                mejor sugerencia, pero nada se guarda hasta que confirmes.
+                mejor sugerencia, pero nada se guarda hasta que confirmes. Las columnas que no reconocimos quedaron como
+                "Personalizada" con el nombre del archivo -se guardan igual y aparecen como columnas extra en la tabla de
+                posiciones; podés renombrarlas o pasarlas a "Ignorar" si no hacen falta.
               </p>
 
               <div className="overflow-x-auto border border-border rounded-lg">
@@ -269,6 +309,15 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
                               <option key={r.value} value={r.value}>{r.label}</option>
                             ))}
                           </select>
+                          {roles[c.index] === 'personalizada' && (
+                            <input
+                              type="text"
+                              value={nombresPersonalizados[c.index] ?? ''}
+                              onChange={(e) => cambiarNombrePersonalizada(c.index, e.target.value)}
+                              placeholder="Nombre de la columna"
+                              className="w-full mt-1 text-xs bg-surface border border-border rounded px-1 py-1 focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                          )}
                         </th>
                       ))}
                     </tr>

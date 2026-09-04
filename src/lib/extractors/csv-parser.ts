@@ -16,6 +16,10 @@ export interface ParseResult {
   // sobre lo que la app calcularía por su cuenta -ver generarClasificacion.
   puestoOficial?: number;
   totalOficial?: number;
+  // Columnas extra que el admin eligió conservar al confirmar la
+  // importación (ej: "Categoría", "DNI") pero que no encajan en ningún
+  // campo fijo de arriba -se guardan tal cual, {nombreDeColumna: valor}.
+  datosExtra?: Record<string, string>;
   regatas: {
     numero: number;
     puntajeBruto: number;
