@@ -24,6 +24,8 @@ export function SailorSearch() {
   }, []);
 
   useEffect(() => {
+    let cancelado = false;
+
     const fetchResults = async () => {
       if (query.trim().length < 2) {
         setResults([]);
@@ -35,17 +37,25 @@ export function SailorSearch() {
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
         const data = await res.json();
+        // Si el usuario ya siguió tipeando, esta respuesta quedó vieja -sin
+        // este chequeo, una búsqueda más rápida disparada después podía
+        // resolver antes que una más lenta anterior, y esta última
+        // pisoteaba los resultados correctos con los de la query vieja.
+        if (cancelado) return;
         setResults(data);
         setIsOpen(true);
       } catch (e) {
-        console.error(e);
+        if (!cancelado) console.error(e);
       } finally {
-        setIsLoading(false);
+        if (!cancelado) setIsLoading(false);
       }
     };
 
     const timer = setTimeout(fetchResults, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelado = true;
+      clearTimeout(timer);
+    };
   }, [query]);
 
   return (

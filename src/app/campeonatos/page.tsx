@@ -58,13 +58,29 @@ export default async function CampeonatosPage({
     ],
   });
 
+  // Cantidad de regatistas ÚNICOS por campeonato -antes esto quedaba
+  // siempre en 0 ("Ideally we would count..."), así que toda tarjeta
+  // mostraba "0 inscriptos" sin importar cuántos hubiera. Una sola consulta
+  // trayendo (regatistaId, campeonatoId) de todos los resultados y
+  // deduplicando en memoria evita hacer N consultas, una por campeonato.
+  const resultadosPorCampeonato = await prisma.resultado.findMany({
+    where: { regata: { campeonatoId: { in: campeonatosDb.map((c) => c.id) } } },
+    select: { regatistaId: true, regata: { select: { campeonatoId: true } } },
+  });
+  const inscriptosPorCampeonato = new Map<string, Set<string>>();
+  for (const r of resultadosPorCampeonato) {
+    const campId = r.regata.campeonatoId;
+    if (!inscriptosPorCampeonato.has(campId)) inscriptosPorCampeonato.set(campId, new Set());
+    inscriptosPorCampeonato.get(campId)!.add(r.regatistaId);
+  }
+
   const campeonatos = campeonatosDb.map((c) => ({
     id: c.id,
     nombre: c.nombre,
     anio: c.anio,
     clase: c.clase.nombre,
     sede: c.sede?.nombre || 'Sede FAY',
-    totalRegatistas: 0, // Ideally we would count unique regatistas here, but leaving 0 is fine for MVP Card UI
+    totalRegatistas: inscriptosPorCampeonato.get(c.id)?.size || 0,
     estado: c.estado,
     fechaInicio: c.fechaInicio ? c.fechaInicio.toISOString().split('T')[0] : `${c.anio}-01-01`,
   }));
