@@ -20,7 +20,7 @@ export function Navbar() {
     { href: '/rankings', label: 'Rankings', icon: BarChart3 },
   ];
 
-  const isAdmin = (session?.user as any)?.role === 'ADMIN';
+  const isAdmin = session?.user?.role === 'ADMIN';
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-surface shadow-sm">
@@ -133,19 +133,59 @@ export function Navbar() {
                 </Link>
               );
             })}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium',
+                  pathname.startsWith('/admin') ? 'bg-primary/10 text-primary' : 'text-accent hover:bg-surface-hover'
+                )}
+              >
+                <Shield className="h-5 w-5" />
+                Admin
+              </Link>
+            )}
+            {/*
+              El menú móvil antes solo mostraba Ingresar/Registro fijos,
+              aunque el usuario ya estuviera logueado: sin acceso a "Mi
+              Perfil", "Salir" ni "Admin" desde el celular. Ahora refleja
+              la sesión igual que la barra de desktop.
+            */}
             <div className="mt-4 grid grid-cols-2 gap-2 pt-4 border-t border-border">
-              <Link href="/login" onClick={() => setIsOpen(false)}>
-                <Button variant="secondary" className="w-full gap-2">
-                  <LogIn className="h-4 w-4" />
-                  Ingresar
-                </Button>
-              </Link>
-              <Link href="/registro" onClick={() => setIsOpen(false)}>
-                <Button variant="default" className="w-full gap-2">
-                  <User className="h-4 w-4" />
-                  Registro
-                </Button>
-              </Link>
+              {session ? (
+                <>
+                  <Link href="/mi-perfil" onClick={() => setIsOpen(false)}>
+                    <Button variant="secondary" className="w-full gap-2">
+                      <User className="h-4 w-4 text-primary" />
+                      {session.user.name || 'Mi Perfil'}
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="secondary"
+                    className="w-full gap-2 text-red-400"
+                    onClick={() => { setIsOpen(false); signOut({ callbackUrl: '/' }); }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Salir
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Button variant="secondary" className="w-full gap-2">
+                      <LogIn className="h-4 w-4" />
+                      Ingresar
+                    </Button>
+                  </Link>
+                  <Link href="/registro" onClick={() => setIsOpen(false)}>
+                    <Button variant="default" className="w-full gap-2">
+                      <User className="h-4 w-4" />
+                      Registro
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

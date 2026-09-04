@@ -50,16 +50,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role || 'REGULAR';
-        token.regatistaId = (user as any).regatistaId || null;
+        token.role = user.role ?? 'REGULAR';
+        token.regatistaId = user.regatistaId ?? null;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub!;
-        (session.user as any).role = token.role;
-        (session.user as any).regatistaId = token.regatistaId;
+        // token.role/regatistaId vienen tipados vía el JWT ampliado en
+        // src/types/next-auth.d.ts, pero next-auth v5 beta expone `token`
+        // acá como el genérico `JWT` sin la extensión resuelta, así que
+        // una aserción local es lo suficiente para eso.
+        session.user.role = token.role as 'ADMIN' | 'REGULAR';
+        session.user.regatistaId = token.regatistaId as string | null;
       }
       return session;
     },

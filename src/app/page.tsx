@@ -5,9 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { prisma } from "@/lib/db";
 import { SailorSearch } from "@/components/search/sailor-search";
 
-// Obtener los últimos 3 campeonatos para la home
+// Obtener los últimos 3 campeonatos para la home. Solo mostramos los que
+// están PUBLICADOS -antes esto no filtraba, así que cualquier borrador
+// creado por un admin aparecía en la home a la vista de todo el mundo.
 async function getUltimosCampeonatos() {
   return prisma.campeonato.findMany({
+    where: { estado: 'PUBLICADO' },
     take: 3,
     orderBy: { updatedAt: 'desc' },
     include: { clase: true, sede: true },
