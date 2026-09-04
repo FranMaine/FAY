@@ -33,16 +33,18 @@ export function parseSailwaveXLSX(buffer: Buffer): ParseResult[] {
   }
 
   const header = rows[0].map((h) => (h === null || h === undefined ? '' : String(h).trim()));
+  // Comparamos ignorando may/min y cualquier caracter que no sea letra o
+  // número -así "Sail #", "Sail#" y "sail" son todos la misma columna, en
+  // vez de exigir que el encabezado coincida carácter por carácter con
+  // alguno de nuestros nombres esperados.
+  const normalizar = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
   const findCol = (...names: string[]) => {
-    for (const name of names) {
-      const idx = header.findIndex((h) => h.toLowerCase() === name.toLowerCase());
-      if (idx !== -1) return idx;
-    }
-    return -1;
+    const normalizados = names.map(normalizar);
+    return header.findIndex((h) => normalizados.includes(normalizar(h)));
   };
 
   const puestoCol = findCol('puesto', 'pl', 'pl.');
-  const velaCol = findCol('vela', 'sail');
+  const velaCol = findCol('vela', 'sail', 'sailno', 'sailnumber', 'nrovela');
   const nombreCol = findCol('navegante', 'skipper', 'nombre', 'crew', 'helm', 'helmname');
   const flotaCol = findCol('Subgroup division', 'subgroup division', 'subgroup', 'flota', 'split', 'split #4');
   const clubCol = findCol('club', 'from');
