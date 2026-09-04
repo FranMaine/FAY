@@ -9,6 +9,10 @@ export interface ClasificacionRegatista {
   posicion: number;
   nombre: string;
   club: string;
+  // Presente cuando la fila junta a una tripulación de más de una persona
+  // (ej: "Fulano & Mengano" en un 29er) -cada una con su propio id, para
+  // poder linkear al perfil de cada una en vez de solo al de `id`.
+  integrantes?: { regatistaId: string; nombre: string }[];
   puntajes: Array<{
     regata: number;
     puntos: number;
@@ -21,6 +25,29 @@ export interface ClasificacionRegatista {
 interface ResultadosTableProps {
   clasificacion: ClasificacionRegatista[];
   regatas: number[];
+}
+
+function NombreRegatista({ row, className }: { row: ClasificacionRegatista; className?: string }) {
+  if (!row.integrantes || row.integrantes.length < 2) {
+    return (
+      <Link href={`/regatistas/${row.id}`} className={className}>
+        {row.nombre}
+      </Link>
+    );
+  }
+
+  return (
+    <>
+      {row.integrantes.map((persona, i) => (
+        <span key={persona.regatistaId}>
+          {i > 0 && ' & '}
+          <Link href={`/regatistas/${persona.regatistaId}`} className={className}>
+            {persona.nombre}
+          </Link>
+        </span>
+      ))}
+    </>
+  );
 }
 
 export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps) {
@@ -43,9 +70,9 @@ export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps
                   {row.posicion}
                 </Badge>
                 <div>
-                  <Link href={`/regatistas/${row.id}`} className="font-semibold text-foreground hover:text-primary transition-colors">
-                    {row.nombre}
-                  </Link>
+                  <div className="font-semibold text-foreground">
+                    <NombreRegatista row={row} className="hover:text-primary transition-colors" />
+                  </div>
                   <div className="text-xs text-muted">{row.club}</div>
                 </div>
               </div>
@@ -99,9 +126,7 @@ export function ResultadosTable({ clasificacion, regatas }: ResultadosTableProps
                   </Badge>
                 </td>
                 <td className="px-4 py-3 sticky left-[60px] bg-surface z-10 font-medium text-foreground whitespace-nowrap">
-                  <Link href={`/regatistas/${row.id}`} className="hover:text-primary transition-colors hover:underline">
-                    {row.nombre}
-                  </Link>
+                  <NombreRegatista row={row} className="hover:text-primary transition-colors hover:underline" />
                 </td>
                 <td className="px-4 py-3 text-muted whitespace-nowrap">{row.club}</td>
                 {regatas.map((r) => {

@@ -55,6 +55,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
   // mostrar dos botes idénticos con el mismo puntaje.
   const clasificacionTabla = agruparTripulaciones(clasificacion).map((c) => ({
     id: c.regatistaId,
+    integrantes: c.integrantes,
     posicion: c.posicionFinal,
     nombre: c.nombre,
     club: c.club || 'Sin Club',

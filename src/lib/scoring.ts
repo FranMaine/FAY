@@ -16,6 +16,11 @@ export interface ClasificacionRegatista {
   totalBruto: number;
   totalNeto: number;
   posicionFinal: number;
+  // Presente solo cuando agruparTripulaciones() combinó a varias personas
+  // en esta fila (ej: "Fulano & Mengano" en un 29er) -cada una con su
+  // propio id, para poder linkear al perfil de cada una en vez de solo al
+  // de la primera.
+  integrantes?: { regatistaId: string; nombre: string }[];
 }
 
 // Forma mínima de Regata/Resultado que necesita agruparPorRegatista -así
@@ -306,7 +311,11 @@ export function agruparTripulaciones(clasificacion: ClasificacionRegatista[]): C
 
     agrupado.push(
       companeros.length > 1
-        ? { ...companeros[0], nombre: companeros.map((g) => g.nombre).join(' & ') }
+        ? {
+            ...companeros[0],
+            nombre: companeros.map((g) => g.nombre).join(' & '),
+            integrantes: companeros.map((g) => ({ regatistaId: g.regatistaId, nombre: g.nombre })),
+          }
         : c
     );
   }
