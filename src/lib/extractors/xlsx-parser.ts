@@ -27,7 +27,12 @@ export interface ColumnMapping {
   puestoCol: number;
   velaCol: number;
   nombreCol: number;
+  // Primera (o única) columna de club. En tripulaciones de más de una
+  // persona a veces el archivo trae una columna de club POR tripulante en
+  // vez de una sola celda con todos juntos -en ese caso clubCol es la del
+  // primero y clubColsExtra las de los siguientes, en orden.
   clubCol: number;
+  clubColsExtra?: number[];
   flotaCol: number | null;
   totalCol: number;
   // Cada columna de regata, en el orden en que deben numerarse (no
@@ -86,7 +91,7 @@ export function detectarPorEncabezado(header: string[]) {
 
 /** Arma el ParseResult[] de un grid ya leído, dado un mapeo de columnas confirmado. */
 export function armarParseResult(header: string[], rows: any[][], mapping: ColumnMapping): ParseResult[] {
-  const { puestoCol, velaCol, nombreCol, clubCol, flotaCol, totalCol, regataCols, columnasPersonalizadas } = mapping;
+  const { puestoCol, velaCol, nombreCol, clubCol, clubColsExtra, flotaCol, totalCol, regataCols, columnasPersonalizadas } = mapping;
 
   const regatistas: ParseResult[] = [];
 
@@ -98,6 +103,12 @@ export function armarParseResult(header: string[], rows: any[][], mapping: Colum
     const totalOficial = numeroDeCelda(row[totalCol]);
     const vela = row[velaCol];
     const club = row[clubCol];
+    // Si hay columnas de club adicionales (una por tripulante extra), ya
+    // sabemos el club de cada uno sin tener que separar un texto combinado
+    // -se guardan en orden para que import-service.ts las use directo.
+    const clubesPorColumna = clubColsExtra && clubColsExtra.length > 0
+      ? [club, ...clubColsExtra.map((idx) => row[idx])].map((v) => (v !== null && v !== undefined ? String(v).trim() : ''))
+      : undefined;
     const flotaRaw = flotaCol !== null ? row[flotaCol] : null;
     const flota = flotaRaw !== null && flotaRaw !== undefined && String(flotaRaw).trim() ? String(flotaRaw).trim() : undefined;
 
@@ -122,6 +133,7 @@ export function armarParseResult(header: string[], rows: any[][], mapping: Colum
       vela: vela !== null && vela !== undefined ? String(vela).trim() : '',
       nombre: nombre.trim(),
       club: club !== null && club !== undefined ? String(club).trim() : '',
+      clubesPorColumna,
       flota,
       puestoOficial: puestoOficial !== null ? Math.round(puestoOficial) : undefined,
       totalOficial: totalOficial !== null ? totalOficial : undefined,

@@ -1,6 +1,6 @@
 import prisma from '@/lib/db';
 import { ParseResult } from './csv-parser';
-import { splitNombreTripulacion, splitClubPorTripulante } from '@/lib/nombres';
+import { splitNombreTripulacion, splitClubPorTripulante, asignarClubesPorColumna } from '@/lib/nombres';
 
 // Corre un lote de promesas con concurrencia limitada, en vez de secuencial
 // (demasiado lento) o todas juntas (satura el pool de conexiones de Neon).
@@ -69,12 +69,16 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
     // regatistas separados -ambos con el mismo resultado en cada regata,
     // ya que compitieron juntos en el mismo bote.
     const nombresTripulacion = splitNombreTripulacion(row.nombre.trim());
-    // El club a veces viene como "CUBA-CVB" -cada tripulante navega para
-    // un club distinto, no es un club compuesto- así que resolvemos el
-    // club de cada persona por separado, no uno solo para toda la fila.
-    const clubesTripulacion = row.club
-      ? splitClubPorTripulante(row.club, nombresTripulacion.length)
-      : nombresTripulacion.map(() => '');
+    // El club de cada tripulante puede venir de dos formas: una columna
+    // separada por persona (row.clubesPorColumna, ya sabemos cuál es cuál
+    // sin adivinar nada) o una sola celda con los clubes juntos por algún
+    // separador (ej: "CUBA-CVB", "CUBA/CVB") -cada tripulante navega para
+    // un club distinto, no es un club compuesto.
+    const clubesTripulacion = row.clubesPorColumna && row.clubesPorColumna.length > 0
+      ? asignarClubesPorColumna(row.clubesPorColumna, nombresTripulacion.length)
+      : row.club
+        ? splitClubPorTripulante(row.club, nombresTripulacion.length)
+        : nombresTripulacion.map(() => '');
 
     for (let i = 0; i < nombresTripulacion.length; i++) {
       const nombreLimpio = nombresTripulacion[i];

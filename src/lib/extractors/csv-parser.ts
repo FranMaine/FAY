@@ -4,6 +4,11 @@ export interface ParseResult {
   vela: string;
   nombre: string;
   club: string;
+  // Presente solo cuando la fuente trae una columna de club SEPARADA por
+  // cada tripulante (en vez de una sola celda con los clubes juntos por
+  // algún separador) -en orden, una entrada por persona de la tripulación.
+  // Cuando está, se usa directo en vez de intentar separar `club`.
+  clubesPorColumna?: string[];
   // Flota/split (Gold/Silver/Bronze, etc.) cuando la fuente distingue
   // niveles dentro del mismo campeonato. `flotaOrden` es el orden de esa
   // flota (0 = la mejor) tal como aparece en la fuente -en la clasificación

@@ -111,6 +111,7 @@ export const columnMappingSchema = z.object({
   velaCol: z.number().int().min(0),
   nombreCol: z.number().int().min(0),
   clubCol: z.number().int().min(0),
+  clubColsExtra: z.array(z.number().int().min(0)).optional(),
   flotaCol: z.number().int().min(0).nullable(),
   totalCol: z.number().int().min(0),
   regataCols: z.array(z.object({
