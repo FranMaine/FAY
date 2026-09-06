@@ -61,11 +61,14 @@ export function SailorSearch() {
   return (
     <div ref={wrapperRef} className="relative w-full max-w-2xl mx-auto z-50">
       <div className="relative flex items-center w-full">
-        <SearchIcon className="absolute left-4 w-5 h-5 text-muted-foreground" />
+        <SearchIcon className="absolute left-3 sm:left-4 w-5 h-5 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Buscar regatista por nombre o club..."
-          className="pl-12 pr-12 py-6 text-lg rounded-full shadow-lg border-2 border-border focus-visible:ring-primary bg-surface/80 backdrop-blur-md"
+          // Placeholder corto -el largo ("...por nombre o club...") se
+          // recortaba a la mitad en pantallas angostas, con el padding y el
+          // tamaño de fuente grandes de este input no entraba entero.
+          placeholder="Buscar regatista o club..."
+          className="pl-10 pr-10 py-4 text-base sm:pl-12 sm:pr-12 sm:py-6 sm:text-lg rounded-full shadow-lg border-2 border-border focus-visible:ring-primary bg-surface/80 backdrop-blur-md"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {
@@ -73,7 +76,7 @@ export function SailorSearch() {
           }}
         />
         {isLoading && (
-          <Loader2Icon className="absolute right-4 w-5 h-5 text-muted-foreground animate-spin" />
+          <Loader2Icon className="absolute right-3 sm:right-4 w-5 h-5 text-muted-foreground animate-spin" />
         )}
       </div>
 

@@ -2,15 +2,16 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { regataResultadosSchema } from '@/lib/validators';
-import { splitNombreTripulacion, splitClubPorTripulante } from '@/lib/nombres';
+import { splitNombreTripulacion, splitClubPorTripulante, normalizarNombre } from '@/lib/nombres';
 import { handleApiError } from '@/lib/api-error';
 
 // Reemplaza el set de resultados de una regata existente: crea/actualiza los
 // enviados y borra los que ya no vienen en el body (así "Guardar" en el
 // editor de admin refleja filas agregadas y eliminadas). El regatista de
 // cada fila puede venir por id (elegido de uno ya existente) o por nombre
-// -se busca por coincidencia exacta insensible a mayúsculas, o se crea si
-// no existe-, igual que el importador de CSV/Excel/PDF.
+// -se busca por nombre normalizado (sin mayúsc/acentos, cualquier orden de
+// palabras: "Tomas Maine" y "Maine Tomas" son la misma persona), o se crea
+// si no existe-, igual que el importador de CSV/Excel/PDF.
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -30,6 +31,13 @@ export async function PUT(
     const json = await request.json();
     const body = regataResultadosSchema.parse(json);
 
+    // Precargado una sola vez (en vez de un findFirst por fila) para poder
+    // matchear por nombre normalizado -Prisma no puede ordenar palabras
+    // dentro de una consulta, así que la comparación se hace en JS.
+    const regatistaPorNombre = new Map(
+      (await prisma.regatista.findMany()).map((r) => [normalizarNombre(r.nombre), r])
+    );
+
     const regatistaIdsUsados: string[] = [];
 
     for (const r of body.resultados) {
@@ -47,34 +55,41 @@ export async function PUT(
         // para un club distinto, no es un club compuesto.
         const clubes = r.club ? splitClubPorTripulante(r.club, nombres.length) : nombres.map(() => '');
 
-        regatistaIds = await Promise.all(
-          nombres.map(async (nombreLimpio, i) => {
-            const existente = await prisma.regatista.findFirst({
-              where: { nombre: { equals: nombreLimpio, mode: 'insensitive' } },
-            });
+        // Secuencial (no Promise.all) porque dos tripulantes nuevos podrían
+        // compartir el mismo nombre normalizado dentro de la misma fila -
+        // improbable, pero así el segundo ve al primero recién creado en
+        // vez de que ambos disparen una creación en paralelo.
+        regatistaIds = [];
+        for (let i = 0; i < nombres.length; i++) {
+          const nombreLimpio = nombres[i];
+          const nombreKey = normalizarNombre(nombreLimpio);
+          const existente = regatistaPorNombre.get(nombreKey);
 
-            if (existente) return existente.id;
+          if (existente) {
+            regatistaIds.push(existente.id);
+            continue;
+          }
 
-            let clubId: string | undefined;
-            if (clubes[i]) {
-              const clubStr = clubes[i].toUpperCase().trim();
-              const club = await prisma.club.upsert({
-                where: { nombre: clubStr },
-                update: {},
-                create: { nombre: clubStr },
-              });
-              clubId = club.id;
-            }
-            const nuevo = await prisma.regatista.create({
-              data: {
-                nombre: nombreLimpio,
-                clubId,
-                fuenteIds: r.vela ? { vela: r.vela } : undefined,
-              },
+          let clubId: string | undefined;
+          if (clubes[i]) {
+            const clubStr = clubes[i].toUpperCase().trim();
+            const club = await prisma.club.upsert({
+              where: { nombre: clubStr },
+              update: {},
+              create: { nombre: clubStr },
             });
-            return nuevo.id;
-          })
-        );
+            clubId = club.id;
+          }
+          const nuevo = await prisma.regatista.create({
+            data: {
+              nombre: nombreLimpio,
+              clubId,
+              fuenteIds: r.vela ? { vela: r.vela } : undefined,
+            },
+          });
+          regatistaPorNombre.set(nombreKey, nuevo);
+          regatistaIds.push(nuevo.id);
+        }
       }
 
       for (const regatistaId of regatistaIds) {

@@ -1,6 +1,6 @@
 import prisma from '@/lib/db';
 import { ParseResult } from './csv-parser';
-import { splitNombreTripulacion, splitClubPorTripulante, asignarClubesPorColumna } from '@/lib/nombres';
+import { splitNombreTripulacion, splitClubPorTripulante, asignarClubesPorColumna, normalizarNombre } from '@/lib/nombres';
 
 // Corre un lote de promesas con concurrencia limitada, en vez de secuencial
 // (demasiado lento) o todas juntas (satura el pool de conexiones de Neon).
@@ -46,7 +46,11 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
   const clubPorNombre = new Map(clubesExistentes.map(c => [c.nombre.toUpperCase(), c]));
 
   const regatistasExistentes = await prisma.regatista.findMany();
-  const regatistaPorNombre = new Map(regatistasExistentes.map(r => [r.nombre.toLowerCase(), r]));
+  // Normalizado (sin mayúsc/acentos, palabras ordenadas) en vez de un
+  // simple toLowerCase() -así "Tomas Maine" y "Maine Tomas" (u otra fuente
+  // que cargó el nombre y apellido al revés) matchean al mismo regatista en
+  // vez de crear una ficha duplicada para la misma persona real.
+  const regatistaPorNombre = new Map(regatistasExistentes.map(r => [normalizarNombre(r.nombre), r]));
 
   // 2. Resolver (o crear) el Club y el Regatista de cada fila. Estas
   // creaciones son inherentemente secuenciales por fila -necesitamos el id
@@ -99,7 +103,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         clubId = club.id;
       }
 
-      const nombreKey = nombreLimpio.toLowerCase();
+      const nombreKey = normalizarNombre(nombreLimpio);
       let regatista = regatistaPorNombre.get(nombreKey);
 
       if (!regatista) {

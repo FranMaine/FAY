@@ -11,10 +11,17 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Buscamos por PALABRA, no por substring completo: cada palabra
+    // escrita tiene que aparecer en el nombre, pero en cualquier orden -así
+    // "Tomas Maine" y "Maine Tomas" encuentran a la misma persona, en vez
+    // de depender de que el usuario escriba el nombre en el mismo orden
+    // exacto en que está guardado.
+    const palabras = q.trim().split(/\s+/).filter(Boolean);
+
     const regatistas = await prisma.regatista.findMany({
       where: {
         OR: [
-          { nombre: { contains: q, mode: 'insensitive' } },
+          { AND: palabras.map((palabra) => ({ nombre: { contains: palabra, mode: 'insensitive' as const } })) },
           { club: { nombre: { contains: q, mode: 'insensitive' } } }
         ]
       },

@@ -1,4 +1,24 @@
 /**
+ * Clave de comparación para reconocer que dos nombres son la misma persona
+ * aunque estén escritos distinto: minúsculas, sin acentos ("José" = "Jose"),
+ * espacios colapsados, y las PALABRAS ORDENADAS alfabéticamente -así "Tomas
+ * Maine" y "Maine Tomas" (nombre y apellido invertidos, algo que pasa
+ * seguido entre distintas fuentes/campeonatos) dan la misma clave y se
+ * reconocen como el mismo regatista en vez de crear una ficha duplicada.
+ */
+export function normalizarNombre(nombre: string): string {
+  return nombre
+    .trim()
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .sort()
+    .join(' ');
+}
+
+/**
  * Separa un nombre de tripulación en los nombres individuales de cada
  * integrante. En clases de doble tripulación (29er, 420, etc.) la fuente
  * suele traer a los dos regatistas en una sola celda -"Fulano & Mengano"-,
