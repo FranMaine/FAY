@@ -24,7 +24,7 @@ interface ColumnaSugerida {
 const ROLES: { value: RolColumna; label: string }[] = [
   { value: 'puesto', label: 'Puesto' },
   { value: 'vela', label: 'Vela' },
-  { value: 'navegante', label: 'Navegante' },
+  { value: 'navegante', label: 'Navegante (timonel/tripulante)' },
   { value: 'club', label: 'Club' },
   { value: 'flota', label: 'Flota / Subgrupo' },
   { value: 'total', label: 'Total de puntos' },
@@ -35,11 +35,12 @@ const ROLES: { value: RolColumna; label: string }[] = [
 
 // Roles que solo puede tener UNA columna -si el admin le pone "Puesto" a
 // una segunda columna, la que la tenía pasa a "Ignorar" para no mandar dos
-// columnas con el mismo rol al importador. "Club" es la excepción: en
-// tripulaciones de más de una persona a veces el archivo trae una columna
-// de club POR tripulante, así que se permite marcar varias -se asignan en
-// el orden de las columnas (1ra columna = club del 1er tripulante, etc.).
-const ROLES_UNICOS: RolColumna[] = ['puesto', 'vela', 'navegante', 'flota', 'total'];
+// columnas con el mismo rol al importador. "Navegante" y "Club" son la
+// excepción: en tripulaciones de más de una persona a veces el archivo trae
+// una columna POR tripulante para cada uno (ej: "Skipper"/"Helm" y "Crew"
+// en vez de una sola celda "Fulano & Mengano") -se permite marcar varias, y
+// se asignan en el orden de las columnas (1ra = 1er tripulante, etc.).
+const ROLES_UNICOS: RolColumna[] = ['puesto', 'vela', 'flota', 'total'];
 
 type Etapa = 'seleccionar' | 'confirmar' | 'importando' | 'exito';
 
@@ -162,13 +163,20 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
 
     const puestoCol = buscar('puesto');
     const velaCol = buscar('vela');
-    const nombreCol = buscar('navegante');
     const totalCol = buscar('total');
     const flotaColRaw = buscar('flota');
 
-    // Puede haber más de una columna de Club (una por tripulante, en
-    // tripulaciones de más de una persona) -se ordenan por posición en el
-    // archivo: la primera es el club del primer tripulante, etc.
+    // Puede haber más de una columna de Navegante (timonel y tripulante(s)
+    // en columnas separadas, en vez de una sola celda "Fulano & Mengano") y
+    // de Club (una por tripulante) -se ordenan por posición en el archivo:
+    // la primera es el/la del primer tripulante, etc.
+    const nombreCols = Object.entries(roles)
+      .filter(([, r]) => r === 'navegante')
+      .map(([idx]) => Number(idx))
+      .sort((a, b) => a - b);
+    const nombreCol = nombreCols[0] ?? -1;
+    const nombreColsExtra = nombreCols.slice(1);
+
     const clubCols = Object.entries(roles)
       .filter(([, r]) => r === 'club')
       .map(([idx]) => Number(idx))
@@ -205,6 +213,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
     return {
       mapping: {
         puestoCol, velaCol, nombreCol, clubCol, totalCol,
+        nombreColsExtra: nombreColsExtra.length > 0 ? nombreColsExtra : undefined,
         clubColsExtra: clubColsExtra.length > 0 ? clubColsExtra : undefined,
         flotaCol: flotaColRaw === -1 ? null : flotaColRaw,
         regataCols,
@@ -303,9 +312,10 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
                 Detectamos {totalFilas} filas de datos. Revisá que cada columna tenga asignado lo correcto -marcamos nuestra
                 mejor sugerencia, pero nada se guarda hasta que confirmes. Las columnas que no reconocimos quedaron como
                 "Personalizada" con el nombre del archivo -se guardan igual y aparecen como columnas extra en la tabla de
-                posiciones; podés renombrarlas o pasarlas a "Ignorar" si no hacen falta. Si el archivo trae una columna de
-                Club separada por cada tripulante (tripulaciones de 2 o más personas), marcá "Club" en cada una -a
-                diferencia de las demás columnas, esta sí se puede repetir, y se asignan en el orden en que aparecen.
+                posiciones; podés renombrarlas o pasarlas a "Ignorar" si no hacen falta. Si el archivo trae columnas
+                separadas para cada tripulante -ej: "Skipper"/"Helm" y "Crew", o Club por cada uno- en vez de una sola
+                celda "Fulano & Mengano", marcá "Navegante" y/o "Club" en cada una: a diferencia de las demás columnas,
+                estas dos sí se pueden repetir, y se asignan en el orden en que aparecen (1ra columna = 1er tripulante).
               </p>
 
               <div className="overflow-x-auto border border-border rounded-lg">

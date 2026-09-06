@@ -26,7 +26,14 @@ export const XLSX_TEMPLATE_COLUMNS = [
 export interface ColumnMapping {
   puestoCol: number;
   velaCol: number;
+  // Primera (o única) columna de navegante. Algunas fuentes traen el
+  // timonel y el/los tripulante(s) en columnas SEPARADAS ("Helm"/"Skipper"
+  // y "Crew") en vez de una sola celda "Fulano & Mengano" -en ese caso
+  // nombreCol es la del timonel y nombreColsExtra las de los tripulantes,
+  // en orden. Se combinan con " & " antes de seguir el mismo camino que un
+  // nombre ya combinado (splitNombreTripulacion en import-service.ts).
   nombreCol: number;
+  nombreColsExtra?: number[];
   // Primera (o única) columna de club. En tripulaciones de más de una
   // persona a veces el archivo trae una columna de club POR tripulante en
   // vez de una sola celda con todos juntos -en ese caso clubCol es la del
@@ -91,13 +98,25 @@ export function detectarPorEncabezado(header: string[]) {
 
 /** Arma el ParseResult[] de un grid ya leído, dado un mapeo de columnas confirmado. */
 export function armarParseResult(header: string[], rows: any[][], mapping: ColumnMapping): ParseResult[] {
-  const { puestoCol, velaCol, nombreCol, clubCol, clubColsExtra, flotaCol, totalCol, regataCols, columnasPersonalizadas } = mapping;
+  const { puestoCol, velaCol, nombreCol, nombreColsExtra, clubCol, clubColsExtra, flotaCol, totalCol, regataCols, columnasPersonalizadas } = mapping;
 
   const regatistas: ParseResult[] = [];
 
   for (const row of rows) {
-    const nombre = row[nombreCol];
-    if (!nombre || typeof nombre !== 'string' || !nombre.trim()) continue;
+    const nombrePrincipal = row[nombreCol];
+    if (!nombrePrincipal || typeof nombrePrincipal !== 'string' || !nombrePrincipal.trim()) continue;
+
+    // Si hay columnas de navegante adicionales (timonel y tripulante(s) en
+    // columnas separadas, en vez de una sola celda "Fulano & Mengano"), las
+    // juntamos acá con " & " -de ahí en más sigue el mismo camino que un
+    // nombre ya combinado (splitNombreTripulacion en import-service.ts se
+    // encarga de separarlos en regatistas individuales).
+    const nombre = nombreColsExtra && nombreColsExtra.length > 0
+      ? [nombrePrincipal, ...nombreColsExtra.map((idx) => row[idx])]
+          .map((v) => (v !== null && v !== undefined ? String(v).trim() : ''))
+          .filter(Boolean)
+          .join(' & ')
+      : nombrePrincipal;
 
     const puestoOficial = numeroDeCelda(row[puestoCol]);
     const totalOficial = numeroDeCelda(row[totalCol]);
