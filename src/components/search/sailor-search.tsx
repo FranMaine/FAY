@@ -59,7 +59,7 @@ export function SailorSearch() {
   }, [query]);
 
   return (
-    <div ref={wrapperRef} className="relative w-full max-w-3xl mx-auto z-50">
+    <div ref={wrapperRef} className="relative w-full max-w-4xl mx-auto z-50">
       <div className="relative flex items-center w-full">
         <SearchIcon className="absolute left-3 sm:left-4 w-5 h-5 text-muted-foreground" />
         <Input

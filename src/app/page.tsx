@@ -35,7 +35,7 @@ export default async function LandingPage() {
       {/* Hero Section */}
       <section className="relative px-6 py-20 md:py-32 flex flex-col items-center text-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-surface z-0"></div>
-        <div className="relative z-10 max-w-4xl mx-auto space-y-8 flex flex-col items-center w-full">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8 flex flex-col items-center w-full">
           <div className="p-3 bg-surface rounded-full shadow-xl shadow-blue-900/20 mb-2 ring-1 ring-border">
             <Sailboat className="w-10 h-10 text-primary" />
           </div>
