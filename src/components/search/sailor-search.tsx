@@ -60,8 +60,15 @@ export function SailorSearch() {
 
   return (
     <div ref={wrapperRef} className="relative w-full max-w-4xl mx-auto z-50">
-      <div className="relative flex items-center w-full">
-        <SearchIcon className="absolute left-3 sm:left-4 w-5 h-5 text-muted-foreground" />
+      {/* Sin "flex" acá: el ícono y el loader ya se posicionan con
+          "absolute", así que no dependen del layout de este contenedor. Si
+          es flex, el <div> interno que envuelve el <input> (viene del
+          propio componente Input, sin flex-1/w-full) se encoge a su ancho
+          mínimo en vez de ocupar todo el ancho -es lo que hacía que agrandar
+          el max-w de los contenedores de afuera no tuviera ningún efecto
+          visible. Como bloque normal, ese div sí ocupa el 100% del padre. */}
+      <div className="relative w-full">
+        <SearchIcon className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
           type="text"
           // Placeholder corto -el largo ("...por nombre o club...") se
@@ -76,7 +83,7 @@ export function SailorSearch() {
           }}
         />
         {isLoading && (
-          <Loader2Icon className="absolute right-3 sm:right-4 w-5 h-5 text-muted-foreground animate-spin" />
+          <Loader2Icon className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground animate-spin" />
         )}
       </div>
 
