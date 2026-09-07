@@ -5,6 +5,14 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { prisma } from "@/lib/db";
 import { SailorSearch } from "@/components/search/sailor-search";
 
+// Sin esto, Next.js pre-renderiza esta página como HTML ESTÁTICO en cada
+// deploy -los números de "Regatistas"/"Campeonatos" y la lista de últimos
+// resultados quedan congelados con los datos de ese momento, sin
+// actualizarse hasta el próximo deploy, aunque se cargue un campeonato
+// nuevo un minuto después. Forzamos que se renderice en el servidor en
+// cada visita, así siempre refleja el estado actual de la base.
+export const dynamic = 'force-dynamic';
+
 // Obtener los últimos 3 campeonatos para la home. Solo mostramos los que
 // están PUBLICADOS -antes esto no filtraba, así que cualquier borrador
 // creado por un admin aparecía en la home a la vista de todo el mundo.
