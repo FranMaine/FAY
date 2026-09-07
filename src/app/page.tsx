@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Trophy, BarChart3, Medal, Sailboat, ArrowRight, ActivityIcon } from "lucide-react";
+import { Trophy, Sailboat, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
 import { SailorSearch } from "@/components/search/sailor-search";
 

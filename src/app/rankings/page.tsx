@@ -100,8 +100,8 @@ export default async function RankingsPage({
   }
 
   // Si no hay params, buscar el default (el que tenga más regatas o el primero)
-  let activeClaseId = typeof resolvedParams.clase === 'string' ? resolvedParams.clase : clases[0].id;
-  let activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
+  const activeClaseId = typeof resolvedParams.clase === 'string' ? resolvedParams.clase : clases[0].id;
+  const activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
 
   const ranking = await getRankingGeneral(activeClaseId, activeAnio);
   const selectedClaseNombre = clases.find(c => c.id === activeClaseId)?.nombre || '';

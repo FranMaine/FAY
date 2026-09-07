@@ -46,7 +46,7 @@ export async function GET(
     });
 
     const campeonatosStats: any[] = [];
-    let posiciones: number[] = [];
+    const posiciones: number[] = [];
 
     for (const [_, campeonato] of campeonatosMap) {
       const clasificacion = generarClasificacion(agruparPorRegatista(campeonato.regatas), campeonato.descartes);
@@ -65,10 +65,13 @@ export async function GET(
       }
     }
 
+    // Math.min/max de un array vacío da Infinity/-Infinity -que
+    // JSON.stringify convierte en "null" sin avisar- si el regatista tiene
+    // resultados pero ninguno cayó en un campeonato ya clasificable.
     const summary = {
       totalCampeonatos: campeonatosStats.length,
-      mejorPosicion: Math.min(...posiciones),
-      peorPosicion: Math.max(...posiciones),
+      mejorPosicion: posiciones.length ? Math.min(...posiciones) : null,
+      peorPosicion: posiciones.length ? Math.max(...posiciones) : null,
       promedioPosicion: posiciones.length ? (posiciones.reduce((a, b) => a + b, 0) / posiciones.length).toFixed(2) : 0,
       detalle: campeonatosStats
     };

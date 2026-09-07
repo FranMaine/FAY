@@ -31,8 +31,8 @@ export default async function CampeonatosPage({
   const allClasses = [{ id: 'ALL', nombre: 'Todas las clases' }, ...clases];
   const allYears = [0, ...anios]; // 0 significará "Todos los años"
 
-  let activeClaseId = typeof resolvedParams.clase === 'string' ? resolvedParams.clase : 'ALL';
-  let activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
+  const activeClaseId = typeof resolvedParams.clase === 'string' ? resolvedParams.clase : 'ALL';
+  const activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
 
   // Construir clausula WHERE
   const whereClause: any = { estado: 'PUBLICADO' };
@@ -85,8 +85,6 @@ export default async function CampeonatosPage({
     fechaInicio: c.fechaInicio ? c.fechaInicio.toISOString().split('T')[0] : `${c.anio}-01-01`,
   }));
 
-  const formatYearOption = (y: number) => y === 0 ? "Todos los años" : y.toString();
-  const aniosString = allYears.map(formatYearOption);
 
   return (
     <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
