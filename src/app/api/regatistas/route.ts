@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { regatistaEditSchema } from '@/lib/validators';
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
     const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50', 10) || 50));
 
-    const where: any = {};
+    const where: Prisma.RegatistaWhereInput = {};
     if (q) {
       where.nombre = {
         contains: q,

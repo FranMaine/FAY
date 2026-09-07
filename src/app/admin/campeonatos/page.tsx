@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { PlusIcon, EditIcon, TrashIcon, EyeIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
+import { mensajeDeError } from "@/lib/utils";
 
 interface Campeonato {
   id: string;
@@ -27,10 +28,6 @@ export default function AdminCampeonatosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -47,6 +44,11 @@ export default function AdminCampeonatosPage() {
     }
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, []);
+
   const handleEliminar = async (c: Campeonato) => {
     const ok = window.confirm(
       `¿Seguro que querés eliminar "${c.nombre}"?\n\nEsto borra también todas sus regatas y resultados cargados. No se puede deshacer.`
@@ -61,8 +63,8 @@ export default function AdminCampeonatosPage() {
         throw new Error(data.error || "No se pudo eliminar el campeonato");
       }
       await fetchData();
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error) {
+      alert(mensajeDeError(error));
     } finally {
       setDeletingId(null);
     }

@@ -5,10 +5,17 @@ import { useRouter } from "next/navigation";
 import { SearchIcon, Loader2Icon, UserIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
+interface ResultadoBusqueda {
+  id: string;
+  nombre: string;
+  pais: string | null;
+  club: { nombre: string } | null;
+}
+
 export function SailorSearch() {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<ResultadoBusqueda[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);

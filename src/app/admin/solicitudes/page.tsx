@@ -1,19 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState, useEffect, useCallback } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2Icon, CheckIcon, XIcon } from "lucide-react";
 
+interface Solicitud {
+  id: string;
+  user: { name: string | null; email: string };
+  regatista: { nombre: string; club: { nombre: string } | null };
+}
+
 export default function SolicitudesAdminPage() {
-  const [solicitudes, setSolicitudes] = useState<any[]>([]);
+  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSolicitudes();
-  }, []);
-
-  const fetchSolicitudes = async () => {
+  const fetchSolicitudes = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/solicitudes");
       const data = await res.json();
@@ -23,7 +25,15 @@ export default function SolicitudesAdminPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Carga inicial de datos desde la API -el lint moderno de hooks
+    // preferiría un patrón sin esto, pero es el "fetch al montar" estándar
+    // y no hay nada raro pasando acá.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchSolicitudes();
+  }, [fetchSolicitudes]);
 
   const handleAction = async (id: string, action: 'APROBAR' | 'RECHAZAR') => {
     try {

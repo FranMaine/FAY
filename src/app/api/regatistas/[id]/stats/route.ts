@@ -37,22 +37,30 @@ export async function GET(
       return NextResponse.json({ error: 'No stats found' }, { status: 404 });
     }
 
-    const campeonatosMap = new Map();
-    resultados.forEach((res: any) => {
+    type CampeonatoConRegatas = (typeof resultados)[number]['regata']['campeonato'];
+
+    const campeonatosMap = new Map<string, CampeonatoConRegatas>();
+    resultados.forEach((res) => {
       const camp = res.regata.campeonato;
       if (!campeonatosMap.has(camp.id)) {
         campeonatosMap.set(camp.id, camp);
       }
     });
 
-    const campeonatosStats: any[] = [];
+    const campeonatosStats: {
+      campeonatoId: string;
+      anio: number;
+      posicionFinal: number;
+      puntosTotales: number;
+      flota: number;
+    }[] = [];
     const posiciones: number[] = [];
 
-    for (const [_, campeonato] of campeonatosMap) {
+    for (const campeonato of campeonatosMap.values()) {
       const clasificacion = generarClasificacion(agruparPorRegatista(campeonato.regatas), campeonato.descartes);
-      
-      const regatistaPos = clasificacion.find((c: any) => c.regatistaId === id);
-      
+
+      const regatistaPos = clasificacion.find((c) => c.regatistaId === id);
+
       if (regatistaPos) {
         posiciones.push(regatistaPos.posicionFinal);
         campeonatosStats.push({

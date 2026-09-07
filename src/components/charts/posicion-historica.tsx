@@ -55,7 +55,7 @@ export function PosicionHistorica({ data }: PosicionHistoricaProps) {
             }}
             itemStyle={{ color: '#fbbf24' }}
             labelStyle={{ color: '#94a3b8', marginBottom: '0.25rem' }}
-            formatter={(value: any) => [`Posición ${value}`, 'Posición']}
+            formatter={(value) => [`Posición ${value}`, 'Posición']}
             labelFormatter={(label, payload) => {
               if (payload && payload.length > 0) {
                 return `${payload[0].payload.campeonato} (${label})`;

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { CampeonatoCard } from "@/components/ui/campeonato-card";
 import prisma from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 import { AlertCircleIcon } from "lucide-react";
 
@@ -35,7 +36,7 @@ export default async function CampeonatosPage({
   const activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
 
   // Construir clausula WHERE
-  const whereClause: any = { estado: 'PUBLICADO' };
+  const whereClause: Prisma.CampeonatoWhereInput = { estado: 'PUBLICADO' };
   if (activeClaseId !== 'ALL') {
     whereClause.claseId = activeClaseId;
   }

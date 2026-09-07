@@ -11,6 +11,17 @@ interface Item {
   y: number;
 }
 
+// pdf-parse tipa su callback pagerender como (pageData: any) -no exporta
+// tipos propios de pdfjs- así que estas son solo las formas mínimas que
+// realmente usamos de lo que pdfjs le pasa a ese callback.
+interface PdfTextItem {
+  str: string;
+  transform: number[];
+}
+interface PdfPageData {
+  getTextContent(): Promise<{ items: PdfTextItem[] }>;
+}
+
 // Palabras que suelen aparecer en la fila de encabezado de un reporte de
 // Sailwave, en cualquiera de sus variantes de nombre de columna. Se usa
 // solo para ENCONTRAR cuál fila es el encabezado (no para decidir qué es
@@ -30,10 +41,10 @@ async function extraerItemsPorPagina(buffer: Buffer): Promise<Item[][]> {
     // pdf-parse nos deja "renderizar" cada página nosotros mismos; en vez
     // de usar su render por defecto (que concatena todo a texto plano y
     // pierde la posición), tomamos los items crudos de pdf.js con su x/y.
-    pagerender: async (pageData: any) => {
+    pagerender: async (pageData: PdfPageData) => {
       const tc = await pageData.getTextContent();
       paginas.push(
-        tc.items.map((it: any) => ({
+        tc.items.map((it) => ({
           str: it.str,
           x: Math.round(it.transform[4] * 100) / 100,
           y: Math.round(it.transform[5] * 100) / 100,
@@ -73,7 +84,7 @@ function agruparPorFila(items: Item[], tolerancia = 2): Item[][] {
  * rango de X (aunque sean varias palabras, como un nombre de tripulación
  * largo) se junta como el valor de esa celda.
  */
-export async function leerGridPDF(buffer: Buffer): Promise<{ header: string[]; rows: any[][] }> {
+export async function leerGridPDF(buffer: Buffer): Promise<{ header: string[]; rows: string[][] }> {
   const paginas = await extraerItemsPorPagina(buffer);
   if (paginas.length === 0 || paginas[0].length === 0) {
     throw new Error('No se pudo leer texto del PDF (¿es una imagen escaneada sin texto?).');
@@ -168,7 +179,7 @@ export async function leerGridPDF(buffer: Buffer): Promise<{ header: string[]; r
     return { nombre, club, total };
   };
 
-  const filaAGrid = (fila: Item[]): any[] | null => {
+  const filaAGrid = (fila: Item[]): string[] | null => {
     if (!rangoAFusionar) {
       const celdas: string[] = Array(header.length).fill('');
       for (const item of fila) {
@@ -198,7 +209,7 @@ export async function leerGridPDF(buffer: Buffer): Promise<{ header: string[]; r
     return salida;
   };
 
-  const filasGrid: any[][] = [];
+  const filasGrid: string[][] = [];
   for (let p = 0; p < paginas.length; p++) {
     const filas = p === 0 ? filasPagina1 : agruparPorFila(paginas[p]);
     for (const fila of filas) {

@@ -19,7 +19,7 @@ export async function POST(
     
     const body = resultadosBulkSchema.parse(json);
 
-    const result = await prisma.$transaction(async (tx: any) => {
+    const result = await prisma.$transaction(async (tx) => {
       const regata = await tx.regata.create({
         data: {
           campeonatoId: id,

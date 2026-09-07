@@ -1,4 +1,4 @@
-import { numeroDeCelda, detectarPorEncabezado } from './xlsx-parser';
+import { numeroDeCelda, detectarPorEncabezado, FilaCruda } from './xlsx-parser';
 
 export type RolColumna = 'puesto' | 'vela' | 'navegante' | 'club' | 'flota' | 'total' | 'regata' | 'personalizada' | 'ignorar';
 
@@ -31,7 +31,7 @@ export interface ColumnaSugerida {
  * admin corrige lo que haga falta con un click en vez de que el sistema
  * adivine mal en silencio sobre un ranking oficial.
  */
-export function detectarColumnas(header: string[], rows: any[][]): ColumnaSugerida[] {
+export function detectarColumnas(header: string[], rows: FilaCruda[]): ColumnaSugerida[] {
   const numCols = header.length;
   const numRows = rows.length;
 
@@ -53,7 +53,7 @@ export function detectarColumnas(header: string[], rows: any[][]): ColumnaSugeri
     const ratioUnicoNumero = numeros.length ? numerosUnicos.size / numeros.length : 0;
 
     const promedioPalabras = textos.length
-      ? textos.reduce((s, t) => s + String(t).trim().split(/\s+/).length, 0) / textos.length
+      ? textos.reduce((s: number, t) => s + String(t).trim().split(/\s+/).length, 0) / textos.length
       : 0;
 
     // ¿Los valores de esta columna van 1, 2, 3... en el mismo orden que las

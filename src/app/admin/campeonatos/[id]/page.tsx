@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import { PlusIcon, SaveIcon, UploadIcon, CheckCircleIcon, Loader2Icon, TrashIcon, AlertCircleIcon, PencilIcon, XIcon } from "lucide-react";
 
 import { CsvUploadModal } from "@/components/admin/csv-upload-modal";
+import { mensajeDeError } from "@/lib/utils";
 
 interface Resultado {
   id: string;
   puesto: number;
   puntos: number;
   observacion: string | null;
-  regatista: { id: string; nombre: string; fuenteIds: any };
+  regatista: { id: string; nombre: string; fuenteIds: { vela?: string } | null };
 }
 
 interface Regata {
@@ -109,8 +110,8 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
           setFecha("");
           setCondiciones("");
         }
-      } catch (err: any) {
-        setLoadError(err.message || "Error cargando el campeonato");
+      } catch (err) {
+        setLoadError(mensajeDeError(err, "Error cargando el campeonato"));
       } finally {
         setIsLoading(false);
       }
@@ -120,6 +121,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCampeonato();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -169,8 +171,8 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
       if (!res.ok) throw new Error(data.error || "No se pudo crear la regata");
 
       await fetchCampeonato(data.id);
-    } catch (err: any) {
-      setSaveError(err.message);
+    } catch (err) {
+      setSaveError(mensajeDeError(err));
     } finally {
       setIsCreatingRegata(false);
     }
@@ -212,8 +214,8 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
 
       await fetchCampeonato(selectedRegataId);
       setSaveOk(true);
-    } catch (err: any) {
-      setSaveError(err.message);
+    } catch (err) {
+      setSaveError(mensajeDeError(err));
     } finally {
       setIsSavingRegata(false);
     }
@@ -237,8 +239,8 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo guardar el descarte");
       setCampeonato((prev) => (prev ? { ...prev, descartes: data.descartes } : prev));
-    } catch (err: any) {
-      setSaveError(err.message);
+    } catch (err) {
+      setSaveError(mensajeDeError(err));
     } finally {
       setIsSavingDescartes(false);
     }
@@ -263,8 +265,8 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
       if (!res.ok) throw new Error(data.error || "No se pudo renombrar el campeonato");
       setCampeonato((prev) => (prev ? { ...prev, nombre: data.nombre } : prev));
       setIsEditingNombre(false);
-    } catch (err: any) {
-      setSaveError(err.message);
+    } catch (err) {
+      setSaveError(mensajeDeError(err));
     } finally {
       setIsSavingNombre(false);
     }
@@ -284,8 +286,8 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo cambiar el estado");
       setCampeonato((prev) => (prev ? { ...prev, estado: data.estado } : prev));
-    } catch (err: any) {
-      setSaveError(err.message);
+    } catch (err) {
+      setSaveError(mensajeDeError(err));
     } finally {
       setIsPublishing(false);
     }

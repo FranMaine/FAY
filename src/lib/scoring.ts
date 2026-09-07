@@ -290,6 +290,9 @@ export function generarClasificacion(
     c.posicionFinal = idx + 1;
   });
 
+  // Se destructura flotaOrden a propósito para sacarlo del objeto devuelto
+  // (no es parte de ClasificacionRegatista), no para usarlo.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return clasificacion.map(({ flotaOrden, ...c }) => c);
 }
 

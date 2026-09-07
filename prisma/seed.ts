@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, EstadoCampeonato } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -91,7 +91,7 @@ async function main() {
     const campeonato = await prisma.campeonato.create({
       data: {
         ...c,
-        estado: c.estado as any,
+        estado: c.estado as EstadoCampeonato,
       },
     });
 

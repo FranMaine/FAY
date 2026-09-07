@@ -5,6 +5,10 @@
 // only ships a declaration for the package root, so we declare this subpath
 // ourselves, mirroring that same signature.
 declare module 'pdf-parse/lib/pdf-parse.js' {
+  // "import X = require(...)" es la forma correcta en TypeScript de tipar
+  // un módulo CommonJS con "export =" -no es un require() de JS real, pero
+  // la regla de lint no distingue el caso y lo marca igual.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   import PdfParse = require('pdf-parse');
   export = PdfParse;
 }

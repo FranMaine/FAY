@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { SearchIcon, Sailboat } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { mensajeDeError } from "@/lib/utils";
 
 const registroSchema = z.object({
   name: z.string().min(2, { message: "El nombre es muy corto" }),
@@ -39,7 +40,7 @@ export default function RegistroPage() {
 
   const [error, setError] = useState<string | null>(null);
 
-  async function onStep1Submit(values: z.infer<typeof registroSchema>) {
+  async function onStep1Submit() {
     setStep(2);
   }
 
@@ -79,8 +80,8 @@ export default function RegistroPage() {
         router.push("/mi-perfil");
         router.refresh();
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(mensajeDeError(err));
       setStep(1); // Volver para mostrar el error
     } finally {
       setIsLoading(false);

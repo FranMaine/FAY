@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircleIcon, XIcon, Loader2Icon } from "lucide-react";
+import { mensajeDeError } from "@/lib/utils";
 
 interface RegatistaModalProps {
   isOpen: boolean;
@@ -21,6 +22,9 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
 
   useEffect(() => {
     if (isOpen) {
+      // Sincroniza el formulario con la ficha a editar (o lo limpia para
+      // "Nuevo Regatista") cada vez que se abre el modal.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNombre(regatista?.nombre || "");
       setClub(regatista?.club?.nombre || "");
       setPais(regatista?.pais || "Argentina");
@@ -51,8 +55,8 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
 
       onSaved();
       onClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(mensajeDeError(err));
     } finally {
       setIsSaving(false);
     }

@@ -7,6 +7,7 @@ import { leerGridPDF } from "@/lib/extractors/pdf-grid-reader";
 import { parseSailwaveXLSX, leerGridXLSX, armarParseResult, ColumnMapping } from "@/lib/extractors/xlsx-parser";
 import { importCampeonatoResults } from "@/lib/extractors/import-service";
 import { columnMappingSchema } from "@/lib/validators";
+import { mensajeDeError } from "@/lib/utils";
 
 // Un campeonato grande (200+ regatistas x varias regatas) puede tardar más
 // que el límite por defecto de las funciones serverless de Vercel.
@@ -78,10 +79,10 @@ export async function POST(
     const result = await importCampeonatoResults(campeonatoId, parseResult);
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error("[IMPORT_ERROR]", error);
     return NextResponse.json(
-      { error: error.message || "Error interno" },
+      { error: mensajeDeError(error, "Error interno") },
       { status: 500 }
     );
   }

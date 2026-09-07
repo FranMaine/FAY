@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { AlertCircleIcon, XIcon, Loader2Icon } from "lucide-react";
+import { mensajeDeError } from "@/lib/utils";
 
 interface Clase {
   id: string;
@@ -78,8 +79,8 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
 
       onCreated();
       resetAndClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(mensajeDeError(err));
     } finally {
       setIsSaving(false);
     }

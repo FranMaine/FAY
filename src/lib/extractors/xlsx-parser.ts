@@ -1,6 +1,12 @@
 import * as XLSX from 'xlsx';
 import { ParseResult } from './csv-parser';
 
+// Lo que puede haber en una celda cruda de Excel o de la grilla reconstruida
+// de un PDF (ver pdf-grid-reader.ts) -antes de que numeroDeCelda()/armarParseResult()
+// la interpreten como texto o número.
+export type CeldaValor = string | number | boolean | Date | null | undefined;
+export type FilaCruda = CeldaValor[];
+
 /**
  * Columnas esperadas del Excel, en este orden:
  *   puesto | vela | navegante | Subgroup division | club | Total puntos | regata 1 | regata 2 | ...
@@ -52,7 +58,7 @@ export interface ColumnMapping {
 }
 
 /** Extrae el primer número de una celda ("(16 BFD)" -> 16, "-20" -> -20). */
-export function numeroDeCelda(v: any): number | null {
+export function numeroDeCelda(v: CeldaValor): number | null {
   if (v === null || v === undefined || v === '') return null;
   if (typeof v === 'number') return v;
   const match = String(v).match(/-?\d+(\.\d+)?/);
@@ -60,10 +66,10 @@ export function numeroDeCelda(v: any): number | null {
 }
 
 /** Lee un .xlsx a una grilla cruda: encabezado + filas de datos. */
-export function leerGridXLSX(buffer: Buffer): { header: string[]; rows: any[][] } {
+export function leerGridXLSX(buffer: Buffer): { header: string[]; rows: FilaCruda[] } {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: null });
+  const rows: FilaCruda[] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: null });
 
   if (rows.length < 2) {
     throw new Error('El archivo Excel no tiene filas de datos.');
@@ -97,7 +103,7 @@ export function detectarPorEncabezado(header: string[]) {
 }
 
 /** Arma el ParseResult[] de un grid ya leído, dado un mapeo de columnas confirmado. */
-export function armarParseResult(header: string[], rows: any[][], mapping: ColumnMapping): ParseResult[] {
+export function armarParseResult(header: string[], rows: FilaCruda[], mapping: ColumnMapping): ParseResult[] {
   const { puestoCol, velaCol, nombreCol, nombreColsExtra, clubCol, clubColsExtra, flotaCol, totalCol, regataCols, columnasPersonalizadas } = mapping;
 
   const regatistas: ParseResult[] = [];

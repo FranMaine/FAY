@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UploadIcon, CheckCircleIcon, AlertCircleIcon, XIcon, Loader2Icon, ArrowLeftIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { mensajeDeError } from "@/lib/utils";
 
 interface CsvUploadModalProps {
   campeonatoId: string;
@@ -57,7 +58,12 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
   const [nombresPersonalizados, setNombresPersonalizados] = useState<Record<number, string>>({});
   const [totalFilas, setTotalFilas] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<any>(null);
+  const [success, setSuccess] = useState<{
+    totalInscritos: number;
+    regatistasNuevos: number;
+    regatasNuevas: number;
+    resultadosInsertados: number;
+  } | null>(null);
 
   if (!isOpen) return null;
 
@@ -123,8 +129,8 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
       setRoles(rolesIniciales);
       setNombresPersonalizados(nombresIniciales);
       setEtapa('confirmar');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(mensajeDeError(err));
     } finally {
       setIsLoadingPreview(false);
     }
@@ -242,8 +248,8 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
       setSuccess(data.stats);
       setEtapa('exito');
       router.refresh();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(mensajeDeError(err));
       setEtapa(mapping ? 'confirmar' : 'seleccionar');
     }
   };
@@ -311,10 +317,10 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
               <p className="text-sm text-muted-foreground">
                 Detectamos {totalFilas} filas de datos. Revisá que cada columna tenga asignado lo correcto -marcamos nuestra
                 mejor sugerencia, pero nada se guarda hasta que confirmes. Las columnas que no reconocimos quedaron como
-                "Personalizada" con el nombre del archivo -se guardan igual y aparecen como columnas extra en la tabla de
-                posiciones; podés renombrarlas o pasarlas a "Ignorar" si no hacen falta. Si el archivo trae columnas
-                separadas para cada tripulante -ej: "Skipper"/"Helm" y "Crew", o Club por cada uno- en vez de una sola
-                celda "Fulano & Mengano", marcá "Navegante" y/o "Club" en cada una: a diferencia de las demás columnas,
+                &quot;Personalizada&quot; con el nombre del archivo -se guardan igual y aparecen como columnas extra en la tabla de
+                posiciones; podés renombrarlas o pasarlas a &quot;Ignorar&quot; si no hacen falta. Si el archivo trae columnas
+                separadas para cada tripulante -ej: &quot;Skipper&quot;/&quot;Helm&quot; y &quot;Crew&quot;, o Club por cada uno- en vez de una sola
+                celda &quot;Fulano & Mengano&quot;, marcá &quot;Navegante&quot; y/o &quot;Club&quot; en cada una: a diferencia de las demás columnas,
                 estas dos sí se pueden repetir, y se asignan en el orden en que aparecen (1ra columna = 1er tripulante).
               </p>
 

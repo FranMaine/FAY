@@ -1,5 +1,4 @@
 import prisma from '../src/lib/db';
-import { calcularPuntosPenalidad, esPenalidad, generarClasificacion } from '../src/lib/scoring';
 
 // Helper to randomize or generate deterministic realistic scores for championships
 function generateResultsForRegatistas(

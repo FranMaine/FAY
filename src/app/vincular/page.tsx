@@ -8,15 +8,27 @@ import { SearchIcon, UserIcon, Loader2Icon, AlertCircleIcon, ClockIcon } from "l
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
+interface ResultadoBusqueda {
+  id: string;
+  nombre: string;
+  pais: string | null;
+  club: { nombre: string } | null;
+}
+
+interface Solicitud {
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+  regatista: { nombre: string };
+}
+
 export default function VincularPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<ResultadoBusqueda[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
-  
-  const [solicitud, setSolicitud] = useState<any>(null);
+
+  const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,6 +47,7 @@ export default function VincularPage() {
     if (session) {
       checkStatus();
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingStatus(false);
     }
   }, [session]);

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Prisma, EstadoCampeonato } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { campeonatoSchema } from '@/lib/validators';
@@ -14,15 +15,15 @@ export async function GET(request: Request) {
     const session = await auth();
     const isAdmin = session?.user?.role === 'ADMIN';
 
-    const where: any = {};
+    const where: Prisma.CampeonatoWhereInput = {};
     if (anio) where.anio = parseInt(anio, 10);
     if (claseId) where.claseId = claseId;
-    
+
     if (estado) {
       if (estado !== 'PUBLICADO' && !isAdmin) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
       }
-      where.estado = estado;
+      where.estado = estado as EstadoCampeonato;
     } else if (!isAdmin) {
       where.estado = 'PUBLICADO';
     }
