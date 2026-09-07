@@ -3,3 +3,11 @@ onlyBuiltDependencies:
   - prisma
   - "@prisma/engines"
   - "@prisma/client"
+
+# Fuerza versiones parcheadas de dos vulnerabilidades transitivas
+# (deepmerge-ts vía @prisma/config, valibot vía @hookform/resolvers) que
+# pnpm audit reporta -ninguna de las dos está bajo nuestro control directo
+# en package.json porque las trae otra librería, no nosotros.
+overrides:
+  deepmerge-ts: ">=8.0.0"
+  valibot: ">=1.4.2"
