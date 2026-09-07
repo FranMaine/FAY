@@ -95,6 +95,14 @@ export const regatistaEditSchema = z.object({
   pais: z.string().optional(),
 });
 
+// Fusión de regatistas duplicados desde el panel de admin: todo el
+// historial (Resultado, SolicitudVinculacion, User vinculado) de cada
+// duplicado pasa al canónico, y los duplicados se borran.
+export const regatistaMergeSchema = z.object({
+  canonicoId: z.string().min(1),
+  duplicadoIds: z.array(z.string().min(1)).min(1, 'Elegí al menos un duplicado para fusionar'),
+});
+
 export const resultadosBulkSchema = z.object({
   regataNumero: z.number().int().min(1),
   fecha: fechaOpcional,

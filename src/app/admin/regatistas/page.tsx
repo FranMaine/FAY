@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SearchIcon, PlusIcon, EditIcon, Loader2Icon } from "lucide-react";
+import { SearchIcon, PlusIcon, EditIcon, Loader2Icon, MergeIcon } from "lucide-react";
 import { RegatistaModal } from "@/components/admin/regatista-modal";
 
 interface Regatista {
@@ -42,11 +43,13 @@ export default function AdminRegatistasPage() {
   }, [page, search]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRegatistas();
   }, [fetchRegatistas]);
 
   // Al buscar, volvemos siempre a la primera página.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
   }, [search]);
 
@@ -70,17 +73,17 @@ export default function AdminRegatistasPage() {
             <h1 className="text-4xl font-bold tracking-tight mb-2">Gestión de Regatistas</h1>
             <p className="text-muted-foreground text-lg">Administración de la base de datos central de regatistas</p>
           </div>
-          <Button className="flex items-center gap-2" onClick={abrirNuevo}>
-            <PlusIcon className="w-4 h-4" /> Nuevo Regatista
-          </Button>
+          <div className="flex gap-2">
+            <Link href="/admin/regatistas/duplicados">
+              <Button variant="secondary" className="flex items-center gap-2">
+                <MergeIcon className="w-4 h-4" /> Ver duplicados
+              </Button>
+            </Link>
+            <Button className="flex items-center gap-2" onClick={abrirNuevo}>
+              <PlusIcon className="w-4 h-4" /> Nuevo Regatista
+            </Button>
+          </div>
         </header>
-
-        {/*
-          La detección de duplicados (nombres similares que en realidad son
-          la misma persona) necesita un algoritmo de comparación difuso y una
-          pantalla de revisión/merge propia -no está implementada todavía,
-          así que no mostramos un banner que prometa un número inventado.
-        */}
 
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <div className="relative flex-1">
