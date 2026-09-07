@@ -25,13 +25,15 @@ export function normalizarNombre(nombre: string): string {
  * y si los guardáramos así quedarían como un único Regatista inventado en
  * vez de dos personas reales, cada una con su propio historial.
  *
- * Separa por "&" o por " y " (con espacios, para no partir apellidos que
- * contengan "y"). Para un nombre de una sola persona devuelve un array de
- * un solo elemento, sin tocarlo.
+ * Separa por "&", por " y " (con espacios, para no partir apellidos que
+ * contengan "y") o por "/" -este último lo usan fuentes con más de 2
+ * tripulantes por bote (J70, RAPTOR: "Fulano/ Mengano/ Zutano"), donde "&"
+ * o " y " solo separarían al primero del resto. Para un nombre de una sola
+ * persona devuelve un array de un solo elemento, sin tocarlo.
  */
 export function splitNombreTripulacion(nombre: string): string[] {
   return nombre
-    .split(/\s*&\s*|\s+y\s+/i)
+    .split(/\s*&\s*|\s+y\s+|\s*\/\s*/i)
     .map((n) => n.trim())
     .filter((n) => n.length > 0);
 }

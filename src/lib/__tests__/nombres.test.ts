@@ -37,6 +37,12 @@ describe('splitNombreTripulacion', () => {
     expect(splitNombreTripulacion('Yago Videla Tejo')).toEqual(['Yago Videla Tejo']);
   });
 
+  it('separa por "/" -tripulaciones de más de 2 personas (J70, RAPTOR)', () => {
+    expect(splitNombreTripulacion('Galvan Juan Geronimo/ Gwodz Cecilia/ De Martis Rafael')).toEqual([
+      'Galvan Juan Geronimo', 'Gwodz Cecilia', 'De Martis Rafael',
+    ]);
+  });
+
   it('devuelve un solo elemento para una persona', () => {
     expect(splitNombreTripulacion('Juan Perez')).toEqual(['Juan Perez']);
   });

@@ -32,7 +32,13 @@ export interface ColumnaSugerida {
  * adivine mal en silencio sobre un ranking oficial.
  */
 export function detectarColumnas(header: string[], rows: FilaCruda[]): ColumnaSugerida[] {
-  const numCols = header.length;
+  // Algunas fuentes (ej: reportes de Sailwave con "Total"/"Nett" al final
+  // sin encabezado propio, como si el título de esas dos últimas columnas
+  // se hubiera perdido) tienen filas de datos con MÁS columnas que la fila
+  // de encabezado. Si numCols saliera solo de header.length, esas columnas
+  // de más (justo las que suelen tener el total) quedarían totalmente
+  // afuera de la detección.
+  const numCols = Math.max(header.length, ...rows.map((r) => r.length));
   const numRows = rows.length;
 
   const columnas = (idx: number) => rows.map((r) => r[idx]);

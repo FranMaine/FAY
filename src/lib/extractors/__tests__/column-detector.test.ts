@@ -43,15 +43,15 @@ describe('detectarColumnas', () => {
   });
 
   it('columnas de texto sin rol reconocido quedan como "personalizada", no "ignorar"', () => {
-    const header = ['Pl.', 'Sail #', 'Skipper', 'Club', 'Tot.', 'R1', 'Categoria'];
+    const header = ['Pl.', 'Sail #', 'Skipper', 'Club', 'Tot.', 'R1', 'DNI del padre'];
     const rows = [
       [1, 101, 'Juan Perez', 'CUBA', 5, 2, 'Juvenil'],
       [2, 102, 'Ana Diaz', 'CVB', 9, 4, 'Juvenil'],
     ];
     const columnas = detectarColumnas(header, rows);
-    const categoria = columnas.find((c) => c.header === 'Categoria');
+    const categoria = columnas.find((c) => c.header === 'DNI del padre');
     expect(categoria?.rol).toBe('personalizada');
-    expect(categoria?.nombrePersonalizada).toBe('Categoria');
+    expect(categoria?.nombrePersonalizada).toBe('DNI del padre');
   });
 
   it('una columna numérica sin rol reconocido después del total se propone como regata, no como personalizada', () => {

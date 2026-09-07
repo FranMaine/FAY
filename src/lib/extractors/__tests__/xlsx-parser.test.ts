@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { numeroDeCelda, detectarPorEncabezado, armarParseResult, ColumnMapping } from '../xlsx-parser';
+import { numeroDeCelda, detectarPorEncabezado, armarParseResult, repararFilasDivididas, ColumnMapping } from '../xlsx-parser';
 
 describe('numeroDeCelda', () => {
   it('extrae un número entero simple', () => {
@@ -36,11 +36,78 @@ describe('detectarPorEncabezado', () => {
     expect(detectado.totalCol).toBe(5);
   });
 
+  it('reconoce "Rank" como puesto y "Timonel" como nombre', () => {
+    const header = ['Rank', 'Pais', 'Vela', 'Timonel', 'Club'];
+    const detectado = detectarPorEncabezado(header);
+    expect(detectado.puestoCol).toBe(0);
+    expect(detectado.nombreCol).toBe(3);
+  });
+
+  it('junta HelmName + CrewName como nombreCol + nombreColsExtra', () => {
+    const header = ['Rank', 'Vela', 'CLUB', 'HelmName', 'CrewName', 'R1'];
+    const detectado = detectarPorEncabezado(header);
+    expect(detectado.nombreCol).toBe(3);
+    expect(detectado.nombreColsExtra).toEqual([4]);
+  });
+
+  it('no agrega nombreColsExtra si el nombre ya viene combinado en una sola columna ("Crew")', () => {
+    const header = ['Pl', 'Sail', 'Crew', 'From', 'Tot'];
+    const detectado = detectarPorEncabezado(header);
+    expect(detectado.nombreCol).toBe(2);
+    expect(detectado.nombreColsExtra).toEqual([]);
+  });
+
   it('devuelve -1 para columnas que no reconoce', () => {
     const header = ['Columna A', 'Columna B'];
     const detectado = detectarPorEncabezado(header);
     expect(detectado.puestoCol).toBe(-1);
     expect(detectado.clubCol).toBe(-1);
+  });
+});
+
+describe('repararFilasDivididas', () => {
+  it('no cambia nada en un archivo bien formado (una fila = un resultado)', () => {
+    const rows = [
+      [1, 101, 'Juan Perez', 'CUBA', 5],
+      [2, 102, 'Ana Diaz', 'CVB', 9],
+    ];
+    expect(repararFilasDivididas(rows)).toEqual(rows);
+  });
+
+  it('junta una fila de datos con el puesto que quedó suelto en la fila siguiente', () => {
+    const rows = [
+      [null, 3, 'Felix Llauro & Lucas Cozar', 'YCA', 13],
+      [1, null, null, null, null],
+      [null, 9, 'Olivia Riesgo & Agustina Arguelles', 'YCA', 24],
+      [2, null, null, null, null],
+    ];
+    expect(repararFilasDivididas(rows)).toEqual([
+      [1, 3, 'Felix Llauro & Lucas Cozar', 'YCA', 13],
+      [2, 9, 'Olivia Riesgo & Agustina Arguelles', 'YCA', 24],
+    ]);
+  });
+
+  it('descarta filas separadoras en blanco', () => {
+    const rows = [
+      [1, 101, 'Juan Perez', 'CUBA', 5],
+      [null, null, null, null, null],
+      [2, 102, 'Ana Diaz', 'CVB', 9],
+    ];
+    expect(repararFilasDivididas(rows)).toEqual([
+      [1, 101, 'Juan Perez', 'CUBA', 5],
+      [2, 102, 'Ana Diaz', 'CVB', 9],
+    ]);
+  });
+
+  it('tolera una fila en blanco entre la fila de datos y el puesto suelto', () => {
+    const rows = [
+      [null, 3, 'Felix Llauro & Lucas Cozar', 'YCA', 13],
+      [null, null, null, null, null],
+      [1, null, null, null, null],
+    ];
+    expect(repararFilasDivididas(rows)).toEqual([
+      [1, 3, 'Felix Llauro & Lucas Cozar', 'YCA', 13],
+    ]);
   });
 });
 

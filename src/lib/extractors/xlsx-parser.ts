@@ -65,18 +65,76 @@ export function numeroDeCelda(v: CeldaValor): number | null {
   return match ? parseFloat(match[0]) : null;
 }
 
-/** Lee un .xlsx a una grilla cruda: encabezado + filas de datos. */
+const filaVacia = (r: FilaCruda) => r.every((v) => v === null || v === undefined || v === '');
+const celdasLlenas = (r: FilaCruda) => r.filter((v) => v !== null && v !== undefined && v !== '').length;
+
+/**
+ * Algunos reportes de Sailwave, cuando dos botes empatan en puntaje total,
+ * exportan la celda de "Pl" (puesto) con un rowspan que abarca ambas filas
+ * -al pasar por Excel/SheetJS eso se parte en dos filas: una con todos los
+ * datos del bote MENOS el puesto, y otra fila suelta más abajo que trae
+ * solo ese puesto (y a veces una fila en blanco de por medio, separando
+ * cada bote). El resultado es indistinguible de dos filas reales si no se
+ * reconstruye antes de seguir -así que cada fila de datos a la que le
+ * falte algún valor lo toma prestado de la próxima fila "suelta" (con un
+ * solo valor) que encuentre, y las filas en blanco se descartan.
+ *
+ * Es un no-op para un archivo bien formado (una fila = un resultado): no
+ * hay filas sueltas de un solo valor para pedir prestadas, así que nunca
+ * cambia nada ahí.
+ */
+export function repararFilasDivididas(rows: FilaCruda[]): FilaCruda[] {
+  const consumida = new Set<number>();
+  const resultado: FilaCruda[] = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    if (consumida.has(i)) continue;
+    const fila = rows[i];
+    if (filaVacia(fila)) continue;
+    if (celdasLlenas(fila) === 1) continue; // fila suelta que nadie reclamó
+
+    const filaCombinada = [...fila];
+    for (let j = i + 1; j <= i + 2 && j < rows.length; j++) {
+      if (consumida.has(j)) continue;
+      const candidata = rows[j];
+      if (filaVacia(candidata)) continue;
+      if (celdasLlenas(candidata) !== 1) break; // ya es la próxima fila de datos real
+      const idx = candidata.findIndex((v) => v !== null && v !== undefined && v !== '');
+      if (idx !== -1 && (filaCombinada[idx] === null || filaCombinada[idx] === undefined || filaCombinada[idx] === '')) {
+        filaCombinada[idx] = candidata[idx];
+        consumida.add(j);
+      }
+      break;
+    }
+    resultado.push(filaCombinada);
+  }
+
+  return resultado;
+}
+
+/**
+ * Lee un .xlsx a una grilla cruda: encabezado + filas de datos. El
+ * encabezado sale de la PRIMERA hoja; si el archivo tiene más de una hoja
+ * (reportes de flotas grandes que Sailwave/Excel parte en "Table 1",
+ * "Table 2", etc. sin repetir el encabezado) se juntan todas como si fueran
+ * una sola tabla continua.
+ */
 export function leerGridXLSX(buffer: Buffer): { header: string[]; rows: FilaCruda[] } {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows: FilaCruda[] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: null });
 
-  if (rows.length < 2) {
+  const filasPorHoja = workbook.SheetNames.map(
+    (nombre) => XLSX.utils.sheet_to_json(workbook.Sheets[nombre], { header: 1, raw: true, defval: null }) as FilaCruda[]
+  );
+
+  const [primeraHoja, ...restoDeHojas] = filasPorHoja;
+  if (!primeraHoja || primeraHoja.length < 2) {
     throw new Error('El archivo Excel no tiene filas de datos.');
   }
 
-  const header = rows[0].map((h) => (h === null || h === undefined ? '' : String(h).trim()));
-  return { header, rows: rows.slice(1) };
+  const header = primeraHoja[0].map((h) => (h === null || h === undefined ? '' : String(h).trim()));
+  const rows = [...primeraHoja.slice(1), ...restoDeHojas.flat()];
+
+  return { header, rows: repararFilasDivididas(rows) };
 }
 
 // Comparamos ignorando may/min y cualquier caracter que no sea letra o
@@ -92,11 +150,36 @@ function buscarPorNombre(header: string[], ...names: string[]): number {
 
 /** Matchea columnas por el texto del encabezado. -1 cuando no encuentra. */
 export function detectarPorEncabezado(header: string[]) {
+  // El timonel/skipper puede estar en una columna con nombre propio
+  // ("Skipper", "Helm", "Timonel") separada de la del tripulante ("Crew",
+  // "CrewName") -típico en clases de más de una persona por bote como F18,
+  // J70, RAPTOR o Star, que exportan Helm/Crew como dos columnas en vez de
+  // una sola celda "Fulano & Mengano". Si existe una columna de timonel
+  // reconocible, esa es nombreCol y, si ADEMÁS hay una de tripulante
+  // distinta, se devuelve como nombreColsExtra (el importador la junta con
+  // " & "). Si no hay columna de timonel separada, "Crew"/"Nombre" es la
+  // única columna de nombre (ya viene combinada, como en 29er: "Fulano &
+  // Mengano" en una sola celda).
+  const timonelCol = buscarPorNombre(header, 'skipper', 'helm', 'helmname', 'timonel');
+  const tripulanteCol = buscarPorNombre(header, 'crew', 'crewname', 'tripulante');
+  const nombreCol = timonelCol !== -1 ? timonelCol : buscarPorNombre(header, 'navegante', 'nombre', 'crew');
+  const nombreColsExtra = timonelCol !== -1 && tripulanteCol !== -1 && tripulanteCol !== nombreCol ? [tripulanteCol] : [];
+
   return {
-    puestoCol: buscarPorNombre(header, 'puesto', 'pl', 'pl.'),
-    velaCol: buscarPorNombre(header, 'vela', 'sail', 'sailno', 'sailnumber', 'nrovela'),
-    nombreCol: buscarPorNombre(header, 'navegante', 'skipper', 'nombre', 'crew', 'helm', 'helmname'),
-    flotaCol: buscarPorNombre(header, 'Subgroup division', 'subgroup division', 'subgroup', 'flota', 'split', 'split #4'),
+    puestoCol: buscarPorNombre(header, 'puesto', 'pl', 'pl.', 'rank'),
+    // "Proa" (número de proa) es el fallback para RAPTOR y clases
+    // similares que no numeran veleros con un "Sail #"/"Vela" propio, sino
+    // con el número de proa asignado para esa regata -cumple el mismo rol
+    // acá (un identificador numérico por bote). Va DESPUÉS de vela/sail a
+    // propósito: algunas fuentes (ej: J70) traen ambas columnas, "Proa" Y
+    // "Vela", y la que realmente identifica al barco en el resto de la app
+    // es "Vela".
+    velaCol: buscarPorNombre(header, 'vela', 'sail', 'sailno', 'sailnumber', 'nrovela') !== -1
+      ? buscarPorNombre(header, 'vela', 'sail', 'sailno', 'sailnumber', 'nrovela')
+      : buscarPorNombre(header, 'proa'),
+    nombreCol,
+    nombreColsExtra,
+    flotaCol: buscarPorNombre(header, 'Subgroup division', 'subgroup division', 'subgroup', 'flota', 'split', 'split #4', 'categoria', 'category'),
     clubCol: buscarPorNombre(header, 'club', 'from'),
     totalCol: buscarPorNombre(header, 'Total puntos', 'total puntos', 'total', 'tot', 'tot.'),
   };
