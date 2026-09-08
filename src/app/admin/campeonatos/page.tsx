@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PlusIcon, EditIcon, TrashIcon, EyeIcon, Loader2Icon } from "lucide-react";
@@ -22,6 +23,7 @@ interface Clase {
 }
 
 export default function AdminCampeonatosPage() {
+  const router = useRouter();
   const [campeonatos, setCampeonatos] = useState<Campeonato[]>([]);
   const [clases, setClases] = useState<Clase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -158,7 +160,10 @@ export default function AdminCampeonatosPage() {
       <NuevoCampeonatoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onCreated={fetchData}
+        // Redirigimos directo a la página de edición del campeonato recién
+        // creado -antes había que cerrar el modal y buscarlo a mano en la
+        // tabla para poder cargarle las regatas y resultados.
+        onCreated={(campeonato) => router.push(`/admin/campeonatos/${campeonato.id}`)}
         clases={clases}
       />
     </main>

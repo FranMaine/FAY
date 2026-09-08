@@ -12,10 +12,14 @@ interface Clase {
   nombre: string;
 }
 
+interface CampeonatoCreado {
+  id: string;
+}
+
 interface NuevoCampeonatoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreated: () => void;
+  onCreated: (campeonato: CampeonatoCreado) => void;
   clases: Clase[];
 }
 
@@ -77,7 +81,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
         throw new Error(data.error || "Error al crear el campeonato");
       }
 
-      onCreated();
+      onCreated(data);
       resetAndClose();
     } catch (err) {
       setError(mensajeDeError(err));

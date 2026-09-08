@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-error';
+import { sendEmail, emailVinculacionAprobada } from '@/lib/email';
 
 export async function PATCH(
   request: Request,
@@ -31,7 +32,7 @@ export async function PATCH(
 
     if (action === 'APROBAR') {
       // Transaction to approve and link
-      await prisma.$transaction([
+      const [, usuarioActualizado, , regatista] = await prisma.$transaction([
         prisma.solicitudVinculacion.update({
           where: { id: solicitudId },
           data: { estado: 'APROBADA' }
@@ -48,8 +49,19 @@ export async function PATCH(
             id: { not: solicitudId }
           },
           data: { estado: 'RECHAZADA' }
-        })
+        }),
+        prisma.regatista.findUnique({ where: { id: solicitud.regatistaId } })
       ]);
+
+      // Notificación por mail de que la cuenta quedó verificada -no
+      // bloqueamos la respuesta si el envío falla, la vinculación ya
+      // quedó confirmada en la base.
+      if (usuarioActualizado.email && regatista) {
+        void sendEmail({
+          to: usuarioActualizado.email,
+          ...emailVinculacionAprobada(regatista.nombre),
+        });
+      }
     } else {
       await prisma.solicitudVinculacion.update({
         where: { id: solicitudId },

@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { SearchIcon, Sailboat } from "lucide-react";
+import { SearchIcon, Sailboat, Loader2Icon, UserIcon, CheckIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { mensajeDeError } from "@/lib/utils";
@@ -23,10 +23,27 @@ const registroSchema = z.object({
   path: ["confirmPassword"],
 });
 
+interface ResultadoBusqueda {
+  id: string;
+  nombre: string;
+  pais: string | null;
+  club: { nombre: string } | null;
+}
+
 export default function RegistroPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Búsqueda de regatista para vincular en el paso 2 -antes este input no
+  // estaba conectado a nada: se podía escribir pero nunca disparaba una
+  // búsqueda real, así que quien quería reclamar su perfil acá terminaba
+  // sin poder hacerlo y tenía que ir a pedirlo de nuevo desde adentro de
+  // la página una vez logueado.
+  const [query, setQuery] = useState("");
+  const [resultados, setResultados] = useState<ResultadoBusqueda[]>([]);
+  const [buscando, setBuscando] = useState(false);
+  const [seleccionado, setSeleccionado] = useState<ResultadoBusqueda | null>(null);
 
   const form = useForm<z.infer<typeof registroSchema>>({
     resolver: zodResolver(registroSchema),
@@ -39,6 +56,35 @@ export default function RegistroPage() {
   });
 
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (seleccionado) return; // ya eligió, no hace falta seguir buscando
+    let cancelado = false;
+
+    const buscar = async () => {
+      if (query.trim().length < 2) {
+        setResultados([]);
+        return;
+      }
+      setBuscando(true);
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (cancelado) return;
+        setResultados(data);
+      } catch (e) {
+        if (!cancelado) console.error(e);
+      } finally {
+        if (!cancelado) setBuscando(false);
+      }
+    };
+
+    const timer = setTimeout(buscar, 300);
+    return () => {
+      cancelado = true;
+      clearTimeout(timer);
+    };
+  }, [query, seleccionado]);
 
   async function onStep1Submit() {
     setStep(2);
@@ -66,8 +112,7 @@ export default function RegistroPage() {
         throw new Error(errorData.error || "Ocurrió un error al registrarse");
       }
 
-      // Si queremos vincular regatista acá podríamos hacerlo (MVP: no implementado en API para user no auth)
-      // En vez de redirigir a login, podemos iniciar sesión automáticamente
+      // En vez de redirigir a login, iniciamos sesión automáticamente
       const result = await signIn("credentials", {
         email: values.email,
         password: values.password,
@@ -76,10 +121,27 @@ export default function RegistroPage() {
 
       if (result?.error) {
         router.push("/login"); // Fallback
-      } else {
-        router.push("/mi-perfil");
-        router.refresh();
+        return;
       }
+
+      // Si eligió un perfil de regatista para vincular, mandamos la
+      // solicitud ahora que ya está logueado (el endpoint requiere sesión).
+      // Si esto falla no bloqueamos el alta de la cuenta: puede reclamar
+      // el perfil más tarde desde "Mi Perfil".
+      if (seleccionado) {
+        try {
+          await fetch("/api/vincular", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ regatistaId: seleccionado.id }),
+          });
+        } catch (e) {
+          console.error("No se pudo enviar la solicitud de vinculación", e);
+        }
+      }
+
+      router.push("/mi-perfil");
+      router.refresh();
     } catch (err) {
       setError(mensajeDeError(err));
       setStep(1); // Volver para mostrar el error
@@ -136,13 +198,79 @@ export default function RegistroPage() {
                   Busca tu nombre para vincular tu historial de resultados a tu cuenta. Podés hacerlo más tarde.
                 </p>
               </div>
-              <div className="relative">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Buscar por nombre o vela..." className="pl-9 bg-background border-border" />
-              </div>
+
+              {seleccionado ? (
+                <div className="flex items-center justify-between gap-3 p-3 rounded-md border border-primary/50 bg-primary/10">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0">
+                      <CheckIcon className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{seleccionado.nombre}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {seleccionado.club?.nombre || "Sin club"} {seleccionado.pais ? `• ${seleccionado.pais}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSeleccionado(null);
+                      setQuery("");
+                    }}
+                  >
+                    Cambiar
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por nombre o club..."
+                    className="pl-9 bg-background border-border"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                  />
+                  {buscando && (
+                    <Loader2Icon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
+                  )}
+
+                  {query.trim().length >= 2 && !buscando && (
+                    <div className="mt-2 w-full bg-background border border-border rounded-md shadow-sm overflow-hidden max-h-[220px] overflow-y-auto">
+                      {resultados.length === 0 ? (
+                        <p className="p-3 text-sm text-muted-foreground text-center">
+                          No se encontraron regatistas con ese nombre.
+                        </p>
+                      ) : (
+                        resultados.map((r) => (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => setSeleccionado(r)}
+                            className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors text-left border-b border-border last:border-0"
+                          >
+                            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0">
+                              <UserIcon className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm truncate">{r.nombre}</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {r.club?.nombre || "Sin club"} {r.pais ? `• ${r.pais}` : ""}
+                              </p>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex flex-col gap-3 pt-4">
                 <Button onClick={onFinalSubmit} disabled={isLoading} className="w-full">
-                  {isLoading ? "Creando..." : "Crear cuenta y vincular luego"}
+                  {isLoading ? "Creando..." : seleccionado ? "Crear cuenta y vincular" : "Crear cuenta y vincular luego"}
                 </Button>
                 <Button variant="ghost" onClick={() => setStep(1)} className="w-full text-muted-foreground hover:text-foreground">
                   Volver atrás
