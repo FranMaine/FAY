@@ -37,6 +37,23 @@ export async function sendEmail({
   }
 }
 
+export function emailResetPassword(link: string) {
+  return {
+    subject: 'Recuperá tu contraseña de FAY Stats',
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1e293b;">Recuperar contraseña</h2>
+        <p>Pediste restablecer tu contraseña en FAY Stats. Hacé clic en el siguiente botón para elegir una nueva:</p>
+        <p style="margin: 24px 0;">
+          <a href="${link}" style="background: #3b82f6; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">Restablecer contraseña</a>
+        </p>
+        <p style="color: #94a3b8; font-size: 13px;">Si no pediste esto, podés ignorar este mail -tu contraseña actual sigue funcionando. El enlace vence en 1 hora.</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Federación Argentina de Yachting · FAY Stats</p>
+      </div>
+    `,
+  };
+}
+
 export function emailVinculacionAprobada(nombreRegatista: string) {
   return {
     subject: 'Tu perfil de regatista fue vinculado',

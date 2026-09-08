@@ -26,6 +26,20 @@ export const registroSchema = z.object({
   path: ['confirmPassword'],
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Email inválido'),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email('Email inválido'),
+  token: z.string().min(1, 'Falta el token'),
+  password: z.string().min(6, 'Mínimo 6 caracteres'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Las contraseñas no coinciden',
+  path: ['confirmPassword'],
+});
+
 export const campeonatoSchema = z.object({
   nombre: z.string().min(3, 'Mínimo 3 caracteres'),
   anio: z.number().int().min(2000).max(2100),

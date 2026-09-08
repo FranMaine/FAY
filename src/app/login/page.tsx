@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,8 +19,10 @@ const loginSchema = z.object({
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const passwordRecienRestablecida = searchParams.get("reset") === "1";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,6 +65,11 @@ export default function LoginPage() {
           <CardDescription>Accedé a tu cuenta de FAY Stats</CardDescription>
         </CardHeader>
         <CardContent>
+          {passwordRecienRestablecida && !error && (
+            <div className="bg-green-500/10 border border-green-500/50 text-green-500 text-sm p-3 rounded-md mb-4 text-center">
+              Tu contraseña se actualizó correctamente. Ya podés iniciar sesión.
+            </div>
+          )}
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center">
               {error}
@@ -83,6 +91,9 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">Contraseña</label>
+                <Link href="/olvide-password" className="text-xs text-primary hover:underline font-medium">
+                  ¿Olvidaste tu contraseña?
+                </Link>
               </div>
               <Input
                 {...form.register("password")}
@@ -126,5 +137,15 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  // useSearchParams necesita estar debajo de un Suspense boundary en el
+  // App Router -sin esto, Next tira error en build.
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }
