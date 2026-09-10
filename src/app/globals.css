@@ -43,3 +43,12 @@ body {
   background: var(--color-primary);
   color: white;
 }
+
+/* Scroll infinito de la marquesina de logos de categoría (ver
+   ClaseMarquee). El contenido se duplica una vez y se desplaza -50% de su
+   propio ancho -al llegar ahí el segundo tramo queda pixel a pixel donde
+   arrancó el primero, así el loop no se nota. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}

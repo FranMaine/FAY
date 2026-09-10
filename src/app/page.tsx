@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
 import { SailorSearch } from "@/components/search/sailor-search";
+import { ClaseMarquee } from "@/components/marquee/clase-marquee";
+import { ClaseIcon } from "@/components/icons/clase-icons";
 
 // Sin esto, Next.js pre-renderiza esta página como HTML ESTÁTICO en cada
 // deploy -los números de "Regatistas"/"Campeonatos" y la lista de últimos
@@ -95,6 +97,10 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Franja de categorías: qué clases de barco tiene cargadas el sitio,
+          antes de mostrar los últimos resultados. */}
+      <ClaseMarquee />
+
       {/* Latest Championships */}
       <section className="py-20 px-6 max-w-7xl mx-auto w-full relative z-10">
         <div className="flex items-center justify-between mb-10">
@@ -110,7 +116,8 @@ export default async function LandingPage() {
               <Link href={`/campeonatos/${camp.id}`}>
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-1 rounded-md">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-1 rounded-md">
+                      <ClaseIcon nombreClase={camp.clase.nombre} className="w-5 h-5 shrink-0" />
                       {camp.clase.nombre}
                     </span>
                     <span className="text-sm text-muted-foreground font-medium">{camp.anio}</span>

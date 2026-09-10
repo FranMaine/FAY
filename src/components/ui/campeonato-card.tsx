@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ClaseIcon } from '@/components/icons/clase-icons';
 
 export interface Campeonato {
   id: string;
@@ -24,7 +25,8 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
       <Card className="h-full transition-all duration-200 hover:scale-[1.02] hover:border-primary/50">
         <CardContent className="p-5 flex flex-col h-full">
           <div className="flex justify-between items-start mb-4">
-            <Badge variant="accent" className="font-semibold">
+            <Badge variant="accent" className="font-semibold flex items-center gap-1.5">
+              <ClaseIcon nombreClase={campeonato.clase} className="w-6 h-6 shrink-0 text-primary" />
               {campeonato.clase}
             </Badge>
             <Badge variant={campeonato.estado === 'PUBLICADO' ? 'success' : 'muted'} className="text-[10px]">

@@ -8,6 +8,7 @@ import { PlusIcon, EditIcon, TrashIcon, EyeIcon, Loader2Icon } from "lucide-reac
 import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
 import { mensajeDeError } from "@/lib/utils";
+import { ClaseIcon } from "@/components/icons/clase-icons";
 
 interface Campeonato {
   id: string;
@@ -115,7 +116,12 @@ export default function AdminCampeonatosPage() {
                     <tr key={c.id} className="hover:bg-background/50 transition-colors">
                       <td className="px-6 py-4 font-medium">{c.nombre}</td>
                       <td className="px-6 py-4">{c.anio}</td>
-                      <td className="px-6 py-4">{c.clase?.nombre}</td>
+                      <td className="px-6 py-4">
+                        <span className="flex items-center gap-2">
+                          {c.clase && <ClaseIcon nombreClase={c.clase.nombre} className="w-6 h-6 shrink-0 text-primary" />}
+                          {c.clase?.nombre}
+                        </span>
+                      </td>
                       <td className="px-6 py-4">
                         <Badge variant={c.estado === "PUBLICADO" ? "default" : "muted"} className={
                           c.estado === "PUBLICADO" ? "bg-green-500/20 text-green-500 hover:bg-green-500/30" : "bg-amber-500/20 text-amber-500 hover:bg-amber-500/30"
