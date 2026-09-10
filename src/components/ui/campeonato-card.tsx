@@ -26,7 +26,7 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
         <CardContent className="p-5 flex flex-col h-full">
           <div className="flex justify-between items-start mb-4">
             <Badge variant="accent" className="font-semibold flex items-center gap-1.5">
-              <ClaseIcon nombreClase={campeonato.clase} className="w-6 h-6 shrink-0 text-primary" />
+              <ClaseIcon nombreClase={campeonato.clase} className="w-6 h-6 shrink-0 object-contain" />
               {campeonato.clase}
             </Badge>
             <Badge variant={campeonato.estado === 'PUBLICADO' ? 'success' : 'muted'} className="text-[10px]">

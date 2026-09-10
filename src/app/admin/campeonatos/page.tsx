@@ -118,7 +118,7 @@ export default function AdminCampeonatosPage() {
                       <td className="px-6 py-4">{c.anio}</td>
                       <td className="px-6 py-4">
                         <span className="flex items-center gap-2">
-                          {c.clase && <ClaseIcon nombreClase={c.clase.nombre} className="w-6 h-6 shrink-0 text-primary" />}
+                          {c.clase && <ClaseIcon nombreClase={c.clase.nombre} className="w-6 h-6 shrink-0 object-contain" />}
                           {c.clase?.nombre}
                         </span>
                       </td>
