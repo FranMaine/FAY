@@ -63,6 +63,33 @@ describe('detectarPorEncabezado', () => {
     expect(detectado.puestoCol).toBe(-1);
     expect(detectado.clubCol).toBe(-1);
   });
+
+  it('prefiere "Nett" sobre "Total" para totalCol cuando el archivo trae los dos por separado', () => {
+    // "Total" es la suma bruta de TODAS las regatas, sin descartar nada;
+    // "Nett" es el puntaje final después de aplicar los descartes -si se
+    // toma "Total" como si fuera el puntaje oficial final (totalCol
+    // apuntaba ahí antes de este fix), queda inflado en los puntos de la
+    // regata descartada.
+    const header = ['Rank', 'Vela', 'Timonel', 'Club', 'R1', 'R2', 'Total', 'Nett'];
+    const detectado = detectarPorEncabezado(header);
+    expect(detectado.totalCol).toBe(7); // "Nett", no 6 ("Total")
+  });
+
+  it('usa "Total" cuando no hay una columna "Nett" separada (la mayoría de las fuentes)', () => {
+    const header = ['Rank', 'Vela', 'Timonel', 'Club', 'R1', 'R2', 'Total'];
+    const detectado = detectarPorEncabezado(header);
+    expect(detectado.totalCol).toBe(6);
+  });
+
+  it('reconoce "Tripulación" (con tilde) como nombreCol cuando no hay columna de timonel separada', () => {
+    // Antes de este fix, normalizar() no reemplazaba tildes por la letra
+    // sin tilde -las borraba directo (BORRABA la letra, "Tripulación"
+    // quedaba "tripulacin", sin la "o"), así que nunca matcheaba contra el
+    // sinónimo 'tripulacion' aunque estuviera en la lista.
+    const header = ['Rank', 'Proa', 'Vela', 'Tripulación', 'Club', 'R1', 'Total', 'Nett'];
+    const detectado = detectarPorEncabezado(header);
+    expect(detectado.nombreCol).toBe(3);
+  });
 });
 
 describe('repararFilasDivididas', () => {

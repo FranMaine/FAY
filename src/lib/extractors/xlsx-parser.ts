@@ -137,11 +137,19 @@ export function leerGridXLSX(buffer: Buffer): { header: string[]; rows: FilaCrud
   return { header, rows: repararFilasDivididas(rows) };
 }
 
-// Comparamos ignorando may/min y cualquier caracter que no sea letra o
-// número -así "Sail #", "Sail#" y "sail" son todos la misma columna, en
-// vez de exigir que el encabezado coincida carácter por carácter con
-// alguno de nuestros nombres esperados.
-const normalizar = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+// Comparamos ignorando may/min, tildes, y cualquier caracter que no sea
+// letra o número -así "Sail #", "Sail#" y "sail" son todos la misma
+// columna, en vez de exigir que el encabezado coincida carácter por
+// carácter con alguno de nuestros nombres esperados.
+//
+// El paso normalize('NFD') + quitar diacríticos es necesario: antes esto
+// solo borraba directo cualquier caracter fuera de a-z0-9, así que una
+// tilde no se convertía en la letra sin tilde -desaparecía. "Tripulación"
+// quedaba "tripulacin" (sin la "o"), que nunca iba a matchear contra el
+// sinónimo 'tripulacion'. Con NFD, "ó" se separa en "o" + un diacrítico
+// combinante aparte, que la segunda regex sí saca limpio.
+const normalizar = (s: string) =>
+  s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
 function buscarPorNombre(header: string[], ...names: string[]): number {
   const normalizados = names.map(normalizar);
@@ -162,7 +170,11 @@ export function detectarPorEncabezado(header: string[]) {
   // Mengano" en una sola celda).
   const timonelCol = buscarPorNombre(header, 'skipper', 'helm', 'helmname', 'timonel');
   const tripulanteCol = buscarPorNombre(header, 'crew', 'crewname', 'tripulante');
-  const nombreCol = timonelCol !== -1 ? timonelCol : buscarPorNombre(header, 'navegante', 'nombre', 'crew');
+  // "Tripulación" -sin columna de timonel separada- es otra forma de traer
+  // el nombre ya combinado en una sola celda ("BLOSSON & BLOSSON"), vista en
+  // los archivos de Vela Fest 2025 (29er, 420): no significa "columna de
+  // tripulante adicional" acá, es la única columna de nombre que hay.
+  const nombreCol = timonelCol !== -1 ? timonelCol : buscarPorNombre(header, 'navegante', 'nombre', 'crew', 'tripulacion');
   const nombreColsExtra = timonelCol !== -1 && tripulanteCol !== -1 && tripulanteCol !== nombreCol ? [tripulanteCol] : [];
 
   return {
@@ -181,7 +193,20 @@ export function detectarPorEncabezado(header: string[]) {
     nombreColsExtra,
     flotaCol: buscarPorNombre(header, 'Subgroup division', 'subgroup division', 'subgroup', 'flota', 'split', 'split #4', 'categoria', 'category'),
     clubCol: buscarPorNombre(header, 'club', 'from'),
-    totalCol: buscarPorNombre(header, 'Total puntos', 'total puntos', 'total', 'tot', 'tot.'),
+    // Cuando el archivo trae "Total" (la suma bruta de TODAS las regatas,
+    // sin descartar nada) Y "Nett" (el neto, después de aplicar los
+    // descartes) como dos columnas separadas -común en exportaciones tipo
+    // Sailwave, visto en Semana de Buenos Aires y Vela Fest 2025-, el valor
+    // que de verdad representa el puntaje final de cada regatista es
+    // "Nett", no "Total". Antes esto matcheaba "Total" siempre (viene
+    // primero en la lista de sinónimos) y ese puntaje bruto -inflado en
+    // exactamente los puntos de la regata descartada- se guardaba como
+    // totalOficial. Preferimos "Nett"/"Neto" cuando existe; si no hay
+    // columna separada (la mayoría de las fuentes solo traen una, que ES
+    // el puntaje final), seguimos cayendo en "Total"/"Tot" como antes.
+    totalCol: buscarPorNombre(header, 'nett', 'neto') !== -1
+      ? buscarPorNombre(header, 'nett', 'neto')
+      : buscarPorNombre(header, 'Total puntos', 'total puntos', 'total', 'tot', 'tot.'),
   };
 }
 

@@ -162,4 +162,41 @@ describe('generarClasificacion', () => {
     const result = generarClasificacion(regatistas, 0);
     expect(result[0].totalNeto).toBe(2);
   });
+
+  it('con puestoOficial/totalOficial, recalcula el neto propio en vez de usar totalOficial tal cual', () => {
+    // Reproduce el bug real: un archivo con columnas "Total" (bruto) Y
+    // "Nett" (neto) separadas mapeaba totalCol a "Total" -totalOficial
+    // terminaba siendo el puntaje BRUTO, y este atajo (todos los
+    // regatistas traen puesto/total "oficial") lo usaba tal cual como si
+    // fuera el neto: el punteo mostrado quedaba inflado en exactamente los
+    // puntos de la regata descartada, y ninguna regata quedaba marcada
+    // como descartada.
+    const regatistas = [
+      {
+        regatistaId: 'r1',
+        nombre: 'Vito Torino',
+        club: 'CVB',
+        // Puntos reales: [2,3,2,2,2,8,2,3] -bruto=24, neto (con 1
+        // descarte, se tira el 8) = 16.
+        puestoOficial: 2,
+        totalOficial: 24, // el archivo solo traía "Total" (bruto), no "Nett"
+        resultados: [
+          { regataNumero: 1, puesto: 2, puntos: 2, observacion: null },
+          { regataNumero: 2, puesto: 3, puntos: 3, observacion: null },
+          { regataNumero: 3, puesto: 2, puntos: 2, observacion: null },
+          { regataNumero: 4, puesto: 2, puntos: 2, observacion: null },
+          { regataNumero: 5, puesto: 2, puntos: 2, observacion: null },
+          { regataNumero: 6, puesto: 8, puntos: 8, observacion: null },
+          { regataNumero: 7, puesto: 2, puntos: 2, observacion: null },
+          { regataNumero: 8, puesto: 3, puntos: 3, observacion: null },
+        ],
+      },
+    ];
+
+    const result = generarClasificacion(regatistas, 1);
+    expect(result[0].totalNeto).toBe(16); // NO 24 (el bug)
+    expect(result[0].totalBruto).toBe(24);
+    expect(result[0].posicionFinal).toBe(2); // sigue confiando en puestoOficial para el orden
+    expect(result[0].resultados.find((r) => r.regataNumero === 6)!.descartado).toBe(true);
+  });
 });

@@ -238,17 +238,37 @@ export function generarClasificacion(
   );
 
   if (todosConOficial) {
-    const clasificacion = regatistas.map(r => ({
-      regatistaId: r.regatistaId,
-      nombre: r.nombre,
-      club: r.club,
-      flota: r.flota ?? null,
-      datosExtra: r.datosExtra ?? null,
-      resultados: r.resultados.map(res => ({ ...res, descartado: false })),
-      totalBruto: r.totalOficial as number,
-      totalNeto: r.totalOficial as number,
-      posicionFinal: r.puestoOficial as number,
-    }));
+    // Seguimos confiando en puestoOficial para el ORDEN final -evita que
+    // tengamos que reproducir nosotros los desempates y el orden de flota
+    // de la fuente, que es justamente lo que este atajo quiere evitar. Pero
+    // totalOficial NO se usa más como el puntaje neto tal cual: en
+    // archivos que traen "Total" (bruto, sin descartar nada) Y "Nett"
+    // (neto) como dos columnas separadas -Vela Fest, Semana de Buenos
+    // Aires-, la columna que matchea el detector de encabezados es
+    // "Total", así que totalOficial terminaba siendo el puntaje BRUTO. Acá
+    // adentro se mostraba tal cual como si fuera el neto -inflado en
+    // exactamente los puntos de la regata descartada, para cualquier
+    // campeonato con descartes > 0- y ninguna regata quedaba marcada como
+    // descartada en la tabla. Recalculamos el descarte nosotros (la parte
+    // simple y ya verificada: tirar las N peores regatas crudas) en vez de
+    // confiar en totalOficial para el VALOR del puntaje.
+    const clasificacion = regatistas.map(r => {
+      const resultadosConDescartes = aplicarDescartes(
+        r.resultados.map(res => ({ ...res, descartado: false })),
+        cantidadDescartes
+      );
+      return {
+        regatistaId: r.regatistaId,
+        nombre: r.nombre,
+        club: r.club,
+        flota: r.flota ?? null,
+        datosExtra: r.datosExtra ?? null,
+        resultados: resultadosConDescartes,
+        totalBruto: calcularTotalBruto(resultadosConDescartes),
+        totalNeto: calcularTotalNeto(resultadosConDescartes),
+        posicionFinal: r.puestoOficial as number,
+      };
+    });
     clasificacion.sort((a, b) => a.posicionFinal - b.posicionFinal);
     return clasificacion;
   }
