@@ -10,7 +10,7 @@ export function ClaseMarquee() {
 
   return (
     <div className="relative overflow-hidden py-10 border-y border-border bg-surface/30 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-      <div className="flex w-max animate-[marquee_28s_linear_infinite] hover:[animation-play-state:paused]">
+      <div className="flex w-max animate-[marquee_28s_linear_infinite]">
         {doble.map(([slug, { label }], i) => (
           <div key={`${slug}-${i}`} className="flex flex-col items-center gap-2 px-8 shrink-0 w-28">
             {/* eslint-disable-next-line @next/next/no-img-element -- ver ClaseIcon en clase-icons.tsx */}
