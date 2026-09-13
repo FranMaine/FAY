@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sailboat } from "lucide-react";
+import { SailingBoat } from "@/components/icons/sailing-boat";
 import { mensajeDeError } from "@/lib/utils";
 
 const schema = z.object({
@@ -63,7 +63,7 @@ function ResetPasswordForm() {
       <Card className="w-full max-w-md bg-surface border-border">
         <CardHeader className="space-y-2 items-center text-center">
           <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-            <Sailboat className="w-6 h-6 text-primary" />
+            <SailingBoat className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Elegí tu nueva contraseña</CardTitle>
           <CardDescription>{email}</CardDescription>

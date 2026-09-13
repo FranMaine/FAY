@@ -8,7 +8,8 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { SearchIcon, Sailboat, Loader2Icon, UserIcon, CheckIcon } from "lucide-react";
+import { SearchIcon, Loader2Icon, UserIcon, CheckIcon } from "lucide-react";
+import { SailingBoat } from "@/components/icons/sailing-boat";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { mensajeDeError } from "@/lib/utils";
@@ -155,7 +156,7 @@ export default function RegistroPage() {
       <Card className="w-full max-w-md bg-surface border-border">
         <CardHeader className="space-y-2 items-center text-center">
           <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-            <Sailboat className="w-6 h-6 text-primary" />
+            <SailingBoat className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
           <CardDescription>Paso {step} de 2</CardDescription>

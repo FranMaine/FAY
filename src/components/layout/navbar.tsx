@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Sailboat, Menu, X, Trophy, BarChart3, User, LogIn, Home } from 'lucide-react';
+import { Menu, X, Trophy, BarChart3, User, LogIn, Home } from 'lucide-react';
+import { SailingBoat } from '@/components/icons/sailing-boat';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -32,7 +33,7 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
-              <Sailboat className="h-6 w-6 text-primary" />
+              <SailingBoat className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold text-foreground">FAY Stats</span>
             </Link>
           </div>

@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sailboat } from "lucide-react";
+import { SailingBoat } from "@/components/icons/sailing-boat";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -59,7 +59,7 @@ function LoginForm() {
       <Card className="w-full max-w-md bg-surface border-border">
         <CardHeader className="space-y-2 items-center text-center">
           <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-            <Sailboat className="w-6 h-6 text-primary" />
+            <SailingBoat className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
           <CardDescription>Accedé a tu cuenta de FAY Stats</CardDescription>
