@@ -8,6 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon } from "lucide-react";
 
+// Mismo caso que /campeonatos/[id]: sin esto, el perfil queda cacheado
+// estático para siempre después de la primera visita -si esa persona
+// corre una nueva regata, nadie ve el resultado nuevo en su perfil hasta
+// el próximo deploy. ISR de 60s, igual que el resto de las páginas que
+// muestran datos que cambian.
+export const revalidate = 60;
+
 async function getRegatistaProfile(id: string) {
   const regatista = await prisma.regatista.findUnique({
     where: { id },

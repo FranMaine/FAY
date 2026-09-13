@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 import { SessionProvider } from '@/components/providers/session-provider';
+import { BackToTop } from '@/components/layout/back-to-top';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="border-t border-border py-6 text-center text-sm text-muted">
             <p>FAY Stats © {new Date().getFullYear()} — Estadísticas de Vela Argentina</p>
           </footer>
+          <BackToTop />
         </SessionProvider>
       </body>
     </html>

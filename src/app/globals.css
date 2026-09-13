@@ -128,3 +128,21 @@ body {
     animation: none;
   }
 }
+
+/* El agua debajo del velero (ver SailingBoat): el path dibuja un patrón de
+   onda periódico (período de 5 de las 40 unidades del viewBox = 12.5% del
+   ancho) -trasladarlo exactamente un período y en loop da un flujo
+   continuo sin salto en el empalme, el mismo truco que .marquee-track pero
+   sin necesitar duplicar el contenido. */
+@keyframes water-flow {
+  from { transform: translateX(0); }
+  to { transform: translateX(-12.5%); }
+}
+.water-ripple path {
+  animation: water-flow 1.2s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .water-ripple path {
+    animation: none;
+  }
+}

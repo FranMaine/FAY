@@ -6,6 +6,17 @@ import prisma from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
 import { notFound } from "next/navigation";
 
+// Sin esto, esta página quedaba 100% estática después de la primera
+// visita -Next.js la cachea indefinidamente porque no usa ninguna API
+// dinámica (solo el "id" de la ruta, conocido). Si un admin corrige un
+// resultado o publica una regata nueva, quien ya la había cacheado seguía
+// viendo la versión vieja hasta el próximo deploy (mismo bug que tenía la
+// home). ISR con 60s de revalidación -igual que /rankings- da lo mejor de
+// los dos mundos: la mayoría de las visitas sigue sirviendo desde caché
+// (rápido, sin pegarle a la base en cada request), pero nunca queda
+// desactualizada por más de un minuto.
+export const revalidate = 60;
+
 type Props = {
   params: Promise<{ id: string }>;
 };

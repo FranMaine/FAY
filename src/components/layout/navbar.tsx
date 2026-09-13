@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, X, Trophy, BarChart3, User, LogIn, Home } from 'lucide-react';
 import { SailingBoat } from '@/components/icons/sailing-boat';
 import { cn } from '@/lib/utils';
@@ -26,6 +26,17 @@ export function Navbar() {
   ];
 
   const isAdmin = session?.user?.role === 'ADMIN';
+
+  // Bloquear el scroll del body mientras el menú móvil está abierto -sin
+  // esto, se podía scrollear la página de atrás mientras el menú estaba
+  // desplegado encima, algo que se siente raro en mobile (el contenido de
+  // atrás se mueve pero el menú que tapa la pantalla, no).
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [isOpen]);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-surface shadow-sm">
@@ -104,13 +115,22 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button -el ícono pasa de hamburguesa a X con un
+              cross-fade + rotación en vez de reemplazarse de golpe. */}
           <div className="flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-muted hover:bg-surface-hover hover:text-foreground focus:outline-none"
+              aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+              className="relative inline-flex items-center justify-center rounded-md p-2 h-9 w-9 text-muted hover:bg-surface-hover hover:text-foreground focus:outline-none active:scale-90 transition-transform"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <Menu className={cn(
+                'h-6 w-6 absolute transition-[opacity,transform] duration-200 ease-out',
+                isOpen ? 'opacity-0 rotate-45' : 'opacity-100 rotate-0'
+              )} />
+              <X className={cn(
+                'h-6 w-6 absolute transition-[opacity,transform] duration-200 ease-out',
+                isOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-45'
+              )} />
             </button>
           </div>
         </div>
