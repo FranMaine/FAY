@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Prata } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/navbar';
 
@@ -11,6 +11,17 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+});
+
+// Serif de acento para el titular del hero (--font-serif, mapeada en
+// globals.css) -el resto del sitio es sans-serif (Geist) de punta a punta,
+// así que reservamos este serif solo para ese único lugar donde queremos
+// que se sienta más "editorial"/cinematográfico, no como una tipografía
+// más del sistema.
+const prata = Prata({
+  variable: '--font-prata',
+  subsets: ['latin'],
+  weight: '400',
 });
 
 export const metadata: Metadata = {
@@ -26,7 +37,7 @@ import { BackToTop } from '@/components/layout/back-to-top';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} dark`}>
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${prata.variable} dark`}>
       <body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
         <SessionProvider>
           <Navbar />
