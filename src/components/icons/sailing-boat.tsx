@@ -21,6 +21,14 @@ import type { LucideProps } from "lucide-react";
 // dibuja como una ola aparte más abajo del ícono. Dos trazos (uno más
 // tenue detrás) en vez de uno solo le dan una sensación de profundidad en
 // vez de una única línea plana.
+//
+// OJO con "left-[6%] right-[6%]" sin un width explícito: un <svg> es un
+// elemento "reemplazado" (como <img>), y cuando tiene left Y right fijos
+// pero no width, el navegador IGNORA right y calcula el ancho a partir
+// del aspect-ratio intrínseco del viewBox (acá 40:8 = 5:1) en vez de
+// estirarlo entre los dos bordes -el agua terminaba mucho más ancha de lo
+// pensado y se salía por la derecha del ícono, descentrada. Por eso el
+// ancho va explícito (w-[88%]) y solo "left" para la posición.
 export function SailingBoat({ className, ...props }: LucideProps) {
   return (
     <span className="relative inline-block">
@@ -28,7 +36,7 @@ export function SailingBoat({ className, ...props }: LucideProps) {
         <Sailboat className={className} {...props} />
       </span>
       <svg
-        className="water-ripple absolute left-[6%] right-[6%] bottom-[4%] h-[22%] text-primary/70"
+        className="water-ripple absolute left-[6%] w-[88%] bottom-[4%] h-[22%] text-primary/70"
         viewBox="0 0 40 8"
         preserveAspectRatio="none"
         aria-hidden="true"

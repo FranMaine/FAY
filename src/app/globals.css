@@ -14,7 +14,6 @@
   --color-error: #ef4444;         /* red-500 */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-prata);
 }
 
 body {
@@ -152,72 +151,6 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .water-ripple path {
-    animation: none;
-  }
-}
-
-/* Titular del hero: el texto entra deslizándose desde abajo de una máscara
-   (overflow:hidden en el contenedor) en vez de solo aparecer con fade -le
-   da más presencia al elemento más grande de la página, en vez de tratarlo
-   igual que cualquier otra card con .fade-in-up. padding/margin negativos
-   en el contenedor compensan que el overflow:hidden recortaría los
-   descendentes de letras como la "y" de "Stats". */
-@keyframes hero-reveal {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-.hero-reveal-mask {
-  display: block;
-  overflow: hidden;
-  padding-bottom: 0.12em;
-  margin-bottom: -0.12em;
-}
-.hero-reveal-line {
-  display: block;
-  transform: translateY(100%);
-  animation: hero-reveal 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-reveal-line {
-    animation-duration: 1ms;
-    transform: none;
-  }
-}
-
-/* Resplandor ambiente detrás del hero: un blob difuminado en el color de
-   marca que deriva lentamente de posición/escala -sugiere movimiento de
-   agua/luz sin ser una animación literal de olas (no tenemos video de
-   fondo como el ejemplo de referencia). Muy lento (10s) y de bajo
-   contraste a propósito -es atmósfera, no algo que deba llamar la
-   atención por sí mismo. */
-@keyframes ambient-drift {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-  50% { transform: translate(-46%, -54%) scale(1.15); opacity: 0.8; }
-}
-.ambient-blob {
-  animation: ambient-drift 10s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .ambient-blob {
-    animation: none;
-    transform: translate(-50%, -50%);
-    opacity: 0.5;
-  }
-}
-
-/* Botón "scroll cue" al pie del hero: el chevron rebota suavemente para
-   sugerir "hay más contenido abajo" -mismo criterio que la marquesina: es
-   el único elemento con loop propio en la sección, y se frena entero con
-   reduced-motion. */
-@keyframes scroll-cue-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
-}
-.scroll-cue-icon {
-  animation: scroll-cue-bounce 1.6s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .scroll-cue-icon {
     animation: none;
   }
 }
