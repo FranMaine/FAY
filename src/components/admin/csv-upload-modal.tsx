@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { UploadIcon, CheckCircleIcon, AlertCircleIcon, XIcon, Loader2Icon, ArrowLeftIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { mensajeDeError } from "@/lib/utils";
@@ -64,8 +65,6 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
     regatasNuevas: number;
     resultadosInsertados: number;
   } | null>(null);
-
-  if (!isOpen) return null;
 
   const reset = () => {
     setFile(null);
@@ -266,9 +265,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
   const isBusy = isLoadingPreview || etapa === 'importando';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-surface border border-border rounded-xl w-full max-w-4xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
-
+    <Modal isOpen={isOpen} onClose={handleClose} className="w-full max-w-4xl max-h-[90vh]">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold">
             {etapa === 'confirmar' ? 'Confirmá las columnas detectadas' : 'Importar Resultados (CSV / Excel / PDF)'}
@@ -428,8 +425,6 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
             )}
           </div>
         </div>
-
-      </div>
-    </div>
+    </Modal>
   );
 }

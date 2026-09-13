@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Sailboat, Menu, X, Trophy, BarChart3, User, LogIn } from 'lucide-react';
+import { Sailboat, Menu, X, Trophy, BarChart3, User, LogIn, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -15,7 +15,11 @@ export function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
+  // "Inicio" lleva a la home, que también es donde está el buscador de
+  // regatistas (SailorSearch, en el hero) -un atajo directo desde
+  // cualquier página en vez de tener que volver haciendo click en el logo.
   const navLinks = [
+    { href: '/', label: 'Inicio', icon: Home },
     { href: '/campeonatos', label: 'Campeonatos', icon: Trophy },
     { href: '/rankings', label: 'Rankings', icon: BarChart3 },
   ];
@@ -38,7 +42,7 @@ export function Navbar() {
             <div className="flex items-center gap-4">
               {navLinks.map((link) => {
                 const Icon = link.icon;
-                const isActive = pathname.startsWith(link.href);
+                const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
                 return (
                   <Link
                     key={link.href}
@@ -111,13 +115,23 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden border-t border-border bg-surface">
+      {/* Mobile Menu -antes aparecía/desaparecía instantáneo (montaje
+          condicional sin transición). El truco de grid-template-rows
+          0fr→1fr anima a "altura automática" sin tener que medir el alto
+          real en JS -el contenido sigue montado siempre (así el toggle es
+          instantáneo al tocar de nuevo, sin esperar a que desmonte), solo
+          se colapsa visualmente. */}
+      <div
+        className={cn(
+          'md:hidden grid overflow-hidden transition-[grid-template-rows] duration-200 ease-out',
+          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        )}
+      >
+        <div className="min-h-0 overflow-hidden border-t border-border bg-surface">
           <div className="space-y-1 px-4 pb-3 pt-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = pathname.startsWith(link.href);
+              const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
               return (
                 <Link
                   key={link.href}
@@ -189,7 +203,7 @@ export function Navbar() {
             </div>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 }

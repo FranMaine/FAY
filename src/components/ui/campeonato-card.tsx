@@ -22,7 +22,7 @@ interface CampeonatoCardProps {
 export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
   return (
     <Link href={`/campeonatos/${campeonato.id}`} className="block h-full">
-      <Card className="h-full transition-all duration-200 hover:scale-[1.02] hover:border-primary/50">
+      <Card className="h-full transition-[transform,border-color] duration-200 ease-out hover:scale-[1.02] hover:border-primary/50">
         <CardContent className="p-5 flex flex-col h-full">
           <div className="flex justify-between items-start mb-4">
             <Badge variant="accent" className="font-semibold flex items-center gap-1.5">

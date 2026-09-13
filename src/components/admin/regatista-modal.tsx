@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
 import { AlertCircleIcon, XIcon, Loader2Icon } from "lucide-react";
 import { mensajeDeError } from "@/lib/utils";
 
@@ -31,8 +32,6 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
       setError(null);
     }
   }, [isOpen, regatista]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async () => {
     if (nombre.trim().length < 2) {
@@ -63,8 +62,7 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-surface border border-border rounded-xl w-full max-w-md shadow-xl overflow-hidden flex flex-col">
+    <Modal isOpen={isOpen} onClose={onClose} className="w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold">{regatista ? "Editar Regatista" : "Nuevo Regatista"}</h2>
           <Button variant="ghost" size="icon" onClick={onClose} disabled={isSaving}>
@@ -117,7 +115,6 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
             )}
           </Button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

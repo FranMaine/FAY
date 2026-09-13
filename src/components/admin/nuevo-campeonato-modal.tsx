@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Modal } from "@/components/ui/modal";
 import { AlertCircleIcon, XIcon, Loader2Icon } from "lucide-react";
 import { mensajeDeError } from "@/lib/utils";
 
@@ -34,8 +35,6 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
   const [descartes, setDescartes] = useState("1");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const resetAndClose = () => {
     setNombre("");
@@ -91,8 +90,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-surface border border-border rounded-xl w-full max-w-md shadow-xl overflow-hidden flex flex-col">
+    <Modal isOpen={isOpen} onClose={resetAndClose} className="w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold">Nuevo Campeonato</h2>
           <Button variant="ghost" size="icon" onClick={resetAndClose} disabled={isSaving}>
@@ -181,7 +179,6 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
             )}
           </Button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

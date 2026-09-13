@@ -111,8 +111,12 @@ export default async function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {campeonatos.map((camp) => (
-            <Card key={camp.id} className="bg-surface border-border hover:border-primary/50 transition-colors group">
+          {campeonatos.map((camp, i) => (
+            <Card
+              key={camp.id}
+              className="fade-in-up bg-surface border-border hover:border-primary/50 transition-colors group"
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
               <Link href={`/campeonatos/${camp.id}`}>
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
