@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import Link from "next/link";
+import Image from "next/image";
 import { Trophy, ArrowRight, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,11 +11,15 @@ import { ClaseMarquee } from "@/components/marquee/clase-marquee";
 import { ClaseIcon } from "@/components/icons/clase-icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
-// Nombre de archivo esperado para el video de fondo del hero (ver sección
-// HERO más abajo) -mientras no esté, el hero muestra un degradé como
-// placeholder en su lugar. Poniendo el archivo ahí con este nombre exacto
-// (sin tocar código) el hero pasa a usarlo solo.
-const VIDEO_HERO_PATH = path.join(process.cwd(), "public", "videos", "velero-hero.mp4");
+// Foto de fondo del hero (ver sección HERO más abajo) -mientras no esté,
+// el hero muestra un degradé como placeholder en su lugar. Es una foto
+// real de la 51ª Semana Nacional del Yachting (crédito visible: Capizzano
+// Photography), escalada desde una preview de 500x334px con
+// scripts/upscale-hero-photo.ts -no es una foto nativa en alta
+// resolución, así que si en algún momento aparece el archivo original en
+// mejor calidad, conviene reemplazar public/hero/velero-hero.jpg por ese
+// (mismo nombre, mismo lugar, no hace falta tocar este archivo).
+const FOTO_HERO_PATH = path.join(process.cwd(), "public", "hero", "velero-hero.jpg");
 
 // Sin esto, Next.js pre-renderiza esta página como HTML ESTÁTICO en cada
 // deploy -los números de "Regatistas"/"Campeonatos" y la lista de últimos
@@ -48,26 +53,30 @@ async function getStats() {
 export default async function LandingPage() {
   const campeonatos = await getUltimosCampeonatos();
   const stats = await getStats();
-  const tieneVideoHero = fs.existsSync(VIDEO_HERO_PATH);
+  const tieneFotoHero = fs.existsSync(FOTO_HERO_PATH);
 
   return (
     <main className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Hero Section: foto/video de fondo a pantalla completa con el
-          buscador encima -mientras no tengamos el video final, un degradé
-          hace de placeholder (mismo lugar, mismo overlay), así que
-          agregar el archivo en public/videos/velero-hero.mp4 alcanza para
-          que se use sin tocar este componente. El texto entra con la
-          misma animación (fade-in-up) escalonada elemento por elemento,
-          arriba del pliegue así que dispara apenas carga. */}
+      {/* Hero Section: foto de fondo a pantalla completa con el buscador
+          encima -mientras no tengamos la foto, un degradé hace de
+          placeholder (mismo lugar, mismo overlay), así que agregar el
+          archivo en public/hero/velero-hero.jpg alcanza para que se use
+          sin tocar este componente. El texto entra con la misma animación
+          (fade-in-up) escalonada elemento por elemento, arriba del
+          pliegue así que dispara apenas carga. */}
       <section className="relative min-h-[560px] md:min-h-[640px] flex items-center justify-center overflow-hidden text-white">
-        {tieneVideoHero ? (
-          <video
-            className="absolute inset-0 z-0 h-full w-full object-cover"
-            src="/videos/velero-hero.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
+        {tieneFotoHero ? (
+          // Es la imagen más grande de la página (LCP) -next/image con
+          // priority la precarga y la sirve en el formato más liviano que
+          // soporte el navegador (webp/avif) en vez de bajar siempre el
+          // jpg de origen entero.
+          <Image
+            src="/hero/velero-hero.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover z-0"
             aria-hidden="true"
           />
         ) : (
