@@ -7,7 +7,17 @@
    cambiar los valores acá, no tocar cada componente uno por uno. Los
    pocos lugares con color hardcodeado para el tema oscuro (el gráfico de
    evolución histórica, en particular) se ajustaron aparte. */
-@theme inline {
+/* OJO acá: "@theme" (sin "inline") a propósito. Con "@theme inline",
+   Tailwind v4 hornea el valor literal de cada color adentro de cada clase
+   generada (ej: ".bg-surface{background-color:#fff}") en vez de
+   ".bg-surface{background-color:var(--color-surface)}" -sirve para los
+   fonts de next/font (abajo) pero rompe el toggle de tema: si el valor
+   queda grabado a fuego en el CSS de cada clase, pisar la variable
+   después (en .dark, ver más abajo) no cambia nada. Sin "inline" sí queda
+   la indirección var(), así que las mismas clases de siempre
+   (bg-surface, text-muted, etc.) seguían funcionando en todo el código
+   sin tocarlas, y ahora además reaccionan al toggle. */
+@theme {
   --color-background: #f8fafc;    /* slate-50 */
   --color-foreground: #0f172a;    /* slate-900 */
   --color-surface: #ffffff;       /* white */
@@ -20,8 +30,36 @@
   --color-border: #e2e8f0;        /* slate-200 */
   --color-success: #059669;       /* emerald-600 -más oscuro que antes (emerald-500) para legibilidad sobre blanco */
   --color-error: #dc2626;         /* red-600 -ídem (antes red-500) */
+}
+
+/* Estos dos SÍ necesitan "inline": --font-sans no es un color literal
+   sino una referencia a la variable que genera next/font en runtime
+   (--font-geist-sans, inyectada vía className en <html>) -sin "inline"
+   Tailwind no la resuelve bien en el CSS generado. */
+@theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Paleta oscura (la que tenía el sitio antes de pasar a clara): se activa
+   agregando la clase "dark" al <html> (ver ThemeToggle). Mismos nombres
+   de token que el bloque claro de arriba -alcanza con pisar el valor de
+   la custom property acá, ninguna clase de utilidad (bg-surface,
+   text-foreground, etc.) necesita un className "dark:" especial en cada
+   componente. */
+:root.dark {
+  --color-background: #020617;    /* slate-950 */
+  --color-foreground: #f8fafc;    /* slate-50 */
+  --color-surface: #1e293b;       /* slate-800 */
+  --color-surface-hover: #334155; /* slate-700 */
+  --color-primary: #3b82f6;       /* blue-500 */
+  --color-primary-hover: #2563eb; /* blue-600 */
+  --color-accent: #fbbf24;        /* amber-400 */
+  --color-muted: #94a3b8;         /* slate-400 */
+  --color-muted-foreground: var(--color-muted);
+  --color-border: #334155;        /* slate-700 */
+  --color-success: #10b981;       /* emerald-500 */
+  --color-error: #ef4444;         /* red-500 */
 }
 
 body {

@@ -7,6 +7,7 @@ import { Menu, X, Trophy, BarChart3, User, LogIn, Home } from 'lucide-react';
 import { SailingBoat } from '@/components/icons/sailing-boat';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 import { useSession, signOut } from 'next-auth/react';
 import { LogOut, Shield } from 'lucide-react';
@@ -113,11 +114,15 @@ export function Navbar() {
                 </>
               )}
             </div>
+            <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button -el ícono pasa de hamburguesa a X con un
-              cross-fade + rotación en vez de reemplazarse de golpe. */}
-          <div className="flex md:hidden">
+              cross-fade + rotación en vez de reemplazarse de golpe. El
+              toggle de tema va al lado, siempre visible (no hace falta
+              abrir el menú para cambiar de tema). */}
+          <div className="flex items-center gap-1 md:hidden">
+            <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
