@@ -14,11 +14,10 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 // Foto de fondo del hero (ver sección HERO más abajo) -mientras no esté,
 // el hero muestra un degradé como placeholder en su lugar. Es una foto
 // real de la 51ª Semana Nacional del Yachting (crédito visible: Capizzano
-// Photography), escalada desde una preview de 500x334px con
-// scripts/upscale-hero-photo.ts -no es una foto nativa en alta
-// resolución, así que si en algún momento aparece el archivo original en
-// mejor calidad, conviene reemplazar public/hero/velero-hero.jpg por ese
-// (mismo nombre, mismo lugar, no hace falta tocar este archivo).
+// Photography), escalada a 1920px de ancho con
+// scripts/upscale-hero-photo.ts. Si en algún momento aparece un archivo
+// en mejor calidad, conviene reemplazar public/hero/velero-hero.jpg por
+// ese (mismo nombre, mismo lugar, no hace falta tocar este archivo).
 const FOTO_HERO_PATH = path.join(process.cwd(), "public", "hero", "velero-hero.jpg");
 
 // Sin esto, Next.js pre-renderiza esta página como HTML ESTÁTICO en cada
