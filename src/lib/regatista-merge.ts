@@ -131,3 +131,72 @@ export async function buscarRegatistasDuplicados(): Promise<GrupoDuplicado[]> {
 
   return [...grupos.values()].filter((g) => g.regatistas.length > 1);
 }
+
+export interface RegatistaInfo {
+  id: string;
+  nombre: string;
+  club: string | null;
+  resultadosCount: number;
+  createdAt: Date;
+}
+
+export interface CandidatoApellidoSuelto {
+  suelto: RegatistaInfo;
+  candidatos: RegatistaInfo[];
+}
+
+/**
+ * Detecta regatistas cuyo nombre es UNA sola palabra (típico de un
+ * campeonato que solo traía el apellido en vez del nombre completo -ver
+ * scripts/audit-db.ts) y que esa palabra aparece dentro del nombre de
+ * otro regatista de nombre completo -candidatos a ser la misma persona
+ * cargada aparte por error.
+ *
+ * A diferencia de buscarRegatistasDuplicados (nombre normalizado
+ * IDÉNTICO: ahí no hay ambigüedad, todos son la misma persona y se
+ * fusionan entre sí), acá puede haber VARIOS candidatos plausibles para
+ * el mismo apellido suelto -personas reales distintas que comparten
+ * apellido (ej: "DIAZ" podría ser cualquiera de 9 "Fulano Diaz"
+ * distintos). Por eso NO se agrupan para fusionar en bloque -eso uniría
+ * por error a esas personas distintas entre sí-, sino que se devuelve la
+ * lista completa de candidatos para que un humano elija cuál (o ninguno)
+ * es la persona correcta antes de fusionar.
+ */
+export async function buscarCandidatosApellidoSuelto(): Promise<CandidatoApellidoSuelto[]> {
+  const regatistas = await prisma.regatista.findMany({
+    include: { club: true, _count: { select: { resultados: true } } },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  const toInfo = (r: (typeof regatistas)[number]): RegatistaInfo => ({
+    id: r.id,
+    nombre: r.nombre,
+    club: r.club?.nombre ?? null,
+    resultadosCount: r._count.resultados,
+    createdAt: r.createdAt,
+  });
+
+  const tokensDe = (nombre: string) => normalizarNombre(nombre).split(' ').filter(Boolean);
+
+  const porToken = new Map<string, typeof regatistas>();
+  for (const r of regatistas) {
+    for (const t of tokensDe(r.nombre)) {
+      if (!porToken.has(t)) porToken.set(t, []);
+      porToken.get(t)!.push(r);
+    }
+  }
+
+  const resultado: CandidatoApellidoSuelto[] = [];
+  for (const r of regatistas) {
+    const tokensR = tokensDe(r.nombre);
+    if (tokensR.length !== 1) continue; // solo nos interesan los de una sola palabra
+
+    const candidatos = (porToken.get(tokensR[0]) || []).filter(
+      (o) => o.id !== r.id && tokensDe(o.nombre).length > 1
+    );
+    if (candidatos.length > 0) {
+      resultado.push({ suelto: toInfo(r), candidatos: candidatos.map(toInfo) });
+    }
+  }
+  return resultado;
+}
