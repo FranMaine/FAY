@@ -23,6 +23,19 @@ import { normalizarNombre } from '@/lib/nombres';
  *    regatista, cosa que el @unique de la columna no permite).
  *  - Si el duplicado tiene club y el canónico no, el canónico se queda con
  *    el club del duplicado en vez de perder ese dato.
+ *
+ * OJO: a propósito NO corre adentro de un prisma.$transaction()
+ * interactivo. Con un duplicado que tiene varias decenas de resultados,
+ * una transacción interactiva (un find+update/delete por resultado, más
+ * lo de solicitudes/usuario) hace demasiados round-trips seguidos sobre
+ * la conexión pooleada de Neon -el pooler la recicla antes de que
+ * termine y Prisma tira "Transaction not found" a mitad de camino
+ * (comprobado). Mismo motivo por el que import-service.ts tampoco usa
+ * una. En cambio, cada paso de acá abajo es idempotente por sí solo (el
+ * resultado en cuestión ya no tiene regatistaId=duplicadoId una vez
+ * movido, así que un find posterior no lo vuelve a encontrar) -si esto
+ * se corta a mitad de camino, llamar a fusionarRegatistas de nuevo con
+ * los mismos ids retoma donde quedó sin duplicar ni perder nada.
  */
 export async function fusionarRegatistas(canonicoId: string, duplicadoIds: string[]) {
   if (duplicadoIds.includes(canonicoId)) {
@@ -38,61 +51,59 @@ export async function fusionarRegatistas(canonicoId: string, duplicadoIds: strin
     duplicadosBorrados: 0,
   };
 
-  await prisma.$transaction(async (tx) => {
-    let canonico = await tx.regatista.findUnique({ where: { id: canonicoId } });
-    if (!canonico) throw new Error('Regatista canónico no encontrado');
+  let canonico = await prisma.regatista.findUnique({ where: { id: canonicoId } });
+  if (!canonico) throw new Error('Regatista canónico no encontrado');
 
-    for (const duplicadoId of duplicadoIds) {
-      const duplicado = await tx.regatista.findUnique({ where: { id: duplicadoId } });
-      if (!duplicado) continue; // ya borrado o id inválido: seguimos con el resto
+  for (const duplicadoId of duplicadoIds) {
+    const duplicado = await prisma.regatista.findUnique({ where: { id: duplicadoId } });
+    if (!duplicado) continue; // ya borrado o id inválido: seguimos con el resto
 
-      if (!canonico.clubId && duplicado.clubId) {
-        canonico = await tx.regatista.update({ where: { id: canonicoId }, data: { clubId: duplicado.clubId } });
-      }
-
-      const resultadosDuplicado = await tx.resultado.findMany({ where: { regatistaId: duplicadoId } });
-      for (const r of resultadosDuplicado) {
-        const yaExiste = await tx.resultado.findUnique({
-          where: { regataId_regatistaId: { regataId: r.regataId, regatistaId: canonicoId } },
-        });
-        if (yaExiste) {
-          await tx.resultado.delete({ where: { id: r.id } });
-          resumen.resultadosDescartados++;
-        } else {
-          await tx.resultado.update({ where: { id: r.id }, data: { regatistaId: canonicoId } });
-          resumen.resultadosMovidos++;
-        }
-      }
-
-      const solicitudesDuplicado = await tx.solicitudVinculacion.findMany({ where: { regatistaId: duplicadoId } });
-      for (const s of solicitudesDuplicado) {
-        const yaExiste = await tx.solicitudVinculacion.findUnique({
-          where: { userId_regatistaId: { userId: s.userId, regatistaId: canonicoId } },
-        });
-        if (yaExiste) {
-          await tx.solicitudVinculacion.delete({ where: { id: s.id } });
-          resumen.solicitudesDescartadas++;
-        } else {
-          await tx.solicitudVinculacion.update({ where: { id: s.id }, data: { regatistaId: canonicoId } });
-          resumen.solicitudesMovidas++;
-        }
-      }
-
-      const usuarioVinculado = await tx.user.findUnique({ where: { regatistaId: duplicadoId } });
-      if (usuarioVinculado) {
-        const canonicoYaVinculado = await tx.user.findUnique({ where: { regatistaId: canonicoId } });
-        if (canonicoYaVinculado) {
-          await tx.user.update({ where: { id: usuarioVinculado.id }, data: { regatistaId: null } });
-          resumen.usuariosDesvinculados++;
-        } else {
-          await tx.user.update({ where: { id: usuarioVinculado.id }, data: { regatistaId: canonicoId } });
-        }
-      }
-
-      await tx.regatista.delete({ where: { id: duplicadoId } });
-      resumen.duplicadosBorrados++;
+    if (!canonico.clubId && duplicado.clubId) {
+      canonico = await prisma.regatista.update({ where: { id: canonicoId }, data: { clubId: duplicado.clubId } });
     }
-  });
+
+    const resultadosDuplicado = await prisma.resultado.findMany({ where: { regatistaId: duplicadoId } });
+    for (const r of resultadosDuplicado) {
+      const yaExiste = await prisma.resultado.findUnique({
+        where: { regataId_regatistaId: { regataId: r.regataId, regatistaId: canonicoId } },
+      });
+      if (yaExiste) {
+        await prisma.resultado.delete({ where: { id: r.id } });
+        resumen.resultadosDescartados++;
+      } else {
+        await prisma.resultado.update({ where: { id: r.id }, data: { regatistaId: canonicoId } });
+        resumen.resultadosMovidos++;
+      }
+    }
+
+    const solicitudesDuplicado = await prisma.solicitudVinculacion.findMany({ where: { regatistaId: duplicadoId } });
+    for (const s of solicitudesDuplicado) {
+      const yaExiste = await prisma.solicitudVinculacion.findUnique({
+        where: { userId_regatistaId: { userId: s.userId, regatistaId: canonicoId } },
+      });
+      if (yaExiste) {
+        await prisma.solicitudVinculacion.delete({ where: { id: s.id } });
+        resumen.solicitudesDescartadas++;
+      } else {
+        await prisma.solicitudVinculacion.update({ where: { id: s.id }, data: { regatistaId: canonicoId } });
+        resumen.solicitudesMovidas++;
+      }
+    }
+
+    const usuarioVinculado = await prisma.user.findUnique({ where: { regatistaId: duplicadoId } });
+    if (usuarioVinculado) {
+      const canonicoYaVinculado = await prisma.user.findUnique({ where: { regatistaId: canonicoId } });
+      if (canonicoYaVinculado) {
+        await prisma.user.update({ where: { id: usuarioVinculado.id }, data: { regatistaId: null } });
+        resumen.usuariosDesvinculados++;
+      } else {
+        await prisma.user.update({ where: { id: usuarioVinculado.id }, data: { regatistaId: canonicoId } });
+      }
+    }
+
+    await prisma.regatista.delete({ where: { id: duplicadoId } });
+    resumen.duplicadosBorrados++;
+  }
 
   return resumen;
 }
