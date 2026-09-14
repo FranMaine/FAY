@@ -26,7 +26,7 @@ import { BackToTop } from '@/components/layout/back-to-top';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} dark`}>
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
         <SessionProvider>
           <Navbar />

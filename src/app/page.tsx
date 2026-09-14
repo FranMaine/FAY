@@ -1,6 +1,7 @@
+import fs from "node:fs";
+import path from "node:path";
 import Link from "next/link";
 import { Trophy, ArrowRight, BarChart3 } from "lucide-react";
-import { SailingBoat } from "@/components/icons/sailing-boat";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
@@ -8,6 +9,12 @@ import { SailorSearch } from "@/components/search/sailor-search";
 import { ClaseMarquee } from "@/components/marquee/clase-marquee";
 import { ClaseIcon } from "@/components/icons/clase-icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+
+// Nombre de archivo esperado para el video de fondo del hero (ver sección
+// HERO más abajo) -mientras no esté, el hero muestra un degradé como
+// placeholder en su lugar. Poniendo el archivo ahí con este nombre exacto
+// (sin tocar código) el hero pasa a usarlo solo.
+const VIDEO_HERO_PATH = path.join(process.cwd(), "public", "videos", "velero-hero.mp4");
 
 // Sin esto, Next.js pre-renderiza esta página como HTML ESTÁTICO en cada
 // deploy -los números de "Regatistas"/"Campeonatos" y la lista de últimos
@@ -41,34 +48,48 @@ async function getStats() {
 export default async function LandingPage() {
   const campeonatos = await getUltimosCampeonatos();
   const stats = await getStats();
+  const tieneVideoHero = fs.existsSync(VIDEO_HERO_PATH);
 
   return (
     <main className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Hero Section -entra con la misma animación (fade-in-up) escalonada
-          elemento por elemento, arriba del pliegue así que dispara apenas
-          carga (no hace falta ScrollReveal/IntersectionObserver acá, ya
-          está a la vista). */}
-      <section className="relative px-6 py-20 md:py-32 flex flex-col items-center text-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-surface z-0"></div>
-        <div className="relative z-10 max-w-5xl mx-auto space-y-8 flex flex-col items-center w-full">
-          <div className="fade-in-up p-3 bg-surface rounded-full shadow-xl shadow-blue-900/20 mb-2 ring-1 ring-border">
-            <SailingBoat className="w-10 h-10 text-primary" />
-          </div>
+      {/* Hero Section: foto/video de fondo a pantalla completa con el
+          buscador encima -mientras no tengamos el video final, un degradé
+          hace de placeholder (mismo lugar, mismo overlay), así que
+          agregar el archivo en public/videos/velero-hero.mp4 alcanza para
+          que se use sin tocar este componente. El texto entra con la
+          misma animación (fade-in-up) escalonada elemento por elemento,
+          arriba del pliegue así que dispara apenas carga. */}
+      <section className="relative min-h-[560px] md:min-h-[640px] flex items-center justify-center overflow-hidden text-white">
+        {tieneVideoHero ? (
+          <video
+            className="absolute inset-0 z-0 h-full w-full object-cover"
+            src="/videos/velero-hero.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+          />
+        ) : (
+          <div className="absolute inset-0 z-0 bg-gradient-to-br from-sky-700 via-blue-800 to-slate-900" aria-hidden="true" />
+        )}
+        {/* Oscurece el fondo lo justo para que el texto blanco quede
+            legible sin importar qué tan clara sea la escena del video. */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/70 via-black/25 to-black/40" aria-hidden="true" />
 
-          <div className="space-y-4">
-            <h1 className="fade-in-up text-5xl md:text-7xl font-extrabold tracking-tight" style={{ animationDelay: '80ms' }}>
-              FAY <span className="text-primary">Stats</span>
-            </h1>
-            <p className="fade-in-up text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-light" style={{ animationDelay: '160ms' }}>
-              Ranking Nacional, resultados históricos y perfiles de regatistas de Argentina.
-            </p>
-          </div>
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 flex flex-col items-center text-center space-y-8">
+          <h1 className="fade-in-up text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight" style={{ animationDelay: '80ms' }}>
+            FAY <span className="text-sky-300">Stats</span>
+          </h1>
+          <p className="fade-in-up text-lg sm:text-xl md:text-2xl text-white/90 max-w-2xl mx-auto font-light" style={{ animationDelay: '160ms' }}>
+            Ranking Nacional, resultados históricos y perfiles de regatistas de Argentina.
+          </p>
 
-          <div className="fade-in-up w-full py-6" style={{ animationDelay: '240ms' }}>
+          <div className="fade-in-up w-full py-2" style={{ animationDelay: '240ms' }}>
             <SailorSearch />
           </div>
 
-          <div className="fade-in-up flex flex-col sm:flex-row gap-4 mt-4" style={{ animationDelay: '320ms' }}>
+          <div className="fade-in-up flex flex-col sm:flex-row gap-4 mt-2" style={{ animationDelay: '320ms' }}>
             <Link href="/rankings">
               <Button size="lg" className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto">
                 <Trophy className="w-5 h-5 mr-2" />
@@ -76,7 +97,11 @@ export default async function LandingPage() {
               </Button>
             </Link>
             <Link href="/campeonatos">
-              <Button variant="outline" size="lg" className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto border-white/70 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:border-white"
+              >
                 Explorar Campeonatos
               </Button>
             </Link>

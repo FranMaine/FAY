@@ -1,17 +1,25 @@
 @import 'tailwindcss';
 
+/* Paleta clara (antes era oscura de punta a punta). Como el resto del
+   sitio ya usa estos tokens semánticos (bg-background, bg-surface,
+   text-muted, border-border, etc.) en vez de colores de Tailwind
+   pisados directo, cambiar el tema del sitio entero es -en su mayoría-
+   cambiar los valores acá, no tocar cada componente uno por uno. Los
+   pocos lugares con color hardcodeado para el tema oscuro (el gráfico de
+   evolución histórica, en particular) se ajustaron aparte. */
 @theme inline {
-  --color-background: #020617;    /* slate-950 */
-  --color-foreground: #f8fafc;    /* slate-50 */
-  --color-surface: #1e293b;       /* slate-800 */
-  --color-surface-hover: #334155; /* slate-700 */
-  --color-primary: #3b82f6;       /* blue-500 */
-  --color-primary-hover: #2563eb; /* blue-600 */
-  --color-accent: #fbbf24;        /* amber-400 */
-  --color-muted: #94a3b8;         /* slate-400 */
-  --color-border: #334155;        /* slate-700 */
-  --color-success: #10b981;       /* emerald-500 */
-  --color-error: #ef4444;         /* red-500 */
+  --color-background: #f8fafc;    /* slate-50 */
+  --color-foreground: #0f172a;    /* slate-900 */
+  --color-surface: #ffffff;       /* white */
+  --color-surface-hover: #f1f5f9; /* slate-100 */
+  --color-primary: #2563eb;       /* blue-600 -un poco más oscuro que antes (blue-500) para mantener buen contraste de texto blanco sobre fondo claro */
+  --color-primary-hover: #1d4ed8; /* blue-700 */
+  --color-accent: #d97706;        /* amber-600 -bastante más oscuro que antes (amber-400): se usa como texto plano en varios lugares (link "Admin", íconos), y amber-500 quedaba con muy poco contraste sobre blanco */
+  --color-muted: #64748b;         /* slate-500 -antes (slate-400) tenía buen contraste sobre fondo oscuro pero es demasiado claro sobre blanco */
+  --color-muted-foreground: var(--color-muted); /* alias: el código usa "text-muted" y "text-muted-foreground" indistintamente */
+  --color-border: #e2e8f0;        /* slate-200 */
+  --color-success: #059669;       /* emerald-600 -más oscuro que antes (emerald-500) para legibilidad sobre blanco */
+  --color-error: #dc2626;         /* red-600 -ídem (antes red-500) */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -22,7 +30,7 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Custom scrollbar for dark theme */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

@@ -217,7 +217,7 @@ export default async function MiPerfilPage() {
                           <CardContent className="p-0">
                             <div className="flex items-center justify-between p-4">
                               <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isPodium ? 'bg-amber-500/10 text-amber-500' : 'bg-muted text-muted-foreground'}`}>
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isPodium ? 'bg-amber-500/10 text-amber-500' : 'bg-muted/15 text-muted-foreground'}`}>
                                   {isPodium ? <MedalIcon className="w-5 h-5" /> : <span className="font-bold">#{h.posicion}</span>}
                                 </div>
                                 <div>

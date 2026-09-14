@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { SearchIcon, Loader2Icon, UserIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
 
 interface ResultadoBusqueda {
   id: string;
@@ -66,23 +65,31 @@ export function SailorSearch() {
   }, [query]);
 
   return (
-    <div ref={wrapperRef} className="relative w-full max-w-4xl mx-auto z-50">
-      {/* Sin "flex" acá: el ícono y el loader ya se posicionan con
-          "absolute", así que no dependen del layout de este contenedor. Si
-          es flex, el <div> interno que envuelve el <input> (viene del
-          propio componente Input, sin flex-1/w-full) se encoge a su ancho
-          mínimo en vez de ocupar todo el ancho -es lo que hacía que agrandar
-          el max-w de los contenedores de afuera no tuviera ningún efecto
-          visible. Como bloque normal, ese div sí ocupa el 100% del padre. */}
-      <div className="relative w-full">
-        <SearchIcon className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <Input
+    <div ref={wrapperRef} className="relative w-full max-w-2xl mx-auto z-50">
+      {/* Píldora blanca con el botón "Buscar" pegado a la derecha (en vez
+          del Input genérico de siempre) -así funciona igual de bien sobre
+          un fondo con foto/video como el del hero, no solo sobre el fondo
+          liso del resto del sitio. El submit del form navega al primer
+          resultado del dropdown en vivo (mismo destino que tocarlo de la
+          lista) -el botón es un atajo, no reemplaza esa lista. */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (results.length > 0) {
+            setIsOpen(false);
+            router.push(`/regatistas/${results[0].id}`);
+          }
+        }}
+        className="flex items-center w-full rounded-full bg-surface shadow-xl p-1.5 sm:p-2 gap-1 sm:gap-2"
+      >
+        <SearchIcon className="hidden sm:block ml-2.5 w-5 h-5 text-muted-foreground shrink-0" aria-hidden="true" />
+        <input
           type="text"
           // Placeholder corto -el largo ("...por nombre o club...") se
           // recortaba a la mitad en pantallas angostas, con el padding y el
           // tamaño de fuente grandes de este input no entraba entero.
-          placeholder="Buscar regatista o club..."
-          className="pl-10 pr-10 py-4 text-base sm:pl-12 sm:pr-12 sm:py-6 sm:text-lg rounded-full shadow-lg border-2 border-border focus-visible:ring-primary bg-surface/80 backdrop-blur-md"
+          placeholder="Buscar regatista por nombre..."
+          className="flex-1 min-w-0 bg-transparent border-0 outline-none text-foreground placeholder:text-muted-foreground text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-1"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {
@@ -90,9 +97,16 @@ export function SailorSearch() {
           }}
         />
         {isLoading && (
-          <Loader2Icon className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground animate-spin" />
+          <Loader2Icon className="w-5 h-5 text-muted-foreground animate-spin shrink-0" aria-hidden="true" />
         )}
-      </div>
+        <button
+          type="submit"
+          disabled={results.length === 0}
+          className="shrink-0 rounded-full bg-foreground text-background font-semibold text-sm sm:text-base px-5 sm:px-7 py-2.5 sm:py-3 hover:opacity-90 active:scale-[0.97] transition-[opacity,transform] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+        >
+          Buscar
+        </button>
+      </form>
 
       {isOpen && results.length > 0 && (
         <div className="absolute top-full mt-2 w-full bg-surface border border-border rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[300px] overflow-y-auto">

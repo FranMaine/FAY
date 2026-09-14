@@ -37,10 +37,15 @@ export function PosicionHistorica({ data }: PosicionHistoricaProps) {
           data={chartData}
           margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+          {/* Colores vía var(--color-*) en vez de hex hardcodeado -así el
+              gráfico sigue automáticamente al tema del sitio (ver
+              globals.css) en vez de quedar pisado con los valores del tema
+              oscuro anterior, que se veían mal (grilla/texto casi
+              invisibles, tooltip oscuro) sobre el fondo claro actual. */}
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
           <XAxis
             dataKey="indice"
-            stroke="#94a3b8"
+            stroke="var(--color-muted)"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -49,7 +54,7 @@ export function PosicionHistorica({ data }: PosicionHistoricaProps) {
           />
           <YAxis
             reversed
-            stroke="#94a3b8"
+            stroke="var(--color-muted)"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -58,13 +63,14 @@ export function PosicionHistorica({ data }: PosicionHistoricaProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1e293b',
-              borderColor: '#334155',
+              backgroundColor: 'var(--color-surface)',
+              borderColor: 'var(--color-border)',
               borderRadius: '0.5rem',
-              color: '#f8fafc'
+              color: 'var(--color-foreground)',
+              boxShadow: '0 4px 12px rgba(15, 23, 42, 0.1)'
             }}
-            itemStyle={{ color: '#fbbf24' }}
-            labelStyle={{ color: '#94a3b8', marginBottom: '0.25rem' }}
+            itemStyle={{ color: 'var(--color-accent)' }}
+            labelStyle={{ color: 'var(--color-muted)', marginBottom: '0.25rem' }}
             formatter={(value) => [`Posición ${value}`, 'Posición']}
             labelFormatter={(_label, payload) => {
               if (payload && payload.length > 0) {
@@ -77,10 +83,10 @@ export function PosicionHistorica({ data }: PosicionHistoricaProps) {
           <Line
             type="monotone"
             dataKey="posicion"
-            stroke="#3b82f6"
+            stroke="var(--color-primary)"
             strokeWidth={3}
-            dot={{ r: 4, fill: '#fbbf24', strokeWidth: 0 }}
-            activeDot={{ r: 6, fill: '#fbbf24', stroke: '#1e293b', strokeWidth: 2 }}
+            dot={{ r: 4, fill: 'var(--color-accent)', strokeWidth: 0 }}
+            activeDot={{ r: 6, fill: 'var(--color-accent)', stroke: 'var(--color-surface)', strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

@@ -131,7 +131,7 @@ export default async function RegatistaProfilePage({ params }: { params: Promise
                     </span>
                   )}
                   {regatista.pais && (
-                    <span className="px-2 py-0.5 bg-muted rounded-full">
+                    <span className="px-2 py-0.5 bg-muted text-white rounded-full">
                       {regatista.pais}
                     </span>
                   )}
@@ -181,7 +181,7 @@ export default async function RegatistaProfilePage({ params }: { params: Promise
                           <div className="flex items-center justify-between p-4 sm:p-6">
                             
                             <div className="flex items-center gap-4 sm:gap-6">
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${isPodium ? 'bg-amber-500/10 text-amber-500' : 'bg-muted text-muted-foreground'}`}>
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${isPodium ? 'bg-amber-500/10 text-amber-500' : 'bg-muted/15 text-muted-foreground'}`}>
                                 {isPodium ? <MedalIcon className="w-6 h-6" /> : <span className="text-lg font-bold">#{h.posicion}</span>}
                               </div>
                               <div>
