@@ -25,6 +25,19 @@ export const CLASE_ICONOS: Record<ClaseIconSlug, { label: string }> = {
 };
 
 /**
+ * Slugs que se muestran como categoría propia en la marquesina
+ * (ClaseMarquee). No son los mismos 10 que tienen ícono: "optimist" sigue
+ * en CLASE_ICONOS/slugDeClase porque las clases reales de la base
+ * ("Optimist Principiantes", "Optimist Timoneles") necesitan ese ícono en
+ * sus badges y cards -pero no existe ninguna clase que se llame solo
+ * "Optimist", así que mostrarlo en la marquesina como si fuera una
+ * categoría en sí misma sería engañoso.
+ */
+export const SLUGS_MARQUESINA: ClaseIconSlug[] = (
+  Object.keys(CLASE_ICONOS) as ClaseIconSlug[]
+).filter((slug) => slug !== 'optimist');
+
+/**
  * Matchea el nombre de una Clase de la base (ej: "ILCA 6 (Laser Radial)",
  * "Optimist Principiantes") contra el slug de ícono que le corresponde.
  * Varias clases distintas de la base comparten un mismo ícono (las tres

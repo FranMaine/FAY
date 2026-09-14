@@ -1,11 +1,11 @@
-import { CLASE_ICONOS, ClaseIconSlug } from '@/components/icons/clase-icons';
+import { CLASE_ICONOS, SLUGS_MARQUESINA } from '@/components/icons/clase-icons';
 
 // Franja de logos de categoría con scroll automático infinito. Se duplica
 // la lista de ítems una vez y se anima el contenedor -50% de su ancho: al
 // llegar a la mitad, lo que se ve es visualmente idéntico al arranque, así
 // que el loop no se nota (el salto ocurre "detrás" del duplicado).
 export function ClaseMarquee() {
-  const items = Object.entries(CLASE_ICONOS) as [ClaseIconSlug, { label: string }][];
+  const items = SLUGS_MARQUESINA.map((slug) => [slug, CLASE_ICONOS[slug]] as const);
   const doble = [...items, ...items];
 
   return (
