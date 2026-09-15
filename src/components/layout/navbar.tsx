@@ -8,6 +8,7 @@ import { SailingBoat } from '@/components/icons/sailing-boat';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { NotificationBell } from '@/components/layout/notification-bell';
 
 import { useSession, signOut } from 'next-auth/react';
 import { LogOut, Shield } from 'lucide-react';
@@ -82,6 +83,7 @@ export function Navbar() {
                   Admin
                 </Link>
               )}
+              {isAdmin && <NotificationBell />}
             </div>
             <div className="flex items-center gap-2 border-l border-border pl-6">
               {session ? (
@@ -122,6 +124,7 @@ export function Navbar() {
               toggle de tema va al lado, siempre visible (no hace falta
               abrir el menú para cambiar de tema). */}
           <div className="flex items-center gap-1 md:hidden">
+            {isAdmin && <NotificationBell />}
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}

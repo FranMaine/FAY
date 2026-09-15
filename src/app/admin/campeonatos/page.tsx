@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlusIcon, EditIcon, TrashIcon, EyeIcon, Loader2Icon } from "lucide-react";
+import { PlusIcon, EditIcon, EyeIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
+import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
 import { mensajeDeError } from "@/lib/utils";
 import { ClaseIcon } from "@/components/icons/clase-icons";
 
@@ -53,11 +54,8 @@ export default function AdminCampeonatosPage() {
   }, []);
 
   const handleEliminar = async (c: Campeonato) => {
-    const ok = window.confirm(
-      `¿Seguro que querés eliminar "${c.nombre}"?\n\nEsto borra también todas sus regatas y resultados cargados. No se puede deshacer.`
-    );
-    if (!ok) return;
-
+    // La confirmación ahora la maneja ConfirmDeleteButton (in-place, no un
+    // window.confirm nativo) -acá ya llega confirmado.
     setDeletingId(c.id);
     try {
       const res = await fetch(`/api/campeonatos/${c.id}`, { method: "DELETE" });
@@ -140,19 +138,11 @@ export default function AdminCampeonatosPage() {
                             <EditIcon className="w-4 h-4" />
                           </Button>
                         </Link>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-red-500"
-                          onClick={() => handleEliminar(c)}
+                        <ConfirmDeleteButton
+                          label={`Eliminar "${c.nombre}"`}
                           disabled={deletingId === c.id}
-                        >
-                          {deletingId === c.id ? (
-                            <Loader2Icon className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <TrashIcon className="w-4 h-4" />
-                          )}
-                        </Button>
+                          onConfirm={() => handleEliminar(c)}
+                        />
                       </td>
                     </tr>
                   ))
