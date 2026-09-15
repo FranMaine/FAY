@@ -134,13 +134,32 @@ body {
    del router. Duración un poco mayor que la de un componente (350ms en
    vez de los ~200-300ms de un modal/card) porque es la página entera la
    que entra, pero se mantiene corta para no sentirse lenta navegando
-   seguido. */
+   seguido.
+
+   OJO con el "to: transform: none" y CUALQUIER transform que no sea
+   "none" (aunque sea una traslación de 0px, matemáticamente idéntica a no
+   mover nada): mientras un navegador mantiene "vivo" el efecto de una
+   animación (por fill-mode "both"/"forwards"), el valor de transform que
+   reporta getComputedStyle() puede seguir siendo una matriz -no
+   literalmente la palabra "none"- por cómo se resuelve internamente la
+   interpolación. Eso alcanza para convertir a este div en el "containing
+   block" de sus descendientes position:fixed, que pasan a posicionarse
+   relativos A ESTE DIV en vez de a la ventana. Como template.tsx envuelve
+   el contenido de TODAS las páginas, cualquier modal, el botón de "volver
+   arriba" o el aviso de cookies quedaban posicionados relativos al
+   contenido de la página en vez de centrados/fijos en la pantalla -en una
+   página larga, aparecían lejos, había que scrollear para encontrarlos
+   (bug reportado). Por eso NO se usa fill-mode "both" acá: Template
+   (src/app/template.tsx) saca la clase "page-enter" del todo apenas
+   termina la animación, así el div queda sin ningún transform declarado
+   -sin depender de qué tan "inocuo" resuelva el navegador un transform
+   animado a cero. */
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 .page-enter {
-  animation: page-enter 350ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation: page-enter 350ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 @media (prefers-reduced-motion: reduce) {
   .page-enter {
