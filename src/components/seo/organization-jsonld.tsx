@@ -1,0 +1,48 @@
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
+
+// Datos estructurados (schema.org) de la organización, en el layout raíz
+// -así aparece en TODAS las páginas sin tener que repetirlo. Ayuda a que
+// buscadores (y el panel de conocimiento de Google) entiendan que este
+// sitio pertenece a la Federación Argentina de Yachting, no es contenido
+// suelto sin dueño. Va como JSON-LD (el formato que Google recomienda)
+// en vez de microdatos inline, que ensuciarían cada componente.
+export function OrganizationJsonLd() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "SportsOrganization",
+    name: "Federación Argentina de Yachting",
+    alternateName: "FAY",
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    sport: "Sailing",
+    areaServed: {
+      "@type": "Country",
+      name: "Argentina",
+    },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
+
+export function WebsiteJsonLd() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    inLanguage: "es-AR",
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}

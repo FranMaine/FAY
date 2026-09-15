@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { SITE_URL } from "@/lib/site";
 import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { PosicionHistorica } from "@/components/charts/posicion-historica";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -94,7 +96,25 @@ async function getRegatistaProfile(id: string) {
   return { regatista, historial, chartData };
 }
 
-export default async function RegatistaProfilePage({ params }: { params: Promise<{ id: string }> }) {
+type Props = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const regatista = await prisma.regatista.findUnique({
+    where: { id },
+    select: { nombre: true, club: { select: { nombre: true } } },
+  });
+
+  if (!regatista) return { title: "Regatista no encontrado" };
+
+  const club = regatista.club?.nombre;
+  return {
+    title: regatista.nombre,
+    description: `Historial de resultados de ${regatista.nombre}${club ? ` (${club})` : ""} en campeonatos de vela de la Federación Argentina de Yachting.`,
+  };
+}
+
+export default async function RegatistaProfilePage({ params }: Props) {
   const { id } = await params;
   const data = await getRegatistaProfile(id);
 
@@ -104,8 +124,21 @@ export default async function RegatistaProfilePage({ params }: { params: Promise
 
   const { regatista, historial, chartData } = data;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: regatista.nombre,
+    nationality: regatista.pais || undefined,
+    memberOf: regatista.club ? { "@type": "SportsOrganization", name: regatista.club.nombre } : undefined,
+    url: `${SITE_URL}/regatistas/${regatista.id}`,
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header */}
       <div className="bg-surface border-b border-border">
         <div className="max-w-5xl mx-auto px-6 py-8">

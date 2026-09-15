@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/navbar';
+import { SITE_URL, SITE_DESCRIPTION } from '@/lib/site';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -14,15 +15,33 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Sin esto, Next no puede resolver a URL absoluta las imágenes de
+  // Open Graph/Twitter que se declaran como ruta relativa (ej: "/og.png")
+  // -y tira un warning en cada build. También es la URL "canónica" que usa
+  // por default para cualquier página que no declare la suya.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'FAY Stats',
     template: '%s | FAY Stats',
   },
-  description: 'Estadísticas y resultados de campeonatos de vela de la Federación Argentina de Yachting',
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    siteName: 'FAY Stats',
+    description: SITE_DESCRIPTION,
+    locale: 'es_AR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'FAY Stats',
+    description: SITE_DESCRIPTION,
+  },
 };
 
 import { SessionProvider } from '@/components/providers/session-provider';
 import { BackToTop } from '@/components/layout/back-to-top';
+import { CookieBanner } from '@/components/layout/cookie-banner';
+import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization-jsonld';
 
 // Script bloqueante: corre ANTES de que se pinte la página (va en <head>,
 // no en un componente de React que recién se hidrata después). Sin esto,
@@ -55,15 +74,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <OrganizationJsonLd />
+        <WebsiteJsonLd />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
         <SessionProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-border py-6 text-center text-sm text-muted">
+          <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
             <p>FAY Stats © {new Date().getFullYear()} — Estadísticas de Vela Argentina</p>
+            <nav className="flex items-center justify-center gap-4 text-xs">
+              <a href="/aviso-legal" className="hover:text-foreground hover:underline">Aviso legal</a>
+              <a href="/privacidad" className="hover:text-foreground hover:underline">Privacidad</a>
+              <a href="/cookies" className="hover:text-foreground hover:underline">Cookies</a>
+            </nav>
           </footer>
           <BackToTop />
+          <CookieBanner />
         </SessionProvider>
       </body>
     </html>

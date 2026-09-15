@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,14 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { MedalIcon, CalendarIcon, ArrowRightIcon } from "lucide-react";
+
+// Página privada (requiere sesión, ver redirect() más abajo): sin sentido
+// indexarla, y menos con noindex no listado la evita en robots.txt igual
+// -este metadata refuerza el X-Robots-Tag ya seteado en next.config.ts.
+export const metadata: Metadata = {
+  title: "Mi perfil",
+  robots: { index: false, follow: false },
+};
 
 async function getRegatistaStats(regatistaId: string) {
   const regatista = await prisma.regatista.findUnique({

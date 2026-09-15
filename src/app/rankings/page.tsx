@@ -7,7 +7,8 @@ import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 
 export const metadata: Metadata = {
-  title: "Rankings Oficiales | FAY Stats",
+  title: "Rankings Oficiales",
+  description: "Ranking Nacional anual por clase de vela, con el desempeño acumulado de cada regatista en los campeonatos oficiales de la Federación Argentina de Yachting.",
 };
 
 export const revalidate = 60; // Revalidar cada 60 segundos

@@ -5,6 +5,7 @@ import { CalendarIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import prisma from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
 import { notFound } from "next/navigation";
+import { SITE_URL } from "@/lib/site";
 
 // Sin esto, esta página quedaba 100% estática después de la primera
 // visita -Next.js la cachea indefinidamente porque no usa ninguna API
@@ -23,9 +24,19 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const c = await prisma.campeonato.findUnique({ where: { id }, select: { nombre: true } });
+  // Sin el "| FAY Stats" acá: el layout raíz ya le agrega ese sufijo a
+  // cualquier título que devuelva una página hija (title.template) -antes
+  // esto lo agregaba manual ACÁ TAMBIÉN, así que el <title> real terminaba
+  // duplicado ("Vela Fest 2025 | FAY Stats | FAY Stats").
+  const c = await prisma.campeonato.findUnique({
+    where: { id },
+    select: { nombre: true, anio: true, clase: { select: { nombre: true } }, sede: { select: { nombre: true } } },
+  });
+  if (!c) return { title: 'Campeonato no encontrado' };
+
   return {
-    title: c ? `${c.nombre} | FAY Stats` : 'Campeonato | FAY Stats',
+    title: `${c.nombre} ${c.anio}`,
+    description: `Resultados y tabla de posiciones de ${c.nombre} ${c.anio} (${c.clase.nombre})${c.sede ? `, en ${c.sede.nombre}` : ''}. Clasificación oficial de la Federación Argentina de Yachting.`,
   };
 }
 
@@ -89,8 +100,31 @@ export default async function CampeonatoDetailPage({ params }: Props) {
     new Set(clasificacionAgrupada.flatMap((c) => Object.keys(c.datosExtra || {})))
   );
 
+  // Datos estructurados (schema.org SportsEvent): ayuda a que un buscador
+  // entienda que esto es un evento deportivo puntual, con su deporte,
+  // organizador y lugar -no solo texto suelto. startDate es requerido por
+  // el schema; si no tenemos fecha cargada, usamos el 1/1 del año del
+  // campeonato como aproximación (mejor eso que omitir el campo entero).
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: `${campeonato.nombre} ${campeonato.anio}`,
+    sport: "Sailing",
+    startDate: (campeonato.fechaInicio ?? new Date(campeonato.anio, 0, 1)).toISOString(),
+    ...(campeonato.fechaFin ? { endDate: campeonato.fechaFin.toISOString() } : {}),
+    location: campeonato.sede
+      ? { "@type": "Place", name: campeonato.sede.nombre }
+      : undefined,
+    organizer: { "@type": "SportsOrganization", name: "Federación Argentina de Yachting" },
+    url: `${SITE_URL}/campeonatos/${campeonato.id}`,
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="space-y-4">
           <div className="flex flex-wrap items-center gap-3">

@@ -21,6 +21,12 @@ export default function OlvidePasswordPage() {
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Anti-spam (ver src/lib/spam-guard.ts): este endpoint manda un mail de
+  // verdad, así que además de honeypot conviene frenar que alguien lo use
+  // para bombardear una casilla ajena con enlaces de reseteo.
+  const [trampa, setTrampa] = useState("");
+  const [montadoEn] = useState(() => Date.now());
+
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: { email: "" },
@@ -33,7 +39,7 @@ export default function OlvidePasswordPage() {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, sitioWeb: trampa, montadoEn }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -70,6 +76,18 @@ export default function OlvidePasswordPage() {
             </div>
           ) : (
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="absolute -left-[9999px] w-px h-px overflow-hidden" aria-hidden="true">
+                <label htmlFor="sitioWeb">No completar este campo</label>
+                <input
+                  id="sitioWeb"
+                  name="sitioWeb"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={trampa}
+                  onChange={(e) => setTrampa(e.target.value)}
+                />
+              </div>
               {error && (
                 <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
                   {error}

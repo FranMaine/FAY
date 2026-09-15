@@ -4,10 +4,28 @@ import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { registroSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
+import { permitir, ipDeRequest } from '@/lib/rate-limit';
+import { pareceSpam } from '@/lib/spam-guard';
 
 export async function POST(request: Request) {
   try {
+    // A lo sumo 5 altas de cuenta por IP cada 10 minutos -no molesta a una
+    // persona real (que se registra una sola vez) pero frena un script que
+    // intenta crear cuentas en cadena.
+    if (!permitir(`registro:${ipDeRequest(request)}`, 5, 10 * 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiados intentos. Probá de nuevo en unos minutos.' }, { status: 429 });
+    }
+
     const json = await request.json();
+
+    // Honeypot + tiempo mínimo de carga: si esto tira spam, respondemos
+    // como si hubiera salido todo bien (200 con un user falso descartado
+    // en silencio) en vez de un error -así un bot no aprende a distinguir
+    // "detectado" de "éxito" y no ajusta su comportamiento.
+    if (pareceSpam({ trampa: json.sitioWeb, montadoEn: json.montadoEn })) {
+      return NextResponse.json({ id: 'ok', name: json.name ?? '', email: json.email ?? '', role: 'REGULAR' }, { status: 201 });
+    }
+
     const body = registroSchema.parse(json);
 
     // El UNIQUE de email en Postgres es case-sensitive, así que

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Trophy, ArrowRight, BarChart3 } from "lucide-react";
@@ -19,6 +20,14 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 // en mejor calidad, conviene reemplazar public/hero/velero-hero.jpg por
 // ese (mismo nombre, mismo lugar, no hace falta tocar este archivo).
 const FOTO_HERO_PATH = path.join(process.cwd(), "public", "hero", "velero-hero.jpg");
+
+export const metadata: Metadata = {
+  // Sin "title" acá, el template del layout raíz ("%s | FAY Stats") lo
+  // duplicaría en la home ("FAY Stats | FAY Stats"). El layout ya define
+  // el default correcto para "/" -acá solo agregamos una descripción más
+  // específica que la genérica del layout.
+  description: "Ranking Nacional, resultados históricos y perfiles de regatistas de vela de Argentina, con datos oficiales de la Federación Argentina de Yachting.",
+};
 
 // Sin esto, Next.js pre-renderiza esta página como HTML ESTÁTICO en cada
 // deploy -los números de "Regatistas"/"Campeonatos" y la lista de últimos

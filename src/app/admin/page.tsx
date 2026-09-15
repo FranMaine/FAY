@@ -5,7 +5,8 @@ import { Trophy, Users, AlertCircle, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard | FAY Stats",
+  title: "Admin Dashboard",
+  robots: { index: false, follow: false },
 };
 
 // Estas tarjetas antes mostraban números fijos ("45 campeonatos", etc.) -

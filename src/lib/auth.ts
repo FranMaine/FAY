@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { prisma } from './db';
+import { permitir } from './rate-limit';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // @auth/prisma-adapter estaba instalado pero nunca conectado acá -sin
@@ -46,6 +47,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // insensibles a mayúsculas, así "Juan@Gmail.com" y "juan@gmail.com"
         // son la misma cuenta.
         const email = String(credentials.email).trim().toLowerCase();
+
+        // Máximo 10 intentos de login por email cada 5 minutos -frena un
+        // ataque de fuerza bruta/credential-stuffing contra una cuenta
+        // puntual sin afectar a alguien que se equivoca de contraseña un
+        // par de veces. authorize() no recibe la request acá, así que el
+        // límite es por email (no por IP además).
+        if (!permitir(`login:${email}`, 10, 5 * 60 * 1000)) return null;
 
         const user = await prisma.user.findUnique({
           where: { email },

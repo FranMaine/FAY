@@ -5,9 +5,11 @@ import { Prisma } from "@prisma/client";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 import { AlertCircleIcon } from "lucide-react";
 
+// Sin "| FAY Stats" acá: el layout raíz ya lo agrega vía title.template
+// -ponerlo también acá duplicaba el sufijo en el <title> real.
 export const metadata: Metadata = {
-  title: "Campeonatos | FAY Stats",
-  description: "Explorá los campeonatos de la vela argentina",
+  title: "Campeonatos",
+  description: "Explorá todos los campeonatos de vela publicados por la Federación Argentina de Yachting, filtrados por clase y año, con su tabla de posiciones oficial.",
 };
 
 export default async function CampeonatosPage({

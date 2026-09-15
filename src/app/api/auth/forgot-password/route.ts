@@ -4,12 +4,32 @@ import { forgotPasswordSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
 import { generarToken } from '@/lib/tokens';
 import { sendEmail, emailResetPassword } from '@/lib/email';
+import { permitir, ipDeRequest } from '@/lib/rate-limit';
+import { pareceSpam } from '@/lib/spam-guard';
 
 const UNA_HORA_MS = 60 * 60 * 1000;
 
 export async function POST(request: Request) {
   try {
+    // Este endpoint manda un mail de verdad -sin límite, alguien podría
+    // usarlo para bombardear la casilla de otra persona con enlaces de
+    // reseteo. 5 pedidos por IP cada 10 minutos alcanza de sobra para un
+    // uso legítimo (probar con distintos emails propios/olvidados).
+    if (!permitir(`forgot-password:${ipDeRequest(request)}`, 5, 10 * 60 * 1000)) {
+      return NextResponse.json({ error: 'Demasiados intentos. Probá de nuevo en unos minutos.' }, { status: 429 });
+    }
+
     const json = await request.json();
+
+    // Honeypot: si cayó, respondemos el mismo mensaje genérico de éxito de
+    // siempre (sin mandar ningún mail) en vez de un error -mismo criterio
+    // que ya usa este endpoint para no filtrar si un email existe o no.
+    if (pareceSpam({ trampa: json.sitioWeb, montadoEn: json.montadoEn })) {
+      return NextResponse.json({
+        message: 'Si el email existe en nuestro sistema, te enviamos un enlace para restablecer tu contraseña.',
+      });
+    }
+
     const { email } = forgotPasswordSchema.parse(json);
     const emailNormalizado = email.trim().toLowerCase();
 

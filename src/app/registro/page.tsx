@@ -58,6 +58,13 @@ export default function RegistroPage() {
 
   const [error, setError] = useState<string | null>(null);
 
+  // Anti-spam: campo trampa (invisible para una persona, pero un bot que
+  // completa todo lo que encuentra en el formulario lo llena) + momento en
+  // que se montó el formulario, para descartar envíos hechos en
+  // milisegundos. Ver src/lib/spam-guard.ts.
+  const [trampa, setTrampa] = useState("");
+  const [montadoEn] = useState(() => Date.now());
+
   useEffect(() => {
     if (seleccionado) return; // ya eligió, no hace falta seguir buscando
     let cancelado = false;
@@ -105,6 +112,8 @@ export default function RegistroPage() {
           email: values.email,
           password: values.password,
           confirmPassword: values.confirmPassword, // Faltaba esto para que pase la validación Zod del backend
+          sitioWeb: trampa,
+          montadoEn,
         }),
       });
 
@@ -169,6 +178,23 @@ export default function RegistroPage() {
           )}
           {step === 1 ? (
             <form onSubmit={form.handleSubmit(onStep1Submit)} className="space-y-4">
+              {/* Campo trampa anti-spam: oculto para una persona (fuera de
+                  pantalla, no display:none -algunos bots ignoran los campos
+                  con display:none pero completan igual los que están
+                  "visibles" para el DOM) y sin tabIndex para que tampoco lo
+                  encuentre alguien navegando con teclado. */}
+              <div className="absolute -left-[9999px] w-px h-px overflow-hidden" aria-hidden="true">
+                <label htmlFor="sitioWeb">No completar este campo</label>
+                <input
+                  id="sitioWeb"
+                  name="sitioWeb"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={trampa}
+                  onChange={(e) => setTrampa(e.target.value)}
+                />
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Nombre completo</label>
                 <Input {...form.register("name")} placeholder="Juan Pérez" className="bg-background border-border" />
