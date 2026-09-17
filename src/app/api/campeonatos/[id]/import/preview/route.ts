@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { puedeGestionarCampeonatos } from "@/lib/permisos";
 import { leerGridXLSX } from "@/lib/extractors/xlsx-parser";
 import { leerGridPDF } from "@/lib/extractors/pdf-grid-reader";
 import { detectarColumnas } from "@/lib/extractors/column-detector";
@@ -13,7 +14,7 @@ import { handleApiError } from "@/lib/api-error";
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !puedeGestionarCampeonatos(session?.user?.role)) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { puedeGestionarCampeonatos } from "@/lib/permisos";
 import { prisma } from "@/lib/db";
 import { parseSailwaveCSV } from "@/lib/extractors/csv-parser";
 import { parsePdfToResult } from "@/lib/extractors/pdf-extractor";
@@ -19,7 +20,7 @@ export async function POST(
 ) {
   try {
     const session = await auth();
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !puedeGestionarCampeonatos(session?.user?.role)) {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 

@@ -29,6 +29,12 @@ export function Navbar() {
   ];
 
   const isAdmin = session?.user?.role === 'ADMIN';
+  // El link "Admin" también es visible para ORGANIZADOR -aterriza en
+  // /admin/campeonatos (ver src/app/admin/page.tsx), la única sección a
+  // la que tiene acceso. La campanita de solicitudes pendientes sigue
+  // siendo exclusiva de ADMIN (ver isAdmin arriba), no algo que le
+  // corresponda ver a un organizador.
+  const puedeVerAdmin = isAdmin || session?.user?.role === 'ORGANIZADOR';
 
   // Bloquear el scroll del body mientras el menú móvil está abierto -sin
   // esto, se podía scrollear la página de atrás mientras el menú estaba
@@ -72,7 +78,7 @@ export function Navbar() {
                   </Link>
                 );
               })}
-              {isAdmin && (
+              {puedeVerAdmin && (
                 <Link
                   href="/admin"
                   className={cn(
@@ -177,7 +183,7 @@ export function Navbar() {
                 </Link>
               );
             })}
-            {isAdmin && (
+            {puedeVerAdmin && (
               <Link
                 href="/admin"
                 onClick={() => setIsOpen(false)}

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { campeonatoSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
+import { puedeGestionarCampeonatos } from '@/lib/permisos';
 
 export async function GET(request: Request) {
   try {
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
     const estado = searchParams.get('estado');
 
     const session = await auth();
-    const isAdmin = session?.user?.role === 'ADMIN';
+    const isAdmin = puedeGestionarCampeonatos(session?.user?.role);
 
     const where: Prisma.CampeonatoWhereInput = {};
     if (anio) where.anio = parseInt(anio, 10);
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (session?.user?.role !== 'ADMIN') {
+    if (!puedeGestionarCampeonatos(session?.user?.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

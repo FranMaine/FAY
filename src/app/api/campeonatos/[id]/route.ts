@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { campeonatoSchema, campeonatoPatchSchema } from '@/lib/validators';
 import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
 import { handleApiError } from '@/lib/api-error';
+import { puedeGestionarCampeonatos } from '@/lib/permisos';
 
 export async function GET(
   request: Request,
@@ -34,7 +35,7 @@ export async function GET(
     }
 
     const session = await auth();
-    const isAdmin = session?.user?.role === 'ADMIN';
+    const isAdmin = puedeGestionarCampeonatos(session?.user?.role);
 
     if (campeonato.estado !== 'PUBLICADO' && !isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -59,7 +60,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const session = await auth();
-    if (session?.user?.role !== 'ADMIN') {
+    if (!puedeGestionarCampeonatos(session?.user?.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -86,7 +87,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     const session = await auth();
-    if (session?.user?.role !== 'ADMIN') {
+    if (!puedeGestionarCampeonatos(session?.user?.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -107,7 +108,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const session = await auth();
-    if (session?.user?.role !== 'ADMIN') {
+    if (!puedeGestionarCampeonatos(session?.user?.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

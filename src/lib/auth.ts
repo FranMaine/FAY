@@ -92,7 +92,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // src/types/next-auth.d.ts, pero next-auth v5 beta expone `token`
         // acá como el genérico `JWT` sin la extensión resuelta, así que
         // una aserción local es lo suficiente para eso.
-        session.user.role = token.role as 'ADMIN' | 'REGULAR';
+        session.user.role = token.role as 'ADMIN' | 'ORGANIZADOR' | 'REGULAR';
         session.user.regatistaId = token.regatistaId as string | null;
       }
       return session;

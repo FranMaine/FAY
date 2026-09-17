@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { resultadosBulkSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
+import { puedeGestionarCampeonatos } from '@/lib/permisos';
 
 export async function POST(
   request: Request,
@@ -11,7 +12,7 @@ export async function POST(
   try {
     const { id } = await params;
     const session = await auth();
-    if (session?.user?.role !== 'ADMIN') {
+    if (!puedeGestionarCampeonatos(session?.user?.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

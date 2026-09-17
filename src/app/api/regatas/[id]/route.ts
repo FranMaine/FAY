@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { regataResultadosSchema } from '@/lib/validators';
 import { splitNombreTripulacion, splitClubPorTripulante, normalizarNombre } from '@/lib/nombres';
 import { handleApiError } from '@/lib/api-error';
+import { puedeGestionarCampeonatos } from '@/lib/permisos';
 
 // Reemplaza el set de resultados de una regata existente: crea/actualiza los
 // enviados y borra los que ya no vienen en el body (así "Guardar" en el
@@ -19,7 +20,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const session = await auth();
-    if (session?.user?.role !== 'ADMIN') {
+    if (!puedeGestionarCampeonatos(session?.user?.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

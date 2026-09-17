@@ -1,8 +1,10 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Trophy, Users, AlertCircle, AlertTriangle, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard",
@@ -27,6 +29,17 @@ async function getStats() {
 }
 
 export default async function AdminDashboardPage() {
+  // El layout de /admin ya deja pasar tanto a ADMIN como a ORGANIZADOR
+  // (ver src/app/admin/layout.tsx) porque ambos necesitan entrar a
+  // /admin/campeonatos -este dashboard en particular (estadísticas
+  // generales, accesos a clubes/regatistas/errores/usuarios) sí es
+  // exclusivo de ADMIN, así que un ORGANIZADOR que aterriza en /admin va
+  // directo a la única sección que le corresponde.
+  const session = await auth();
+  if (session?.user.role !== "ADMIN") {
+    redirect("/admin/campeonatos");
+  }
+
   const stats = await getStats();
 
   return (
@@ -150,6 +163,17 @@ export default async function AdminDashboardPage() {
                   Errores del sistema <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </CardTitle>
                 <CardDescription>Ver errores no esperados de las APIs</CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+
+          <Card className="bg-surface border-border hover:border-primary transition-colors cursor-pointer group">
+            <Link href="/admin/usuarios">
+              <CardHeader>
+                <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
+                  Usuarios y roles <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </CardTitle>
+                <CardDescription>Asignar Organizador o Administrador</CardDescription>
               </CardHeader>
             </Link>
           </Card>

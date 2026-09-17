@@ -2,7 +2,7 @@ import 'next-auth';
 
 declare module 'next-auth' {
   interface User {
-    role?: 'ADMIN' | 'REGULAR';
+    role?: 'ADMIN' | 'ORGANIZADOR' | 'REGULAR';
     regatistaId?: string | null;
   }
 
@@ -12,7 +12,7 @@ declare module 'next-auth' {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      role: 'ADMIN' | 'REGULAR';
+      role: 'ADMIN' | 'ORGANIZADOR' | 'REGULAR';
       regatistaId: string | null;
     };
   }
@@ -20,7 +20,7 @@ declare module 'next-auth' {
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role: 'ADMIN' | 'REGULAR';
+    role: 'ADMIN' | 'ORGANIZADOR' | 'REGULAR';
     regatistaId: string | null;
   }
 }

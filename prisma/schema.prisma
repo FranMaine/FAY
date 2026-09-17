@@ -33,6 +33,13 @@ model User {
 
 enum Role {
   ADMIN
+  // Acceso total a la creación/edición de campeonatos (regatas,
+  // resultados, importar CSV, publicar) -pensado para la persona del
+  // club que organiza una regata puntual y carga sus resultados, sin
+  // darle acceso a lo que sí es exclusivo de ADMIN (gestión de
+  // regatistas, clubes, solicitudes de vinculación, errores del sistema,
+  // ni la posibilidad de asignar roles a otros usuarios).
+  ORGANIZADOR
   REGULAR
 }
 
