@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Modal } from "@/components/ui/modal";
 import { SearchIcon, UserIcon, Loader2Icon, AlertCircleIcon, ClockIcon } from "lucide-react";
+import { mensajeDeError } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -31,6 +33,12 @@ export default function VincularPage() {
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Reemplaza al confirm() nativo del navegador (ver Modal, mismo
+  // componente que ya usan los modales de admin) -antes de esto, la
+  // confirmación era el diálogo feo del propio browser en vez de algo con
+  // la estética del sitio.
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
 
   useEffect(() => {
     async function checkStatus() {
@@ -68,39 +76,44 @@ export default function VincularPage() {
     }
   };
 
-  const handleLink = async () => {
+  const handleLink = () => {
     if (!selectedProfile) return;
-    
+
     if (!session) {
-      alert("Debes iniciar sesión para reclamar un perfil.");
       router.push("/login");
       return;
     }
 
-    if (confirm("¿Confirmas que este es tu perfil oficial? La solicitud será revisada por un administrador de la FAY.")) {
-      setIsSubmitting(true);
-      try {
-        const res = await fetch('/api/vincular', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ regatistaId: selectedProfile })
-        });
-        const data = await res.json();
-        
-        if (!res.ok) {
-          alert(data.error);
-        } else {
-          alert("¡Solicitud enviada exitosamente! Un administrador la revisará pronto.");
-          router.push("/mi-perfil");
-        }
-      } catch (e) {
-        console.error(e);
-        alert("Ocurrió un error.");
-      } finally {
-        setIsSubmitting(false);
+    setError(null);
+    setMostrarConfirmacion(true);
+  };
+
+  const confirmarVinculacion = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/vincular', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ regatistaId: selectedProfile })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "No se pudo enviar la solicitud.");
+        setMostrarConfirmacion(false);
+      } else {
+        router.push("/mi-perfil");
       }
+    } catch (e) {
+      setError(mensajeDeError(e));
+      setMostrarConfirmacion(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const perfilSeleccionado = results.find((r) => r.id === selectedProfile);
 
   if (isLoadingStatus) {
     return (
@@ -204,6 +217,12 @@ export default function VincularPage() {
             </div>
           )}
 
+          {error && (
+            <div className="flex items-center gap-2 p-4 rounded-xl border border-red-500/50 bg-red-500/10 text-red-500 text-sm">
+              <AlertCircleIcon className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
           <Button variant="ghost" onClick={() => router.push("/mi-perfil")} className="text-muted-foreground hover:text-foreground hover:bg-surface">Cancelar</Button>
@@ -213,6 +232,31 @@ export default function VincularPage() {
           </Button>
         </CardFooter>
       </Card>
+
+      <Modal
+        isOpen={mostrarConfirmacion}
+        onClose={() => !isSubmitting && setMostrarConfirmacion(false)}
+        className="w-full max-w-md"
+      >
+        <div className="p-6 space-y-5">
+          <div>
+            <h2 className="text-xl font-bold">Confirmar vinculación</h2>
+            <p className="text-muted-foreground mt-2">
+              ¿Confirmás que <strong className="text-foreground">{perfilSeleccionado?.nombre}</strong> es tu perfil
+              oficial? La solicitud va a ser revisada por un administrador de la FAY antes de vincularse a tu cuenta.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="ghost" onClick={() => setMostrarConfirmacion(false)} disabled={isSubmitting}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmarVinculacion} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2Icon className="w-4 h-4 animate-spin mr-2" /> : null}
+              Confirmar
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </main>
   );
 }

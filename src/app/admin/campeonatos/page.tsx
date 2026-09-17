@@ -31,6 +31,7 @@ export default function AdminCampeonatosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -57,6 +58,7 @@ export default function AdminCampeonatosPage() {
     // La confirmación ahora la maneja ConfirmDeleteButton (in-place, no un
     // window.confirm nativo) -acá ya llega confirmado.
     setDeletingId(c.id);
+    setError(null);
     try {
       const res = await fetch(`/api/campeonatos/${c.id}`, { method: "DELETE" });
       if (!res.ok) {
@@ -64,8 +66,8 @@ export default function AdminCampeonatosPage() {
         throw new Error(data.error || "No se pudo eliminar el campeonato");
       }
       await fetchData();
-    } catch (error) {
-      alert(mensajeDeError(error));
+    } catch (err) {
+      setError(mensajeDeError(err));
     } finally {
       setDeletingId(null);
     }
@@ -83,6 +85,10 @@ export default function AdminCampeonatosPage() {
             <PlusIcon className="w-4 h-4" /> Nuevo Campeonato
           </Button>
         </header>
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
+        )}
 
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">

@@ -14,6 +14,8 @@ interface Solicitud {
 export default function SolicitudesAdminPage() {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [procesando, setProcesando] = useState<string | null>(null);
 
   const fetchSolicitudes = useCallback(async () => {
     try {
@@ -36,6 +38,8 @@ export default function SolicitudesAdminPage() {
   }, [fetchSolicitudes]);
 
   const handleAction = async (id: string, action: 'APROBAR' | 'RECHAZAR') => {
+    setProcesando(id);
+    setError(null);
     try {
       const res = await fetch(`/api/admin/solicitudes/${id}`, {
         method: 'PATCH',
@@ -44,14 +48,17 @@ export default function SolicitudesAdminPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Error procesando solicitud");
+        throw new Error("No se pudo procesar la solicitud");
       }
 
-      alert(`Solicitud ${action.toLowerCase()} exitosamente`);
-      fetchSolicitudes();
-    } catch (error) {
-      alert("Ocurrió un error");
-      console.error(error);
+      // La fila desaparece sola al recargar la lista (esta pantalla solo
+      // muestra las PENDIENTES) -eso ya es la confirmación visual, sin
+      // necesidad de un alert() nativo encima.
+      await fetchSolicitudes();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ocurrió un error");
+    } finally {
+      setProcesando(null);
     }
   };
 
@@ -61,6 +68,10 @@ export default function SolicitudesAdminPage() {
         <h1 className="text-3xl font-bold tracking-tight">Solicitudes de Vinculación</h1>
         <p className="text-muted-foreground mt-2">Revisá las peticiones de los usuarios para reclamar perfiles de regatistas.</p>
       </div>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
+      )}
 
       <Card className="bg-surface border-border">
         <CardContent className="p-0">
@@ -92,19 +103,21 @@ export default function SolicitudesAdminPage() {
                       <td className="px-6 py-4 font-bold text-primary">{solicitud.regatista.nombre}</td>
                       <td className="px-6 py-4 text-muted-foreground">{solicitud.regatista.club?.nombre || '-'}</td>
                       <td className="px-6 py-4 text-right space-x-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
+                        <Button
+                          size="sm"
+                          variant="outline"
                           className="bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
                           onClick={() => handleAction(solicitud.id, 'APROBAR')}
+                          disabled={procesando === solicitud.id}
                         >
-                          <CheckIcon className="w-4 h-4 mr-1" /> Aprobar
+                          {procesando === solicitud.id ? <Loader2Icon className="w-4 h-4 mr-1 animate-spin" /> : <CheckIcon className="w-4 h-4 mr-1" />} Aprobar
                         </Button>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           className="bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
                           onClick={() => handleAction(solicitud.id, 'RECHAZAR')}
+                          disabled={procesando === solicitud.id}
                         >
                           <XIcon className="w-4 h-4 mr-1" /> Rechazar
                         </Button>

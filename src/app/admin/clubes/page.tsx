@@ -78,7 +78,7 @@ export default function AdminClubesPage() {
           .filter((c) => c.regatistas.length > 0)
       );
     } catch (err) {
-      alert(mensajeDeError(err));
+      setError(mensajeDeError(err));
     } finally {
       setGuardando(null);
     }
@@ -97,7 +97,7 @@ export default function AdminClubesPage() {
       if (!res.ok) throw new Error("No se pudo fusionar");
       await cargar();
     } catch (err) {
-      alert(mensajeDeError(err));
+      setError(mensajeDeError(err));
     } finally {
       setGuardando(null);
     }
