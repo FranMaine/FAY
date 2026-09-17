@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, Loader2Icon, MergeIcon, AlertCircleIcon, CheckCircleIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon, MergeIcon, AlertCircleIcon, CheckCircleIcon, UserPlusIcon } from "lucide-react";
 import { mensajeDeError } from "@/lib/utils";
 
 interface RegatistaDup {
@@ -42,6 +42,17 @@ export default function DuplicadosPage() {
   const [candidatoPorSuelto, setCandidatoPorSuelto] = useState<Record<number, string>>({});
   const [fusionandoSuelto, setFusionandoSuelto] = useState<number | null>(null);
   const [exitoSuelto, setExitoSuelto] = useState<Record<number, string>>({});
+
+  // "Crear como nuevo regatista": cuando ninguno de los candidatos es la
+  // persona correcta pero el admin averiguó el nombre completo real (por
+  // ejemplo, mirando la planilla original del campeonato), esto completa
+  // la ficha existente en vez de dejarla para siempre como una sola
+  // palabra. Un Set de índices "abiertos" controla en qué filas se
+  // muestra el campo de texto (colapsado por default, para no
+  // amontonar un input por cada una de golpe).
+  const [creandoNuevoAbierto, setCreandoNuevoAbierto] = useState<Set<number>>(new Set());
+  const [nombreNuevoPorSuelto, setNombreNuevoPorSuelto] = useState<Record<number, string>>({});
+  const [creandoNuevo, setCreandoNuevo] = useState<number | null>(null);
 
   const fetchDatos = useCallback(async () => {
     setIsLoading(true);
@@ -130,6 +141,34 @@ export default function DuplicadosPage() {
       setError(mensajeDeError(err));
     } finally {
       setFusionandoSuelto(null);
+    }
+  };
+
+  const crearNuevoRegatista = async (idx: number) => {
+    const item = apellidosSueltos[idx];
+    const nombre = (nombreNuevoPorSuelto[idx] || "").trim();
+    if (nombre.length < 2) return;
+
+    setCreandoNuevo(idx);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/regatistas/${item.suelto.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo renombrar");
+
+      setExitoSuelto((prev) => ({
+        ...prev,
+        [idx]: `Confirmado como persona nueva: "${nombre}".`,
+      }));
+      setApellidosSueltos((prev) => prev.filter((_, i) => i !== idx));
+    } catch (err) {
+      setError(mensajeDeError(err));
+    } finally {
+      setCreandoNuevo(null);
     }
   };
 
@@ -275,7 +314,7 @@ export default function DuplicadosPage() {
                               </label>
                             ))}
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <Button
                               size="sm"
                               onClick={() => fusionarSuelto(idx)}
@@ -285,10 +324,53 @@ export default function DuplicadosPage() {
                               {fusionandoSuelto === idx ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <MergeIcon className="w-4 h-4" />}
                               Fusionar con el elegido
                             </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                setCreandoNuevoAbierto((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(idx)) next.delete(idx);
+                                  else next.add(idx);
+                                  return next;
+                                })
+                              }
+                              disabled={fusionandoSuelto === idx}
+                              className="gap-2"
+                            >
+                              <UserPlusIcon className="w-4 h-4" />
+                              Crear como nuevo regatista
+                            </Button>
                             <Button size="sm" variant="ghost" onClick={() => descartarSuelto(idx)} disabled={fusionandoSuelto === idx}>
                               Ninguno es -descartar
                             </Button>
                           </div>
+
+                          {creandoNuevoAbierto.has(idx) && (
+                            <div className="flex flex-wrap items-center gap-2 mt-3 p-3 rounded-lg bg-background/50 border border-border">
+                              <p className="text-xs text-muted-foreground w-full">
+                                Ninguno de los candidatos es &quot;{item.suelto.nombre}&quot; -si ya sabés el nombre
+                                completo real (por ejemplo, mirando la planilla original), completalo acá para que
+                                deje de ser un apellido suelto:
+                              </p>
+                              <input
+                                type="text"
+                                placeholder="Nombre completo real"
+                                value={nombreNuevoPorSuelto[idx] || ""}
+                                onChange={(e) => setNombreNuevoPorSuelto((prev) => ({ ...prev, [idx]: e.target.value }))}
+                                className="flex-1 min-w-[200px] text-sm bg-surface border border-border rounded-md px-3 py-1.5"
+                              />
+                              <Button
+                                size="sm"
+                                onClick={() => crearNuevoRegatista(idx)}
+                                disabled={creandoNuevo === idx || (nombreNuevoPorSuelto[idx] || "").trim().length < 2}
+                                className="gap-2"
+                              >
+                                {creandoNuevo === idx ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <UserPlusIcon className="w-4 h-4" />}
+                                Confirmar
+                              </Button>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
