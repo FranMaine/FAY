@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { ResultadosTable } from "@/components/tables/resultados-table";
+import { CsvDownloadButton } from "@/components/ui/csv-download-button";
 import { CalendarIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import prisma from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
@@ -160,7 +161,31 @@ export default async function CampeonatoDetailPage({ params }: Props) {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Clasificación General</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-2xl font-bold">Clasificación General</h2>
+              <a href="/reglas" className="text-xs text-muted-foreground hover:text-primary hover:underline">¿Cómo se calcula esto?</a>
+            </div>
+            <CsvDownloadButton
+              filename={`${campeonato.nombre} ${campeonato.anio}.csv`}
+              headers={["Posición", "Regatista", "Club", ...regatas.map((r) => `R${r}`), "Total Neto", ...columnasExtra]}
+              rows={clasificacionTabla.map((c) => {
+                const puntajesPorRegata = new Map(c.puntajes.map((p) => [p.regata, p]));
+                return [
+                  c.posicion,
+                  c.integrantes && c.integrantes.length > 1 ? c.integrantes.map((i) => i.nombre).join(" / ") : c.nombre,
+                  c.club,
+                  ...regatas.map((r) => {
+                    const p = puntajesPorRegata.get(r);
+                    if (!p) return "";
+                    return p.descartado ? `(${p.puntos})` : p.puntos;
+                  }),
+                  c.totalNeto,
+                  ...columnasExtra.map((col) => c.datosExtra?.[col] ?? ""),
+                ];
+              })}
+            />
+          </div>
           <ResultadosTable clasificacion={clasificacionTabla} regatas={regatas} columnasExtra={columnasExtra} />
         </div>
       </div>

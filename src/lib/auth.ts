@@ -53,7 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // puntual sin afectar a alguien que se equivoca de contraseña un
         // par de veces. authorize() no recibe la request acá, así que el
         // límite es por email (no por IP además).
-        if (!permitir(`login:${email}`, 10, 5 * 60 * 1000)) return null;
+        if (!(await permitir(`login:${email}`, 10, 5 * 60 * 1000))) return null;
 
         const user = await prisma.user.findUnique({
           where: { email },

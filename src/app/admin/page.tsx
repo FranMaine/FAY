@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, Users, AlertCircle, ArrowRight } from "lucide-react";
+import { Trophy, Users, AlertCircle, AlertTriangle, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 
 export const metadata: Metadata = {
@@ -15,14 +15,15 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 async function getStats() {
-  const [campeonatos, regatistas, clases, solicitudesPendientes] = await Promise.all([
+  const [campeonatos, regatistas, clases, solicitudesPendientes, erroresRecientes] = await Promise.all([
     prisma.campeonato.count(),
     prisma.regatista.count(),
     prisma.clase.count(),
     prisma.solicitudVinculacion.count({ where: { estado: "PENDIENTE" } }),
+    prisma.errorLog.count(),
   ]);
 
-  return { campeonatos, regatistas, clases, solicitudesPendientes };
+  return { campeonatos, regatistas, clases, solicitudesPendientes, erroresRecientes };
 }
 
 export default async function AdminDashboardPage() {
@@ -37,7 +38,7 @@ export default async function AdminDashboardPage() {
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <Card className="bg-surface border-border">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Campeonatos</CardTitle>
@@ -80,6 +81,19 @@ export default async function AdminDashboardPage() {
               </div>
             </CardContent>
           </Card>
+          <Card className={`bg-surface border-border ${stats.erroresRecientes > 0 ? "border-l-4 border-l-red-500" : ""}`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className={`text-sm font-medium ${stats.erroresRecientes > 0 ? "text-red-500" : "text-muted-foreground"}`}>
+                Errores
+              </CardTitle>
+              <AlertTriangle className={`w-4 h-4 ${stats.erroresRecientes > 0 ? "text-red-500" : "text-muted-foreground"}`} />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-3xl font-bold ${stats.erroresRecientes > 0 ? "text-red-500" : ""}`}>
+                {stats.erroresRecientes}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Quick Actions */}
@@ -114,6 +128,28 @@ export default async function AdminDashboardPage() {
                   Solicitudes de Vinculación <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </CardTitle>
                 <CardDescription>Revisar y aprobar reclamos de perfiles</CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+
+          <Card className="bg-surface border-border hover:border-primary transition-colors cursor-pointer group">
+            <Link href="/admin/clubes">
+              <CardHeader>
+                <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
+                  Clubes ambiguos <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </CardTitle>
+                <CardDescription>Resolver clubes combinados y siglas ambiguas</CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+
+          <Card className="bg-surface border-border hover:border-primary transition-colors cursor-pointer group">
+            <Link href="/admin/errores">
+              <CardHeader>
+                <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
+                  Errores del sistema <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </CardTitle>
+                <CardDescription>Ver errores no esperados de las APIs</CardDescription>
               </CardHeader>
             </Link>
           </Card>

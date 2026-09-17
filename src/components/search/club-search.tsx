@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { SearchIcon, ShieldIcon, UsersIcon } from "lucide-react";
+import { SearchIcon, UsersIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
+import { ClubAvatar } from "@/components/icons/club-avatar";
 
 export interface ClubListItem {
   id: string;
@@ -64,9 +65,7 @@ export function ClubSearch({ clubes }: ClubSearchProps) {
             <Link key={c.id} href={`/clubes/${c.id}`}>
               <Card className="h-full bg-surface border-border hover:border-primary/50 hover:-translate-y-0.5 transition-[transform,border-color]">
                 <CardContent className="p-5 flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                    <ShieldIcon className="w-5 h-5" />
-                  </div>
+                  <ClubAvatar nombre={c.nombre} className="w-10 h-10 text-sm" />
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground truncate">{c.nombre}</p>
                     {CLUB_ALIASES[c.nombre] && (

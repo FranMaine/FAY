@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, MedalIcon, ShieldIcon, TrophyIcon, UsersIcon } from "lucide-react";
+import { ArrowLeftIcon, MedalIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ClaseIcon } from "@/components/icons/clase-icons";
+import { ClubAvatar } from "@/components/icons/club-avatar";
+import { CsvDownloadButton } from "@/components/ui/csv-download-button";
 import { SITE_URL } from "@/lib/site";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
 
@@ -140,9 +142,7 @@ export default async function ClubDetailPage({ params }: Props) {
         </div>
 
         <header className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-            <ShieldIcon className="w-7 h-7" />
-          </div>
+          <ClubAvatar nombre={club.nombre} className="w-14 h-14 text-lg" />
           <div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{club.nombre}</h1>
             {CLUB_ALIASES[club.nombre] && (
@@ -191,9 +191,16 @@ export default async function ClubDetailPage({ params }: Props) {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
-                <TrophyIcon className="w-5 h-5 text-primary" /> Ranking del club
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
+                  <TrophyIcon className="w-5 h-5 text-primary" /> Ranking del club
+                </h2>
+                <CsvDownloadButton
+                  filename={`${club.nombre} - ranking.csv`}
+                  headers={["Posición", "Regatista", "Resultados", "Victorias", "Podios", "Mejor puesto"]}
+                  rows={rankingInterno.map((r, i) => [i + 1, r.nombre, r.resultados, r.victorias, r.podios, r.mejorPuesto])}
+                />
+              </div>
               <p className="text-sm text-muted-foreground -mt-2">
                 Regatistas del club ordenados por victorias y podios en regatas individuales, a través de todas las clases en las que compitieron.
               </p>

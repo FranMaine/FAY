@@ -21,6 +21,11 @@ export const registroSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Mínimo 6 caracteres'),
   confirmPassword: z.string(),
+  // El checkbox del formulario lo manda como boolean -literal(true) en vez
+  // de z.boolean() para que además de "false" también rechace que
+  // directamente no venga el campo (undefined), algo que un cliente hecho
+  // a mano podría mandar de menos si se saltea el checkbox.
+  aceptoTerminos: z.literal(true, { message: 'Tenés que aceptar el aviso legal y la política de privacidad' }),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],

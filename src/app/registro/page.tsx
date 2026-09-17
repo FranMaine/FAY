@@ -19,6 +19,7 @@ const registroSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
   password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
   confirmPassword: z.string(),
+  aceptoTerminos: z.literal(true, { message: "Tenés que aceptar el aviso legal y la política de privacidad" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
@@ -53,6 +54,7 @@ export default function RegistroPage() {
       email: "",
       password: "",
       confirmPassword: "",
+      aceptoTerminos: false as unknown as true,
     },
   });
 
@@ -112,6 +114,7 @@ export default function RegistroPage() {
           email: values.email,
           password: values.password,
           confirmPassword: values.confirmPassword, // Faltaba esto para que pase la validación Zod del backend
+          aceptoTerminos: values.aceptoTerminos,
           sitioWeb: trampa,
           montadoEn,
         }),
@@ -214,6 +217,29 @@ export default function RegistroPage() {
                 <label className="text-sm font-medium">Confirmar Contraseña</label>
                 <Input {...form.register("confirmPassword")} type="password" placeholder="••••••••" className="bg-background border-border" />
                 {form.formState.errors.confirmPassword && <p className="text-xs text-red-500">{form.formState.errors.confirmPassword.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    {...form.register("aceptoTerminos")}
+                    className="mt-0.5 h-4 w-4 rounded border-border accent-primary shrink-0"
+                  />
+                  <span>
+                    Acepto el{" "}
+                    <Link href="/aviso-legal" target="_blank" className="text-primary hover:underline">
+                      Aviso Legal
+                    </Link>{" "}
+                    y la{" "}
+                    <Link href="/privacidad" target="_blank" className="text-primary hover:underline">
+                      Política de Privacidad
+                    </Link>
+                    .
+                  </span>
+                </label>
+                {form.formState.errors.aceptoTerminos && (
+                  <p className="text-xs text-red-500">{form.formState.errors.aceptoTerminos.message}</p>
+                )}
               </div>
               <Button type="submit" className="w-full mt-2">Siguiente</Button>
             </form>

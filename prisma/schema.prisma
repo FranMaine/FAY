@@ -17,6 +17,13 @@ model User {
   regatista     Regatista? @relation(fields: [regatistaId], references: [id])
   regatistaId   String?   @unique
   emailVerified DateTime?
+  // Cuándo aceptó el Aviso Legal y la Política de Privacidad al
+  // registrarse -null para cuentas creadas antes de que existiera el
+  // checkbox (ver src/app/registro/page.tsx). Guardar el momento, no solo
+  // un booleano, deja registro de que hubo un consentimiento real en vez
+  // de un valor que cualquiera pudo haber seteado en true sin haber
+  // aceptado nada.
+  aceptoTerminosEn DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
@@ -78,6 +85,11 @@ model Regatista {
   updatedAt       DateTime    @updatedAt
 
   @@index([nombre])
+  // La ficha de un club (ver /clubes/[id]) filtra "todos los resultados de
+  // los regatistas con este clubId" -sin este índice, esa consulta
+  // escaneaba la tabla Regatista entera para encontrar quiénes son del
+  // club antes de poder ir a buscar sus resultados.
+  @@index([clubId])
 }
 
 model Club {
@@ -205,5 +217,33 @@ enum EstadoSolicitud {
   PENDIENTE
   APROBADA
   RECHAZADA
+}
+
+// Monitoreo de errores casero: sin un servicio externo (Sentry, etc. -
+// necesitarían una cuenta y un DSN que no tenemos), handleApiError()
+// escribe acá cualquier error no esperado de una API route además de
+// mandarlo a console.error como ya hacía. /admin/errores lo lista, así
+// hay una forma real de enterarse de que algo rompió en producción sin
+// depender de que un usuario escriba para avisar.
+model ErrorLog {
+  id        String   @id @default(cuid())
+  contexto  String
+  mensaje   String
+  stack     String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// Rate limiting compartido entre instancias (ver src/lib/rate-limit.ts):
+// el límite anterior vivía en un Map en memoria, que en un entorno
+// serverless (Vercel) no se comparte entre instancias -dos requests que
+// caían en instancias distintas no veían el intento la una de la otra.
+// Guardarlo acá (mismo Postgres que ya usa toda la app) lo hace
+// consistente sin depender de un servicio de cache aparte (Redis/Upstash).
+model RateLimitEntry {
+  clave         String   @id
+  intentos      Int      @default(1)
+  ventanaInicio DateTime @default(now())
 }
 

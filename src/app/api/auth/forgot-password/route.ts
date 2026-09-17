@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     // usarlo para bombardear la casilla de otra persona con enlaces de
     // reseteo. 5 pedidos por IP cada 10 minutos alcanza de sobra para un
     // uso legítimo (probar con distintos emails propios/olvidados).
-    if (!permitir(`forgot-password:${ipDeRequest(request)}`, 5, 10 * 60 * 1000)) {
+    if (!(await permitir(`forgot-password:${ipDeRequest(request)}`, 5, 10 * 60 * 1000))) {
       return NextResponse.json({ error: 'Demasiados intentos. Probá de nuevo en unos minutos.' }, { status: 429 });
     }
 

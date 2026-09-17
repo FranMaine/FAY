@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon } from "lucide-react";
+import { CsvDownloadButton } from "@/components/ui/csv-download-button";
 
 // Mismo caso que /campeonatos/[id]: sin esto, el perfil queda cacheado
 // estático para siempre después de la primera visita -si esa persona
@@ -203,7 +204,21 @@ export default async function RegatistaProfilePage({ params }: Props) {
 
             {/* Historial de Campeonatos */}
             <div>
-              <h2 className="text-2xl font-bold tracking-tight mb-6">Historial de Resultados</h2>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <h2 className="text-2xl font-bold tracking-tight">Historial de Resultados</h2>
+                <CsvDownloadButton
+                  filename={`${regatista.nombre} - historial.csv`}
+                  headers={["Campeonato", "Año", "Clase", "Posición", "Inscriptos", "Puntos Netos"]}
+                  rows={historial.map((h) => [
+                    h.campeonato.nombre,
+                    h.campeonato.anio,
+                    h.campeonato.clase.nombre,
+                    h.posicion,
+                    h.totalInscriptos,
+                    h.puntosNetos,
+                  ])}
+                />
+              </div>
               <div className="space-y-4">
                 {historial.map((h) => {
                   const isPodium = h.posicion <= 3;

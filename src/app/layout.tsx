@@ -74,6 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <link rel="alternate" type="application/rss+xml" title="FAY Stats — Últimos campeonatos" href="/feed.xml" />
         <OrganizationJsonLd />
         <WebsiteJsonLd />
       </head>
@@ -83,10 +84,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
           <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
             <p>FAY Stats © {new Date().getFullYear()} — Estadísticas de Vela Argentina</p>
-            <nav className="flex items-center justify-center gap-4 text-xs">
+            <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">
+              <a href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</a>
               <a href="/aviso-legal" className="hover:text-foreground hover:underline">Aviso legal</a>
               <a href="/privacidad" className="hover:text-foreground hover:underline">Privacidad</a>
               <a href="/cookies" className="hover:text-foreground hover:underline">Cookies</a>
+              <a href="/feed.xml" className="hover:text-foreground hover:underline">RSS</a>
             </nav>
           </footer>
           <BackToTop />

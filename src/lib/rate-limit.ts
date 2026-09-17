@@ -1,48 +1,60 @@
-// Limitador de tasa simple, en memoria, por IP -pensado para frenar abuso
-// básico (spam de registros, o que alguien use "olvidé mi contraseña" para
-// mandar mail en cadena a direcciones ajenas) sin depender de Redis ni de
-// ningún servicio externo.
-//
-// OJO con la limitación real de esto: en un entorno serverless (Vercel)
-// cada instancia tiene su propia memoria, así que dos requests que caen en
-// instancias distintas no comparten contador -no es un límite exacto ni a
-// prueba de un atacante distribuido. Sirve igual como primera barrera
-// contra bots/spam simple (el caso real que nos importa acá), no como
-// defensa contra un ataque dirigido -para eso hace falta un store
-// compartido (ej: Redis/Upstash), fuera de alcance por ahora.
-const intentos = new Map<string, number[]>();
-
-// Limpieza periódica para no acumular entradas viejas para siempre en el
-// Map -sin esto, cada IP que probó una vez el formulario queda en memoria
-// hasta que se reinicia la instancia.
-const LIMPIEZA_INTERVALO_MS = 10 * 60 * 1000;
-let ultimaLimpieza = Date.now();
-
-function limpiarViejos(ahora: number) {
-  if (ahora - ultimaLimpieza < LIMPIEZA_INTERVALO_MS) return;
-  ultimaLimpieza = ahora;
-  for (const [key, marcas] of intentos) {
-    if (marcas.every((t) => ahora - t > LIMPIEZA_INTERVALO_MS)) intentos.delete(key);
-  }
-}
+import { prisma } from '@/lib/db';
 
 /**
- * Sliding window: permite como máximo `limite` llamados por `key` dentro de
- * los últimos `ventanaMs` milisegundos. Devuelve true si esta llamada está
- * permitida (y la registra); false si hay que rechazarla.
+ * Limitador de tasa por ventana fija, respaldado en Postgres (tabla
+ * RateLimitEntry) -pensado para frenar abuso básico (spam de registros, o
+ * que alguien use "olvidé mi contraseña" para mandar mail en cadena a
+ * direcciones ajenas) sin depender de un servicio externo (Redis/Upstash).
+ *
+ * Antes esto vivía en un Map en memoria del proceso. Funcionaba en un
+ * servidor de un solo proceso, pero en un entorno serverless (Vercel) cada
+ * instancia tiene su propia memoria -dos requests que caían en instancias
+ * distintas no veían el intento la una de la otra, así que el límite real
+ * terminaba siendo "N intentos por instancia", no "N intentos por IP/
+ * email" como se pretendía. Guardarlo en la misma base Postgres que ya usa
+ * toda la app lo hace consistente entre instancias sin sumar
+ * infraestructura nueva.
+ *
+ * No es perfectamente atómico bajo carga concurrente muy alta (hay una
+ * lectura y después una escritura, no un solo UPDATE atómico) -aceptable
+ * acá: es una barrera contra abuso, no un mecanismo de facturación donde
+ * una carrera de milisegundos importe.
  */
-export function permitir(key: string, limite: number, ventanaMs: number): boolean {
-  const ahora = Date.now();
-  limpiarViejos(ahora);
+export async function permitir(key: string, limite: number, ventanaMs: number): Promise<boolean> {
+  const ahora = new Date();
 
-  const marcas = (intentos.get(key) ?? []).filter((t) => ahora - t < ventanaMs);
-  if (marcas.length >= limite) {
-    intentos.set(key, marcas);
-    return false;
+  const entry = await prisma.rateLimitEntry.findUnique({ where: { clave: key } });
+
+  if (!entry || ahora.getTime() - entry.ventanaInicio.getTime() > ventanaMs) {
+    // No hay entrada, o la ventana anterior ya venció -arranca una nueva
+    // ventana con un solo intento (este).
+    await prisma.rateLimitEntry.upsert({
+      where: { clave: key },
+      create: { clave: key, intentos: 1, ventanaInicio: ahora },
+      update: { intentos: 1, ventanaInicio: ahora },
+    });
+    limpiarViejosOcasionalmente();
+    return true;
   }
-  marcas.push(ahora);
-  intentos.set(key, marcas);
+
+  if (entry.intentos >= limite) return false;
+
+  await prisma.rateLimitEntry.update({ where: { clave: key }, data: { intentos: { increment: 1 } } });
   return true;
+}
+
+// Limpieza oportunista de entradas viejas -sin un cron job dedicado, se
+// aprovecha alguna llamada de tanto en tanto (1 de cada ~50) para no dejar
+// crecer la tabla para siempre con ventanas ya vencidas hace rato. No
+// importa perderse una limpieza puntual: la próxima que "toque" la hace
+// igual.
+const UNA_HORA_MS = 60 * 60 * 1000;
+function limpiarViejosOcasionalmente() {
+  if (Math.random() > 0.02) return;
+  const limite = new Date(Date.now() - UNA_HORA_MS);
+  prisma.rateLimitEntry.deleteMany({ where: { ventanaInicio: { lt: limite } } }).catch(() => {
+    // No pasa nada si esto falla -es housekeeping, no una operación crítica.
+  });
 }
 
 /** IP del request, tal como la ve el server detrás del proxy/CDN. */
