@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircleIcon, ImageIcon, Loader2Icon, MergeIcon, RefreshCwIcon } from "lucide-react";
+import { AlertCircleIcon, ImageIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { mensajeDeError } from "@/lib/utils";
@@ -20,12 +20,6 @@ interface Combo {
   nuevos: string[];
 }
 
-interface ClubCnp {
-  id: string;
-  nombre: string;
-  regatistas: RegatistaItem[];
-}
-
 // Panel para resolver a mano los dos tipos de caso "incierto" que quedaron
 // después de la limpieza automática de datos de clubes (ver el commit de
 // la sección Clubes): clubes "combo" (varios clubes reales pegados con
@@ -35,7 +29,6 @@ interface ClubCnp {
 // una fusión automática.
 export default function AdminClubesPage() {
   const [combos, setCombos] = useState<Combo[]>([]);
-  const [clubesCnp, setClubesCnp] = useState<ClubCnp[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState<string | null>(null);
@@ -50,7 +43,6 @@ export default function AdminClubesPage() {
       if (!res.ok) throw new Error("No se pudo cargar la lista");
       const data = await res.json();
       setCombos(data.combos);
-      setClubesCnp(data.clubesCnp);
     } catch (err) {
       setError(mensajeDeError(err));
     } finally {
@@ -80,25 +72,6 @@ export default function AdminClubesPage() {
           .map((c) => (c.id === comboId ? { ...c, regatistas: c.regatistas.filter((r) => r.id !== regatistaId) } : c))
           .filter((c) => c.regatistas.length > 0)
       );
-    } catch (err) {
-      setError(mensajeDeError(err));
-    } finally {
-      setGuardando(null);
-    }
-  }
-
-  async function fusionarEnCnp(duplicadoId: string) {
-    const cnpBase = clubesCnp.find((c) => c.nombre.trim().toUpperCase() === "CNP");
-    if (!cnpBase) return;
-    setGuardando(duplicadoId);
-    try {
-      const res = await fetch("/api/admin/clubes/merge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ canonicoId: cnpBase.id, duplicadoIds: [duplicadoId] }),
-      });
-      if (!res.ok) throw new Error("No se pudo fusionar");
-      await cargar();
     } catch (err) {
       setError(mensajeDeError(err));
     } finally {
@@ -237,42 +210,6 @@ export default function AdminClubesPage() {
               </Card>
             ))
           )}
-        </section>
-
-        <section className="space-y-4">
-          <div>
-            <h2 className="text-xl font-bold tracking-tight">Sigla ambigua: &quot;CNP&quot;</h2>
-            <p className="text-sm text-muted-foreground">
-              La base tiene dos nombres completos distintos para la sigla &quot;CNP&quot; (Club Náutico Paraná y Cofradía Náutica del Pacífico) -no se puede saber cuál corresponde al CNP real sin más información.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {clubesCnp.map((c) => {
-              const esBase = c.nombre.trim().toUpperCase() === "CNP";
-              return (
-                <Card key={c.id} className={`bg-surface border-border ${esBase ? "border-primary/50" : ""}`}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">{c.nombre}</CardTitle>
-                    <CardDescription>{c.regatistas.length} regatista{c.regatistas.length === 1 ? "" : "s"}</CardDescription>
-                  </CardHeader>
-                  {!esBase && (
-                    <CardContent>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full gap-2"
-                        disabled={guardando === c.id}
-                        onClick={() => fusionarEnCnp(c.id)}
-                      >
-                        {guardando === c.id ? <Loader2Icon className="w-3.5 h-3.5 animate-spin" /> : <MergeIcon className="w-3.5 h-3.5" />}
-                        Fusionar en CNP
-                      </Button>
-                    </CardContent>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
         </section>
       </div>
     </main>

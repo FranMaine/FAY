@@ -15,13 +15,9 @@
  *  - Siglas con nombre completo truncado en la fuente original (ej:
  *    "CGLNM", "CDCPV") -mejor no completar a mano lo que se cortó, para no
  *    inventar el final de la frase.
- *  - "CNP": la única sigla que en la base aparecía con DOS nombres
- *    completos distintos ("Club Náutico Paraná" y "Cofradía Náutica del
- *    Pacífico") -no se puede saber cuál de los dos corresponde al club
- *    "CNP" real sin más información, así que se dejó sin fusionar y sin
- *    alias acá (ver el resumen de casos inciertos).
  */
 export const CLUB_ALIASES: Record<string, string> = {
+  CNP: 'Club Náutico Paraná',
   YCR: 'Yacht Club Rosario',
   YCA: 'Yacht Club Argentino',
   CNSI: 'Club Náutico San Isidro',
