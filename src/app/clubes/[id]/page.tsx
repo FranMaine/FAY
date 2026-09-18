@@ -19,9 +19,9 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const club = await prisma.club.findUnique({ where: { id }, select: { nombre: true } });
+  const club = await prisma.club.findUnique({ where: { id }, select: { nombre: true, nombreCompleto: true } });
   if (!club) return { title: "Club no encontrado" };
-  const nombreCompleto = CLUB_ALIASES[club.nombre] || club.nombre;
+  const nombreCompleto = club.nombreCompleto || CLUB_ALIASES[club.nombre] || club.nombre;
   return {
     title: club.nombre,
     description: `Estadísticas y ranking de los regatistas de ${nombreCompleto} en los campeonatos oficiales de la Federación Argentina de Yachting.`,
@@ -116,7 +116,7 @@ export default async function ClubDetailPage({ params }: Props) {
     (a, b) => b.victorias - a.victorias || b.podios - a.podios || b.resultados - a.resultados
   );
 
-  const aliasClub = CLUB_ALIASES[club.nombre];
+  const aliasClub = club.nombreCompleto || CLUB_ALIASES[club.nombre];
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SportsOrganization",
@@ -145,8 +145,8 @@ export default async function ClubDetailPage({ params }: Props) {
           <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-20 h-20 text-xl" />
           <div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{club.nombre}</h1>
-            {CLUB_ALIASES[club.nombre] && (
-              <p className="text-muted-foreground">{CLUB_ALIASES[club.nombre]}</p>
+            {aliasClub && (
+              <p className="text-muted-foreground">{aliasClub}</p>
             )}
             <p className="text-muted-foreground flex items-center gap-2 mt-1">
               {club.ciudad && <span>{club.ciudad} · </span>}

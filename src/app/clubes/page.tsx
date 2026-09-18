@@ -26,7 +26,7 @@ async function getClubes() {
   // o con nombres-combo de baja calidad (ver auditoría de datos) antes que
   // los clubes reales grandes.
   return clubes
-    .map((c) => ({ id: c.id, nombre: c.nombre, ciudad: c.ciudad, logoUrl: c.logoUrl, regatistasCount: c._count.regatistas + c._count.regatistasSecundarios }))
+    .map((c) => ({ id: c.id, nombre: c.nombre, ciudad: c.ciudad, logoUrl: c.logoUrl, nombreCompleto: c.nombreCompleto, regatistasCount: c._count.regatistas + c._count.regatistasSecundarios }))
     .sort((a, b) => b.regatistasCount - a.regatistasCount || a.nombre.localeCompare(b.nombre));
 }
 

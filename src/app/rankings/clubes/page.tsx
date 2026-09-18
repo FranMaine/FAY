@@ -27,16 +27,17 @@ async function getRankingDeClubes(claseId: string, anio: number) {
         }
       }
     }),
-    prisma.club.findMany({ select: { id: true, nombre: true, logoUrl: true } }),
+    prisma.club.findMany({ select: { id: true, nombre: true, logoUrl: true, nombreCompleto: true } }),
   ]);
 
   // La clasificación no trae el id del club, solo su nombre -Club.nombre es
   // único en el schema, así que este mapa alcanza para volver a asociar cada
   // fila con el id real del club (y su logo) y poder linkear a /clubes/[id].
   const idPorNombre = new Map(clubes.map((c) => [c.nombre, c.id]));
+  const completoPorNombre = new Map(clubes.map((c) => [c.nombre, c.nombreCompleto]));
   const logoPorNombre = new Map(clubes.map((c) => [c.nombre, c.logoUrl]));
 
-  const clubesStats = new Map<string, { id: string; nombre: string; logoUrl: string | null; regatistas: Set<string>; puntosRanking: number }>();
+  const clubesStats = new Map<string, { id: string; nombre: string; logoUrl: string | null; completo: string | null; regatistas: Set<string>; puntosRanking: number }>();
 
   for (const camp of campeonatos) {
     const clasificacion = generarClasificacion(agruparPorRegatista(camp.regatas), camp.descartes);
@@ -46,7 +47,7 @@ async function getRankingDeClubes(claseId: string, anio: number) {
       const clubId = c.club ? idPorNombre.get(c.club) : undefined;
       if (!c.club || !clubId) return;
       if (!clubesStats.has(clubId)) {
-        clubesStats.set(clubId, { id: clubId, nombre: c.club, logoUrl: logoPorNombre.get(c.club) ?? null, regatistas: new Set(), puntosRanking: 0 });
+        clubesStats.set(clubId, { id: clubId, nombre: c.club, logoUrl: logoPorNombre.get(c.club) ?? null, completo: completoPorNombre.get(c.club) ?? null, regatistas: new Set(), puntosRanking: 0 });
       }
       const stats = clubesStats.get(clubId)!;
       stats.regatistas.add(c.regatistaId);
@@ -56,7 +57,7 @@ async function getRankingDeClubes(claseId: string, anio: number) {
   }
 
   return Array.from(clubesStats.values())
-    .map((s) => ({ id: s.id, nombre: s.nombre, logoUrl: s.logoUrl, regatistas: s.regatistas.size, puntosRanking: s.puntosRanking }))
+    .map((s) => ({ id: s.id, nombre: s.nombre, logoUrl: s.logoUrl, completo: s.completo, regatistas: s.regatistas.size, puntosRanking: s.puntosRanking }))
     .sort((a, b) => b.puntosRanking - a.puntosRanking);
 }
 
@@ -143,7 +144,7 @@ export default async function RankingClubesPage({
                   <tbody className="divide-y divide-border">
                     {ranking.map((r, i) => {
                       const pos = i + 1;
-                      const nombreCompleto = CLUB_ALIASES[r.nombre] || r.nombre;
+                      const nombreCompleto = r.completo || CLUB_ALIASES[r.nombre] || r.nombre;
                       return (
                         <tr key={r.id} className="hover:bg-background/50 transition-colors">
                           <td className="px-6 py-4 font-bold text-center">

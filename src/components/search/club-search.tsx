@@ -13,6 +13,7 @@ export interface ClubListItem {
   nombre: string;
   ciudad: string | null;
   logoUrl: string | null;
+  nombreCompleto: string | null;
   regatistasCount: number;
 }
 
@@ -39,7 +40,7 @@ export function ClubSearch({ clubes }: ClubSearchProps) {
     const q = normalizar(query);
     if (!q) return clubes;
     return clubes.filter((c) => {
-      const alias = CLUB_ALIASES[c.nombre];
+      const alias = c.nombreCompleto || CLUB_ALIASES[c.nombre];
       return normalizar(c.nombre).includes(q) || (alias && normalizar(alias).includes(q));
     });
   }, [clubes, query]);
@@ -69,8 +70,8 @@ export function ClubSearch({ clubes }: ClubSearchProps) {
                   <ClubAvatar nombre={c.nombre} logoUrl={c.logoUrl} className="w-10 h-10 text-sm" />
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground truncate">{c.nombre}</p>
-                    {CLUB_ALIASES[c.nombre] && (
-                      <p className="text-xs text-muted-foreground truncate">{CLUB_ALIASES[c.nombre]}</p>
+                    {(c.nombreCompleto || CLUB_ALIASES[c.nombre]) && (
+                      <p className="text-xs text-muted-foreground truncate">{c.nombreCompleto || CLUB_ALIASES[c.nombre]}</p>
                     )}
                     {c.ciudad && <p className="text-xs text-muted-foreground truncate">{c.ciudad}</p>}
                     <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">

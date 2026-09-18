@@ -8,10 +8,10 @@ export const contentType = "image/png";
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const club = await prisma.club.findUnique({ where: { id }, select: { nombre: true, ciudad: true } });
+  const club = await prisma.club.findUnique({ where: { id }, select: { nombre: true, ciudad: true, nombreCompleto: true } });
 
   const nombre = club?.nombre || "Club";
-  const alias = club ? CLUB_ALIASES[club.nombre] : undefined;
+  const alias = club ? club.nombreCompleto || CLUB_ALIASES[club.nombre] : undefined;
 
   return new ImageResponse(
     (

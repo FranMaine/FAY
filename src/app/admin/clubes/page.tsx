@@ -100,7 +100,7 @@ export default function AdminClubesPage() {
           <div className="flex items-center gap-2">
             <Link href="/admin/clubes/escudos">
               <Button variant="outline" size="sm" className="gap-2">
-                <ImageIcon className="w-4 h-4" /> Escudos
+                <ImageIcon className="w-4 h-4" /> Listado de clubes
               </Button>
             </Link>
             <Button variant="outline" size="sm" onClick={cargar} className="gap-2">

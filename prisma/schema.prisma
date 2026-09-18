@@ -117,6 +117,9 @@ model Club {
   id          String       @id @default(cuid())
   nombre      String       @unique
   ciudad      String?
+  // Nombre completo (el `nombre` suele ser la sigla, ej: "YCA"), editable
+  // desde /admin/clubes/escudos.
+  nombreCompleto String?
   // Escudo del club, cargado a mano por un admin desde /admin/clubes -si es
   // null se sigue mostrando el ClubAvatar genérico (iniciales + color).
   logoUrl     String?

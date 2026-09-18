@@ -20,6 +20,7 @@ export async function GET() {
         id: c.id,
         nombre: c.nombre,
         logoUrl: c.logoUrl,
+        nombreCompleto: c.nombreCompleto,
         regatistasCount: c._count.regatistas,
       }))
     );
