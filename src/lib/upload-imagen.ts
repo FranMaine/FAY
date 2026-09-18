@@ -25,33 +25,69 @@ export async function quitarFondoLiso(buffer: Buffer): Promise<Buffer> {
   if (esquinas.some((e) => data[e + 3] < 250)) return buffer; // ya tiene transparencia
   if (esquinas.some((e) => dist(e, esquinas[0]) > 24)) return buffer; // fondo no uniforme
 
-  const ref = esquinas[0];
+  const total = w * h;
+  const borrado = new Uint8Array(total);
   const TOL = 40;
-  const visitado = new Uint8Array(w * h);
-  const pila: number[] = [];
-  const empujar = (x: number, y: number) => {
-    const idx = y * w + x;
-    if (visitado[idx] || dist(px(x, y), ref) > TOL) return;
-    visitado[idx] = 1;
-    pila.push(idx);
+  const esBlanco = (i: number) => data[i] > 232 && data[i + 1] > 232 && data[i + 2] > 232;
+
+  // Relleno desde los bordes: borra lo conectado con color cercano a `ref`
+  // (o blanco) que no fue borrado antes. Devuelve cuántos píxeles borró.
+  const rellenar = (ref: number, semillas: number[], permitirBlanco: boolean) => {
+    const pila: number[] = [];
+    let n = 0;
+    const empujar = (idx: number) => {
+      if (borrado[idx]) return;
+      const i = idx * 4;
+      if (dist(i, ref) > TOL && !(permitirBlanco && esBlanco(i))) return;
+      borrado[idx] = 1;
+      n++;
+      pila.push(idx);
+    };
+    semillas.forEach(empujar);
+    while (pila.length) {
+      const idx = pila.pop()!;
+      const x = idx % w;
+      if (x > 0) empujar(idx - 1);
+      if (x < w - 1) empujar(idx + 1);
+      if (idx >= w) empujar(idx - w);
+      if (idx < total - w) empujar(idx + w);
+    }
+    return n;
   };
-  for (let x = 0; x < w; x++) { empujar(x, 0); empujar(x, h - 1); }
-  for (let y = 0; y < h; y++) { empujar(0, y); empujar(w - 1, y); }
-  while (pila.length) {
-    const idx = pila.pop()!;
-    const x = idx % w;
-    const y = (idx - x) / w;
-    if (x > 0) empujar(x - 1, y);
-    if (x < w - 1) empujar(x + 1, y);
-    if (y > 0) empujar(x, y - 1);
-    if (y < h - 1) empujar(x, y + 1);
+
+  const bordes: number[] = [];
+  for (let x = 0; x < w; x++) bordes.push(x, (h - 1) * w + x);
+  for (let y = 0; y < h; y++) bordes.push(y * w, y * w + w - 1);
+  rellenar(esquinas[0], bordes, esBlanco(esquinas[0]));
+
+  // Escudos que vienen con un marco de color (ej: borde azul sobre blanco):
+  // si lo que queda pegado al fondo borrado es un anillo fino de un solo
+  // color que rodea toda la imagen, se lo trata también como fondo. Máximo
+  // 3 capas, y solo si son finos, para no comerse el escudo en sí.
+  for (let pasada = 0; pasada < 3; pasada++) {
+    const frontera: number[] = [];
+    for (let idx = 0; idx < total; idx++) {
+      if (borrado[idx]) continue;
+      const x = idx % w;
+      const vecinoBorrado =
+        (x > 0 && borrado[idx - 1]) || (x < w - 1 && borrado[idx + 1]) ||
+        (idx >= w && borrado[idx - w]) || (idx < total - w && borrado[idx + w]);
+      if (vecinoBorrado) frontera.push(idx);
+    }
+    if (frontera.length < 2 * (w + h) * 0.6) break;
+    const base = frontera[0] * 4;
+    const uniformes = frontera.filter((idx) => dist(idx * 4, base) <= TOL).length;
+    if (uniformes < frontera.length * 0.85) break;
+    const copia = borrado.slice();
+    const n = rellenar(base, frontera, false);
+    if (!esBlanco(base) && n > total * 0.15) { borrado.set(copia); break; }
   }
 
   let borrados = 0;
-  for (let idx = 0; idx < visitado.length; idx++) {
-    if (visitado[idx]) { data[idx * 4 + 3] = 0; borrados++; }
+  for (let idx = 0; idx < total; idx++) {
+    if (borrado[idx]) { data[idx * 4 + 3] = 0; borrados++; }
   }
-  if (borrados < w * h * 0.03) return buffer;
+  if (borrados < total * 0.03) return buffer;
 
   return sharp(data, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
 }
