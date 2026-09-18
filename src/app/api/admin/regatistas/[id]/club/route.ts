@@ -6,6 +6,8 @@ import { handleApiError } from '@/lib/api-error';
 
 const bodySchema = z.object({
   clubId: z.string().nullable().optional(),
+  // Varios clubes a la vez (doble club): el primero queda como principal.
+  clubIds: z.array(z.string()).min(2).optional(),
   // Si el club no existe todavía, se crea con este nombre (o se reutiliza
   // uno existente con el mismo nombre) y se asigna al regatista.
   nuevoClubNombre: z.string().trim().min(2, 'Mínimo 2 caracteres').optional(),
@@ -25,6 +27,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     const { id } = await params;
     const body = bodySchema.parse(await request.json());
+
+    if (body.clubIds) {
+      const ids = [...new Set(body.clubIds)];
+      const existentes = await prisma.club.count({ where: { id: { in: ids } } });
+      if (existentes !== ids.length) return NextResponse.json({ error: 'Club no encontrado' }, { status: 404 });
+      await prisma.regatista.update({
+        where: { id },
+        data: { clubId: ids[0], otrosClubes: { set: ids.slice(1).map((c) => ({ id: c })) } },
+      });
+      return NextResponse.json({ ok: true });
+    }
     let clubId = body.clubId ?? null;
 
     if (body.nuevoClubNombre) {

@@ -63,13 +63,13 @@ export default function AdminClubesPage() {
     cargar();
   }, []);
 
-  async function reasignar(comboId: string, regatistaId: string, clubId: string | null, nuevoClubNombre?: string) {
+  async function reasignar(comboId: string, regatistaId: string, clubId: string | null, nuevoClubNombre?: string, clubIds?: string[]) {
     setGuardando(regatistaId);
     try {
       const res = await fetch(`/api/admin/regatistas/${regatistaId}/club`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevoClubNombre ? { nuevoClubNombre } : { clubId }),
+        body: JSON.stringify(clubIds ? { clubIds } : nuevoClubNombre ? { nuevoClubNombre } : { clubId }),
       });
       if (!res.ok) throw new Error((await res.json().catch(() => null))?.error || "No se pudo reasignar");
       // Sacamos al regatista de la lista del combo en el estado local -si
@@ -182,6 +182,10 @@ export default function AdminClubesPage() {
                             setCreandoPara(r.id);
                             return;
                           }
+                          if (value === "__ambos__") {
+                            reasignar(combo.id, r.id, null, undefined, combo.candidatos.map((c) => c.id));
+                            return;
+                          }
                           if (value.startsWith("nuevo:")) {
                             reasignar(combo.id, r.id, null, value.slice(6));
                             return;
@@ -195,6 +199,9 @@ export default function AdminClubesPage() {
                         {combo.candidatos.map((c) => (
                           <option key={c.id} value={c.id}>{c.nombre}</option>
                         ))}
+                        {combo.candidatos.length >= 2 && (
+                          <option value="__ambos__">Asignar a ambos: {combo.candidatos.map((c) => c.nombre).join(" + ")}</option>
+                        )}
                         {combo.nuevos.map((n) => (
                           <option key={n} value={`nuevo:${n}`}>Crear club nuevo: {n}</option>
                         ))}
