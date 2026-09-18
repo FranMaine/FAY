@@ -137,6 +137,9 @@ model Clase {
 model Campeonato {
   id          String             @id @default(cuid())
   nombre      String
+  // Evento al que pertenece (ej: "SIY" para "SIY Medals" y "SIY Masters"):
+  // si está, los listados agrupan por este nombre en vez de por `nombre`.
+  evento      String?
   anio        Int
   clase       Clase              @relation(fields: [claseId], references: [id])
   claseId     String

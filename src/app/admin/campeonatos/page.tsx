@@ -14,6 +14,7 @@ import { ClaseIcon } from "@/components/icons/clase-icons";
 interface Campeonato {
   id: string;
   nombre: string;
+  evento?: string | null;
   anio: number;
   estado: "BORRADOR" | "PUBLICADO";
   clase: { id: string; nombre: string };
@@ -33,8 +34,9 @@ interface Clase {
 function agruparPorEvento(campeonatos: Campeonato[]) {
   const grupos = new Map<string, { nombre: string; anio: number; items: Campeonato[] }>();
   for (const c of campeonatos) {
-    const clave = `${c.nombre.trim().toLowerCase()}__${c.anio}`;
-    if (!grupos.has(clave)) grupos.set(clave, { nombre: c.nombre, anio: c.anio, items: [] });
+    const nombreGrupo = c.evento?.trim() || c.nombre;
+    const clave = `${nombreGrupo.toLowerCase()}__${c.anio}`;
+    if (!grupos.has(clave)) grupos.set(clave, { nombre: nombreGrupo, anio: c.anio, items: [] });
     grupos.get(clave)!.items.push(c);
   }
   return [...grupos.values()].sort((a, b) => b.anio - a.anio || a.nombre.localeCompare(b.nombre));

@@ -14,8 +14,9 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
   const grupos = useMemo(() => {
     const map = new Map<string, { nombre: string; anio: number; items: Campeonato[] }>();
     for (const c of campeonatos) {
-      const clave = `${c.nombre.trim().toLowerCase()}__${c.anio}`;
-      if (!map.has(clave)) map.set(clave, { nombre: c.nombre, anio: c.anio, items: [] });
+      const nombreGrupo = c.evento?.trim() || c.nombre;
+      const clave = `${nombreGrupo.toLowerCase()}__${c.anio}`;
+      if (!map.has(clave)) map.set(clave, { nombre: nombreGrupo, anio: c.anio, items: [] });
       map.get(clave)!.items.push(c);
     }
     return [...map.entries()].map(([clave, g]) => ({ clave, ...g }));

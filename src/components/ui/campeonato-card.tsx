@@ -7,6 +7,7 @@ import { ClaseIcon } from '@/components/icons/clase-icons';
 export interface Campeonato {
   id: string;
   nombre: string;
+  evento?: string | null;
   anio: number;
   clase: string;
   sede: string;

@@ -80,6 +80,7 @@ export default async function CampeonatosPage({
   const campeonatos = campeonatosDb.map((c) => ({
     id: c.id,
     nombre: c.nombre,
+    evento: c.evento,
     anio: c.anio,
     clase: c.clase.nombre,
     sede: c.sede?.nombre || 'Sede FAY',
