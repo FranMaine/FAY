@@ -142,7 +142,7 @@ export default async function ClubDetailPage({ params }: Props) {
         </div>
 
         <header className="flex items-start gap-4">
-          <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-14 h-14 text-lg" />
+          <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-20 h-20 text-xl" />
           <div>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{club.nombre}</h1>
             {CLUB_ALIASES[club.nombre] && (

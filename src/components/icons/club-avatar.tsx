@@ -46,9 +46,9 @@ export function ClubAvatar({ nombre, logoUrl, className }: ClubAvatarProps) {
       <Image
         src={logoUrl}
         alt={nombre}
-        width={48}
-        height={48}
-        className={cn("rounded-full object-cover shrink-0 bg-white", className)}
+        width={200}
+        height={200}
+        className={cn("object-contain shrink-0", className)}
       />
     );
   }

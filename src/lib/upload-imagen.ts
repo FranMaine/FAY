@@ -8,13 +8,18 @@ export class ImagenInvalidaError extends Error {}
 
 /**
  * Recibe el File de un <input type="file">, lo valida, lo recomprime a
- * WebP cuadrado (evita subir fotos de varios MB tal cual, y normaliza el
- * aspect ratio para que ClubAvatar/foto de perfil siempre se vean bien
- * recortadas) y lo sube a Vercel Blob bajo `carpeta/clave.webp`.
+ * WebP (modo 'cover': cuadrado recortado, para fotos de perfil; modo
+ * 'inside': conserva la proporción original sin recortar, para escudos) y lo sube a Vercel Blob bajo `carpeta/clave.webp`.
  * Devuelve la URL pública. Requiere BLOB_READ_WRITE_TOKEN configurado
  * (automático si el proyecto tiene un Blob Store conectado en Vercel).
  */
-export async function subirImagen(file: File, carpeta: string, clave: string, ladoPx: number): Promise<string> {
+export async function subirImagen(
+  file: File,
+  carpeta: string,
+  clave: string,
+  ladoPx: number,
+  modo: 'cover' | 'inside' = 'cover'
+): Promise<string> {
   if (!TIPOS_PERMITIDOS.has(file.type)) {
     throw new ImagenInvalidaError('Formato no soportado -usá JPG, PNG, WEBP o AVIF.');
   }
@@ -24,7 +29,7 @@ export async function subirImagen(file: File, carpeta: string, clave: string, la
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const webp = await sharp(buffer)
-    .resize(ladoPx, ladoPx, { fit: 'cover' })
+    .resize(ladoPx, ladoPx, modo === 'cover' ? { fit: 'cover' } : { fit: 'inside', withoutEnlargement: true })
     .webp({ quality: 85 })
     .toBuffer();
 

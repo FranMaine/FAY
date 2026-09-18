@@ -23,7 +23,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: 'Falta el archivo' }, { status: 400 });
     }
 
-    const logoUrl = await subirImagen(file, 'clubes', id, 256);
+    const logoUrl = await subirImagen(file, 'clubes', id, 400, 'inside');
     await prisma.club.update({ where: { id }, data: { logoUrl } });
 
     return NextResponse.json({ logoUrl });
