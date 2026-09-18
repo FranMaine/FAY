@@ -19,14 +19,14 @@ export const dynamic = 'force-dynamic';
 
 async function getClubes() {
   const clubes = await prisma.club.findMany({
-    include: { _count: { select: { regatistas: true } } },
+    include: { _count: { select: { regatistas: true, regatistasSecundarios: true } } },
   });
   // Los que tienen más regatistas primero -son los que alguien más
   // probablemente busca, y evita que la grilla arranque con clubes vacíos
   // o con nombres-combo de baja calidad (ver auditoría de datos) antes que
   // los clubes reales grandes.
   return clubes
-    .map((c) => ({ id: c.id, nombre: c.nombre, ciudad: c.ciudad, logoUrl: c.logoUrl, regatistasCount: c._count.regatistas }))
+    .map((c) => ({ id: c.id, nombre: c.nombre, ciudad: c.ciudad, logoUrl: c.logoUrl, regatistasCount: c._count.regatistas + c._count.regatistasSecundarios }))
     .sort((a, b) => b.regatistasCount - a.regatistasCount || a.nombre.localeCompare(b.nombre));
 }
 

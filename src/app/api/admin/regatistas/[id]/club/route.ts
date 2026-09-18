@@ -4,7 +4,12 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 
-const bodySchema = z.object({ clubId: z.string().nullable() });
+const bodySchema = z.object({
+  clubId: z.string().nullable().optional(),
+  // Si el club no existe todavía, se crea con este nombre (o se reutiliza
+  // uno existente con el mismo nombre) y se asigna al regatista.
+  nuevoClubNombre: z.string().trim().min(2, 'Mínimo 2 caracteres').optional(),
+});
 
 // Reasigna el club de UN regatista puntual -pensado para resolver a mano
 // los clubes "combo" (ver /admin/clubes): un regatista que hoy tiene
@@ -19,9 +24,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const { id } = await params;
-    const { clubId } = bodySchema.parse(await request.json());
+    const body = bodySchema.parse(await request.json());
+    let clubId = body.clubId ?? null;
 
-    if (clubId) {
+    if (body.nuevoClubNombre) {
+      const nombre = body.nuevoClubNombre;
+      const existente = await prisma.club.findFirst({ where: { nombre: { equals: nombre, mode: 'insensitive' } } });
+      clubId = (existente ?? (await prisma.club.create({ data: { nombre } }))).id;
+    } else if (clubId) {
       const club = await prisma.club.findUnique({ where: { id: clubId } });
       if (!club) return NextResponse.json({ error: 'Club no encontrado' }, { status: 404 });
     }

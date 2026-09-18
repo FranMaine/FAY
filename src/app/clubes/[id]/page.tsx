@@ -32,7 +32,7 @@ async function getStatsDelClub(clubId: string) {
   const club = await prisma.club.findUnique({ where: { id: clubId } });
   if (!club) return null;
 
-  const regatistasCount = await prisma.regatista.count({ where: { clubId } });
+  const regatistasCount = await prisma.regatista.count({ where: { OR: [{ clubId }, { otrosClubes: { some: { id: clubId } } }] } });
 
   // A propósito NO se trae acá el árbol completo de cada campeonato en el
   // que compitió algún regatista del club (regatas + TODOS sus
@@ -49,7 +49,7 @@ async function getStatsDelClub(clubId: string) {
   // final recalculada de un campeonato entero.
   const resultados = await prisma.resultado.findMany({
     where: {
-      regatista: { clubId },
+      regatista: { OR: [{ clubId }, { otrosClubes: { some: { id: clubId } } }] },
       regata: { campeonato: { estado: "PUBLICADO" } },
     },
     select: {

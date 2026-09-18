@@ -32,18 +32,22 @@ export async function GET() {
     // revisar campeonato por campeonato, así que se muestran para que un
     // admin decida uno por uno en vez de fusionar/reasignar a ciegas.
     const combos = clubes
-      .filter((c) => (c.nombre.includes('/') || c.nombre.includes('|')) && c.regatistas.length > 0)
+      .filter((c) => /[/|-]/.test(c.nombre) && c.regatistas.length > 0)
       .map((c) => {
-        const tokens = c.nombre.split(/[/|]/).map((t) => t.trim()).filter(Boolean);
+        const tokens = c.nombre.split(/[/|-]/).map((t) => t.trim()).filter(Boolean);
         const candidatos = tokens
           .map((t) => porNombre.get(t.toUpperCase()))
           .filter((c): c is NonNullable<typeof c> => !!c && c.regatistas !== undefined)
           .map((c) => ({ id: c.id, nombre: c.nombre }));
+        // Partes del nombre que no coinciden con ningún club existente: se
+        // ofrecen para crearlas como club nuevo.
+        const nuevos = tokens.filter((t) => !porNombre.has(t.toUpperCase()));
         return {
           id: c.id,
           nombre: c.nombre,
           regatistas: c.regatistas,
           candidatos,
+          nuevos,
         };
       });
 

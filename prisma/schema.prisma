@@ -88,6 +88,10 @@ model Regatista {
   nombre          String
   club            Club?       @relation(fields: [clubId], references: [id])
   clubId          String?
+  // Regatistas que compiten por dos clubes (ej: "YCA / CNMP"): `club` es el
+  // principal y acá van los demás -así cada club reconocido lo cuenta como
+  // suyo en vez de quedar en un club "combo" inventado.
+  otrosClubes     Club[]      @relation("OtrosClubes")
   pais            String?     @default("Argentina")
   fechaNacimiento DateTime?
   fuenteIds       Json?       // { "sailwave": "PEREZ Juan", "fay": "123" }
@@ -117,6 +121,7 @@ model Club {
   // null se sigue mostrando el ClubAvatar genérico (iniciales + color).
   logoUrl     String?
   regatistas  Regatista[]
+  regatistasSecundarios Regatista[] @relation("OtrosClubes")
   campeonatos Campeonato[]
 }
 

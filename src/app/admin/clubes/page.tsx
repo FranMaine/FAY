@@ -17,6 +17,7 @@ interface Combo {
   nombre: string;
   regatistas: RegatistaItem[];
   candidatos: { id: string; nombre: string }[];
+  nuevos: string[];
 }
 
 interface ClubCnp {
@@ -38,6 +39,8 @@ export default function AdminClubesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState<string | null>(null);
+  const [creandoPara, setCreandoPara] = useState<string | null>(null);
+  const [nombreNuevo, setNombreNuevo] = useState("");
 
   const cargar = async () => {
     setIsLoading(true);
@@ -60,15 +63,15 @@ export default function AdminClubesPage() {
     cargar();
   }, []);
 
-  async function reasignar(comboId: string, regatistaId: string, clubId: string | null) {
+  async function reasignar(comboId: string, regatistaId: string, clubId: string | null, nuevoClubNombre?: string) {
     setGuardando(regatistaId);
     try {
       const res = await fetch(`/api/admin/regatistas/${regatistaId}/club`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clubId }),
+        body: JSON.stringify(nuevoClubNombre ? { nuevoClubNombre } : { clubId }),
       });
-      if (!res.ok) throw new Error("No se pudo reasignar");
+      if (!res.ok) throw new Error((await res.json().catch(() => null))?.error || "No se pudo reasignar");
       // Sacamos al regatista de la lista del combo en el estado local -si
       // era el último, el combo entero desaparece de la vista (ya no tiene
       // nada pendiente de resolver acá).
@@ -158,11 +161,11 @@ export default function AdminClubesPage() {
                   {combo.candidatos.length === 0 && (
                     <p className="text-xs text-amber-500 flex items-center gap-1.5 mb-2">
                       <AlertCircleIcon className="w-3.5 h-3.5" />
-                      No se encontró ningún club existente que coincida con las partes de este nombre -solo se puede dejar como está o sacar el club.
+                      Ninguna parte de este nombre coincide con un club existente -podés crear uno nuevo desde el desplegable de cada regatista.
                     </p>
                   )}
                   {combo.regatistas.map((r) => (
-                    <div key={r.id} className="flex items-center justify-between gap-3 py-2 border-t border-border first:border-t-0">
+                    <div key={r.id} className="border-t border-border first:border-t-0"><div className="flex items-center justify-between gap-3 py-2">
                       <Link href={`/regatistas/${r.id}`} className="text-sm font-medium hover:text-primary truncate">
                         {r.nombre}
                       </Link>
@@ -173,6 +176,16 @@ export default function AdminClubesPage() {
                         onChange={(e) => {
                           const value = e.target.value;
                           if (!value) return;
+                          if (value === "__otro__") {
+                            e.target.value = "";
+                            setNombreNuevo("");
+                            setCreandoPara(r.id);
+                            return;
+                          }
+                          if (value.startsWith("nuevo:")) {
+                            reasignar(combo.id, r.id, null, value.slice(6));
+                            return;
+                          }
                           reasignar(combo.id, r.id, value === "__sin_club__" ? null : value);
                         }}
                       >
@@ -182,8 +195,35 @@ export default function AdminClubesPage() {
                         {combo.candidatos.map((c) => (
                           <option key={c.id} value={c.id}>{c.nombre}</option>
                         ))}
+                        {combo.nuevos.map((n) => (
+                          <option key={n} value={`nuevo:${n}`}>Crear club nuevo: {n}</option>
+                        ))}
+                        <option value="__otro__">Crear club nuevo con otro nombre...</option>
                         <option value="__sin_club__">Sin club</option>
                       </select>
+                      </div>
+                      {creandoPara === r.id && (
+                        <form
+                          className="flex items-center gap-2 pb-2"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            const nombre = nombreNuevo.trim();
+                            if (nombre.length < 2) return;
+                            setCreandoPara(null);
+                            reasignar(combo.id, r.id, null, nombre);
+                          }}
+                        >
+                          <input
+                            autoFocus
+                            value={nombreNuevo}
+                            onChange={(e) => setNombreNuevo(e.target.value)}
+                            placeholder="Nombre del club nuevo"
+                            className="flex-1 text-sm bg-background border border-border rounded-md px-3 py-1.5"
+                          />
+                          <Button type="submit" size="sm">Crear y asignar</Button>
+                          <Button type="button" size="sm" variant="ghost" onClick={() => setCreandoPara(null)}>Cancelar</Button>
+                        </form>
+                      )}
                     </div>
                   ))}
                 </CardContent>
