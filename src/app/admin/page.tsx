@@ -149,7 +149,7 @@ export default async function AdminDashboardPage() {
             <Link href="/admin/clubes">
               <CardHeader>
                 <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
-                  Clubes ambiguos <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  Clubes <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </CardTitle>
                 <CardDescription>Resolver clubes combinados y siglas ambiguas</CardDescription>
               </CardHeader>

@@ -116,7 +116,7 @@ export default function AdminClubesPage() {
       <div className="max-w-5xl mx-auto space-y-10">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">Clubes ambiguos</h1>
+            <h1 className="text-4xl font-bold tracking-tight mb-2">Clubes</h1>
             <p className="text-muted-foreground text-lg">
               Casos que la limpieza automática de datos no pudo resolver sola -necesitan una decisión.
             </p>

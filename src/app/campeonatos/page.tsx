@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { CampeonatoCard } from "@/components/ui/campeonato-card";
+import { CampeonatosAgrupados } from "@/components/ui/campeonatos-agrupados";
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { RankingFilters } from "@/components/filters/ranking-filters";
@@ -112,11 +112,7 @@ export default async function CampeonatosPage({
             <p className="text-sm">No se encontraron campeonatos publicados con esos filtros.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {campeonatos.map((campeonato) => (
-              <CampeonatoCard key={campeonato.id} campeonato={campeonato} />
-            ))}
-          </div>
+          <CampeonatosAgrupados campeonatos={campeonatos} />
         )}
       </div>
     </main>
