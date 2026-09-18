@@ -87,8 +87,9 @@ export async function subirImagen(
   const blob = await put(`${carpeta}/${clave}.webp`, webp, {
     access: 'public',
     contentType: 'image/webp',
-    addRandomSuffix: false,
-    allowOverwrite: true,
+    // URL nueva en cada subida: con una URL fija, el CDN de Blob y el caché de
+    // next/image seguían mostrando la imagen anterior después de reemplazarla.
+    addRandomSuffix: true,
   });
 
   return blob.url;

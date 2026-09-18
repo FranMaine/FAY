@@ -30,6 +30,7 @@ export async function PATCH(request: Request) {
 
     const fotoUrl = await subirImagen(file, 'regatistas', regatista.id, 320);
     await prisma.regatista.update({ where: { id: regatista.id }, data: { fotoUrl } });
+    if (regatista.fotoUrl) await borrarImagen(regatista.fotoUrl);
 
     return NextResponse.json({ fotoUrl });
   } catch (error) {
