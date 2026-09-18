@@ -177,6 +177,28 @@ export default async function AdminDashboardPage() {
               </CardHeader>
             </Link>
           </Card>
+
+          <Card className="bg-surface border-border hover:border-primary transition-colors cursor-pointer group">
+            <Link href="/admin/auditoria">
+              <CardHeader>
+                <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
+                  Auditoría <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </CardTitle>
+                <CardDescription>Historial de acciones administrativas</CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+
+          <Card className="bg-surface border-border hover:border-primary transition-colors cursor-pointer group">
+            <Link href="/admin/mensajes">
+              <CardHeader>
+                <CardTitle className="group-hover:text-primary transition-colors flex items-center gap-2">
+                  Mensajes <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </CardTitle>
+                <CardDescription>Mensajes recibidos por /contacto</CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
         </div>
       </div>
     </main>

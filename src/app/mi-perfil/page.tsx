@@ -8,7 +8,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
-import { MedalIcon, CalendarIcon, ArrowRightIcon, SettingsIcon } from "lucide-react";
+import Image from "next/image";
+import { MedalIcon, CalendarIcon, ArrowRightIcon, SettingsIcon, UserIcon } from "lucide-react";
 
 // Página privada (requiere sesión, ver redirect() más abajo): sin sentido
 // indexarla, y menos con noindex no listado la evita en robots.txt igual
@@ -131,9 +132,24 @@ export default async function MiPerfilPage() {
     <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-1">Mi Dashboard</h1>
-            <p className="text-muted-foreground">{nombreMostrado}</p>
+          <div className="flex items-center gap-4">
+            {isLinked && stats?.regatista.fotoUrl ? (
+              <Image
+                src={stats.regatista.fotoUrl}
+                alt={nombreMostrado || "Foto de perfil"}
+                width={56}
+                height={56}
+                className="w-14 h-14 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <UserIcon className="w-7 h-7" />
+              </div>
+            )}
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight mb-1">Mi Dashboard</h1>
+              <p className="text-muted-foreground">{nombreMostrado}</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {isLinked && (

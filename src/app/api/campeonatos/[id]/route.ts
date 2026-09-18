@@ -5,6 +5,7 @@ import { campeonatoSchema, campeonatoPatchSchema } from '@/lib/validators';
 import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
 import { handleApiError } from '@/lib/api-error';
 import { puedeGestionarCampeonatos } from '@/lib/permisos';
+import { registrarAuditoria } from '@/lib/auditoria';
 
 export async function GET(
   request: Request,
@@ -91,7 +92,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    await prisma.campeonato.delete({ where: { id } });
+    const borrado = await prisma.campeonato.delete({ where: { id } });
+
+    void registrarAuditoria(
+      { email: session!.user.email || session!.user.id, name: session!.user.name },
+      'campeonato.eliminar',
+      'Campeonato',
+      id,
+      { nombre: borrado.nombre, anio: borrado.anio }
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -123,6 +132,16 @@ export async function PATCH(
         ...(body.nombre !== undefined ? { nombre: body.nombre } : {}),
       },
     });
+
+    if (body.estado !== undefined) {
+      void registrarAuditoria(
+        { email: session!.user.email || session!.user.id, name: session!.user.name },
+        'campeonato.cambiar_estado',
+        'Campeonato',
+        id,
+        { nombre: campeonato.nombre, estadoNuevo: body.estado }
+      );
+    }
 
     return NextResponse.json(campeonato);
   } catch (error) {

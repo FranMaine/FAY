@@ -25,7 +25,8 @@ export default async function ConfiguracionPage() {
     select: {
       email: true,
       apodo: true,
-      regatista: { select: { id: true, nombre: true } },
+      passwordHash: true,
+      regatista: { select: { id: true, nombre: true, fotoUrl: true } },
     },
   });
   if (!user) redirect("/login");
@@ -43,7 +44,12 @@ export default async function ConfiguracionPage() {
           <p className="text-muted-foreground mt-1">{user.email}</p>
         </div>
 
-        <ConfiguracionForm apodoInicial={user.apodo} email={user.email} regatista={user.regatista} />
+        <ConfiguracionForm
+          apodoInicial={user.apodo}
+          email={user.email}
+          regatista={user.regatista}
+          tienePassword={!!user.passwordHash}
+        />
       </div>
     </main>
   );

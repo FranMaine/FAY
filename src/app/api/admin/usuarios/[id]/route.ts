@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
+import { registrarAuditoria } from '@/lib/auditoria';
 
 const bodySchema = z.object({ role: z.enum(['ADMIN', 'ORGANIZADOR', 'REGULAR']) });
 
@@ -43,6 +44,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       data: { role },
       select: { id: true, email: true, name: true, role: true },
     });
+
+    void registrarAuditoria(
+      { email: session.user.email || session.user.id, name: session.user.name },
+      'usuario.cambiar_rol',
+      'User',
+      actualizado.id,
+      { email: actualizado.email, rolNuevo: role }
+    );
+
     return NextResponse.json(actualizado);
   } catch (error) {
     return handleApiError(error, 'PATCH /api/admin/usuarios/[id]');

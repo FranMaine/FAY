@@ -16,6 +16,12 @@ const nextConfig: NextConfig = {
   // default implícito del framework.
   images: {
     formats: ["image/avif", "image/webp"],
+    // Escudos de clubes y fotos de perfil de regatistas, subidos a Vercel
+    // Blob (ver src/lib/upload-imagen.ts) -cada Blob Store público tiene su
+    // propio subdominio de *.public.blob.vercel-storage.com.
+    remotePatterns: [
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+    ],
   },
   async headers() {
     return [

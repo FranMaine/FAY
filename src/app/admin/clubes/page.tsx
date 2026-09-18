@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircleIcon, Loader2Icon, MergeIcon, RefreshCwIcon } from "lucide-react";
+import { AlertCircleIcon, ImageIcon, Loader2Icon, MergeIcon, RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { mensajeDeError } from "@/lib/utils";
@@ -121,9 +121,16 @@ export default function AdminClubesPage() {
               Casos que la limpieza automática de datos no pudo resolver sola -necesitan una decisión.
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={cargar} className="gap-2">
-            <RefreshCwIcon className="w-4 h-4" /> Actualizar
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href="/admin/clubes/escudos">
+              <Button variant="outline" size="sm" className="gap-2">
+                <ImageIcon className="w-4 h-4" /> Escudos
+              </Button>
+            </Link>
+            <Button variant="outline" size="sm" onClick={cargar} className="gap-2">
+              <RefreshCwIcon className="w-4 h-4" /> Actualizar
+            </Button>
+          </div>
         </header>
 
         {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>}

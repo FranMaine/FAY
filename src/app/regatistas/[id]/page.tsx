@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/site";
 import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
@@ -152,9 +153,19 @@ export default async function RegatistaProfilePage({ params }: Props) {
 
           <div className="flex flex-col md:flex-row md:items-end gap-6 justify-between">
             <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary ring-4 ring-background shadow-xl">
-                <UserIcon className="w-12 h-12" />
-              </div>
+              {regatista.fotoUrl ? (
+                <Image
+                  src={regatista.fotoUrl}
+                  alt={regatista.nombre}
+                  width={96}
+                  height={96}
+                  className="w-24 h-24 rounded-full object-cover ring-4 ring-background shadow-xl shrink-0"
+                />
+              ) : (
+                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary ring-4 ring-background shadow-xl shrink-0">
+                  <UserIcon className="w-12 h-12" />
+                </div>
+              )}
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{regatista.nombre}</h1>
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground font-medium">

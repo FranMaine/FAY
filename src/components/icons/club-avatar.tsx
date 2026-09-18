@@ -1,11 +1,13 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-// No tenemos el escudo real de ninguno de los 180 clubes (serían logos de
-// terceros, no algo que se pueda generar) -esto da a cada club una
-// identidad visual propia y consistente en vez de mostrar el mismo ícono
-// genérico en todos lados: un color y unas iniciales derivados del propio
-// nombre (siempre el mismo resultado para el mismo club, sin guardar nada
-// nuevo en la base).
+// Antes no teníamos el escudo real de ninguno de los clubes -esto le daba
+// a cada uno una identidad visual propia y consistente en vez de mostrar
+// el mismo ícono genérico en todos lados: un color y unas iniciales
+// derivados del propio nombre. Ahora que un ADMIN puede cargar el escudo
+// real desde /admin/clubes (ver logoUrl), este componente lo muestra
+// cuando existe y cae de vuelta a las iniciales para los que todavía no
+// tienen uno cargado.
 
 function hashDeNombre(nombre: string): number {
   let hash = 0;
@@ -33,11 +35,24 @@ function inicialesDeClub(nombre: string): string {
 
 interface ClubAvatarProps {
   nombre: string;
+  logoUrl?: string | null;
   /** Controla tamaño (w-*, h-*) y tipografía (text-*) -ej: "w-10 h-10 text-sm". */
   className?: string;
 }
 
-export function ClubAvatar({ nombre, className }: ClubAvatarProps) {
+export function ClubAvatar({ nombre, logoUrl, className }: ClubAvatarProps) {
+  if (logoUrl) {
+    return (
+      <Image
+        src={logoUrl}
+        alt={nombre}
+        width={48}
+        height={48}
+        className={cn("rounded-full object-cover shrink-0 bg-white", className)}
+      />
+    );
+  }
+
   return (
     <div
       className={cn("rounded-full flex items-center justify-center font-bold text-white shrink-0", className)}

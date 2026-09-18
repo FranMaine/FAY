@@ -45,6 +45,22 @@ export const resetPasswordSchema = z.object({
   path: ['confirmPassword'],
 });
 
+export const cambiarPasswordSchema = z.object({
+  passwordActual: z.string().min(1, 'Falta la contraseña actual'),
+  passwordNueva: z.string().min(6, 'Mínimo 6 caracteres'),
+  confirmPassword: z.string(),
+}).refine((data) => data.passwordNueva === data.confirmPassword, {
+  message: 'Las contraseñas no coinciden',
+  path: ['confirmPassword'],
+});
+
+export const contactoSchema = z.object({
+  nombre: z.string().trim().min(2, 'Mínimo 2 caracteres'),
+  email: z.string().email('Email inválido'),
+  asunto: z.string().trim().min(3, 'Mínimo 3 caracteres').max(120, 'Máximo 120 caracteres'),
+  mensaje: z.string().trim().min(10, 'Contanos un poco más (mínimo 10 caracteres)').max(4000, 'Máximo 4000 caracteres'),
+});
+
 export const campeonatoSchema = z.object({
   nombre: z.string().min(3, 'Mínimo 3 caracteres'),
   anio: z.number().int().min(2000).max(2100),

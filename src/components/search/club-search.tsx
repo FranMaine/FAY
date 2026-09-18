@@ -12,6 +12,7 @@ export interface ClubListItem {
   id: string;
   nombre: string;
   ciudad: string | null;
+  logoUrl: string | null;
   regatistasCount: number;
 }
 
@@ -65,7 +66,7 @@ export function ClubSearch({ clubes }: ClubSearchProps) {
             <Link key={c.id} href={`/clubes/${c.id}`}>
               <Card className="h-full bg-surface border-border hover:border-primary/50 hover:-translate-y-0.5 transition-[transform,border-color]">
                 <CardContent className="p-5 flex items-start gap-3">
-                  <ClubAvatar nombre={c.nombre} className="w-10 h-10 text-sm" />
+                  <ClubAvatar nombre={c.nombre} logoUrl={c.logoUrl} className="w-10 h-10 text-sm" />
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground truncate">{c.nombre}</p>
                     {CLUB_ALIASES[c.nombre] && (

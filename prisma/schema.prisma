@@ -91,6 +91,10 @@ model Regatista {
   pais            String?     @default("Argentina")
   fechaNacimiento DateTime?
   fuenteIds       Json?       // { "sailwave": "PEREZ Juan", "fay": "123" }
+  // Foto de perfil opcional que el regatista (una vez vinculado a su
+  // cuenta) puede subir desde /mi-perfil/configuracion -se muestra en su
+  // ficha pública (/regatistas/[id]) en vez de las iniciales genéricas.
+  fotoUrl         String?
   user            User?
   resultados      Resultado[]
   solicitudes     SolicitudVinculacion[]
@@ -109,6 +113,9 @@ model Club {
   id          String       @id @default(cuid())
   nombre      String       @unique
   ciudad      String?
+  // Escudo del club, cargado a mano por un admin desde /admin/clubes -si es
+  // null se sigue mostrando el ClubAvatar genérico (iniciales + color).
+  logoUrl     String?
   regatistas  Regatista[]
   campeonatos Campeonato[]
 }
@@ -258,5 +265,43 @@ model RateLimitEntry {
   clave         String   @id
   intentos      Int      @default(1)
   ventanaInicio DateTime @default(now())
+}
+
+// Registro de auditoría de acciones administrativas sensibles (cambiar el
+// rol de un usuario, publicar/eliminar un campeonato, etc.) -antes no
+// quedaba ningún rastro de quién hizo qué, algo relevante ahora que hay
+// varios ADMIN/ORGANIZADOR con permisos de edición reales. Guarda el
+// email del actor en texto plano (no una relación a User) para que el
+// registro siga siendo legible aunque esa cuenta se elimine después.
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorEmail  String
+  actorNombre String?
+  accion      String
+  entidad     String
+  entidadId   String?
+  detalle     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entidad, entidadId])
+}
+
+// Mensajes del formulario de /contacto -no hay una dirección de mail
+// "oficial" de FAY configurada como variable de entorno, así que en vez de
+// depender de un envío de mail que podría fallar silenciosamente, el
+// mensaje queda guardado acá (y /admin/mensajes lo lista) además de
+// intentar notificar por mail a los ADMIN si RESEND_API_KEY está
+// configurada.
+model MensajeContacto {
+  id        String   @id @default(cuid())
+  nombre    String
+  email     String
+  asunto    String
+  mensaje   String   @db.Text
+  leido     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 

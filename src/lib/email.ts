@@ -71,6 +71,21 @@ export function emailVerificacion(link: string) {
   };
 }
 
+export function emailNuevoMensajeContacto(datos: { nombre: string; email: string; asunto: string; mensaje: string }) {
+  return {
+    subject: `Nuevo mensaje de contacto: ${datos.asunto}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1e293b;">Nuevo mensaje desde /contacto</h2>
+        <p><strong>De:</strong> ${datos.nombre} (${datos.email})</p>
+        <p><strong>Asunto:</strong> ${datos.asunto}</p>
+        <p style="white-space: pre-wrap; background: #f1f5f9; padding: 12px; border-radius: 8px;">${datos.mensaje}</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">FAY Stats · Ver todos los mensajes en /admin/mensajes</p>
+      </div>
+    `,
+  };
+}
+
 export function emailVinculacionAprobada(nombreRegatista: string) {
   return {
     subject: 'Tu perfil de regatista fue vinculado',

@@ -86,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <p>FAY Stats © {new Date().getFullYear()} — Estadísticas de Vela Argentina</p>
             <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">
               <a href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</a>
+              <a href="/contacto" className="hover:text-foreground hover:underline">Contacto</a>
               <a href="/aviso-legal" className="hover:text-foreground hover:underline">Aviso legal</a>
               <a href="/privacidad" className="hover:text-foreground hover:underline">Privacidad</a>
               <a href="/cookies" className="hover:text-foreground hover:underline">Cookies</a>
