@@ -8,11 +8,18 @@ import { cn } from "@/lib/utils";
 interface ConfirmDeleteButtonProps {
   onConfirm: () => void | Promise<void>;
   className?: string;
-  /** aria-label del botón de basura inicial. */
+  /** aria-label del botón de basura inicial (y su texto visible si mostrarTexto=true). */
   label?: string;
   /** Texto que aparece al lado de los botones mientras se confirma. */
   confirmLabel?: string;
   disabled?: boolean;
+  /**
+   * Por default el botón inicial es solo el ícono de basura (pensado para
+   * una fila de tabla, donde el contexto ya deja claro qué se borra). Para
+   * una acción de página suelta (ej: "Eliminar mi cuenta") un ícono solo
+   * no alcanza -esto agrega el texto de `label` al lado.
+   */
+  mostrarTexto?: boolean;
 }
 
 const AUTO_CANCELAR_MS = 4000;
@@ -31,6 +38,7 @@ export function ConfirmDeleteButton({
   label = "Eliminar",
   confirmLabel = "¿Confirmar?",
   disabled,
+  mostrarTexto = false,
 }: ConfirmDeleteButtonProps) {
   const [confirmando, setConfirmando] = useState(false);
   const [borrando, setBorrando] = useState(false);
@@ -67,14 +75,18 @@ export function ConfirmDeleteButton({
     return (
       <Button
         type="button"
-        variant="ghost"
-        size="icon"
+        variant={mostrarTexto ? "outline" : "ghost"}
+        size={mostrarTexto ? "default" : "icon"}
         aria-label={label}
         disabled={disabled}
         onClick={iniciar}
-        className={cn("h-8 w-8 text-muted-foreground hover:text-red-500", className)}
+        className={cn(
+          mostrarTexto ? "gap-2 text-red-500 border-red-500/30 hover:bg-red-500/10" : "h-8 w-8 text-muted-foreground hover:text-red-500",
+          className
+        )}
       >
         <TrashIcon className="w-4 h-4" />
+        {mostrarTexto && label}
       </Button>
     );
   }

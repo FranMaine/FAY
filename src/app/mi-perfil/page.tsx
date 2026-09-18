@@ -8,7 +8,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
-import { MedalIcon, CalendarIcon, ArrowRightIcon } from "lucide-react";
+import { MedalIcon, CalendarIcon, ArrowRightIcon, SettingsIcon } from "lucide-react";
 
 // Página privada (requiere sesión, ver redirect() más abajo): sin sentido
 // indexarla, y menos con noindex no listado la evita en robots.txt igual
@@ -100,7 +100,8 @@ export default async function MiPerfilPage() {
 
   // Refetch user to get the latest regatistaId if they just got linked
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  const isLinked = !!user?.regatistaId; 
+  const isLinked = !!user?.regatistaId;
+  const nombreMostrado = user?.apodo || session.user.name || session.user.email;
 
   let stats = null;
   if (isLinked) {
@@ -132,11 +133,18 @@ export default async function MiPerfilPage() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-4xl font-bold tracking-tight mb-1">Mi Dashboard</h1>
-            <p className="text-muted-foreground">{session.user.name || session.user.email}</p>
+            <p className="text-muted-foreground">{nombreMostrado}</p>
           </div>
-          {isLinked && (
-            <Badge variant="default" className="bg-primary text-primary-foreground">Perfil Vinculado</Badge>
-          )}
+          <div className="flex items-center gap-3">
+            {isLinked && (
+              <Badge variant="default" className="bg-primary text-primary-foreground">Perfil Vinculado</Badge>
+            )}
+            <Link href="/mi-perfil/configuracion">
+              <Button variant="outline" size="sm" className="gap-2">
+                <SettingsIcon className="w-4 h-4" /> Configuración
+              </Button>
+            </Link>
+          </div>
         </header>
 
         {!isLinked || !stats ? (

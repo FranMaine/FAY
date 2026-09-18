@@ -11,6 +11,12 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String?
+  // Apodo opcional que el usuario elige para sí mismo (ver
+  // /mi-perfil/configuracion) -a diferencia de Regatista.nombre (el
+  // nombre "oficial" tal como viene de los resultados importados de una
+  // regata), este es de uso puramente personal/de cuenta y no aparece en
+  // ningún resultado ni tabla de posiciones.
+  apodo         String?
   passwordHash  String?
   image         String?
   role          Role      @default(REGULAR)

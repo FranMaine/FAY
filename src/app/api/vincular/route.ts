@@ -71,3 +71,31 @@ export async function GET() {
     return handleApiError(error, 'GET /api/vincular');
   }
 }
+
+// Desvincula la cuenta del perfil de regatista al que está conectada -lo
+// inverso del POST de arriba. Además de sacar el regatistaId, borra las
+// solicitudes de vinculación (PENDIENTE/APROBADA) de este usuario: si no
+// se borraran, una vinculación nueva más adelante chocaría con el chequeo
+// de "ya tenés una solicitud activa o aprobada" del POST, con una
+// solicitud vieja que ya no tiene sentido (apunta a una vinculación que
+// el usuario mismo deshizo).
+export async function DELETE() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { regatistaId: null },
+    });
+    await prisma.solicitudVinculacion.deleteMany({
+      where: { userId: session.user.id, estado: { in: ['PENDIENTE', 'APROBADA'] } },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleApiError(error, 'DELETE /api/vincular');
+  }
+}
