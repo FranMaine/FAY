@@ -185,7 +185,7 @@ export default function AdminEscudosClubesPage() {
           </Link>
           <h1 className="text-2xl font-bold tracking-tight mt-3">Listado de clubes</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Editá la abreviación y el nombre completo, subí el escudo (\"Buscar\" abre Google Imágenes) o eliminá un club. Al eliminarlo, sus regatistas quedan sin club.
+            Editá la abreviación y el nombre completo, subí el escudo (&quot;Buscar&quot; abre Google Imágenes) o eliminá un club. Al eliminarlo, sus regatistas quedan sin club.
           </p>
         </div>
 
