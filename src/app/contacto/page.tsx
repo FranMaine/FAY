@@ -83,6 +83,7 @@ export default function ContactoPage() {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Input
+                    id="nombre"
                     label="Nombre"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
@@ -90,6 +91,7 @@ export default function ContactoPage() {
                     minLength={2}
                   />
                   <Input
+                    id="email"
                     label="Email"
                     type="email"
                     value={email}
@@ -98,6 +100,7 @@ export default function ContactoPage() {
                   />
                 </div>
                 <Input
+                  id="asunto"
                   label="Asunto"
                   value={asunto}
                   onChange={(e) => setAsunto(e.target.value)}

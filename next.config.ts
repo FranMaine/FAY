@@ -9,6 +9,11 @@ import type { NextConfig } from "next";
 const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 
 const nextConfig: NextConfig = {
+  // Los tests e2e (ver playwright.config.ts) levantan `next dev` y navegan
+  // por 127.0.0.1 en vez de localhost -sin esto, Next.js bloquea esas
+  // requests de desarrollo (HMR, etc.) por default como protección
+  // general, aunque sea la propia máquina.
+  allowedDevOrigins: ["127.0.0.1"],
   // AVIF/WebP en vez de solo servir el jpg/png de origen -next/image ya
   // elegía el mejor formato soportado por el navegador, pero declarar
   // explícitamente el orden de preferencia (AVIF primero, más liviano;
