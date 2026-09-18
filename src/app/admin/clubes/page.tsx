@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { AlertCircleIcon, CheckIcon, ExternalLinkIcon, Loader2Icon, PencilIcon, UploadIcon, XIcon } from "lucide-react";
+import { AlertCircleIcon, CheckIcon, MergeIcon, ExternalLinkIcon, Loader2Icon, PencilIcon, UploadIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ClubAvatar } from "@/components/icons/club-avatar";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
 import { mensajeDeError } from "@/lib/utils";
+import { FusionarModal, type ItemFusion } from "@/components/admin/fusionar-modal";
 
 interface ClubItem {
   id: string;
@@ -154,13 +155,35 @@ export default function AdminEscudosClubesPage() {
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState("");
 
-  useEffect(() => {
+  const [fusionando, setFusionandoRaw] = useState(false);
+  const [llaveFusion, setLlaveFusion] = useState(0);
+  const setFusionando = (abierto: boolean) => {
+    if (abierto) setLlaveFusion((k) => k + 1);
+    setFusionandoRaw(abierto);
+  };
+
+  const cargar = useCallback(() => {
     fetch("/api/admin/clubes")
       .then((res) => res.json())
       .then((data) => setClubes(data))
       .catch((err) => setError(mensajeDeError(err)))
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    cargar();
+  }, [cargar]);
+
+  const buscarClubes = useCallback(
+    async (texto: string): Promise<ItemFusion[]> => {
+      const q = texto.toLowerCase();
+      return clubes
+        .filter((c) => !q || `${c.nombre} ${c.nombreCompleto || ""}`.toLowerCase().includes(q))
+        .slice(0, 30)
+        .map((c) => ({ id: c.id, titulo: c.nombre, detalle: `${c.nombreCompleto ? c.nombreCompleto + " · " : ""}${c.regatistasCount} regatistas` }));
+    },
+    [clubes]
+  );
 
   function actualizarLogo(id: string, logoUrl: string | null) {
     setClubes((prev) => prev.map((c) => (c.id === id ? { ...c, logoUrl } : c)));
@@ -186,11 +209,16 @@ export default function AdminEscudosClubesPage() {
               Editá la abreviación y el nombre completo, subí el escudo (&quot;Buscar&quot; abre Google Imágenes) o eliminá un club. Al eliminarlo, sus regatistas quedan sin club.
             </p>
           </div>
-          <Link href="/admin/clubes/ambiguos">
-            <Button variant="outline" size="sm" className="gap-2 shrink-0">
-              <AlertCircleIcon className="w-4 h-4" /> Clubes ambiguos
+          <div className="flex gap-2 shrink-0">
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setFusionando(true)}>
+              <MergeIcon className="w-4 h-4" /> Fusionar clubes
             </Button>
-          </Link>
+            <Link href="/admin/clubes/ambiguos">
+              <Button variant="outline" size="sm" className="gap-2">
+                <AlertCircleIcon className="w-4 h-4" /> Clubes ambiguos
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {error && (
@@ -224,6 +252,7 @@ export default function AdminEscudosClubesPage() {
           </CardContent>
         </Card>
       </div>
+      <FusionarModal key={llaveFusion} isOpen={fusionando} onClose={() => setFusionando(false)} tipo="club" buscar={buscarClubes} onFusionado={cargar} />
     </main>
   );
 }

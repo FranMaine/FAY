@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon, PlusIcon, EditIcon, Loader2Icon, MergeIcon } from "lucide-react";
 import { RegatistaModal } from "@/components/admin/regatista-modal";
+import { FusionarModal, type ItemFusion } from "@/components/admin/fusionar-modal";
 
 interface Regatista {
   id: string;
@@ -24,7 +25,21 @@ export default function AdminRegatistasPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fusionando, setFusionandoRaw] = useState(false);
+  const [llaveFusion, setLlaveFusion] = useState(0);
+  const setFusionando = (abierto: boolean) => {
+    if (abierto) setLlaveFusion((k) => k + 1);
+    setFusionandoRaw(abierto);
+  };
   const [editing, setEditing] = useState<Regatista | null>(null);
+
+  const buscarRegatistas = useCallback(async (texto: string): Promise<ItemFusion[]> => {
+    const params = new URLSearchParams({ page: "1", pageSize: "10" });
+    if (texto) params.set("q", texto);
+    const res = await fetch(`/api/regatistas?${params.toString()}`);
+    const data = await res.json();
+    return (data.regatistas || []).map((r: Regatista) => ({ id: r.id, titulo: r.nombre, detalle: r.club?.nombre || "Sin club" }));
+  }, []);
 
   const fetchRegatistas = useCallback(async () => {
     setIsLoading(true);
@@ -74,6 +89,9 @@ export default function AdminRegatistasPage() {
             <p className="text-muted-foreground text-lg">Administración de la base de datos central de regatistas</p>
           </div>
           <div className="flex gap-2">
+            <Button variant="secondary" className="flex items-center gap-2" onClick={() => setFusionando(true)}>
+              <MergeIcon className="w-4 h-4" /> Fusionar regatistas
+            </Button>
             <Link href="/admin/regatistas/duplicados">
               <Button variant="secondary" className="flex items-center gap-2">
                 <MergeIcon className="w-4 h-4" /> Ver duplicados
@@ -184,6 +202,14 @@ export default function AdminRegatistasPage() {
         onClose={() => setIsModalOpen(false)}
         onSaved={fetchRegatistas}
         regatista={editing}
+      />
+
+      <FusionarModal key={llaveFusion}
+        isOpen={fusionando}
+        onClose={() => setFusionando(false)}
+        tipo="regatista"
+        buscar={buscarRegatistas}
+        onFusionado={fetchRegatistas}
       />
     </main>
   );

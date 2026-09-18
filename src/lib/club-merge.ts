@@ -37,6 +37,43 @@ export async function fusionarClubes(canonicoId: string, duplicadoIds: string[])
     });
     resumen.regatistasMovidos += regatistas.count;
 
+    // Regatistas de doble club: el duplicado pasa a ser el canónico (sin
+    // repetirlo si ya es su club principal o ya lo tenían).
+    const secundarios = await prisma.regatista.findMany({
+      where: { otrosClubes: { some: { id: duplicadoId } } },
+      select: { id: true, clubId: true },
+    });
+    for (const sec of secundarios) {
+      await prisma.regatista.update({
+        where: { id: sec.id },
+        data: {
+          otrosClubes: {
+            disconnect: [{ id: duplicadoId }],
+            ...(sec.clubId !== canonicoId ? { connect: [{ id: canonicoId }] } : {}),
+          },
+        },
+      });
+    }
+    // Quien ahora tiene al canónico como principal no lo necesita repetido en el secundario.
+    const redundantes = await prisma.regatista.findMany({
+      where: { clubId: canonicoId, otrosClubes: { some: { id: canonicoId } } },
+      select: { id: true },
+    });
+    for (const r of redundantes) {
+      await prisma.regatista.update({ where: { id: r.id }, data: { otrosClubes: { disconnect: [{ id: canonicoId }] } } });
+    }
+
+    // Conserva el escudo y el nombre completo del duplicado si el canónico no tiene.
+    if ((!canonico.logoUrl && duplicado.logoUrl) || (!canonico.nombreCompleto && duplicado.nombreCompleto)) {
+      await prisma.club.update({
+        where: { id: canonicoId },
+        data: {
+          ...(!canonico.logoUrl && duplicado.logoUrl ? { logoUrl: duplicado.logoUrl } : {}),
+          ...(!canonico.nombreCompleto && duplicado.nombreCompleto ? { nombreCompleto: duplicado.nombreCompleto } : {}),
+        },
+      });
+    }
+
     const campeonatos = await prisma.campeonato.updateMany({
       where: { sedeId: duplicadoId },
       data: { sedeId: canonicoId },

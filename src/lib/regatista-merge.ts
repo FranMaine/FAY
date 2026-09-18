@@ -62,6 +62,22 @@ export async function fusionarRegatistas(canonicoId: string, duplicadoIds: strin
       canonico = await prisma.regatista.update({ where: { id: canonicoId }, data: { clubId: duplicado.clubId } });
     }
 
+    // Doble club: se suman los clubes del duplicado (principal y secundarios)
+    // a los del canónico, sin repetir.
+    const conClubes = await prisma.regatista.findMany({
+      where: { id: { in: [canonicoId, duplicadoId] } },
+      select: { id: true, clubId: true, otrosClubes: { select: { id: true } } },
+    });
+    const can = conClubes.find((x) => x.id === canonicoId);
+    const dup = conClubes.find((x) => x.id === duplicadoId);
+    if (can && dup) {
+      const ya = new Set([can.clubId, ...can.otrosClubes.map((c) => c.id)].filter(Boolean) as string[]);
+      const nuevos = [dup.clubId, ...dup.otrosClubes.map((c) => c.id)].filter((id): id is string => !!id && !ya.has(id));
+      if (nuevos.length) {
+        await prisma.regatista.update({ where: { id: canonicoId }, data: { otrosClubes: { connect: nuevos.map((id) => ({ id })) } } });
+      }
+    }
+
     const resultadosDuplicado = await prisma.resultado.findMany({ where: { regatistaId: duplicadoId } });
     for (const r of resultadosDuplicado) {
       const yaExiste = await prisma.resultado.findUnique({
