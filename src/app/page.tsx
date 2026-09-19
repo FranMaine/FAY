@@ -92,13 +92,15 @@ export default async function LandingPage() {
         )}
         {/* Oscurece el fondo lo justo para que el texto blanco quede
             legible sin importar qué tan clara sea la escena del video. */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/70 via-black/25 to-black/40" aria-hidden="true" />
+        <div className="absolute inset-0 z-0 bg-black/45" aria-hidden="true" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/70 via-black/20 to-black/50" aria-hidden="true" />
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.35)_0%,transparent_70%)]" aria-hidden="true" />
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 flex flex-col items-center text-center space-y-8">
-          <h1 className="fade-in-up text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight" style={{ animationDelay: '80ms' }}>
+          <h1 className="fade-in-up text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight [text-shadow:0_2px_24px_rgba(0,0,0,0.65)]" style={{ animationDelay: '80ms' }}>
             Regateando
           </h1>
-          <p className="fade-in-up text-lg sm:text-xl md:text-2xl text-white/90 max-w-2xl mx-auto font-light" style={{ animationDelay: '160ms' }}>
+          <p className="fade-in-up text-lg sm:text-xl md:text-2xl text-white max-w-2xl mx-auto font-normal [text-shadow:0_1px_14px_rgba(0,0,0,0.7)]" style={{ animationDelay: '160ms' }}>
             Ranking Nacional, resultados históricos y perfiles de regatistas de Argentina.
           </p>
 
@@ -110,7 +112,7 @@ export default async function LandingPage() {
             <Link href="/rankings">
               <Button size="lg" className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto">
                 <Trophy className="w-5 h-5 mr-2" />
-                Ver Rankings Oficiales
+                Ver Rankings
               </Button>
             </Link>
             <Link href="/campeonatos">
@@ -211,7 +213,7 @@ export default async function LandingPage() {
               <Link href="/rankings">
                 <Button size="lg" className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto">
                   <BarChart3 className="w-5 h-5 mr-2" />
-                  Ver Rankings Oficiales
+                  Ver Rankings
                 </Button>
               </Link>
               <Link href="/campeonatos">
