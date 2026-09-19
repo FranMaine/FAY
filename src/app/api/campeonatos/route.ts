@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     const body = campeonatoSchema.parse(json);
 
     const campeonato = await prisma.campeonato.create({
-      data: body,
+      data: { ...body, evento: body.evento || null },
     });
 
     return NextResponse.json(campeonato, { status: 201 });

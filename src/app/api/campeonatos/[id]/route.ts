@@ -70,7 +70,7 @@ export async function PUT(
 
     const campeonato = await prisma.campeonato.update({
       where: { id },
-      data: body,
+      data: { ...body, ...(body.evento !== undefined ? { evento: body.evento || null } : {}) },
     });
 
     return NextResponse.json(campeonato);
@@ -130,6 +130,7 @@ export async function PATCH(
         ...(body.estado !== undefined ? { estado: body.estado } : {}),
         ...(body.descartes !== undefined ? { descartes: body.descartes } : {}),
         ...(body.nombre !== undefined ? { nombre: body.nombre } : {}),
+        ...(body.evento !== undefined ? { evento: body.evento || null } : {}),
       },
     });
 

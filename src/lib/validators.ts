@@ -63,6 +63,7 @@ export const contactoSchema = z.object({
 
 export const campeonatoSchema = z.object({
   nombre: z.string().min(3, 'Mínimo 3 caracteres'),
+  evento: z.string().trim().optional(),
   anio: z.number().int().min(2000).max(2100),
   claseId: z.string().min(1, 'Seleccionar una clase'),
   sedeId: z.string().optional(),
@@ -76,7 +77,8 @@ export const campeonatoPatchSchema = z.object({
   estado: z.enum(['BORRADOR', 'PUBLICADO']).optional(),
   descartes: z.number().int().min(0).optional(),
   nombre: z.string().min(3, 'Mínimo 3 caracteres').optional(),
-}).refine((data) => data.estado !== undefined || data.descartes !== undefined || data.nombre !== undefined, {
+  evento: z.string().trim().nullable().optional(),
+}).refine((data) => data.estado !== undefined || data.descartes !== undefined || data.nombre !== undefined || data.evento !== undefined, {
   message: 'Nada para actualizar',
 });
 

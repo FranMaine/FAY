@@ -29,6 +29,7 @@ interface Regata {
 interface Campeonato {
   id: string;
   nombre: string;
+  evento?: string | null;
   anio: number;
   estado: "BORRADOR" | "PUBLICADO";
   descartes: number;
@@ -83,6 +84,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
 
   const [isEditingNombre, setIsEditingNombre] = useState(false);
   const [nombreInput, setNombreInput] = useState("");
+  const [eventoInput, setEventoInput] = useState("");
   const [isSavingNombre, setIsSavingNombre] = useState(false);
 
   const fetchCampeonato = useCallback(
@@ -259,11 +261,11 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
       const res = await fetch(`/api/campeonatos/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre }),
+        body: JSON.stringify({ nombre, evento: eventoInput.trim() || null }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo renombrar el campeonato");
-      setCampeonato((prev) => (prev ? { ...prev, nombre: data.nombre } : prev));
+      setCampeonato((prev) => (prev ? { ...prev, nombre: data.nombre, evento: data.evento } : prev));
       setIsEditingNombre(false);
     } catch (err) {
       setSaveError(mensajeDeError(err));
@@ -336,6 +338,13 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                     if (e.key === "Escape") setIsEditingNombre(false);
                   }}
                 />
+                <Input
+                  value={eventoInput}
+                  onChange={(e) => setEventoInput(e.target.value)}
+                  placeholder="Evento (opcional)"
+                  className="h-8 max-w-[200px] bg-background border-border"
+                  disabled={isSavingNombre}
+                />
                 <Button size="sm" variant="secondary" onClick={handleGuardarNombre} disabled={isSavingNombre}>
                   {isSavingNombre ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <SaveIcon className="w-4 h-4" />}
                 </Button>
@@ -345,11 +354,11 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
               </div>
             ) : (
               <p className="text-muted-foreground flex items-center gap-2 group">
-                {campeonato.nombre} • {campeonato.clase.nombre}
+                {campeonato.evento ? `${campeonato.evento} › ` : ""}{campeonato.nombre} • {campeonato.clase.nombre}
                 <button
-                  onClick={() => { setNombreInput(campeonato.nombre); setIsEditingNombre(true); }}
+                  onClick={() => { setNombreInput(campeonato.nombre); setEventoInput(campeonato.evento || ""); setIsEditingNombre(true); }}
                   className="text-muted-foreground hover:text-primary opacity-60 hover:opacity-100 transition-opacity"
-                  title="Renombrar campeonato"
+                  title="Editar nombre y evento"
                 >
                   <PencilIcon className="w-3.5 h-3.5" />
                 </button>

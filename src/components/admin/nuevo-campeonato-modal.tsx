@@ -22,12 +22,15 @@ interface NuevoCampeonatoModalProps {
   onClose: () => void;
   onCreated: (campeonato: CampeonatoCreado) => void;
   clases: Clase[];
+  /** Eventos ya existentes, para sugerirlos y no escribirlos distinto por error. */
+  eventos?: string[];
 }
 
 const currentYear = new Date().getFullYear();
 
-export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: NuevoCampeonatoModalProps) {
+export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, eventos = [] }: NuevoCampeonatoModalProps) {
   const [nombre, setNombre] = useState("");
+  const [evento, setEvento] = useState("");
   const [anio, setAnio] = useState(String(currentYear));
   const [claseId, setClaseId] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
@@ -38,6 +41,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
 
   const resetAndClose = () => {
     setNombre("");
+    setEvento("");
     setAnio(String(currentYear));
     setClaseId("");
     setFechaInicio("");
@@ -66,6 +70,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: nombre.trim(),
+          evento: evento.trim() || undefined,
           anio: parseInt(anio, 10),
           claseId,
           fechaInicio: fechaInicio || undefined,
@@ -106,6 +111,22 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases }: Nue
             onChange={(e) => setNombre(e.target.value)}
             disabled={isSaving}
           />
+
+          <div>
+            <Input
+              label="Evento (opcional)"
+              placeholder="Ej: Vela Fest -agrupa varias clases en una carpeta"
+              list="eventos-existentes"
+              value={evento}
+              onChange={(e) => setEvento(e.target.value)}
+              disabled={isSaving}
+            />
+            <datalist id="eventos-existentes">
+              {eventos.map((ev) => (
+                <option key={ev} value={ev} />
+              ))}
+            </datalist>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Input

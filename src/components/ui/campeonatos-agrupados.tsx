@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDownIcon, FolderIcon } from "lucide-react";
+import { ChevronDownIcon, SailboatIcon } from "lucide-react";
 import { CampeonatoCard, type Campeonato } from "@/components/ui/campeonato-card";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +45,7 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
               className="text-left rounded-xl border border-border bg-surface p-5 h-full flex flex-col transition-[transform,border-color] duration-200 ease-out hover:scale-[1.02] hover:border-primary/50"
             >
               <div className="flex justify-between items-start mb-4">
-                <FolderIcon className="w-7 h-7 text-primary" />
+                <span className="w-11 h-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center"><SailboatIcon className="w-6 h-6" /></span>
                 <ChevronDownIcon className={cn("w-5 h-5 text-muted transition-transform", abierta && "rotate-180")} />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-1 line-clamp-2">{g.nombre}</h3>

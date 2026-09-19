@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, FolderIcon } from "lucide-react";
+import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon } from "lucide-react";
 import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
@@ -238,7 +238,7 @@ export default function AdminCampeonatosPage() {
                           <td className="px-6 py-4 font-semibold" colSpan={2}>
                             <div className="flex items-center gap-2">
                               <ChevronRightIcon className={cn("w-4 h-4 text-muted-foreground transition-transform", abierta && "rotate-90")} />
-                              <FolderIcon className="w-4 h-4 text-primary" />
+                              <SailboatIcon className="w-4 h-4 text-primary" />
                               {grupo.nombre} <span className="text-muted-foreground font-normal">{grupo.anio}</span>
                               <span className="text-muted-foreground font-normal text-xs">
                                 ({grupo.items.length} categorías)
@@ -266,6 +266,7 @@ export default function AdminCampeonatosPage() {
         // tabla para poder cargarle las regatas y resultados.
         onCreated={(campeonato) => router.push(`/admin/campeonatos/${campeonato.id}`)}
         clases={clases}
+        eventos={[...new Set(campeonatos.map((c) => c.evento?.trim() || c.nombre))].sort()}
       />
     </main>
   );
