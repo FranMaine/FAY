@@ -10,7 +10,7 @@ import { CLUB_ALIASES } from "@/lib/club-aliases";
 
 export const metadata: Metadata = {
   title: "Ranking de Clubes",
-  description: "Ranking Nacional de clubes por clase de vela, en base al desempeño acumulado de sus regatistas en los campeonatos oficiales de la Federación Argentina de Yachting.",
+  description: "Ranking Nacional de clubes por clase de vela, en base al desempeño acumulado de sus regatistas en los campeonatos de vela de Argentina.",
 };
 
 export const revalidate = 60;
@@ -113,7 +113,7 @@ export default async function RankingClubesPage({
             <span className="text-primary">Clubes</span>
           </div>
           <h1 className="text-4xl font-bold tracking-tight mb-2">Ranking de Clubes</h1>
-          <p className="text-muted-foreground text-lg">Suma de los puntos FAY de todos los regatistas de cada club, por clase y temporada.</p>
+          <p className="text-muted-foreground text-lg">Suma de los puntos de todos los regatistas de cada club, por clase y temporada.</p>
         </header>
 
         <RankingFilters
@@ -139,7 +139,7 @@ export default async function RankingClubesPage({
                       <th className="px-6 py-4 font-medium w-16 text-center">Pos</th>
                       <th className="px-6 py-4 font-medium">Club</th>
                       <th className="px-6 py-4 font-medium text-center">Regatistas</th>
-                      <th className="px-6 py-4 font-medium text-right">Puntaje FAY</th>
+                      <th className="px-6 py-4 font-medium text-right">Puntaje</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">

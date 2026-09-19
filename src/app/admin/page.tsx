@@ -47,7 +47,7 @@ export default async function AdminDashboardPage() {
       <div className="max-w-7xl mx-auto space-y-8">
         <header>
           <h1 className="text-4xl font-bold tracking-tight mb-2">Panel de Administración</h1>
-          <p className="text-muted-foreground text-lg">Resumen y gestión del sistema FAY Stats</p>
+          <p className="text-muted-foreground text-lg">Resumen y gestión del sistema Regateando</p>
         </header>
 
         {/* Stats */}

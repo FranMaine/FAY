@@ -1,4 +1,4 @@
-// Logos de categoría para FAY Stats -los 10 archivos que subió el usuario
+// Logos de categoría para Regateando -los 10 archivos que subió el usuario
 // (public/logos-categorias/*.png), ya procesados a fondo transparente y
 // recoloreados a #3B82F6 por scripts/process-real-logos.ts a partir de los
 // originales en logos/. No son dibujos nuestros: son los logos reales de

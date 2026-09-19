@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 test('la home carga y linkea a rankings y campeonatos', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveTitle(/FAY/i);
+  await expect(page).toHaveTitle(/Regateando/i);
   await expect(page.getByRole('link', { name: /rankings/i }).first()).toBeVisible();
 });
 

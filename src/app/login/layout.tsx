@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 // reset-password/ y vincular/.
 export const metadata: Metadata = {
   title: "Iniciar sesión",
-  description: "Iniciá sesión en FAY Stats para ver tu perfil de regatista y vincular tu historial de resultados.",
+  description: "Iniciá sesión en Regateando para ver tu perfil de regatista y vincular tu historial de resultados.",
 };
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {

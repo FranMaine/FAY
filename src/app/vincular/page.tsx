@@ -243,7 +243,7 @@ export default function VincularPage() {
             <h2 className="text-xl font-bold">Confirmar vinculación</h2>
             <p className="text-muted-foreground mt-2">
               ¿Confirmás que <strong className="text-foreground">{perfilSeleccionado?.nombre}</strong> es tu perfil
-              oficial? La solicitud va a ser revisada por un administrador de la FAY antes de vincularse a tu cuenta.
+              oficial? La solicitud va a ser revisada por un administrador antes de vincularse a tu cuenta.
             </p>
           </div>
           <div className="flex justify-end gap-3">

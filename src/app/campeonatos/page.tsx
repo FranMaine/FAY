@@ -5,11 +5,11 @@ import { Prisma } from "@prisma/client";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 import { AlertCircleIcon } from "lucide-react";
 
-// Sin "| FAY Stats" acá: el layout raíz ya lo agrega vía title.template
+// Sin "| Regateando" acá: el layout raíz ya lo agrega vía title.template
 // -ponerlo también acá duplicaba el sufijo en el <title> real.
 export const metadata: Metadata = {
   title: "Campeonatos",
-  description: "Explorá todos los campeonatos de vela publicados por la Federación Argentina de Yachting, filtrados por clase y año, con su tabla de posiciones oficial.",
+  description: "Explorá todos los campeonatos de vela filtrados por clase y año, con su tabla de posiciones.",
 };
 
 export default async function CampeonatosPage({
@@ -83,7 +83,7 @@ export default async function CampeonatosPage({
     evento: c.evento,
     anio: c.anio,
     clase: c.clase.nombre,
-    sede: c.sede?.nombre || 'Sede FAY',
+    sede: c.sede?.nombre || 'Sin sede',
     totalRegatistas: inscriptosPorCampeonato.get(c.id)?.size || 0,
     estado: c.estado,
     fechaInicio: c.fechaInicio ? c.fechaInicio.toISOString().split('T')[0] : `${c.anio}-01-01`,
@@ -95,7 +95,7 @@ export default async function CampeonatosPage({
       <div className="max-w-7xl mx-auto space-y-8">
         <header>
           <h1 className="text-4xl font-bold tracking-tight mb-2">Explorador de Campeonatos</h1>
-          <p className="text-muted-foreground text-lg">Buscá y filtrá los campeonatos oficiales de la Federación Argentina de Yachting</p>
+          <p className="text-muted-foreground text-lg">Buscá y filtrá los campeonatos de vela de todo el país</p>
         </header>
 
         {/* Reusamos el componente de filtros, pasandole los "All" options */}

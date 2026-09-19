@@ -21,19 +21,19 @@ export const metadata: Metadata = {
   // por default para cualquier página que no declare la suya.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'FAY Stats',
-    template: '%s | FAY Stats',
+    default: 'Regateando',
+    template: '%s | Regateando',
   },
   description: SITE_DESCRIPTION,
   openGraph: {
-    siteName: 'FAY Stats',
+    siteName: 'Regateando',
     description: SITE_DESCRIPTION,
     locale: 'es_AR',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'FAY Stats',
+    title: 'Regateando',
     description: SITE_DESCRIPTION,
   },
 };
@@ -74,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        <link rel="alternate" type="application/rss+xml" title="FAY Stats — Últimos campeonatos" href="/feed.xml" />
+        <link rel="alternate" type="application/rss+xml" title="Regateando — Últimos campeonatos" href="/feed.xml" />
         <OrganizationJsonLd />
         <WebsiteJsonLd />
       </head>
@@ -83,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           <main className="flex-1">{children}</main>
           <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
-            <p>FAY Stats © {new Date().getFullYear()} — Estadísticas de Vela Argentina</p>
+            <p>Regateando © {new Date().getFullYear()} — Estadísticas de Vela Argentina</p>
             <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">
               <a href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</a>
               <a href="/contacto" className="hover:text-foreground hover:underline">Contacto</a>

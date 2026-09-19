@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Aviso de cookies",
-  description: "Qué cookies usa FAY Stats y para qué sirve cada una.",
+  description: "Qué cookies usa Regateando y para qué sirve cada una.",
 };
 
 export default function CookiesPage() {
@@ -16,7 +16,7 @@ export default function CookiesPage() {
 
         <section className="space-y-3 text-foreground/90">
           <p>
-            FAY Stats usa una cantidad mínima de cookies: solo las
+            Regateando usa una cantidad mínima de cookies: solo las
             estrictamente necesarias para que el inicio de sesión funcione.
             No usamos cookies de analítica ni de publicidad de terceros.
           </p>

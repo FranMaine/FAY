@@ -62,7 +62,7 @@ function LoginForm() {
             <SailingBoat className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
-          <CardDescription>Accedé a tu cuenta de FAY Stats</CardDescription>
+          <CardDescription>Accedé a tu cuenta de Regateando</CardDescription>
         </CardHeader>
         <CardContent>
           {passwordRecienRestablecida && !error && (

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Política de privacidad",
-  description: "Qué datos personales recolecta FAY Stats, para qué los usa y cómo ejercer tus derechos sobre ellos.",
+  description: "Qué datos personales recolecta Regateando, para qué los usa y cómo ejercer tus derechos sobre ellos.",
 };
 
 // Redactada según lo que el sistema efectivamente hace hoy (ver
@@ -61,7 +61,7 @@ export default function PrivacidadPage() {
           <p>
             Los datos de cuenta se conservan mientras la cuenta esté activa.
             Los resultados deportivos se conservan como parte del historial
-            oficial de resultados de la FAY, sin plazo de baja automática, dado
+            de resultados de Regateando, sin plazo de baja automática, dado
             su valor como registro histórico.
           </p>
         </section>
@@ -74,8 +74,8 @@ export default function PrivacidadPage() {
             y supresión de tus datos personales de cuenta. Si tu ficha de
             regatista tiene un dato incorrecto (nombre mal cargado, club
             equivocado), también podés pedir su corrección. Para ejercer
-            cualquiera de estos derechos, contactate a través de los canales
-            oficiales de la Federación Argentina de Yachting.
+            cualquiera de estos derechos, contactate a través de la página de
+            contacto del sitio.
           </p>
           <p className="text-sm text-muted-foreground">
             La Agencia de Acceso a la Información Pública, en su carácter de

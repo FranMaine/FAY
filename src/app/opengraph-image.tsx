@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
 // importantes (campeonato, regatista, club) tienen cada una su propio
 // opengraph-image.tsx con su nombre/clase/club de verdad -ver esas
 // carpetas.
-export const alt = "FAY Stats";
+export const alt = "Regateando";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,7 +26,7 @@ export default async function Image() {
         }}
       >
         <div style={{ display: "flex", fontSize: 96, fontWeight: 800, letterSpacing: -2 }}>
-          FAY <span style={{ color: "#7dd3fc", marginLeft: 20 }}>Stats</span>
+          Regateando
         </div>
         <div style={{ display: "flex", fontSize: 32, color: "#cbd5e1", marginTop: 24 }}>
           Resultados, rankings y estadísticas de vela argentina

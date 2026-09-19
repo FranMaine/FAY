@@ -8,7 +8,7 @@ import { RankingFilters } from "@/components/filters/ranking-filters";
 
 export const metadata: Metadata = {
   title: "Rankings Oficiales",
-  description: "Ranking Nacional anual por clase de vela, con el desempeño acumulado de cada regatista en los campeonatos oficiales de la Federación Argentina de Yachting.",
+  description: "Ranking Nacional anual por clase de vela, con el desempeño acumulado de cada regatista en los campeonatos de vela de Argentina.",
 };
 
 export const revalidate = 60; // Revalidar cada 60 segundos
@@ -54,7 +54,7 @@ async function getRankingGeneral(claseId: string, anio: number) {
       const stats = regatistasStats.get(c.regatistaId)!;
       stats.campeonatos += 1;
       
-      // Fórmula de Puntos FAY = (Total Inscriptos - Posición Final) + 1
+      // Fórmula de Puntos = (Total Inscriptos - Posición Final) + 1
       const puntosObtenidos = (totalInscriptos - c.posicionFinal) + 1;
       stats.puntosRanking += puntosObtenidos;
     });
@@ -119,7 +119,7 @@ export default async function RankingsPage({
             <Link href="/rankings/clubes" className="text-muted-foreground hover:text-primary transition-colors">Clubes</Link>
           </div>
           <h1 className="text-4xl font-bold tracking-tight mb-2">Rankings Generales</h1>
-          <p className="text-muted-foreground text-lg">Clasificaciones calculadas en base a resultados de los campeonatos oficiales de FAY.</p>
+          <p className="text-muted-foreground text-lg">Clasificaciones calculadas en base a los resultados de los campeonatos cargados.</p>
         </header>
 
         <RankingFilters 
@@ -146,7 +146,7 @@ export default async function RankingsPage({
                       <th className="px-6 py-4 font-medium">Regatista</th>
                       <th className="px-6 py-4 font-medium">Club</th>
                       <th className="px-6 py-4 font-medium text-center">Campeonatos</th>
-                      <th className="px-6 py-4 font-medium text-right">Puntaje FAY</th>
+                      <th className="px-6 py-4 font-medium text-right">Puntaje</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">

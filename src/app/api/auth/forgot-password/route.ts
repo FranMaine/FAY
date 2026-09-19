@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     // Respondemos siempre lo mismo exista o no la cuenta, y también si es
     // una cuenta que solo tiene login con Google (sin passwordHash) -si no,
     // este endpoint serviría para que cualquiera adivine qué emails están
-    // registrados en FAY probando uno por uno.
+    // registrados probando uno por uno.
     if (user && user.passwordHash) {
       // Invalidamos cualquier token anterior sin usar para este email antes
       // de generar uno nuevo, así un pedido de reset viejo no queda vivo.

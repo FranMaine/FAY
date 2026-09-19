@@ -31,7 +31,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         }}
       >
         <div style={{ display: "flex", fontSize: 28, color: "#7dd3fc", fontWeight: 700, letterSpacing: 2 }}>
-          FAY STATS · REGATISTA
+          REGATEANDO · REGATISTA
         </div>
         <div style={{ display: "flex", fontSize: 68, fontWeight: 800, marginTop: 24, lineHeight: 1.1, maxWidth: 1000 }}>
           {nombre}

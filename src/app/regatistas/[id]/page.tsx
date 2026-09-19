@@ -112,7 +112,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const club = regatista.club?.nombre;
   return {
     title: regatista.nombre,
-    description: `Historial de resultados de ${regatista.nombre}${club ? ` (${club})` : ""} en campeonatos de vela de la Federación Argentina de Yachting.`,
+    description: `Historial de resultados de ${regatista.nombre}${club ? ` (${club})` : ""} en campeonatos de vela de Argentina.`,
   };
 }
 

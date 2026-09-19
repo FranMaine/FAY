@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Cómo se calculan los puntajes",
-  description: "Explicación del sistema de puntaje, descartes y flotas que usa FAY Stats para armar la tabla de posiciones de cada campeonato.",
+  description: "Explicación del sistema de puntaje, descartes y flotas que usa Regateando para armar la tabla de posiciones de cada campeonato.",
 };
 
 export default function ReglasPage() {
@@ -60,14 +60,14 @@ export default function ReglasPage() {
           <h2 className="text-xl font-semibold">5. Cuando el resultado oficial ya viene calculado</h2>
           <p>
             Cuando la fuente de un campeonato (por ejemplo, un archivo exportado de Sailwave) ya trae el puesto y el
-            puntaje final de cada regatista calculados, FAY Stats muestra esos valores tal cual en vez de
+            puntaje final de cada regatista calculados, Regateando muestra esos valores tal cual en vez de
             recalcularlos desde cero -así la tabla coincide exactamente con el resultado que publicó el club
             organizador, sin discrepancias por una diferencia de criterio en el desempate o el orden de las flotas.
           </p>
         </section>
 
         <section className="space-y-3 text-foreground/90">
-          <h2 className="text-xl font-semibold">6. Puntaje FAY (rankings)</h2>
+          <h2 className="text-xl font-semibold">6. Puntaje (rankings)</h2>
           <p>
             El <a href="/rankings" className="text-primary hover:underline font-medium">Ranking Nacional</a> usa una
             fórmula propia para poder sumar el desempeño de un regatista a través de varios campeonatos distintos:

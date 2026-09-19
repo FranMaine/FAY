@@ -25,10 +25,10 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  // Sin el "| FAY Stats" acá: el layout raíz ya le agrega ese sufijo a
+  // Sin el "| Regateando" acá: el layout raíz ya le agrega ese sufijo a
   // cualquier título que devuelva una página hija (title.template) -antes
   // esto lo agregaba manual ACÁ TAMBIÉN, así que el <title> real terminaba
-  // duplicado ("Vela Fest 2025 | FAY Stats | FAY Stats").
+  // duplicado ("Vela Fest 2025 | Regateando | Regateando").
   const c = await prisma.campeonato.findUnique({
     where: { id },
     select: { nombre: true, anio: true, clase: { select: { nombre: true } }, sede: { select: { nombre: true } } },
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${c.nombre} ${c.anio}`,
-    description: `Resultados y tabla de posiciones de ${c.nombre} ${c.anio} (${c.clase.nombre})${c.sede ? `, en ${c.sede.nombre}` : ''}. Clasificación oficial de la Federación Argentina de Yachting.`,
+    description: `Resultados y tabla de posiciones de ${c.nombre} ${c.anio} (${c.clase.nombre})${c.sede ? `, en ${c.sede.nombre}` : ''}. Clasificación completa.`,
   };
 }
 
@@ -116,7 +116,6 @@ export default async function CampeonatoDetailPage({ params }: Props) {
     location: campeonato.sede
       ? { "@type": "Place", name: campeonato.sede.nombre }
       : undefined,
-    organizer: { "@type": "SportsOrganization", name: "Federación Argentina de Yachting" },
     url: `${SITE_URL}/campeonatos/${campeonato.id}`,
   };
 
@@ -136,7 +135,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-6 text-muted-foreground">
             <div className="flex items-center gap-2">
               <MapPinIcon className="w-5 h-5" />
-              <span>{campeonato.sede?.nombre || 'Sede FAY'}</span>
+              <span>{campeonato.sede?.nombre || 'Sin sede'}</span>
             </div>
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-5 h-5" />

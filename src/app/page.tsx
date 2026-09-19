@@ -22,11 +22,11 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 const FOTO_HERO_PATH = path.join(process.cwd(), "public", "hero", "velero-hero.jpg");
 
 export const metadata: Metadata = {
-  // Sin "title" acá, el template del layout raíz ("%s | FAY Stats") lo
-  // duplicaría en la home ("FAY Stats | FAY Stats"). El layout ya define
+  // Sin "title" acá, el template del layout raíz ("%s | Regateando") lo
+  // duplicaría en la home ("Regateando | Regateando"). El layout ya define
   // el default correcto para "/" -acá solo agregamos una descripción más
   // específica que la genérica del layout.
-  description: "Ranking Nacional, resultados históricos y perfiles de regatistas de vela de Argentina, con datos oficiales de la Federación Argentina de Yachting.",
+  description: "Ranking Nacional, resultados históricos y perfiles de regatistas de vela de Argentina, con los resultados de los campeonatos de todo el país.",
 };
 
 // Sin esto, Next.js pre-renderiza esta página como HTML ESTÁTICO en cada
@@ -96,7 +96,7 @@ export default async function LandingPage() {
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 flex flex-col items-center text-center space-y-8">
           <h1 className="fade-in-up text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight" style={{ animationDelay: '80ms' }}>
-            FAY <span className="text-sky-300">Stats</span>
+            Regateando
           </h1>
           <p className="fade-in-up text-lg sm:text-xl md:text-2xl text-white/90 max-w-2xl mx-auto font-light" style={{ animationDelay: '160ms' }}>
             Ranking Nacional, resultados históricos y perfiles de regatistas de Argentina.

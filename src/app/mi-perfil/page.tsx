@@ -119,7 +119,7 @@ export default async function MiPerfilPage() {
             <CardHeader>
               <CardTitle className="text-2xl">Solicitud en proceso</CardTitle>
               <CardDescription className="text-base mt-2">
-                Tu solicitud de vinculación está siendo revisada por un administrador de FAY. Por favor, tené paciencia.
+                Tu solicitud de vinculación está siendo revisada por un administrador. Por favor, tené paciencia.
               </CardDescription>
             </CardHeader>
           </Card>

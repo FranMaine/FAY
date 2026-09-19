@@ -54,7 +54,7 @@ export function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
               <SailingBoat className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold text-foreground">FAY Stats</span>
+              <span className="text-xl font-bold text-foreground">Regateando</span>
             </Link>
           </div>
 

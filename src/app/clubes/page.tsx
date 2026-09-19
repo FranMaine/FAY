@@ -4,7 +4,7 @@ import { ClubSearch } from "@/components/search/club-search";
 
 export const metadata: Metadata = {
   title: "Clubes",
-  description: "Buscá clubes náuticos afiliados a la Federación Argentina de Yachting y consultá sus estadísticas de regatistas y resultados.",
+  description: "Buscá clubes náuticos y consultá sus estadísticas de regatistas y resultados.",
 };
 
 // A diferencia de /rankings o /campeonatos (que además leen searchParams,

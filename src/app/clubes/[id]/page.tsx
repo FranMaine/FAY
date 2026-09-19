@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const nombreCompleto = club.nombreCompleto || CLUB_ALIASES[club.nombre] || club.nombre;
   return {
     title: club.nombre,
-    description: `Estadísticas y ranking de los regatistas de ${nombreCompleto} en los campeonatos oficiales de la Federación Argentina de Yachting.`,
+    description: `Estadísticas y ranking de los regatistas de ${nombreCompleto} en los campeonatos de vela de Argentina.`,
   };
 }
 

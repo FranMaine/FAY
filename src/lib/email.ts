@@ -9,7 +9,7 @@ import { Resend } from 'resend';
 // acción de admin.
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-const FROM = process.env.EMAIL_FROM || 'FAY Stats <onboarding@resend.dev>';
+const FROM = process.env.EMAIL_FROM || 'Regateando <onboarding@resend.dev>';
 
 export async function sendEmail({
   to,
@@ -39,16 +39,16 @@ export async function sendEmail({
 
 export function emailResetPassword(link: string) {
   return {
-    subject: 'Recuperá tu contraseña de FAY Stats',
+    subject: 'Recuperá tu contraseña de Regateando',
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #1e293b;">Recuperar contraseña</h2>
-        <p>Pediste restablecer tu contraseña en FAY Stats. Hacé clic en el siguiente botón para elegir una nueva:</p>
+        <p>Pediste restablecer tu contraseña en Regateando. Hacé clic en el siguiente botón para elegir una nueva:</p>
         <p style="margin: 24px 0;">
           <a href="${link}" style="background: #3b82f6; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">Restablecer contraseña</a>
         </p>
         <p style="color: #94a3b8; font-size: 13px;">Si no pediste esto, podés ignorar este mail -tu contraseña actual sigue funcionando. El enlace vence en 1 hora.</p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Federación Argentina de Yachting · FAY Stats</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Regateando</p>
       </div>
     `,
   };
@@ -56,16 +56,16 @@ export function emailResetPassword(link: string) {
 
 export function emailVerificacion(link: string) {
   return {
-    subject: 'Confirmá tu cuenta de FAY Stats',
+    subject: 'Confirmá tu cuenta de Regateando',
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #1e293b;">Confirmá tu email</h2>
-        <p>Gracias por registrarte en FAY Stats. Hacé clic en el siguiente botón para confirmar que esta dirección de email es tuya:</p>
+        <p>Gracias por registrarte en Regateando. Hacé clic en el siguiente botón para confirmar que esta dirección de email es tuya:</p>
         <p style="margin: 24px 0;">
           <a href="${link}" style="background: #3b82f6; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">Confirmar email</a>
         </p>
         <p style="color: #94a3b8; font-size: 13px;">Si no creaste esta cuenta, podés ignorar este mail. El enlace vence en 24 horas.</p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Federación Argentina de Yachting · FAY Stats</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Regateando</p>
       </div>
     `,
   };
@@ -80,7 +80,7 @@ export function emailNuevoMensajeContacto(datos: { nombre: string; email: string
         <p><strong>De:</strong> ${datos.nombre} (${datos.email})</p>
         <p><strong>Asunto:</strong> ${datos.asunto}</p>
         <p style="white-space: pre-wrap; background: #f1f5f9; padding: 12px; border-radius: 8px;">${datos.mensaje}</p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">FAY Stats · Ver todos los mensajes en /admin/mensajes</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Regateando · Ver todos los mensajes en /admin/mensajes</p>
       </div>
     `,
   };
@@ -92,9 +92,9 @@ export function emailVinculacionAprobada(nombreRegatista: string) {
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #1e293b;">¡Cuenta verificada!</h2>
-        <p>Tu cuenta de FAY Stats fue vinculada correctamente al perfil de regatista de <strong>${nombreRegatista}</strong>.</p>
+        <p>Tu cuenta de Regateando fue vinculada correctamente al perfil de regatista de <strong>${nombreRegatista}</strong>.</p>
         <p>A partir de ahora vas a ver tu historial de resultados en tu perfil.</p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Federación Argentina de Yachting · FAY Stats</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Regateando</p>
       </div>
     `,
   };

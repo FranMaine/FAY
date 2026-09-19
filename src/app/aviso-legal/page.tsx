@@ -2,11 +2,11 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Aviso legal",
-  description: "Aviso legal de FAY Stats: titularidad, condiciones de uso y propiedad intelectual del sitio.",
+  description: "Aviso legal de Regateando: titularidad, condiciones de uso y propiedad intelectual del sitio.",
 };
 
 // Contenido genérico de referencia -las partes marcadas [entre corchetes]
-// son datos institucionales concretos de la FAY (razón social/CUIT
+// son datos institucionales concretos del titular (razón social/CUIT
 // exactos, domicilio legal, canal de contacto oficial) que hay que
 // completar con el dato real antes de considerar esta página definitiva;
 // no se puede inventar un CUIT o domicilio.
@@ -22,8 +22,8 @@ export default function AvisoLegalPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">1. Titularidad del sitio</h2>
           <p>
-            FAY Stats es un sitio operado por la Federación Argentina de Yachting
-            (FAY) [completar: razón social y CUIT exactos], con domicilio en
+            Regateando es un sitio operado por [completar: razón social y CUIT
+            exactos], con domicilio en
             [completar domicilio legal], República Argentina.
           </p>
         </section>
@@ -31,9 +31,9 @@ export default function AvisoLegalPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">2. Objeto del sitio</h2>
           <p>
-            FAY Stats publica resultados oficiales, clasificaciones, rankings y
-            estadísticas de regatas de vela correspondientes a los campeonatos
-            organizados o reconocidos por la FAY y sus clubes afiliados. La
+            Regateando publica resultados oficiales, clasificaciones, rankings y
+            estadísticas de regatas de vela correspondientes a campeonatos
+            organizados por clubes y asociaciones de vela. La
             información se carga a partir de los resultados provistos por cada
             regata; ante cualquier discrepancia con el resultado oficial de un
             campeonato, prevalece este último.
@@ -46,7 +46,7 @@ export default function AvisoLegalPage() {
             El acceso y consulta del contenido público de este sitio es libre y
             gratuito. La creación de una cuenta y la vinculación de una cuenta a
             un perfil de regatista están sujetas a la veracidad de los datos
-            aportados por el usuario; FAY se reserva el derecho de rechazar o
+            aportados por el usuario; Regateando se reserva el derecho de rechazar o
             dar de baja una cuenta o una vinculación cuando existan indicios de
             uso indebido o de datos falsos.
           </p>
@@ -60,15 +60,15 @@ export default function AvisoLegalPage() {
             únicamente con fines identificatorios de cada categoría, sin que
             ello implique afiliación, patrocinio o respaldo por parte de esas
             asociaciones. El resto del contenido propio del sitio (marca
-            &quot;FAY Stats&quot;, diseño, textos) pertenece a la Federación
-            Argentina de Yachting.
+            &quot;Regateando&quot;, diseño, textos) pertenece a su titular
+            (ver punto 1).
           </p>
         </section>
 
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">5. Exactitud de la información</h2>
           <p>
-            FAY realiza sus mejores esfuerzos para que los resultados publicados
+            Regateando realiza sus mejores esfuerzos para que los resultados publicados
             sean fieles a los resultados oficiales de cada regata, pero no
             garantiza la ausencia total de errores u omisiones derivados de la
             carga de datos. Cualquier error detectado puede reportarse para su
@@ -91,8 +91,7 @@ export default function AvisoLegalPage() {
           <h2 className="text-xl font-semibold">7. Contacto</h2>
           <p>
             Para consultas relacionadas con este aviso legal, comunicate a
-            través de los canales de contacto oficiales de la Federación
-            Argentina de Yachting.
+            través de la página de contacto del sitio.
           </p>
         </section>
       </div>
