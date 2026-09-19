@@ -18,7 +18,7 @@ export const revalidate = 60;
 async function getRankingDeClubes(claseId: string, anio: number) {
   const [campeonatos, clubes] = await Promise.all([
     prisma.campeonato.findMany({
-      where: { estado: 'PUBLICADO', claseId, anio },
+      where: { estado: 'PUBLICADO', claseId, ...(anio !== 0 ? { anio } : {}) },
       include: {
         regatas: {
           include: {
@@ -78,6 +78,7 @@ export default async function RankingClubesPage({
   });
   const anios = campeonatosAnios.map((c) => c.anio);
   if (!anios.includes(currentYear)) anios.unshift(currentYear);
+  anios.push(0); // 0 = todos los años
 
   if (clases.length === 0) {
     return (
@@ -126,7 +127,7 @@ export default async function RankingClubesPage({
           <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
             <AlertCircleIcon className="w-8 h-8 mb-3 opacity-50" />
             <p className="text-lg font-medium">Sin resultados</p>
-            <p className="text-sm">No hay campeonatos publicados de {selectedClaseNombre} para el año {activeAnio}.</p>
+            <p className="text-sm">No hay campeonatos publicados de {selectedClaseNombre} {activeAnio === 0 ? "en ningún año" : `para el año ${activeAnio}`}.</p>
           </div>
         ) : (
           <Card className="bg-surface border-border overflow-hidden">
