@@ -3,6 +3,7 @@ onlyBuiltDependencies:
   - prisma
   - "@prisma/engines"
   - "@prisma/client"
+  - unrs-resolver
 
 # Fuerza versiones parcheadas de dos vulnerabilidades transitivas
 # (deepmerge-ts vía @prisma/config, valibot vía @hookform/resolvers) que
