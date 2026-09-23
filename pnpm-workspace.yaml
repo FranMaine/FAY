@@ -1,9 +1,13 @@
-onlyBuiltDependencies:
-  - esbuild
-  - prisma
-  - "@prisma/engines"
-  - "@prisma/client"
-  - unrs-resolver
+# pnpm 11.23+ reemplazó onlyBuiltDependencies por este mapa -la clave vieja
+# queda sin efecto silenciosamente (no da error, simplemente no hace nada),
+# que es justo lo que nos pasó: quedó ahí sin bloquear el "ignored builds"
+# que rompía "pnpm install" en el runner de GitHub Actions.
+allowBuilds:
+  esbuild: true
+  prisma: true
+  "@prisma/engines": true
+  "@prisma/client": true
+  unrs-resolver: true
 
 # Fuerza versiones parcheadas de dos vulnerabilidades transitivas
 # (deepmerge-ts vía @prisma/config, valibot vía @hookform/resolvers) que
