@@ -29,7 +29,13 @@ jobs:
           cache: pnpm
 
       - name: Instalar dependencias
-        run: pnpm install --frozen-lockfile
+        # Sin --frozen-lockfile: el lockfile se generó en Windows y no trae
+        # anotados los binarios nativos de la variante Linux de paquetes
+        # como sharp/lightningcss/@next/swc -con --frozen-lockfile, pnpm
+        # exige que el lockfile ya los liste y falla en el runner de GitHub
+        # (Linux) antes de instalar nada. Vercel no tiene este problema
+        # porque no usa esa bandera.
+        run: pnpm install
 
       - name: Generar cliente de Prisma
         # El postinstall del propio proyecto ya corre esto en un pnpm
