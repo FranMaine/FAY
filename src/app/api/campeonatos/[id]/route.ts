@@ -131,6 +131,7 @@ export async function PATCH(
         ...(body.descartes !== undefined ? { descartes: body.descartes } : {}),
         ...(body.nombre !== undefined ? { nombre: body.nombre } : {}),
         ...(body.evento !== undefined ? { evento: body.evento || null } : {}),
+        ...(body.sedeId !== undefined ? { sedeId: body.sedeId || null } : {}),
       },
     });
 

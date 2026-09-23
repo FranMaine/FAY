@@ -25,6 +25,9 @@ function LoginForm() {
   const passwordRecienRestablecida = searchParams.get("reset") === "1";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailNoVerificado, setEmailNoVerificado] = useState<string | null>(null);
+  const [reenviando, setReenviando] = useState(false);
+  const [reenviado, setReenviado] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -37,20 +40,41 @@ function LoginForm() {
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
     setError(null);
-    
+    setEmailNoVerificado(null);
+    setReenviado(false);
+
     const result = await signIn("credentials", {
       email: values.email,
       password: values.password,
       redirect: false,
     });
-    
+
     setIsLoading(false);
 
     if (result?.error) {
-      setError("Email o contraseña incorrectos");
+      if (result.code === "email_no_verificado") {
+        setEmailNoVerificado(values.email);
+      } else {
+        setError("Email o contraseña incorrectos");
+      }
     } else {
       router.push("/mi-perfil");
       router.refresh();
+    }
+  }
+
+  async function reenviarVerificacion() {
+    if (!emailNoVerificado) return;
+    setReenviando(true);
+    try {
+      await fetch("/api/auth/reenviar-verificacion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailNoVerificado }),
+      });
+      setReenviado(true);
+    } finally {
+      setReenviando(false);
     }
   }
 
@@ -73,6 +97,18 @@ function LoginForm() {
           {error && (
             <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center">
               {error}
+            </div>
+          )}
+          {emailNoVerificado && (
+            <div className="bg-amber-500/10 border border-amber-500/50 text-amber-500 text-sm p-3 rounded-md mb-4 text-center space-y-2">
+              <p>Todavía no confirmaste tu email. Revisá tu casilla, o pedimos un nuevo enlace.</p>
+              {reenviado ? (
+                <p className="font-medium">Listo, te mandamos un nuevo enlace.</p>
+              ) : (
+                <Button type="button" size="sm" variant="outline" onClick={reenviarVerificacion} disabled={reenviando}>
+                  {reenviando ? "Enviando..." : "Reenviar email de verificación"}
+                </Button>
+              )}
             </div>
           )}
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

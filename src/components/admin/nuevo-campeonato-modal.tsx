@@ -13,6 +13,11 @@ interface Clase {
   nombre: string;
 }
 
+interface ClubOption {
+  id: string;
+  nombre: string;
+}
+
 interface CampeonatoCreado {
   id: string;
 }
@@ -24,13 +29,15 @@ interface NuevoCampeonatoModalProps {
   clases: Clase[];
   /** Eventos ya existentes, para sugerirlos y no escribirlos distinto por error. */
   eventos?: string[];
+  clubes: ClubOption[];
 }
 
 const currentYear = new Date().getFullYear();
 
-export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, eventos = [] }: NuevoCampeonatoModalProps) {
+export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, eventos = [], clubes }: NuevoCampeonatoModalProps) {
   const [nombre, setNombre] = useState("");
   const [evento, setEvento] = useState("");
+  const [sedeId, setSedeId] = useState("");
   const [anio, setAnio] = useState(String(currentYear));
   const [claseId, setClaseId] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
@@ -42,6 +49,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, event
   const resetAndClose = () => {
     setNombre("");
     setEvento("");
+    setSedeId("");
     setAnio(String(currentYear));
     setClaseId("");
     setFechaInicio("");
@@ -71,6 +79,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, event
         body: JSON.stringify({
           nombre: nombre.trim(),
           evento: evento.trim() || undefined,
+          sedeId: sedeId || undefined,
           anio: parseInt(anio, 10),
           claseId,
           fechaInicio: fechaInicio || undefined,
@@ -145,6 +154,15 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, event
               disabled={isSaving}
             />
           </div>
+
+          <Select
+            label="Sede (opcional)"
+            placeholder="Sin sede"
+            value={sedeId}
+            onChange={(e) => setSedeId(e.target.value)}
+            options={clubes.map((c) => ({ value: c.id, label: c.nombre }))}
+            disabled={isSaving}
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <Input

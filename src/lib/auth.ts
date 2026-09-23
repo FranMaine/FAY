@@ -1,4 +1,5 @@
 import NextAuth from 'next-auth';
+import { CredentialsSignin } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
@@ -6,7 +7,21 @@ import bcrypt from 'bcryptjs';
 import { prisma } from './db';
 import { permitir } from './rate-limit';
 
+// Subclase propia para poder distinguir este caso puntual del resto de
+// credenciales inválidas -ver el `code` custom, que sí viaja hasta el
+// cliente (a diferencia del mensaje del Error, que Auth.js no expone).
+// login/page.tsx lo usa para mostrar "confirmá tu email" en vez del
+// genérico "email o contraseña incorrectos".
+export class EmailNoVerificadoError extends CredentialsSignin {
+  code = 'email_no_verificado';
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // NextAuth v5 busca AUTH_SECRET por default -esto lo hace explícito y
+  // además acepta NEXTAUTH_SECRET (el nombre de la v4, que es el que
+  // quedó cargado en algunos entornos) sin depender de que la librería
+  // decida sola cuál de los dos mirar.
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   // @auth/prisma-adapter estaba instalado pero nunca conectado acá -sin
   // adapter, un login con Google NUNCA crea una fila en la tabla User: solo
   // arma una sesión JWT con un id que no existe en la base. Cualquier cosa
@@ -67,6 +82,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!isValid) return null;
+
+        // Se manda un mail de verificación al registrarse (ver
+        // /api/registro), pero antes esto nunca se chequeaba acá: se podía
+        // usar la cuenta entera sin haber tocado el link. Solo afecta al
+        // login con contraseña -Google ya confirma el email por su cuenta.
+        if (!user.emailVerified) throw new EmailNoVerificadoError();
 
         return {
           id: user.id,

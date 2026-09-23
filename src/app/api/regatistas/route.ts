@@ -20,12 +20,12 @@ export async function GET(request: Request) {
         mode: 'insensitive',
       };
     }
-    if (clubId) where.clubId = clubId;
+    if (clubId) where.OR = [{ clubId }, { otrosClubes: { some: { id: clubId } } }];
 
     const [regatistas, total] = await Promise.all([
       prisma.regatista.findMany({
         where,
-        include: { club: true },
+        include: { club: true, otrosClubes: true },
         orderBy: { nombre: 'asc' },
         skip: (page - 1) * pageSize,
         take: pageSize,

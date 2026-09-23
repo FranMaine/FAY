@@ -22,7 +22,7 @@ async function getRankingDeClubes(claseId: string, anio: number) {
       include: {
         regatas: {
           include: {
-            resultados: { include: { regatista: { include: { club: true } } } }
+            resultados: { include: { regatista: { include: { club: true, otrosClubes: true } } } }
           }
         }
       }
@@ -30,14 +30,37 @@ async function getRankingDeClubes(claseId: string, anio: number) {
     prisma.club.findMany({ select: { id: true, nombre: true, logoUrl: true, nombreCompleto: true } }),
   ]);
 
+  // Regatista -> ids de sus clubes SECUNDARIOS (doble club): la
+  // clasificación (generarClasificacion) solo sabe del club principal, así
+  // que sin esto un regatista con dos clubes solo sumaba puntos para el
+  // primero, y el segundo quedaba siempre en cero en este ranking.
+  const otrosClubesPorRegatista = new Map<string, string[]>();
+  for (const camp of campeonatos) {
+    for (const regata of camp.regatas) {
+      for (const res of regata.resultados) {
+        if (res.regatista.otrosClubes.length) {
+          otrosClubesPorRegatista.set(res.regatista.id, res.regatista.otrosClubes.map((c) => c.id));
+        }
+      }
+    }
+  }
+
   // La clasificación no trae el id del club, solo su nombre -Club.nombre es
   // único en el schema, así que este mapa alcanza para volver a asociar cada
   // fila con el id real del club (y su logo) y poder linkear a /clubes/[id].
   const idPorNombre = new Map(clubes.map((c) => [c.nombre, c.id]));
-  const completoPorNombre = new Map(clubes.map((c) => [c.nombre, c.nombreCompleto]));
-  const logoPorNombre = new Map(clubes.map((c) => [c.nombre, c.logoUrl]));
+  const clubPorId = new Map(clubes.map((c) => [c.id, c]));
 
   const clubesStats = new Map<string, { id: string; nombre: string; logoUrl: string | null; completo: string | null; regatistas: Set<string>; puntosRanking: number }>();
+
+  function sumar(clubId: string, nombre: string, logoUrl: string | null, completo: string | null, regatistaId: string, puntos: number) {
+    if (!clubesStats.has(clubId)) {
+      clubesStats.set(clubId, { id: clubId, nombre, logoUrl, completo, regatistas: new Set(), puntosRanking: 0 });
+    }
+    const stats = clubesStats.get(clubId)!;
+    stats.regatistas.add(regatistaId);
+    stats.puntosRanking += puntos;
+  }
 
   for (const camp of campeonatos) {
     const clasificacion = generarClasificacion(agruparPorRegatista(camp.regatas), camp.descartes);
@@ -46,13 +69,15 @@ async function getRankingDeClubes(claseId: string, anio: number) {
     clasificacion.forEach((c) => {
       const clubId = c.club ? idPorNombre.get(c.club) : undefined;
       if (!c.club || !clubId) return;
-      if (!clubesStats.has(clubId)) {
-        clubesStats.set(clubId, { id: clubId, nombre: c.club, logoUrl: logoPorNombre.get(c.club) ?? null, completo: completoPorNombre.get(c.club) ?? null, regatistas: new Set(), puntosRanking: 0 });
-      }
-      const stats = clubesStats.get(clubId)!;
-      stats.regatistas.add(c.regatistaId);
       const puntosObtenidos = (totalInscriptos - c.posicionFinal) + 1;
-      stats.puntosRanking += puntosObtenidos;
+      const club = clubPorId.get(clubId);
+      sumar(clubId, c.club, club?.logoUrl ?? null, club?.nombreCompleto ?? null, c.regatistaId, puntosObtenidos);
+
+      for (const otroId of otrosClubesPorRegatista.get(c.regatistaId) ?? []) {
+        const otro = clubPorId.get(otroId);
+        if (!otro) continue;
+        sumar(otroId, otro.nombre, otro.logoUrl, otro.nombreCompleto, c.regatistaId, puntosObtenidos);
+      }
     });
   }
 

@@ -78,7 +78,8 @@ export const campeonatoPatchSchema = z.object({
   descartes: z.number().int().min(0).optional(),
   nombre: z.string().min(3, 'Mínimo 3 caracteres').optional(),
   evento: z.string().trim().nullable().optional(),
-}).refine((data) => data.estado !== undefined || data.descartes !== undefined || data.nombre !== undefined || data.evento !== undefined, {
+  sedeId: z.string().nullable().optional(),
+}).refine((data) => data.estado !== undefined || data.descartes !== undefined || data.nombre !== undefined || data.evento !== undefined || data.sedeId !== undefined, {
   message: 'Nada para actualizar',
 });
 

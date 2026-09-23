@@ -31,6 +31,7 @@ interface Campeonato {
   nombre: string;
   evento?: string | null;
   anio: number;
+  sede: { id: string; nombre: string } | null;
   estado: "BORRADOR" | "PUBLICADO";
   descartes: number;
   clase: { nombre: string };
@@ -85,6 +86,8 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
   const [isEditingNombre, setIsEditingNombre] = useState(false);
   const [nombreInput, setNombreInput] = useState("");
   const [eventoInput, setEventoInput] = useState("");
+  const [sedeIdInput, setSedeIdInput] = useState("");
+  const [clubes, setClubes] = useState<{ id: string; nombre: string }[]>([]);
   const [isSavingNombre, setIsSavingNombre] = useState(false);
 
   const fetchCampeonato = useCallback(
@@ -127,6 +130,13 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
     fetchCampeonato();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    fetch("/api/clubes")
+      .then((res) => res.json())
+      .then((data) => setClubes(data))
+      .catch(() => {});
+  }, []);
 
   const seleccionarRegata = (regata: Regata) => {
     setSelectedRegataId(regata.id);
@@ -261,11 +271,11 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
       const res = await fetch(`/api/campeonatos/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, evento: eventoInput.trim() || null }),
+        body: JSON.stringify({ nombre, evento: eventoInput.trim() || null, sedeId: sedeIdInput || null }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo renombrar el campeonato");
-      setCampeonato((prev) => (prev ? { ...prev, nombre: data.nombre, evento: data.evento } : prev));
+      setCampeonato((prev) => (prev ? { ...prev, nombre: data.nombre, evento: data.evento, sede: clubes.find((c) => c.id === sedeIdInput) || null } : prev));
       setIsEditingNombre(false);
     } catch (err) {
       setSaveError(mensajeDeError(err));
@@ -345,6 +355,17 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                   className="h-8 max-w-[200px] bg-background border-border"
                   disabled={isSavingNombre}
                 />
+                <select
+                  value={sedeIdInput}
+                  onChange={(e) => setSedeIdInput(e.target.value)}
+                  className="h-8 max-w-[180px] text-sm bg-background border border-border rounded-md px-2"
+                  disabled={isSavingNombre}
+                >
+                  <option value="">Sin sede</option>
+                  {clubes.map((c) => (
+                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                  ))}
+                </select>
                 <Button size="sm" variant="secondary" onClick={handleGuardarNombre} disabled={isSavingNombre}>
                   {isSavingNombre ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <SaveIcon className="w-4 h-4" />}
                 </Button>
@@ -354,9 +375,9 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
               </div>
             ) : (
               <p className="text-muted-foreground flex items-center gap-2 group">
-                {campeonato.evento ? `${campeonato.evento} › ` : ""}{campeonato.nombre} • {campeonato.clase.nombre}
+                {campeonato.evento ? `${campeonato.evento} › ` : ""}{campeonato.nombre} • {campeonato.clase.nombre}{campeonato.sede ? ` • ${campeonato.sede.nombre}` : ""}
                 <button
-                  onClick={() => { setNombreInput(campeonato.nombre); setEventoInput(campeonato.evento || ""); setIsEditingNombre(true); }}
+                  onClick={() => { setNombreInput(campeonato.nombre); setEventoInput(campeonato.evento || ""); setSedeIdInput(campeonato.sede?.id || ""); setIsEditingNombre(true); }}
                   className="text-muted-foreground hover:text-primary opacity-60 hover:opacity-100 transition-opacity"
                   title="Editar nombre y evento"
                 >

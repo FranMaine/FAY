@@ -25,6 +25,11 @@ interface Clase {
   nombre: string;
 }
 
+interface ClubOption {
+  id: string;
+  nombre: string;
+}
+
 // Un mismo evento (ej: "Vela Fest 2026") carga una fila por clase -antes
 // se veían todas sueltas en una lista plana sin ninguna agrupación
 // visual, mezcladas con el resto de los campeonatos del sistema. Agrupar
@@ -46,6 +51,7 @@ export default function AdminCampeonatosPage() {
   const router = useRouter();
   const [campeonatos, setCampeonatos] = useState<Campeonato[]>([]);
   const [clases, setClases] = useState<Clase[]>([]);
+  const [clubes, setClubes] = useState<ClubOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -57,12 +63,14 @@ export default function AdminCampeonatosPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [campeonatosRes, clasesRes] = await Promise.all([
+      const [campeonatosRes, clasesRes, clubesRes] = await Promise.all([
         fetch("/api/campeonatos"),
         fetch("/api/clases"),
+        fetch("/api/clubes"),
       ]);
       setCampeonatos(await campeonatosRes.json());
       setClases(await clasesRes.json());
+      setClubes(await clubesRes.json());
     } catch (error) {
       console.error(error);
     } finally {
@@ -266,6 +274,7 @@ export default function AdminCampeonatosPage() {
         // tabla para poder cargarle las regatas y resultados.
         onCreated={(campeonato) => router.push(`/admin/campeonatos/${campeonato.id}`)}
         clases={clases}
+        clubes={clubes}
         eventos={[...new Set(campeonatos.map((c) => c.evento?.trim() || c.nombre))].sort()}
       />
     </main>

@@ -114,11 +114,27 @@ export async function subirImagen(
   }
 
   let buffer: Buffer = Buffer.from(await file.arrayBuffer());
-  if (modo === 'inside') buffer = await quitarFondoLiso(buffer);
-  const webp = await sharp(buffer)
-    .resize(ladoPx, ladoPx, modo === 'cover' ? { fit: 'cover' } : { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 85 })
-    .toBuffer();
+  let webp: Buffer;
+
+  try {
+    if (modo === 'inside') {
+      // quitarFondoLiso recorre la imagen píxel por píxel -sin achicarla
+      // antes, una foto de celular de varios miles de px de lado podía
+      // tardar varios segundos (arriesgando el timeout de la función) para
+      // terminar igual reducida a `ladoPx`. Bajarla a un tamaño de trabajo
+      // acotado primero deja el costo del recorte de fondo fijo, sin
+      // perder precisión real (el resultado final es más chico todavía).
+      const TAMANIO_TRABAJO = 900;
+      buffer = await sharp(buffer).resize(TAMANIO_TRABAJO, TAMANIO_TRABAJO, { fit: 'inside', withoutEnlargement: true }).toBuffer();
+      buffer = await quitarFondoLiso(buffer);
+    }
+    webp = await sharp(buffer)
+      .resize(ladoPx, ladoPx, modo === 'cover' ? { fit: 'cover' } : { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 85 })
+      .toBuffer();
+  } catch {
+    throw new ImagenInvalidaError('No se pudo procesar la imagen -¿es un archivo de imagen válido?');
+  }
 
   const blob = await put(`${carpeta}/${clave}.webp`, webp, {
     access: 'public',

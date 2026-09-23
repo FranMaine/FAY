@@ -12,7 +12,8 @@ interface Regatista {
   id: string;
   nombre: string;
   pais: string | null;
-  club: { nombre: string } | null;
+  club: { id: string; nombre: string } | null;
+  otrosClubes: { id: string; nombre: string }[];
 }
 
 const PAGE_SIZE = 20;

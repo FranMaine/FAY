@@ -4,14 +4,19 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
-import { AlertCircleIcon, XIcon, Loader2Icon } from "lucide-react";
+import { AlertCircleIcon, XIcon, Loader2Icon, PlusIcon } from "lucide-react";
 import { mensajeDeError } from "@/lib/utils";
+
+interface ClubRef {
+  id: string;
+  nombre: string;
+}
 
 interface RegatistaModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaved: () => void;
-  regatista?: { id: string; nombre: string; club: { nombre: string } | null; pais: string | null } | null;
+  regatista?: { id: string; nombre: string; club: ClubRef | null; otrosClubes?: ClubRef[]; pais: string | null } | null;
 }
 
 export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: RegatistaModalProps) {
@@ -21,6 +26,15 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Doble club (ver "otrosClubes" en el schema): solo editable en un
+  // regatista ya existente -antes solo se podía asignar desde la
+  // resolución de un club "combo" en /admin/clubes, sin forma de verlo ni
+  // tocarlo a mano después.
+  const [otrosClubes, setOtrosClubes] = useState<ClubRef[]>([]);
+  const [nuevoClub, setNuevoClub] = useState("");
+  const [guardandoClubes, setGuardandoClubes] = useState(false);
+  const [errorClubes, setErrorClubes] = useState<string | null>(null);
+
   useEffect(() => {
     if (isOpen) {
       // Sincroniza el formulario con la ficha a editar (o lo limpia para
@@ -29,9 +43,59 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
       setNombre(regatista?.nombre || "");
       setClub(regatista?.club?.nombre || "");
       setPais(regatista?.pais || "Argentina");
+      setOtrosClubes(regatista?.otrosClubes || []);
+      setNuevoClub("");
       setError(null);
+      setErrorClubes(null);
     }
   }, [isOpen, regatista]);
+
+  async function guardarOtrosClubes(nuevaLista: ClubRef[]) {
+    if (!regatista?.club) return; // no tiene sentido un club secundario sin uno principal
+    setGuardandoClubes(true);
+    setErrorClubes(null);
+    try {
+      const res = await fetch(`/api/admin/regatistas/${regatista.id}/club`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clubIds: [regatista.club.id, ...nuevaLista.map((c) => c.id)] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo guardar");
+      setOtrosClubes(nuevaLista);
+      onSaved();
+    } catch (err) {
+      setErrorClubes(mensajeDeError(err));
+    } finally {
+      setGuardandoClubes(false);
+    }
+  }
+
+  async function agregarClub() {
+    const nombreClub = nuevoClub.trim();
+    if (nombreClub.length < 2) return;
+    if (otrosClubes.some((c) => c.nombre.toLowerCase() === nombreClub.toLowerCase())) {
+      setErrorClubes("Ya está agregado");
+      return;
+    }
+    setGuardandoClubes(true);
+    setErrorClubes(null);
+    try {
+      const res = await fetch("/api/admin/clubes/resolver", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nombreClub }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo agregar el club");
+      await guardarOtrosClubes([...otrosClubes, { id: data.id, nombre: data.nombre }]);
+      setNuevoClub("");
+    } catch (err) {
+      setErrorClubes(mensajeDeError(err));
+    } finally {
+      setGuardandoClubes(false);
+    }
+  }
 
   const handleSubmit = async () => {
     if (nombre.trim().length < 2) {
@@ -99,6 +163,47 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
             </div>
           )}
         </div>
+
+        {regatista?.club && (
+          <div className="px-6 pb-6 -mt-2 space-y-2 border-t border-border pt-4">
+            <p className="text-sm font-medium text-muted-foreground">
+              Otros clubes (compite por dos clubes a la vez)
+            </p>
+            {otrosClubes.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {otrosClubes.map((c) => (
+                  <span key={c.id} className="inline-flex items-center gap-1.5 text-xs bg-background border border-border rounded-full pl-3 pr-1.5 py-1">
+                    {c.nombre}
+                    <button
+                      type="button"
+                      aria-label={`Quitar ${c.nombre}`}
+                      disabled={guardandoClubes}
+                      onClick={() => guardarOtrosClubes(otrosClubes.filter((x) => x.id !== c.id))}
+                      className="text-muted-foreground hover:text-red-500"
+                    >
+                      <XIcon className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                value={nuevoClub}
+                onChange={(e) => setNuevoClub(e.target.value)}
+                placeholder="Nombre exacto del club a agregar"
+                disabled={guardandoClubes}
+                className="flex-1 text-sm bg-background border border-border rounded-md px-3 py-1.5"
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); agregarClub(); } }}
+              />
+              <Button type="button" size="sm" variant="outline" disabled={guardandoClubes || nuevoClub.trim().length < 2} onClick={agregarClub} className="gap-1">
+                {guardandoClubes ? <Loader2Icon className="w-3.5 h-3.5 animate-spin" /> : <PlusIcon className="w-3.5 h-3.5" />}
+                Agregar
+              </Button>
+            </div>
+            {errorClubes && <p className="text-xs text-red-500">{errorClubes}</p>}
+          </div>
+        )}
 
         <div className="p-4 border-t border-border flex justify-end gap-3 bg-muted/20">
           <Button variant="secondary" onClick={onClose} disabled={isSaving}>

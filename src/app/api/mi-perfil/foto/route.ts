@@ -4,6 +4,11 @@ import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 import { subirImagen, borrarImagen, ImagenInvalidaError } from '@/lib/upload-imagen';
 
+// El recorte de fondo del escudo (quitarFondoLiso) puede tardar unos
+// segundos con fotos grandes -el default de Vercel (10s en Hobby) puede
+// no alcanzar.
+export const maxDuration = 30;
+
 async function getRegatistaVinculado(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user?.regatistaId) return null;

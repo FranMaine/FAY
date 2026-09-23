@@ -24,6 +24,7 @@ async function getRegatistaProfile(id: string) {
     where: { id },
     include: {
       club: true,
+      otrosClubes: true,
       resultados: {
         include: {
           regata: {
@@ -172,7 +173,7 @@ export default async function RegatistaProfilePage({ params }: Props) {
                   {regatista.club && (
                     <span className="flex items-center">
                       <MapPinIcon className="w-4 h-4 mr-1" />
-                      {regatista.club.nombre}
+                      {[regatista.club.nombre, ...regatista.otrosClubes.map((c) => c.nombre)].join(" + ")}
                     </span>
                   )}
                   {regatista.pais && (
