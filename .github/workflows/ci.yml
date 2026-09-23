@@ -29,13 +29,14 @@ jobs:
           cache: pnpm
 
       - name: Instalar dependencias
-        # Sin --frozen-lockfile: el lockfile se generó en Windows y no trae
-        # anotados los binarios nativos de la variante Linux de paquetes
-        # como sharp/lightningcss/@next/swc -con --frozen-lockfile, pnpm
-        # exige que el lockfile ya los liste y falla en el runner de GitHub
-        # (Linux) antes de instalar nada. Vercel no tiene este problema
-        # porque no usa esa bandera.
-        run: pnpm install
+        # --frozen-lockfile: garantiza que CI instale exactamente lo que
+        # dice pnpm-lock.yaml, sin poder actualizarlo solo -si package.json
+        # y el lockfile quedan desincronizados, esto falla acá en vez de
+        # instalar algo distinto a lo que corre en producción sin que nadie
+        # lo note. (La falla de install que hubo antes no era por esto: era
+        # que onlyBuiltDependencies había quedado sin efecto desde pnpm
+        # 11.23 -ver el commit que migró a allowBuilds en pnpm-workspace.yaml.)
+        run: pnpm install --frozen-lockfile
 
       - name: Generar cliente de Prisma
         # El postinstall del propio proyecto ya corre esto en un pnpm

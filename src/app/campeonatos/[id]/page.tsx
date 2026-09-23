@@ -7,6 +7,7 @@ import prisma from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
 import { notFound } from "next/navigation";
 import { SITE_URL } from "@/lib/site";
+import { jsonLdSeguro } from "@/lib/json-ld";
 
 // Sin esto, esta página quedaba 100% estática después de la primera
 // visita -Next.js la cachea indefinidamente porque no usa ninguna API
@@ -123,7 +124,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
     <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="space-y-4">

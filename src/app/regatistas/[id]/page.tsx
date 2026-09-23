@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon } from "lucide-react";
 import { CsvDownloadButton } from "@/components/ui/csv-download-button";
+import { jsonLdSeguro } from "@/lib/json-ld";
 
 // Mismo caso que /campeonatos/[id]: sin esto, el perfil queda cacheado
 // estático para siempre después de la primera visita -si esa persona
@@ -140,7 +141,7 @@ export default async function RegatistaProfilePage({ params }: Props) {
     <main className="min-h-screen bg-background text-foreground pb-20">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       {/* Header */}
       <div className="bg-surface border-b border-border">

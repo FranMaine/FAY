@@ -9,6 +9,7 @@ import { ClubAvatar } from "@/components/icons/club-avatar";
 import { CsvDownloadButton } from "@/components/ui/csv-download-button";
 import { SITE_URL } from "@/lib/site";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
+import { jsonLdSeguro } from "@/lib/json-ld";
 
 // Mismo criterio que /campeonatos/[id] y /regatistas/[id]: sin esto la
 // página queda cacheada estática para siempre, y un resultado nuevo
@@ -130,7 +131,7 @@ export default async function ClubDetailPage({ params }: Props) {
     <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <div className="max-w-5xl mx-auto space-y-8">
         <div>

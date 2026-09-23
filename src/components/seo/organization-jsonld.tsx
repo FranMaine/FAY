@@ -1,4 +1,5 @@
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
+import { jsonLdSeguro } from "@/lib/json-ld";
 
 // Datos estructurados (schema.org) de la organización, en el layout raíz
 // -así aparece en TODAS las páginas sin tener que repetirlo. Ayuda a que
@@ -22,7 +23,7 @@ export function OrganizationJsonLd() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: jsonLdSeguro(data) }}
     />
   );
 }
@@ -40,7 +41,7 @@ export function WebsiteJsonLd() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: jsonLdSeguro(data) }}
     />
   );
 }
