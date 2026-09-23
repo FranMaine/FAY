@@ -31,6 +31,14 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
 
+      - name: Generar cliente de Prisma
+        # El postinstall del propio proyecto ya corre esto en un pnpm
+        # normal, pero algunos entornos bloquean los scripts de instalación
+        # por default -este paso explícito hace que CI no dependa de eso:
+        # sin el cliente generado, tsc directamente no encuentra los tipos
+        # de @prisma/client y todo lo demás falla en cadena.
+        run: pnpm exec prisma generate
+
       - name: Chequeo de tipos
         run: pnpm exec tsc --noEmit
 
