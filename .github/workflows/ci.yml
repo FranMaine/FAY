@@ -1,0 +1,51 @@
+name: CI
+
+# Corre en cada push/PR a main la misma batería que se corre a mano antes
+# de cada commit en este proyecto (tsc, lint, tests, build) -pensado para
+# atajar un error tonto (un typo que rompe el build, un test que queda
+# roto) ANTES de que llegue a producción, no recién cuando el deploy ya
+# falló o el sitio ya se rompió para los usuarios. No corre los tests e2e
+# (e2e/) porque esos necesitan una base de datos real -son para correr a
+# mano con `pnpm run test:e2e`.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Chequeo de tipos
+        run: pnpm exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Tests unitarios
+        run: pnpm run test:run
+
+      - name: Build
+        # El build no necesita una base real: ninguna página se prerenderiza
+        # contra datos en build time (todas usan force-dynamic o revalidate),
+        # así que un placeholder alcanza -ver el mismo criterio en las
+        # verificaciones manuales de este proyecto.
+        env:
+          DATABASE_URL: "__PLACEHOLDER__"
+          NEXTAUTH_SECRET: "ci-placeholder-secret-not-for-production"
+        run: pnpm run build

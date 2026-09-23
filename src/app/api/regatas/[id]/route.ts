@@ -5,6 +5,7 @@ import { regataResultadosSchema } from '@/lib/validators';
 import { splitNombreTripulacion, splitClubPorTripulante, normalizarNombre } from '@/lib/nombres';
 import { handleApiError } from '@/lib/api-error';
 import { puedeGestionarCampeonatos } from '@/lib/permisos';
+import { revalidateTag } from 'next/cache';
 
 // Reemplaza el set de resultados de una regata existente: crea/actualiza los
 // enviados y borra los que ya no vienen en el body (así "Guardar" en el
@@ -136,6 +137,7 @@ export async function PUT(
       },
     });
 
+    revalidateTag('rankings', { expire: 0 });
     return NextResponse.json(regata);
   } catch (error) {
     return handleApiError(error, 'PUT /api/regatas/[id]');

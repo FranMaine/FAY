@@ -6,6 +6,7 @@ import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
 import { handleApiError } from '@/lib/api-error';
 import { puedeGestionarCampeonatos } from '@/lib/permisos';
 import { registrarAuditoria } from '@/lib/auditoria';
+import { revalidateTag } from 'next/cache';
 
 export async function GET(
   request: Request,
@@ -73,6 +74,7 @@ export async function PUT(
       data: { ...body, ...(body.evento !== undefined ? { evento: body.evento || null } : {}) },
     });
 
+    revalidateTag('rankings', { expire: 0 });
     return NextResponse.json(campeonato);
   } catch (error) {
     return handleApiError(error, 'PUT /api/campeonatos/[id]');
@@ -102,6 +104,7 @@ export async function DELETE(
       { nombre: borrado.nombre, anio: borrado.anio }
     );
 
+    revalidateTag('rankings', { expire: 0 });
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'DELETE /api/campeonatos/[id]');
@@ -145,6 +148,7 @@ export async function PATCH(
       );
     }
 
+    revalidateTag('rankings', { expire: 0 });
     return NextResponse.json(campeonato);
   } catch (error) {
     return handleApiError(error, 'PATCH /api/campeonatos/[id]');

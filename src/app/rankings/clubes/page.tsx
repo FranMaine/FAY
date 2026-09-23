@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { MedalIcon, ArrowRightIcon, AlertCircleIcon, UsersIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClubAvatar } from "@/components/icons/club-avatar";
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-async function getRankingDeClubes(claseId: string, anio: number) {
+async function calcularRankingDeClubes(claseId: string, anio: number) {
   const [campeonatos, clubes] = await Promise.all([
     prisma.campeonato.findMany({
       where: { estado: 'PUBLICADO', claseId, ...(anio !== 0 ? { anio } : {}) },
@@ -85,6 +86,14 @@ async function getRankingDeClubes(claseId: string, anio: number) {
     .map((s) => ({ id: s.id, nombre: s.nombre, logoUrl: s.logoUrl, completo: s.completo, regatistas: s.regatistas.size, puntosRanking: s.puntosRanking }))
     .sort((a, b) => b.puntosRanking - a.puntosRanking);
 }
+
+// Mismo criterio que calcularRankingGeneral en /rankings: cachea 1h y se
+// invalida al toque con revalidateTag("rankings") en vez de depender solo
+// de que pase el tiempo -ver esos puntos en /api/campeonatos y /api/regatas.
+const getRankingDeClubes = unstable_cache(calcularRankingDeClubes, ['ranking-clubes'], {
+  revalidate: 3600,
+  tags: ['rankings'],
+});
 
 export default async function RankingClubesPage({
   searchParams,
