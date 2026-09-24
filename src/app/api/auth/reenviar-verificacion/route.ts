@@ -24,7 +24,13 @@ export async function POST(request: Request) {
     const { email } = forgotPasswordSchema.parse(await request.json());
     const emailNormalizado = email.trim().toLowerCase();
 
-    const user = await prisma.user.findUnique({ where: { email: emailNormalizado } });
+    // Mismo criterio que forgot-password: el límite de arriba es por IP,
+    // este es por email destino -corta a alguien con varias IPs
+    // bombardeando la misma casilla, sin filtrar nada distinto en la
+    // respuesta si se pasa.
+    const puedeEnviar = await permitir(`reenviar-verificacion-email:${emailNormalizado}`, 3, 60 * 60 * 1000);
+
+    const user = puedeEnviar ? await prisma.user.findUnique({ where: { email: emailNormalizado } }) : null;
 
     if (user && user.passwordHash && !user.emailVerified) {
       await prisma.verificationToken.deleteMany({ where: { identifier: `${PREFIJO_VERIFICACION}${emailNormalizado}` } });

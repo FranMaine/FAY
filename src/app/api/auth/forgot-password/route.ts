@@ -33,7 +33,16 @@ export async function POST(request: Request) {
     const { email } = forgotPasswordSchema.parse(json);
     const emailNormalizado = email.trim().toLowerCase();
 
-    const user = await prisma.user.findUnique({ where: { email: emailNormalizado } });
+    // El límite de arriba es por IP -alguien con varias IPs (proxies
+    // rotativos) podría seguir mandándole mails de reseteo a la MISMA
+    // persona sin tope. Este segundo límite es por email destino, así que
+    // corta eso independientemente de cuántas IPs use el que lo pide. Si
+    // se pasa, seguimos devolviendo el mismo mensaje genérico de siempre
+    // (nunca un error distinto) para no filtrar que ese email existe y
+    // además está siendo bombardeado.
+    const puedeEnviar = await permitir(`forgot-password-email:${emailNormalizado}`, 3, 60 * 60 * 1000);
+
+    const user = puedeEnviar ? await prisma.user.findUnique({ where: { email: emailNormalizado } }) : null;
 
     // Respondemos siempre lo mismo exista o no la cuenta, y también si es
     // una cuenta que solo tiene login con Google (sin passwordHash) -si no,

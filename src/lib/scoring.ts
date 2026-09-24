@@ -114,10 +114,13 @@ export const PENALTY_CODES = ['DNF', 'DNS', 'DNC', 'DSQ', 'OCS', 'BFD', 'UFD', '
 export type PenaltyCode = typeof PENALTY_CODES[number];
 
 /**
- * Calculate penalty points for a given code.
- * In low-point system: DNF/DNS/DNC/DSQ/OCS/BFD/UFD/RET = number of entries + 1
+ * Puntos de penalidad en el sistema "low point": no depende de CUÁL
+ * penalidad sea (DNF, DSQ, etc.) -todas puntúan lo mismo, el total de
+ * inscriptos + 1. Por eso no recibe el código como parámetro (antes lo
+ * recibía sin usarlo, lo que sugería una diferenciación por tipo que en
+ * realidad no existe en este sistema de puntaje).
  */
-export function calcularPuntosPenalidad(codigo: PenaltyCode, totalInscritos: number): number {
+export function calcularPuntosPenalidad(totalInscritos: number): number {
   return totalInscritos + 1;
 }
 
@@ -327,6 +330,16 @@ export function generarClasificacion(
  * prácticamente imposible salvo que hayan competido en el mismo bote-, en
  * vez de depender de algún campo separado que habría que mantener
  * sincronizado.
+ *
+ * Excepción real a "prácticamente imposible": una penalidad (DNF, DSQ,
+ * etc.) siempre puntúa inscriptos+1 en esa regata (ver
+ * calcularPuntosPenalidad), el mismo número para CUALQUIERA que la reciba
+ * en esa regata puntual -no es evidencia de nada compartido, es una
+ * garantía de la fórmula. En una flota chica donde dos personas navegan
+ * botes distintos pero nunca terminan ninguna regata, esa coincidencia
+ * podría fusionarlas por error. Por eso alguien sin ningún resultado real
+ * (todo penalidades) nunca se agrupa con nadie: no hay forma de
+ * distinguir "es la misma tripulación" de "la fórmula da lo mismo".
  */
 export function agruparTripulaciones(clasificacion: ClasificacionRegatista[]): ClasificacionRegatista[] {
   const firma = (c: ClasificacionRegatista) =>
@@ -335,13 +348,16 @@ export function agruparTripulaciones(clasificacion: ClasificacionRegatista[]): C
       .sort()
       .join('|');
 
+  const tieneResultadoReal = (c: ClasificacionRegatista) =>
+    c.resultados.some((r) => !esPenalidad(r.observacion));
+
   const procesados = new Set<string>();
   const agrupado: ClasificacionRegatista[] = [];
 
   for (const c of clasificacion) {
     if (procesados.has(c.regatistaId)) continue;
 
-    const suFirma = c.resultados.length > 0 ? firma(c) : null;
+    const suFirma = c.resultados.length > 0 && tieneResultadoReal(c) ? firma(c) : null;
     const companeros = suFirma
       ? clasificacion.filter((otro) => !procesados.has(otro.regatistaId) && firma(otro) === suFirma)
       : [c];

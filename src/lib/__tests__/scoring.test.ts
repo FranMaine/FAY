@@ -7,7 +7,9 @@ import {
   calcularTotalBruto,
   desempatar,
   generarClasificacion,
+  agruparTripulaciones,
   type ResultadoRegata,
+  type ClasificacionRegatista,
 } from '../scoring';
 
 describe('esPenalidad', () => {
@@ -26,9 +28,9 @@ describe('esPenalidad', () => {
 });
 
 describe('calcularPuntosPenalidad', () => {
-  it('returns entries + 1', () => {
-    expect(calcularPuntosPenalidad('DNF', 20)).toBe(21);
-    expect(calcularPuntosPenalidad('DSQ', 5)).toBe(6);
+  it('returns entries + 1 regardless of penalty type (low-point system)', () => {
+    expect(calcularPuntosPenalidad(20)).toBe(21);
+    expect(calcularPuntosPenalidad(5)).toBe(6);
   });
 });
 
@@ -104,6 +106,28 @@ describe('desempatar', () => {
       { regataNumero: 1, puesto: 2, puntos: 2, descartado: false, observacion: null },
     ];
     expect(desempatar(a, a)).toBe(0);
+  });
+
+  // El importador de CSV/Excel guarda `puesto` == `puntos` para una
+  // penalidad (DNF, DSQ, etc. -ver el comentario en import-service.ts),
+  // porque no hay una posición de llegada real que registrar. Este test
+  // prueba que ese valor fabricado (inscriptos+1) sigue rankeando peor que
+  // cualquier llegada real en el countback, que es justo lo que tiene que
+  // pasar: no llegar nunca no puede "ganarle" a haber salido último de
+  // verdad.
+  it('treats a fabricated puesto for a penalty as worse than any real finish', () => {
+    const flota = 4;
+    const conDnf: ResultadoRegata[] = [
+      { regataNumero: 1, puesto: 1, puntos: 1, descartado: false, observacion: null },
+      { regataNumero: 2, puesto: flota + 1, puntos: flota + 1, descartado: false, observacion: 'DNF' },
+    ];
+    const ultimoRealDeVerdad: ResultadoRegata[] = [
+      { regataNumero: 1, puesto: 1, puntos: 1, descartado: false, observacion: null },
+      { regataNumero: 2, puesto: flota, puntos: flota, descartado: false, observacion: null },
+    ];
+    // b (llegó último de verdad) le gana el desempate a a (DNF) a pesar de
+    // que ambos tienen un 1er puesto y el mismo total: a positivo == "b gana".
+    expect(desempatar(conDnf, ultimoRealDeVerdad)).toBeGreaterThan(0);
   });
 });
 
@@ -198,5 +222,73 @@ describe('generarClasificacion', () => {
     expect(result[0].totalBruto).toBe(24);
     expect(result[0].posicionFinal).toBe(2); // sigue confiando en puestoOficial para el orden
     expect(result[0].resultados.find((r) => r.regataNumero === 6)!.descartado).toBe(true);
+  });
+});
+
+describe('agruparTripulaciones', () => {
+  function fila(overrides: Partial<ClasificacionRegatista>): ClasificacionRegatista {
+    return {
+      regatistaId: overrides.regatistaId!,
+      nombre: overrides.nombre ?? overrides.regatistaId!,
+      club: null,
+      flota: null,
+      resultados: [],
+      totalBruto: 0,
+      totalNeto: 0,
+      posicionFinal: 0,
+      ...overrides,
+    };
+  }
+
+  it('groups two sailors with identical real results as a crew', () => {
+    const a = fila({
+      regatistaId: 'a',
+      posicionFinal: 1,
+      resultados: [
+        { regataNumero: 1, puesto: 1, puntos: 1, descartado: false, observacion: null },
+        { regataNumero: 2, puesto: 2, puntos: 2, descartado: false, observacion: null },
+      ],
+    });
+    const b = fila({
+      regatistaId: 'b',
+      posicionFinal: 1,
+      resultados: [
+        { regataNumero: 1, puesto: 1, puntos: 1, descartado: false, observacion: null },
+        { regataNumero: 2, puesto: 2, puntos: 2, descartado: false, observacion: null },
+      ],
+    });
+
+    const result = agruparTripulaciones([a, b]);
+    expect(result).toHaveLength(1);
+    expect(result[0].integrantes).toHaveLength(2);
+  });
+
+  // Ver el comentario arriba de agruparTripulaciones en scoring.ts: dos
+  // botes distintos que nunca terminan ninguna regata en una flota chica
+  // comparten el mismo puntaje de penalidad (inscriptos+1) en cada regata
+  // por pura fórmula, no porque sean la misma tripulación -no deben
+  // agruparse.
+  it('does NOT group two sailors whose only shared results are penalties', () => {
+    const flota = 3;
+    const a = fila({
+      regatistaId: 'a',
+      posicionFinal: 4,
+      resultados: [
+        { regataNumero: 1, puesto: flota + 1, puntos: flota + 1, descartado: false, observacion: 'DNS' },
+        { regataNumero: 2, puesto: flota + 1, puntos: flota + 1, descartado: false, observacion: 'DNS' },
+      ],
+    });
+    const b = fila({
+      regatistaId: 'b',
+      posicionFinal: 4,
+      resultados: [
+        { regataNumero: 1, puesto: flota + 1, puntos: flota + 1, descartado: false, observacion: 'DNS' },
+        { regataNumero: 2, puesto: flota + 1, puntos: flota + 1, descartado: false, observacion: 'DNS' },
+      ],
+    });
+
+    const result = agruparTripulaciones([a, b]);
+    expect(result).toHaveLength(2);
+    expect(result.every((r) => !r.integrantes)).toBe(true);
   });
 });

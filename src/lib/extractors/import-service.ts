@@ -181,6 +181,15 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
         puntos = totalInscritos + 1;
       }
 
+      // `puesto` queda igual a `puntos` acá a propósito, no es un
+      // descuido: para una penalidad (DNF, DSQ, etc.) no existe una
+      // "posición de llegada" real que guardar, así que se usa el mismo
+      // valor -inscriptos+1, el peor puesto posible en esa regata- para
+      // que el desempate por countback en desempatar() (scoring.ts, que sí
+      // usa `puesto` crudo) siga tratando esta fila como la peor de todas,
+      // en vez de quedar sin valor. La carga manual desde /api/regatas/[id]
+      // sí puede guardar puesto/puntos distintos (ej: un puesto real con
+      // una penalidad porcentual sobre el puntaje), eso es intencional.
       resultadosAInsertar.push({
         regataId: regata.id,
         regatistaId: fila.regatistaId,
