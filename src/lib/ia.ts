@@ -13,6 +13,23 @@ export class IaNoConfiguradaError extends Error {
   }
 }
 
+/**
+ * Reintenta ante errores pasajeros de Gemini (503 saturado, 500 interno):
+ * hasta 2 reintentos con 1 s y 2 s de espera. Los demás errores (clave,
+ * modelo, cuota) no se reintentan porque volverían a fallar igual.
+ */
+export async function conReintentos<T>(fn: () => Promise<T>): Promise<T> {
+  for (let intento = 0; ; intento++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const pasajero = error instanceof ApiError && (error.status === 503 || error.status === 500);
+      if (!pasajero || intento >= 2) throw error;
+      await new Promise((r) => setTimeout(r, 1000 * (intento + 1)));
+    }
+  }
+}
+
 export function iaDisponible(): boolean {
   return !!process.env.GEMINI_API_KEY;
 }
@@ -26,11 +43,13 @@ export async function pedirJson<T extends z.ZodType>(prompt: string, esquema: T)
   if (!apiKey) throw new IaNoConfiguradaError();
 
   const ai = new GoogleGenAI({ apiKey });
-  const respuesta = await ai.models.generateContent({
-    model: MODELO,
-    contents: prompt,
-    config: { responseMimeType: 'application/json', temperature: 0, maxOutputTokens: 600 },
-  });
+  const respuesta = await conReintentos(() =>
+    ai.models.generateContent({
+      model: MODELO,
+      contents: prompt,
+      config: { responseMimeType: 'application/json', temperature: 0, maxOutputTokens: 600 },
+    })
+  );
 
   const texto = respuesta.text;
   if (!texto) throw new Error('La IA no devolvió respuesta');
@@ -52,6 +71,9 @@ export function errorDeGemini(error: unknown): { mensaje: string; status: number
   }
   if (error.status === 429) {
     return { status: 429, mensaje: 'Llegaste al límite gratuito de Gemini (por minuto o por día). Probá de nuevo más tarde.' };
+  }
+  if (error.status === 503) {
+    return { status: 503, mensaje: 'Los servidores de Gemini están saturados en este momento. Probá de nuevo en un minuto.' };
   }
   return { status: 502, mensaje: `Gemini respondió con un error (${error.status}). Probá de nuevo en un momento.` };
 }

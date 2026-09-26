@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { GoogleGenAI, type Content } from '@google/genai';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-error';
-import { iaDisponible, errorDeGemini, MODELO } from '@/lib/ia';
+import { iaDisponible, errorDeGemini, conReintentos, MODELO } from '@/lib/ia';
 import { DECLARACIONES, ejecutarHerramienta } from '@/lib/ia-herramientas';
 import { permitir } from '@/lib/rate-limit';
 
@@ -45,11 +45,13 @@ export async function POST(request: Request) {
     const contents: Content[] = mensajes.map((m) => ({ role: m.rol === 'usuario' ? 'user' : 'model', parts: [{ text: m.texto }] }));
 
     for (let vuelta = 0; vuelta < MAX_VUELTAS; vuelta++) {
-      const res = await ai.models.generateContent({
-        model: MODELO,
-        contents,
-        config: { systemInstruction: INSTRUCCIONES, temperature: 0.2, maxOutputTokens: 900, tools: [{ functionDeclarations: DECLARACIONES }] },
-      });
+      const res = await conReintentos(() =>
+        ai.models.generateContent({
+          model: MODELO,
+          contents,
+          config: { systemInstruction: INSTRUCCIONES, temperature: 0.2, maxOutputTokens: 900, tools: [{ functionDeclarations: DECLARACIONES }] },
+        })
+      );
 
       const llamadas = res.functionCalls;
       if (!llamadas || llamadas.length === 0) {
