@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { puedeGestionarCampeonatos } from "@/lib/permisos";
+import { IaChat } from "@/components/admin/ia-chat";
 
 // Antes, /admin/* no tenía ningún control de acceso propio -las páginas
 // renderizaban igual para cualquiera, y solo las llamadas a la API fallaban
@@ -24,5 +25,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/");
   }
 
-  return <>{children}</>;
+  // El asistente de IA consulta datos de todo el sitio: solo para ADMIN, no
+  // para ORGANIZADOR (que solo gestiona campeonatos).
+  return (
+    <>
+      {children}
+      {session.user.role === "ADMIN" && <IaChat />}
+    </>
+  );
 }
