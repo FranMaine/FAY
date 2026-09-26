@@ -9,6 +9,8 @@ import { prisma } from "@/lib/db";
 import { SailorSearch } from "@/components/search/sailor-search";
 import { ClaseMarquee } from "@/components/marquee/clase-marquee";
 import { ClaseIcon } from "@/components/icons/clase-icons";
+import { clubesConMasPodios } from "@/lib/podios-clubes";
+import { ClubAvatar } from "@/components/icons/club-avatar";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 // Foto de fondo del hero (ver sección HERO más abajo) -mientras no esté,
@@ -69,8 +71,7 @@ async function getStats() {
 }
 
 export default async function LandingPage() {
-  const campeonatos = await getUltimosCampeonatos();
-  const stats = await getStats();
+  const [campeonatos, stats, topClubes] = await Promise.all([getUltimosCampeonatos(), getStats(), clubesConMasPodios(5)]);
   const tieneFotoHero = fs.existsSync(FOTO_HERO_PATH);
   const [destacado, ...otros] = campeonatos;
 
@@ -247,6 +248,45 @@ export default async function LandingPage() {
           </div>
         )}
       </section>
+
+      {/* Clubes con más podios: datos reales de la base, con los escudos ya cargados. */}
+      {topClubes.length > 0 && (
+        <section className="px-6 pb-20 max-w-7xl mx-auto w-full">
+          <ScrollReveal>
+            <div className="flex items-end justify-between gap-4 mb-8">
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight">Clubes con más podios</h2>
+                <p className="mt-2 text-muted-foreground">Podios de sus regatistas en todos los campeonatos cargados.</p>
+              </div>
+              <Link href="/rankings/clubes" className="group hidden sm:flex shrink-0 items-center font-medium text-primary hover:underline">
+                Ranking de clubes <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-200 ease-out group-hover:translate-x-1" aria-hidden="true" />
+              </Link>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal>
+            <ol className="overflow-hidden rounded-2xl border border-border bg-surface divide-y divide-border">
+              {topClubes.map((c, i) => (
+                <li key={c.id}>
+                  <Link href={`/clubes/${c.id}`} className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-background/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
+                    <span className="w-6 text-center text-lg font-extrabold tabular-nums text-muted-foreground">{i + 1}</span>
+                    <ClubAvatar nombre={c.nombre} logoUrl={c.logoUrl} className="w-10 h-10 text-sm" pixeles={40} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-bold group-hover:text-primary transition-colors">{c.nombre}</span>
+                      <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-border">
+                        <span className="block h-full rounded-full bg-primary" style={{ width: `${Math.max(6, Math.round((c.podios / topClubes[0].podios) * 100))}%` }} />
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      <span className="block text-2xl font-extrabold tabular-nums leading-none">{c.podios}</span>
+                      <span className="text-xs text-muted-foreground">podios{c.victorias > 0 ? `, ${c.victorias} en el 1º` : ""}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </ScrollReveal>
+        </section>
+      )}
 
       {/* CTA final: el mismo llamado del hero, de nuevo al final del recorrido. */}
       <ScrollReveal>

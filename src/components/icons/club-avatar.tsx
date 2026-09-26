@@ -18,7 +18,7 @@ function hashDeNombre(nombre: string): number {
   return hash;
 }
 
-function colorDeClub(nombre: string): string {
+export function colorDeClub(nombre: string): string {
   const hue = hashDeNombre(nombre) % 360;
   // Saturación/luminosidad fijas -varía el matiz entre clubes, no
   // qué tan "fuerte" se ve cada uno (uno no debería parecer más
@@ -70,7 +70,7 @@ function renderAvatar(nombre: string, logoUrl: string | null | undefined, classN
 
   return (
     <div
-      className={cn("rounded-full flex items-center justify-center font-bold text-white shrink-0", className)}
+      className={cn("rounded-2xl flex items-center justify-center font-bold text-white shrink-0 shadow-inner", className)}
       style={{ backgroundColor: colorDeClub(nombre) }}
       aria-hidden="true"
     >

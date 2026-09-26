@@ -5,7 +5,7 @@ import { ArrowLeftIcon, MedalIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ClaseIcon } from "@/components/icons/clase-icons";
-import { ClubAvatar } from "@/components/icons/club-avatar";
+import { ClubAvatar, colorDeClub } from "@/components/icons/club-avatar";
 import { CsvDownloadButton } from "@/components/ui/csv-download-button";
 import { SITE_URL } from "@/lib/site";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
@@ -142,7 +142,10 @@ export default async function ClubDetailPage({ params }: Props) {
           </Link>
         </div>
 
-        <header className="relative flex flex-col sm:flex-row sm:items-center gap-6 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-10">
+        <header
+          className="relative flex flex-col sm:flex-row sm:items-center gap-6 overflow-hidden rounded-3xl border border-border bg-surface p-6 md:p-10"
+          style={{ backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${colorDeClub(club.nombre)} 22%, transparent), transparent 65%)` }}
+        >
           <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-24 h-24 md:w-28 md:h-28 text-2xl" pixeles={112} transitionName={`club-${club.id}`} />
           <div className="min-w-0">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{club.nombre}</h1>
