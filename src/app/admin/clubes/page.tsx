@@ -204,7 +204,7 @@ export default function AdminEscudosClubesPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Clubes</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Clubes</h1>
             <p className="text-muted-foreground text-sm mt-1">
               Editá la abreviación y el nombre completo, subí el escudo (&quot;Buscar&quot; abre Google Imágenes) o eliminá un club. Al eliminarlo, sus regatistas quedan sin club.
             </p>

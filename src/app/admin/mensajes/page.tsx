@@ -63,7 +63,7 @@ export default function AdminMensajesPage() {
       <div className="max-w-4xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2 flex items-center gap-3">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 flex items-center gap-3">
               <MailIcon className="w-8 h-8 text-primary" />
               Mensajes
             </h1>

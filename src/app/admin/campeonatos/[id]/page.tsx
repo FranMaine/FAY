@@ -327,7 +327,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold tracking-tight">Carga de Resultados</h1>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Carga de Resultados</h1>
               <Badge
                 variant="muted"
                 className={campeonato.estado === "PUBLICADO" ? "bg-green-500/20 text-green-500" : "bg-amber-500/20 text-amber-500"}
@@ -576,6 +576,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                                aria-label="Quitar fila"
                                 onClick={() => eliminarFila(row.key)}
                               >
                                 <TrashIcon className="w-4 h-4" />

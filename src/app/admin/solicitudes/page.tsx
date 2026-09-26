@@ -65,7 +65,7 @@ export default function SolicitudesAdminPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Solicitudes de Vinculación</h1>
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Solicitudes de Vinculación</h1>
         <p className="text-muted-foreground mt-2">Revisá las peticiones de los usuarios para reclamar perfiles de regatistas.</p>
       </div>
 

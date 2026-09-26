@@ -82,7 +82,7 @@ export default function AdminUsuariosPage() {
               Volver al panel
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Usuarios y roles</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Usuarios y roles</h1>
           <p className="text-muted-foreground">
             Buscá una cuenta por email o nombre para asignarle rol de <strong>Organizador</strong> (crear y editar
             campeonatos, cargar resultados) o <strong>Administrador</strong> (acceso total al panel).

@@ -270,7 +270,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
           <h2 className="text-lg font-semibold">
             {etapa === 'confirmar' ? 'Confirmá las columnas detectadas' : 'Importar Resultados (CSV / Excel / PDF)'}
           </h2>
-          <Button variant="ghost" size="icon" onClick={handleClose} disabled={isBusy}>
+          <Button variant="ghost" size="icon" aria-label="Cerrar" onClick={handleClose} disabled={isBusy}>
             <XIcon className="w-5 h-5" />
           </Button>
         </div>

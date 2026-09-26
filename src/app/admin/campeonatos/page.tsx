@@ -131,12 +131,12 @@ export default function AdminCampeonatosPage() {
         </td>
         <td className="px-6 py-3 text-right space-x-2">
           <Link href={`/admin/campeonatos/${c.id}`}>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+            <Button variant="ghost" size="icon" aria-label="Ver campeonato" className="h-8 w-8 text-muted-foreground hover:text-primary">
               <EyeIcon className="w-4 h-4" />
             </Button>
           </Link>
           <Link href={`/admin/campeonatos/${c.id}`}>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-accent">
+            <Button variant="ghost" size="icon" aria-label="Editar campeonato" className="h-8 w-8 text-muted-foreground hover:text-accent">
               <EditIcon className="w-4 h-4" />
             </Button>
           </Link>
@@ -155,7 +155,7 @@ export default function AdminCampeonatosPage() {
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">Gestión de Campeonatos</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Gestión de Campeonatos</h1>
             <p className="text-muted-foreground text-lg">Administrá los campeonatos del sistema, agrupados por evento</p>
           </div>
           <Button className="flex items-center gap-2" onClick={() => setIsModalOpen(true)}>
@@ -167,7 +167,7 @@ export default function AdminCampeonatosPage() {
           <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
         )}
 
-        <div className="bg-surface border border-border rounded-xl overflow-hidden">
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
@@ -217,12 +217,12 @@ export default function AdminCampeonatosPage() {
                           </td>
                           <td className="px-6 py-4 text-right space-x-2">
                             <Link href={`/admin/campeonatos/${c.id}`}>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                              <Button variant="ghost" size="icon" aria-label="Ver campeonato" className="h-8 w-8 text-muted-foreground hover:text-primary">
                                 <EyeIcon className="w-4 h-4" />
                               </Button>
                             </Link>
                             <Link href={`/admin/campeonatos/${c.id}`}>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-accent">
+                              <Button variant="ghost" size="icon" aria-label="Editar campeonato" className="h-8 w-8 text-muted-foreground hover:text-accent">
                                 <EditIcon className="w-4 h-4" />
                               </Button>
                             </Link>

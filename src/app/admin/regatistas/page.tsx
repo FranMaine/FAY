@@ -86,7 +86,7 @@ export default function AdminRegatistasPage() {
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-2">Gestión de Regatistas</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Gestión de Regatistas</h1>
             <p className="text-muted-foreground text-lg">Administración de la base de datos central de regatistas</p>
           </div>
           <div className="flex gap-2">
@@ -116,7 +116,7 @@ export default function AdminRegatistasPage() {
           </div>
         </div>
 
-        <div className="bg-surface border border-border rounded-xl overflow-hidden">
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
@@ -151,6 +151,7 @@ export default function AdminRegatistasPage() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-accent"
+                          aria-label={`Editar a ${r.nombre}`}
                           onClick={() => abrirEditar(r)}
                         >
                           <EditIcon className="w-4 h-4" />

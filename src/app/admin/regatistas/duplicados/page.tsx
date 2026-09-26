@@ -189,7 +189,7 @@ export default function DuplicadosPage() {
               Volver a Regatistas
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Regatistas Duplicados</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Regatistas Duplicados</h1>
           <p className="text-muted-foreground">
             Dos formas en que la misma persona termina con más de una ficha: nombre repetido tal cual, o un campeonato
             que solo trajo el apellido y se cargó como regatista nuevo en vez de reconocer al que ya existía.
@@ -214,14 +214,14 @@ export default function DuplicadosPage() {
             <section className="space-y-4">
               <h2 className="text-xl font-semibold">Mismo nombre ({grupos.length})</h2>
               {grupos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
+                <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-border rounded-2xl bg-surface/50 text-muted-foreground">
                   <CheckCircleIcon className="w-7 h-7 mb-2 opacity-50" />
                   <p className="text-sm">Sin duplicados de nombre idéntico.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {grupos.map((grupo, idx) => (
-                    <div key={grupo.nombreNormalizado} className="bg-surface border border-border rounded-xl p-5">
+                    <div key={grupo.nombreNormalizado} className="bg-surface border border-border rounded-2xl p-5">
                       <h3 className="font-semibold mb-3">{grupo.regatistas[0]?.nombre}</h3>
 
                       {exitoGrupo[idx] ? (
@@ -276,14 +276,14 @@ export default function DuplicadosPage() {
                 comparte apellido).
               </p>
               {apellidosSueltos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
+                <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-border rounded-2xl bg-surface/50 text-muted-foreground">
                   <CheckCircleIcon className="w-7 h-7 mb-2 opacity-50" />
                   <p className="text-sm">Sin apellidos sueltos pendientes de revisar.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {apellidosSueltos.map((item, idx) => (
-                    <div key={item.suelto.id} className="bg-surface border border-border rounded-xl p-5">
+                    <div key={item.suelto.id} className="bg-surface border border-border rounded-2xl p-5">
                       <h3 className="font-semibold mb-1">&quot;{item.suelto.nombre}&quot;</h3>
                       <p className="text-xs text-muted-foreground mb-3">
                         club: {item.suelto.club || "-"} · {item.suelto.resultadosCount} resultado(s)
