@@ -1,3 +1,4 @@
+import Image from 'next/image';
 // Logos de categoría para Regateando -los 10 archivos que subió el usuario
 // (public/logos-categorias/*.png), ya procesados a fondo transparente y
 // recoloreados a #3B82F6 por scripts/process-real-logos.ts a partir de los
@@ -59,19 +60,18 @@ export function slugDeClase(nombreClase: string): ClaseIconSlug | null {
   return null;
 }
 
-interface ClaseIconProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'> {
+interface ClaseIconProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt' | 'width' | 'height' | 'srcSet'> {
   nombreClase: string;
 }
 
 export function ClaseIcon({ nombreClase, ...props }: ClaseIconProps) {
   const slug = slugDeClase(nombreClase);
   if (!slug) return null;
-  // Son 10 archivos chicos (unos pocos KB), mostrados en tamaños distintos
-  // según el lugar (badge de 16px, marquesina de 56px); next/image exige
-  // width/height numéricos fijos por imagen, que chocaría con el sizing por
-  // className que ya usa cada lugar donde se muestra.
+  // Los PNG originales pesan ~20 KB y se muestran a 16-56px: next/image los
+  // sirve en WebP/AVIF al tamaño real. width/height (64) solo fijan la
+  // relación de aspecto y el máximo a pedir; el tamaño visible lo sigue
+  // dando el className de cada lugar.
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={`/logos-categorias/${slug}.png`} alt={CLASE_ICONOS[slug].label} {...props} />
+    <Image src={`/logos-categorias/${slug}.png`} alt={CLASE_ICONOS[slug].label} width={64} height={64} {...props} />
   );
 }

@@ -294,7 +294,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-md file:border-0
                     file:text-sm file:font-semibold
-                    file:bg-primary file:text-primary-foreground
+                    file:bg-primary-solid file:text-white
                     hover:file:bg-primary/90 cursor-pointer"
                   disabled={isBusy}
                 />

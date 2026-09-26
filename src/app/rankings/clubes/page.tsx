@@ -173,7 +173,7 @@ export default async function RankingClubesPage({
                 titulo: r.nombre,
                 subtitulo: r.completo || CLUB_ALIASES[r.nombre] || null,
                 puntos: r.puntosRanking,
-                avatar: <ClubAvatar nombre={r.nombre} logoUrl={r.logoUrl} className="w-11 h-11 text-sm" />,
+                avatar: <ClubAvatar nombre={r.nombre} logoUrl={r.logoUrl} className="w-11 h-11 text-sm" pixeles={44} />,
               }))}
             />
             <Card className="bg-surface border-border overflow-hidden">
@@ -205,7 +205,7 @@ export default async function RankingClubesPage({
                             </td>
                             <td className="px-3 sm:px-6 py-3 font-medium">
                               <Link href={`/clubes/${r.id}`} className="hover:text-primary transition-colors flex items-center gap-3 group min-w-0">
-                                <ClubAvatar nombre={r.nombre} logoUrl={r.logoUrl} className="w-8 h-8 text-xs" />
+                                <ClubAvatar nombre={r.nombre} logoUrl={r.logoUrl} className="w-8 h-8 text-xs" pixeles={32} />
                                 <span className="min-w-0">
                                   <span className="block truncate" title={nombreCompleto}>{r.nombre}</span>
                                   <span className="sm:hidden block text-xs text-muted-foreground">{r.regatistas} regatistas</span>

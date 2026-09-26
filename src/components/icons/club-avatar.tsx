@@ -41,10 +41,12 @@ interface ClubAvatarProps {
   className?: string;
   /** Si se pasa, el escudo "viaja" entre páginas que lo muestren con el mismo nombre (ver globals.css). Debe ser único por página. */
   transitionName?: string;
+  /** Ancho/alto real (px) con que se muestra; define qué tamaño de imagen se pide (default 200). */
+  pixeles?: number;
 }
 
-export function ClubAvatar({ nombre, logoUrl, className, transitionName }: ClubAvatarProps) {
-  const avatar = renderAvatar(nombre, logoUrl, className);
+export function ClubAvatar({ nombre, logoUrl, className, transitionName, pixeles }: ClubAvatarProps) {
+  const avatar = renderAvatar(nombre, logoUrl, className, pixeles);
   if (!transitionName) return avatar;
   return (
     <ViewTransition name={transitionName} share="morph" default="none">
@@ -53,14 +55,14 @@ export function ClubAvatar({ nombre, logoUrl, className, transitionName }: ClubA
   );
 }
 
-function renderAvatar(nombre: string, logoUrl: string | null | undefined, className?: string) {
+function renderAvatar(nombre: string, logoUrl: string | null | undefined, className?: string, pixeles = 200) {
   if (logoUrl) {
     return (
       <Image
         src={logoUrl}
         alt={nombre}
-        width={200}
-        height={200}
+        width={pixeles}
+        height={pixeles}
         className={cn("object-contain shrink-0", className)}
       />
     );

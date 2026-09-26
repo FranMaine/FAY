@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { CLASE_ICONOS, SLUGS_MARQUESINA } from '@/components/icons/clase-icons';
 
 // Franja de logos de categoría con scroll automático infinito. Se duplica
@@ -13,8 +14,7 @@ export function ClaseMarquee() {
       <div className="marquee-track flex w-max animate-[marquee_28s_linear_infinite]">
         {doble.map(([slug, { label }], i) => (
           <div key={`${slug}-${i}`} className="flex flex-col items-center gap-2 px-8 shrink-0 w-28">
-            {/* eslint-disable-next-line @next/next/no-img-element -- ver ClaseIcon en clase-icons.tsx */}
-            <img src={`/logos-categorias/${slug}.png`} alt={label} className="w-14 h-14 object-contain" />
+            <Image src={`/logos-categorias/${slug}.png`} alt={label} width={56} height={56} className="w-14 h-14 object-contain" />
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
           </div>
         ))}

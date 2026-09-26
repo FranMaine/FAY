@@ -153,7 +153,7 @@ export default async function MiPerfilPage() {
           </div>
           <div className="flex items-center gap-3">
             {isLinked && (
-              <Badge variant="default" className="bg-primary text-primary-foreground">Perfil Vinculado</Badge>
+              <Badge variant="default" className="bg-primary-solid text-white">Perfil Vinculado</Badge>
             )}
             <Link href="/mi-perfil/configuracion">
               <Button variant="outline" size="sm" className="gap-2">

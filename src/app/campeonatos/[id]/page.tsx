@@ -138,7 +138,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
           <ClaseIcon nombreClase={campeonato.clase.nombre} className="absolute -right-6 -top-6 h-48 w-48 object-contain opacity-[0.07]" />
           <div className="relative space-y-4">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white">
+              <span className="inline-flex items-center gap-2 rounded-lg bg-primary-solid px-3 py-1.5 text-sm font-semibold text-white">
                 <ClaseIcon nombreClase={campeonato.clase.nombre} className="h-5 w-5 object-contain brightness-0 invert" />
                 {campeonato.clase.nombre}
               </span>

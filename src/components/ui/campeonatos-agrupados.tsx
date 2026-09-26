@@ -49,7 +49,7 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
                 <span className="w-11 h-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center"><SailboatIcon className="w-6 h-6" /></span>
                 <ChevronDownIcon className={cn("w-5 h-5 text-muted transition-transform", abierta && "rotate-180")} />
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-1 line-clamp-2">{g.nombre}</h3>
+              <p className="text-lg font-bold text-foreground mb-1 line-clamp-2">{g.nombre}</p>
               <p className="text-sm text-primary mb-4 font-mono">{g.anio}</p>
               <div className="mt-auto flex items-center justify-between gap-3 pt-6">
                 <p className="text-sm text-muted-foreground">{g.items.length} categorías</p>

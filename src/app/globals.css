@@ -24,6 +24,9 @@
   --color-surface-hover: #f1f5f9; /* slate-100 */
   --color-primary: #2563eb;       /* blue-600 -un poco más oscuro que antes (blue-500) para mantener buen contraste de texto blanco sobre fondo claro */
   --color-primary-hover: #1d4ed8; /* blue-700 */
+  /* Fondo de botones/etiquetas con texto blanco: el mismo azul en ambos temas (el "primary" de texto se aclara en modo oscuro para leerse sobre fondo oscuro, pero blanco sobre ese azul claro no pasa el contraste). */
+  --color-primary-solid: #2563eb;       /* blue-600: blanco encima = 5.2:1 */
+  --color-primary-solid-hover: #1d4ed8; /* blue-700 */
   --color-accent: #d97706;        /* amber-600 -bastante más oscuro que antes (amber-400): se usa como texto plano en varios lugares (link "Admin", íconos), y amber-500 quedaba con muy poco contraste sobre blanco */
   --color-muted: #64748b;         /* slate-500 -antes (slate-400) tenía buen contraste sobre fondo oscuro pero es demasiado claro sobre blanco */
   --color-muted-foreground: var(--color-muted); /* alias: el código usa "text-muted" y "text-muted-foreground" indistintamente */
@@ -52,8 +55,8 @@
   --color-foreground: #f8fafc;    /* slate-50 */
   --color-surface: #1e293b;       /* slate-800 */
   --color-surface-hover: #334155; /* slate-700 */
-  --color-primary: #3b82f6;       /* blue-500 */
-  --color-primary-hover: #2563eb; /* blue-600 */
+  --color-primary: #60a5fa;       /* blue-400: texto/acentos sobre fondo oscuro (blue-500 daba 3.8:1) */
+  --color-primary-hover: #93c5fd; /* blue-300 */
   --color-accent: #fbbf24;        /* amber-400 */
   --color-muted: #94a3b8;         /* slate-400 */
   --color-muted-foreground: var(--color-muted);
@@ -94,7 +97,7 @@ body {
 
 /* Selection */
 ::selection {
-  background: var(--color-primary);
+  background: var(--color-primary-solid);
   color: white;
 }
 

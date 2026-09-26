@@ -199,7 +199,7 @@ export default function VincularPage() {
                     </div>
                     <div className="flex items-center h-full">
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                        selectedProfile === result.id ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"
+                        selectedProfile === result.id ? "border-primary bg-primary-solid text-white" : "border-muted-foreground"
                       }`}>
                         {selectedProfile === result.id && <div className="w-2.5 h-2.5 bg-background rounded-full" />}
                       </div>
