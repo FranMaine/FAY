@@ -24,12 +24,12 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
   );
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 p-4 bg-surface border border-border rounded-lg mb-8">
+    <div className="flex flex-col sm:flex-row gap-4 p-4 bg-surface border border-border rounded-2xl mb-8">
       <div className="flex-1 space-y-1">
         <label htmlFor="filtro-clase" className="text-sm font-medium text-muted-foreground">Clase</label>
         <select 
           id="filtro-clase"
-          className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
+          className="w-full h-11 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
           value={currentClaseId}
           onChange={(e) => {
             router.push("?" + createQueryString("clase", e.target.value));
@@ -44,7 +44,7 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
         <label htmlFor="filtro-anio" className="text-sm font-medium text-muted-foreground">Temporada (Año)</label>
         <select 
           id="filtro-anio"
-          className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
+          className="w-full h-11 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
           value={currentAnio.toString()}
           onChange={(e) => {
             router.push("?" + createQueryString("anio", e.target.value));

@@ -79,7 +79,7 @@ export default async function LandingPage() {
     { valor: stats.totalCampeonatos.toLocaleString("es-AR"), etiqueta: "Campeonatos" },
     { valor: stats.totalClubes.toLocaleString("es-AR"), etiqueta: "Clubes" },
     {
-      valor: stats.desde && stats.hasta ? (stats.desde === stats.hasta ? `${stats.desde}` : `${stats.desde}–${stats.hasta}`) : "–",
+      valor: stats.desde && stats.hasta ? (stats.desde === stats.hasta ? `${stats.desde}` : `${stats.desde}-${stats.hasta}`) : "-",
       etiqueta: "Temporadas",
     },
   ];
@@ -130,15 +130,6 @@ export default async function LandingPage() {
                 <Button size="lg" className="rounded-full font-semibold px-7 h-12">
                   <Trophy className="w-5 h-5 mr-2" aria-hidden="true" />
                   Ver Rankings
-                </Button>
-              </Link>
-              <Link href="/campeonatos">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full font-semibold px-7 h-12 border-white/70 text-white bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:border-white"
-                >
-                  Explorar Campeonatos
                 </Button>
               </Link>
             </div>
@@ -228,7 +219,7 @@ export default async function LandingPage() {
                 </div>
                 <div className="mt-8">
                   <h3 className="text-3xl font-bold tracking-tight group-hover:text-primary transition-colors line-clamp-2">{destacado.nombre}</h3>
-                  <p className="mt-2 text-muted-foreground">{destacado.sede?.nombre || "Sin sede"}</p>
+                  {destacado.sede?.nombre && <p className="mt-2 text-muted-foreground">{destacado.sede.nombre}</p>}
                 </div>
               </Link>
             </ScrollReveal>
@@ -242,7 +233,7 @@ export default async function LandingPage() {
                         {camp.clase.nombre}
                       </span>
                       <h3 className="mt-1 text-lg font-bold group-hover:text-primary transition-colors line-clamp-1">{camp.nombre}</h3>
-                      <p className="text-sm text-muted-foreground truncate">{camp.sede?.nombre || "Sin sede"}</p>
+                      {camp.sede?.nombre && <p className="text-sm text-muted-foreground truncate">{camp.sede.nombre}</p>}
                     </div>
                     <span className="text-sm text-muted-foreground font-medium tabular-nums shrink-0">{camp.anio}</span>
                   </Link>
@@ -267,16 +258,10 @@ export default async function LandingPage() {
             <p className="text-muted-foreground text-lg">
               Encontrá tu historial completo, comparado con el resto de la flota.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-              <Link href="/rankings">
-                <Button size="lg" className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto">
-                  <BarChart3 className="w-5 h-5 mr-2" aria-hidden="true" />
-                  Ver Rankings
-                </Button>
-              </Link>
-              <Link href="/campeonatos">
-                <Button variant="outline" size="lg" className="rounded-full font-semibold px-8 h-12 w-full sm:w-auto">
-                  Explorar Campeonatos
+            <div className="flex justify-center pt-2">
+              <Link href="/registro">
+                <Button size="lg" className="rounded-full font-semibold px-8 h-12">
+                  Crear mi cuenta
                 </Button>
               </Link>
             </div>
