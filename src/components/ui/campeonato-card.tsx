@@ -1,3 +1,4 @@
+import { ViewTransition } from 'react';
 import Link from 'next/link';
 import { Calendar, MapPin, Users, ArrowUpRight } from 'lucide-react';
 import { ClaseIcon } from '@/components/icons/clase-icons';
@@ -47,9 +48,11 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
           </span>
         </div>
 
-        <h3 className="mt-5 line-clamp-2 text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
-          {campeonato.nombre}
-        </h3>
+        <ViewTransition name={`campeonato-${campeonato.id}`} share="morph" default="none">
+          <h3 className="mt-5 line-clamp-2 text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
+            {campeonato.nombre}
+          </h3>
+        </ViewTransition>
 
         <dl className="mt-auto grid gap-1.5 pt-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">

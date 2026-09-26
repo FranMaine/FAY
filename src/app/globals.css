@@ -270,3 +270,31 @@ body {
     animation: none;
   }
 }
+
+/* View Transitions (React <ViewTransition> + Next): el escudo del club y el
+   título del campeonato "viajan" de la lista a la ficha (ver
+   ClubAvatar/CampeonatoCard). Solo se animan los elementos con nombre
+   (default="none"), así que el resto de la navegación sigue con el
+   .page-enter de template.tsx. */
+::view-transition-group(.morph) {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+@keyframes via-blur {
+  30% { filter: blur(3px); }
+}
+/* Que los clicks durante la transición lleguen a la página real. */
+::view-transition {
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

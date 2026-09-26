@@ -143,7 +143,7 @@ export default async function ClubDetailPage({ params }: Props) {
         </div>
 
         <header className="relative flex flex-col sm:flex-row sm:items-center gap-6 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-10">
-          <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-24 h-24 md:w-28 md:h-28 text-2xl" />
+          <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-24 h-24 md:w-28 md:h-28 text-2xl" transitionName={`club-${club.id}`} />
           <div className="min-w-0">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{club.nombre}</h1>
             {aliasClub && <p className="mt-1 text-lg text-muted-foreground">{aliasClub}</p>}

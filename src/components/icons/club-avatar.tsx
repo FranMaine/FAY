@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -38,9 +39,21 @@ interface ClubAvatarProps {
   logoUrl?: string | null;
   /** Controla tamaño (w-*, h-*) y tipografía (text-*) -ej: "w-10 h-10 text-sm". */
   className?: string;
+  /** Si se pasa, el escudo "viaja" entre páginas que lo muestren con el mismo nombre (ver globals.css). Debe ser único por página. */
+  transitionName?: string;
 }
 
-export function ClubAvatar({ nombre, logoUrl, className }: ClubAvatarProps) {
+export function ClubAvatar({ nombre, logoUrl, className, transitionName }: ClubAvatarProps) {
+  const avatar = renderAvatar(nombre, logoUrl, className);
+  if (!transitionName) return avatar;
+  return (
+    <ViewTransition name={transitionName} share="morph" default="none">
+      {avatar}
+    </ViewTransition>
+  );
+}
+
+function renderAvatar(nombre: string, logoUrl: string | null | undefined, className?: string) {
   if (logoUrl) {
     return (
       <Image

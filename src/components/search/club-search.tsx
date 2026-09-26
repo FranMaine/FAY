@@ -65,7 +65,7 @@ export function ClubSearch({ clubes }: ClubSearchProps) {
           {filtrados.map((c) => (
             <Link key={c.id} href={`/clubes/${c.id}`} className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               <div className="flex h-full items-center gap-4 rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color,box-shadow] duration-200 group-hover:-translate-y-1 group-hover:border-primary/60 group-hover:shadow-lg group-hover:shadow-primary/5">
-                <ClubAvatar nombre={c.nombre} logoUrl={c.logoUrl} className="w-14 h-14 text-base" />
+                <ClubAvatar nombre={c.nombre} logoUrl={c.logoUrl} className="w-14 h-14 text-base" transitionName={`club-${c.id}`} />
                 <div className="min-w-0 flex-1">
                   <p className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">{c.nombre}</p>
                   {(c.nombreCompleto || CLUB_ALIASES[c.nombre]) && (

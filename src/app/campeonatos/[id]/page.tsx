@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { Podio } from "@/components/ranking/podio";
@@ -143,7 +144,9 @@ export default async function CampeonatoDetailPage({ params }: Props) {
               </span>
               <span className="rounded-lg border border-border bg-background/40 px-3 py-1.5 text-sm font-semibold tabular-nums">{campeonato.anio}</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{campeonato.nombre}</h1>
+            <ViewTransition name={`campeonato-${campeonato.id}`} share="morph" default="none">
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{campeonato.nombre}</h1>
+            </ViewTransition>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
               {campeonato.sede && (
                 <div className="flex items-center gap-2">
