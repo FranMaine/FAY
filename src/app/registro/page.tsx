@@ -13,6 +13,7 @@ import { SailingBoat } from "@/components/icons/sailing-boat";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { mensajeDeError } from "@/lib/utils";
+import { AuthShell } from "@/components/auth/auth-shell";
 
 const registroSchema = z.object({
   name: z.string().min(2, { message: "El nombre es muy corto" }),
@@ -164,8 +165,8 @@ export default function RegistroPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-surface border-border">
+    <AuthShell>
+      <Card className="w-full bg-surface border-border rounded-2xl shadow-xl">
         <CardHeader className="space-y-2 items-center text-center">
           <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
             <SailingBoat className="w-6 h-6 text-primary" />
@@ -199,23 +200,23 @@ export default function RegistroPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Nombre completo</label>
-                <Input {...form.register("name")} placeholder="Juan Pérez" className="bg-background border-border" />
+                <label htmlFor="reg-name" className="text-sm font-medium">Nombre completo</label>
+                <Input {...form.register("name")} id="reg-name" autoComplete="name" placeholder="Juan Pérez" className="bg-background border-border" />
                 {form.formState.errors.name && <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Email</label>
-                <Input {...form.register("email")} type="email" placeholder="tu@email.com" className="bg-background border-border" />
+                <label htmlFor="reg-email" className="text-sm font-medium">Email</label>
+                <Input {...form.register("email")} id="reg-email" autoComplete="email" spellCheck={false} type="email" placeholder="tu@email.com" className="bg-background border-border" />
                 {form.formState.errors.email && <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Contraseña</label>
-                <Input {...form.register("password")} type="password" placeholder="••••••••" className="bg-background border-border" />
+                <label htmlFor="reg-password" className="text-sm font-medium">Contraseña</label>
+                <Input {...form.register("password")} id="reg-password" autoComplete="new-password" type="password" placeholder="••••••••" className="bg-background border-border" />
                 {form.formState.errors.password && <p className="text-xs text-red-500">{form.formState.errors.password.message}</p>}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Confirmar Contraseña</label>
-                <Input {...form.register("confirmPassword")} type="password" placeholder="••••••••" className="bg-background border-border" />
+                <label htmlFor="reg-confirm" className="text-sm font-medium">Confirmar contraseña</label>
+                <Input {...form.register("confirmPassword")} id="reg-confirm" autoComplete="new-password" type="password" placeholder="••••••••" className="bg-background border-border" />
                 {form.formState.errors.confirmPassword && <p className="text-xs text-red-500">{form.formState.errors.confirmPassword.message}</p>}
               </div>
               <div className="space-y-1.5">
@@ -343,6 +344,6 @@ export default function RegistroPage() {
           </CardFooter>
         )}
       </Card>
-    </main>
+    </AuthShell>
   );
 }

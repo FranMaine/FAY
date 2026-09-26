@@ -182,42 +182,21 @@ export default async function MiPerfilPage() {
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="bg-surface border-border">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground font-medium">Campeonatos Jugados</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-foreground">{stats.historial.length}</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-surface border-border">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground font-medium">Mejor Puesto General</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-primary">{stats.mejorPuesto > 0 ? `${stats.mejorPuesto}°` : '-'}</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-surface border-border">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground font-medium">Promedio de Puesto</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-amber-500">{stats.promedio}</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-surface border-border">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground font-medium">Club Representado</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-foreground truncate">{stats.regatista.club?.nombre || 'Sin club'}</div>
-                </CardContent>
-              </Card>
+              {[
+                { etiqueta: "Campeonatos jugados", valor: `${stats.historial.length}`, color: "text-foreground" },
+                { etiqueta: "Mejor puesto general", valor: stats.mejorPuesto > 0 ? `${stats.mejorPuesto}°` : "-", color: "text-primary" },
+                { etiqueta: "Promedio de puesto", valor: `${stats.promedio}`, color: "text-amber-500" },
+                { etiqueta: "Club representado", valor: stats.regatista.club?.nombre || "Sin club", color: "text-foreground", chico: true },
+              ].map((e) => (
+                <div key={e.etiqueta} className="rounded-2xl border border-border bg-surface p-5">
+                  <p className="text-sm text-muted-foreground">{e.etiqueta}</p>
+                  <p className={`mt-2 font-extrabold tracking-tight tabular-nums truncate ${e.chico ? "text-2xl" : "text-4xl"} ${e.color}`}>{e.valor}</p>
+                </div>
+              ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card className="bg-surface border-border shadow-md">
+              <Card className="bg-surface border-border shadow-md rounded-2xl">
                 <CardHeader>
                   <CardTitle>Mi Evolución Histórica</CardTitle>
                   <CardDescription>Tu posición general en los campeonatos disputados</CardDescription>

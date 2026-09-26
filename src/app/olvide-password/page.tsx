@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { MailCheckIcon } from "lucide-react";
 import { SailingBoat } from "@/components/icons/sailing-boat";
 import { mensajeDeError } from "@/lib/utils";
+import { AuthShell } from "@/components/auth/auth-shell";
 
 const schema = z.object({
   email: z.string().email({ message: "Email inválido" }),
@@ -57,8 +58,8 @@ export default function OlvidePasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-surface border-border">
+    <AuthShell>
+      <Card className="w-full bg-surface border-border rounded-2xl shadow-xl">
         <CardHeader className="space-y-2 items-center text-center">
           <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
             <SailingBoat className="w-6 h-6 text-primary" />
@@ -112,6 +113,6 @@ export default function OlvidePasswordPage() {
           </p>
         </CardFooter>
       </Card>
-    </main>
+    </AuthShell>
   );
 }

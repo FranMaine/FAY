@@ -18,6 +18,7 @@ const loginSchema = z.object({
 
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { AuthShell } from "@/components/auth/auth-shell";
 
 function LoginForm() {
   const router = useRouter();
@@ -79,8 +80,8 @@ function LoginForm() {
   }
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-surface border-border">
+    <AuthShell>
+      <Card className="w-full bg-surface border-border rounded-2xl shadow-xl">
         <CardHeader className="space-y-2 items-center text-center">
           <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
             <SailingBoat className="w-6 h-6 text-primary" />
@@ -106,16 +107,19 @@ function LoginForm() {
                 <p className="font-medium">Listo, te mandamos un nuevo enlace.</p>
               ) : (
                 <Button type="button" size="sm" variant="outline" onClick={reenviarVerificacion} disabled={reenviando}>
-                  {reenviando ? "Enviando..." : "Reenviar email de verificación"}
+                  {reenviando ? "Enviando…" : "Reenviar email de verificación"}
                 </Button>
               )}
             </div>
           )}
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Email</label>
+              <label htmlFor="login-email" className="text-sm font-medium text-foreground">Email</label>
               <Input
                 {...form.register("email")}
+                id="login-email"
+                autoComplete="email"
+                spellCheck={false}
                 placeholder="tu@email.com"
                 type="email"
                 className="bg-background border-border"
@@ -126,13 +130,15 @@ function LoginForm() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">Contraseña</label>
+                <label htmlFor="login-password" className="text-sm font-medium text-foreground">Contraseña</label>
                 <Link href="/olvide-password" className="text-xs text-primary hover:underline font-medium">
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
               <Input
                 {...form.register("password")}
+                id="login-password"
+                autoComplete="current-password"
                 placeholder="••••••••"
                 type="password"
                 className="bg-background border-border"
@@ -142,7 +148,7 @@ function LoginForm() {
               )}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+              {isLoading ? "Iniciando sesión…" : "Iniciar Sesión"}
             </Button>
           </form>
 
@@ -172,7 +178,7 @@ function LoginForm() {
           </p>
         </CardFooter>
       </Card>
-    </main>
+    </AuthShell>
   );
 }
 

@@ -49,9 +49,9 @@ export default function ContactoPage() {
           </Button>
         </Link>
 
-        <Card className="bg-surface border-border">
+        <Card className="bg-surface border-border rounded-2xl shadow-xl">
           <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
+            <CardTitle className="text-3xl font-extrabold tracking-tight flex items-center gap-2">
               <MailIcon className="w-6 h-6 text-primary" /> Contacto
             </CardTitle>
             <CardDescription>
