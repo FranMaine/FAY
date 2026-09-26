@@ -50,7 +50,12 @@ export function PosicionHistorica({ data }: PosicionHistoricaProps) {
             tickLine={false}
             axisLine={false}
             padding={{ left: 10, right: 10 }}
-            tickFormatter={(indice: number) => String(chartData[indice]?.anio ?? '')}
+            tickFormatter={(indice: number) => {
+              // Varios campeonatos del mismo año repetían "2026" en cada
+              // punto -solo se rotula el primero de cada año.
+              const anio = chartData[indice]?.anio;
+              return indice === 0 || anio !== chartData[indice - 1]?.anio ? String(anio ?? '') : '';
+            }}
           />
           <YAxis
             reversed
