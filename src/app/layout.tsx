@@ -55,6 +55,7 @@ export const metadata: Metadata = {
 import { SessionProvider } from '@/components/providers/session-provider';
 import { BackToTop } from '@/components/layout/back-to-top';
 import { CookieBanner } from '@/components/layout/cookie-banner';
+import { AppToaster } from '@/components/providers/app-toaster';
 import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization-jsonld';
 
 // Script bloqueante: corre ANTES de que se pinte la página (va en <head>,
@@ -115,6 +116,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </footer>
           <BackToTop />
           <CookieBanner />
+          <AppToaster />
         </SessionProvider>
       </body>
     </html>

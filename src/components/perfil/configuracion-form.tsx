@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
+import { toast } from "sonner";
 import { mensajeDeError } from "@/lib/utils";
 
 interface ConfiguracionFormProps {
@@ -100,6 +101,7 @@ export function ConfiguracionForm({ apodoInicial, email, regatista, tienePasswor
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo subir la foto");
       setFotoUrl(data.fotoUrl);
+      toast.success("Foto actualizada");
     } catch (err) {
       setErrorFoto(mensajeDeError(err));
     } finally {
@@ -114,6 +116,7 @@ export function ConfiguracionForm({ apodoInicial, email, regatista, tienePasswor
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo quitar la foto");
       setFotoUrl(null);
+      toast("Foto quitada");
     } catch (err) {
       setErrorFoto(mensajeDeError(err));
     }
