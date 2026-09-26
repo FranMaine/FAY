@@ -117,7 +117,7 @@ export default function VincularPage() {
 
   if (isLoadingStatus) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
+      <main className="min-h-dvh bg-background flex items-center justify-center">
         <Loader2Icon className="w-8 h-8 animate-spin text-primary" />
       </main>
     );
@@ -126,7 +126,7 @@ export default function VincularPage() {
   // Si ya tiene una solicitud pendiente o aprobada
   if (solicitud && (solicitud.estado === 'PENDIENTE' || solicitud.estado === 'APROBADA')) {
     return (
-      <main className="min-h-screen bg-background p-6 md:p-10 flex items-start justify-center">
+      <main className="min-h-dvh bg-background p-6 md:p-10 flex items-start justify-center">
         <Card className="w-full max-w-lg bg-surface border-border mt-10 text-center">
           <CardHeader>
             <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
@@ -150,7 +150,7 @@ export default function VincularPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10 flex items-start justify-center">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10 flex items-start justify-center">
       <Card className="w-full max-w-2xl bg-surface border-border mt-10">
         <CardHeader>
           <CardTitle className="text-3xl">Vincular Perfil</CardTitle>

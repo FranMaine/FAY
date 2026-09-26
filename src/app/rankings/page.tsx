@@ -37,7 +37,7 @@ export default async function RankingsPage({
 
   if (clases.length === 0) {
     return (
-      <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+      <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
         <div className="max-w-5xl mx-auto space-y-8">
           <header>
             <h1 className="text-4xl font-bold tracking-tight mb-2">Rankings Generales</h1>
@@ -60,7 +60,7 @@ export default async function RankingsPage({
   const selectedClaseNombre = clases.find(c => c.id === activeClaseId)?.nombre || '';
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-5xl mx-auto space-y-8">
         <header>
           <div className="flex items-center gap-2 text-sm font-medium mb-3">

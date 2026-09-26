@@ -124,7 +124,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}

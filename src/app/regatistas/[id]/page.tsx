@@ -138,7 +138,7 @@ export default async function RegatistaProfilePage({ params }: Props) {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground pb-20">
+    <main className="min-h-dvh bg-background text-foreground pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}

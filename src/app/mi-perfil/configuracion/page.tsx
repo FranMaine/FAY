@@ -32,7 +32,7 @@ export default async function ConfiguracionPage() {
   if (!user) redirect("/login");
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
           <Link href="/mi-perfil">

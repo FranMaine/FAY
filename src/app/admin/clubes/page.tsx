@@ -200,7 +200,7 @@ export default function AdminEscudosClubesPage() {
   const filtrados = clubes.filter((c) => `${c.nombre} ${c.nombreCompleto || ""}`.toLowerCase().includes(busqueda.trim().toLowerCase()));
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
           <div>

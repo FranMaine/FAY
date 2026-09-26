@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function ReglasPage() {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-8">
         <header className="space-y-2">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">Cómo se calculan los puntajes</h1>

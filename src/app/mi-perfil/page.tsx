@@ -114,7 +114,7 @@ export default async function MiPerfilPage() {
     });
     if (solicitud) {
       return (
-        <main className="min-h-screen bg-background p-6 md:p-10 flex items-start justify-center">
+        <main className="min-h-dvh bg-background p-6 md:p-10 flex items-start justify-center">
           <Card className="w-full max-w-lg bg-surface border-border mt-10 text-center">
             <CardHeader>
               <CardTitle className="text-2xl">Solicitud en proceso</CardTitle>
@@ -129,7 +129,7 @@ export default async function MiPerfilPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-4">

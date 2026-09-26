@@ -63,7 +63,7 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-10">
         <header>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Panel de administración</h1>

@@ -117,7 +117,7 @@ export default async function LandingPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col">
+    <main className="min-h-dvh bg-background text-foreground flex flex-col">
       {/* Hero: alineado a la izquierda con la foto visible a la derecha
           (antes: todo centrado sobre un fondo oscuro parejo, donde la foto
           casi no se notaba). El degradé va de izquierda a derecha -oscuro

@@ -81,14 +81,14 @@ export default function AdminClubesPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
+      <main className="min-h-dvh bg-background flex items-center justify-center">
         <Loader2Icon className="w-8 h-8 animate-spin text-primary" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-5xl mx-auto space-y-10">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>

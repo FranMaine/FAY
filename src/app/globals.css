@@ -304,3 +304,36 @@ body {
     animation-delay: 0s !important;
   }
 }
+
+/* Base para que se sienta app en el celular (ver mobile-native):
+   - sin el destello gris al tocar (cada elemento tocable ya tiene su :active),
+   - sin la inflación de texto al girar a horizontal,
+   - sin el retraso de doble toque ni la selección de texto al mantener
+     apretado un botón (los links y el contenido siguen seleccionables),
+   - inputs a 16px en pantallas táctiles: por debajo, iOS hace zoom solo al
+     enfocarlos y no vuelve a alejarse. Va sin capa a propósito: le gana a
+     las utilidades text-sm de Tailwind. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+button,
+a,
+[role="button"],
+summary,
+label {
+  touch-action: manipulation;
+}
+button,
+[role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

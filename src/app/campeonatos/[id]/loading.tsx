@@ -2,7 +2,7 @@ import { Skeleton, SkeletonTableRow } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-dvh bg-background text-foreground">
       <div className="bg-surface border-b border-border px-6 py-10">
         <div className="max-w-5xl mx-auto space-y-3">
           <Skeleton className="h-6 w-32" />

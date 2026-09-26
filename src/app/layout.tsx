@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/navbar';
@@ -13,6 +13,20 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
+
+// viewport-fit=cover deja pintar bajo el notch (los elementos fijos ya
+// compensan con env(safe-area-inset-*)); theme-color tiñe la barra de estado
+// del navegador con el color de la navbar de cada tema, en vez de un
+// blanco/negro genérico.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#1e293b' },
+  ],
+};
 
 export const metadata: Metadata = {
   // Sin esto, Next no puede resolver a URL absoluta las imágenes de
@@ -78,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <OrganizationJsonLd />
         <WebsiteJsonLd />
       </head>
-      <body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
+      <body className="min-h-dvh flex flex-col bg-background text-foreground antialiased">
         <SessionProvider>
           <a
             href="#contenido"

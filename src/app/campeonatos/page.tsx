@@ -91,7 +91,7 @@ export default async function CampeonatosPage({
 
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
         <header>
           <h1 className="text-4xl font-bold tracking-tight mb-2">Explorador de Campeonatos</h1>

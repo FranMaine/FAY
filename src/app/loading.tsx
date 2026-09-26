@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 // como una pantalla en blanco.
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col">
+    <main className="min-h-dvh bg-background text-foreground flex flex-col">
       <section className="px-6 py-20 md:py-32 flex flex-col items-center text-center">
         <Skeleton className="h-16 w-16 rounded-full mb-6" />
         <Skeleton className="h-12 w-64 mb-4" />

@@ -41,7 +41,7 @@ export default function ContactoPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10 flex items-start justify-center">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10 flex items-start justify-center">
       <div className="w-full max-w-lg mt-6 space-y-6">
         <Link href="/">
           <Button variant="ghost" size="sm" className="-ml-3 text-muted-foreground">

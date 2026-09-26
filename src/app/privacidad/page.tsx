@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 // para reflejarlo).
 export default function PrivacidadPage() {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-8">
         <header className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Política de privacidad</h1>

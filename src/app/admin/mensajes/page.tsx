@@ -59,7 +59,7 @@ export default function AdminMensajesPage() {
   const sinLeer = mensajes.filter((m) => !m.leido).length;
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 md:p-10">
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-4xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
