@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, Loader2Icon, MergeIcon, AlertCircleIcon, CheckCircleIcon, UserPlusIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon, MergeIcon, AlertCircleIcon, CheckCircleIcon, UserPlusIcon, SparklesIcon } from "lucide-react";
 import { mensajeDeError } from "@/lib/utils";
 
 interface RegatistaDup {
@@ -57,6 +57,11 @@ export default function DuplicadosPage() {
   const [nombreNuevoPorSuelto, setNombreNuevoPorSuelto] = useState<Record<string, string>>({});
   const [creandoNuevo, setCreandoNuevo] = useState<string | null>(null);
 
+  // Sugerencias de la IA por apellido suelto (solo orientan: no fusionan nada).
+  const [sugerencias, setSugerencias] = useState<Record<string, { candidatoNombre: string | null; confianza: string; motivo: string }>>({});
+  const [pidiendoIa, setPidiendoIa] = useState<string | null>(null);
+  const [errorIa, setErrorIa] = useState<Record<string, string>>({});
+
   const fetchDatos = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -83,7 +88,6 @@ export default function DuplicadosPage() {
     }
   }, []);
 
-  useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDatos();
   }, [fetchDatos]);
@@ -169,6 +173,28 @@ export default function DuplicadosPage() {
       setError(mensajeDeError(err));
     } finally {
       setCreandoNuevo(null);
+    }
+  };
+
+  const sugerirConIa = async (item: CandidatoApellidoSuelto) => {
+    const clave = item.suelto.id;
+    setPidiendoIa(clave);
+    setErrorIa((prev) => ({ ...prev, [clave]: "" }));
+    try {
+      const res = await fetch("/api/admin/ia/sugerir-apellido-suelto", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sueltoId: clave, candidatoIds: item.candidatos.map((c) => c.id) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo pedir la sugerencia");
+      setSugerencias((prev) => ({ ...prev, [clave]: data }));
+      // Deja marcado el candidato sugerido; igual hay que apretar "Fusionar".
+      if (data.candidatoId) setCandidatoPorSuelto((prev) => ({ ...prev, [clave]: data.candidatoId }));
+    } catch (err) {
+      setErrorIa((prev) => ({ ...prev, [clave]: mensajeDeError(err) }));
+    } finally {
+      setPidiendoIa(null);
     }
   };
 
@@ -343,10 +369,34 @@ export default function DuplicadosPage() {
                               <UserPlusIcon className="w-4 h-4" />
                               Crear como nuevo regatista
                             </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => sugerirConIa(item)}
+                              disabled={pidiendoIa === item.suelto.id || fusionandoSuelto === item.suelto.id}
+                              className="gap-2"
+                            >
+                              {pidiendoIa === item.suelto.id ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <SparklesIcon className="w-4 h-4" />}
+                              Sugerir con IA
+                            </Button>
                             <Button size="sm" variant="ghost" onClick={() => descartarSuelto(item.suelto.id)} disabled={fusionandoSuelto === item.suelto.id}>
                               Ninguno es -descartar
                             </Button>
                           </div>
+
+                          {errorIa[item.suelto.id] && (
+                            <p role="alert" className="mt-3 text-sm text-red-500">{errorIa[item.suelto.id]}</p>
+                          )}
+                          {sugerencias[item.suelto.id] && (
+                            <p className="mt-3 rounded-lg border border-border bg-background/50 p-3 text-sm" role="status">
+                              <span className="font-medium">
+                                {sugerencias[item.suelto.id].candidatoNombre
+                                  ? `La IA sugiere: ${sugerencias[item.suelto.id].candidatoNombre} (confianza ${sugerencias[item.suelto.id].confianza}).`
+                                  : "La IA no encontró evidencia suficiente."}
+                              </span>{" "}
+                              <span className="text-muted-foreground">{sugerencias[item.suelto.id].motivo} Es solo una orientación: revisalo antes de fusionar.</span>
+                            </p>
+                          )}
 
                           {creandoNuevoAbierto.has(item.suelto.id) && (
                             <div className="flex flex-wrap items-center gap-2 mt-3 p-3 rounded-lg bg-background/50 border border-border">
