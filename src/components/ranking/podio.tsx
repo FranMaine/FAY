@@ -31,7 +31,7 @@ export function Podio({ items, unidad = "pts" }: { items: ItemPodio[]; unidad?: 
             <Link
               href={item.href}
               className={cn(
-                "group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border bg-gradient-to-b to-surface bg-surface p-5 transition-[transform,border-color] duration-200 hover:-translate-y-1",
+                "group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border bg-gradient-to-b to-surface bg-surface p-5 transition-[transform,border-color] duration-200 ease-out-strong hover:-translate-y-1 active:scale-[0.985]",
                 e.borde,
                 e.brillo,
                 e.alto

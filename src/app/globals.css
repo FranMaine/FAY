@@ -18,6 +18,9 @@
    (bg-surface, text-muted, etc.) seguían funcionando en todo el código
    sin tocarlas, y ahora además reaccionan al toggle. */
 @theme {
+  /* Curvas con más punch que las built-in de CSS (ease-out se siente flojo). */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
   --color-background: #f8fafc;    /* slate-50 */
   --color-foreground: #0f172a;    /* slate-900 */
   --color-surface: #ffffff;       /* white */

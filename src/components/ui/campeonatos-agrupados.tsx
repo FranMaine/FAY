@@ -43,7 +43,7 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
               type="button"
               onClick={() => toggle(g.clave)}
               aria-expanded={abierta}
-              className="text-left rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-surface p-5 h-full flex flex-col transition-[transform,border-color] duration-200 ease-out hover:-translate-y-1 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="text-left rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-surface p-5 h-full flex flex-col transition-[transform,border-color] duration-200 ease-out-strong hover:-translate-y-1 active:scale-[0.985] hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <div className="flex justify-between items-start mb-4">
                 <span className="w-11 h-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center"><SailboatIcon className="w-6 h-6" /></span>

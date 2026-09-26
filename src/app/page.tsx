@@ -200,14 +200,14 @@ export default async function LandingPage() {
             {podios.length > 0 ? (
               <PodioPortada podios={podios} anio={stats.hasta!} />
             ) : (
-              <Link href="/rankings" className="group flex h-full min-h-[260px] flex-col justify-end rounded-2xl border border-border bg-surface p-8 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-primary/60">
+              <Link href="/rankings" className="group flex h-full min-h-[260px] flex-col justify-end rounded-2xl border border-border bg-surface p-8 transition-[transform,border-color] duration-200 ease-out-strong hover:-translate-y-1 active:scale-[0.985] hover:border-primary/60">
                 <h3 className="text-3xl font-bold tracking-tight">Rankings</h3>
                 <p className="mt-2 max-w-md text-muted-foreground">Quién va primero en cada clase, por temporada o de todos los años.</p>
               </Link>
             )}
           </ScrollReveal>
           <ScrollReveal delay={80}>
-            <Link href="/clubes" className="group flex h-full flex-col justify-between rounded-2xl border border-border bg-surface p-6 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-primary/60">
+            <Link href="/clubes" className="group flex h-full flex-col justify-between rounded-2xl border border-border bg-surface p-6 transition-[transform,border-color] duration-200 ease-out-strong hover:-translate-y-1 active:scale-[0.985] hover:border-primary/60">
               <Building2 className="w-8 h-8 text-primary" aria-hidden="true" />
               <div className="mt-6">
                 <h3 className="text-xl font-bold">Clubes</h3>
@@ -216,7 +216,7 @@ export default async function LandingPage() {
             </Link>
           </ScrollReveal>
           <ScrollReveal delay={160}>
-            <Link href="/campeonatos" className="group flex h-full flex-col justify-between rounded-2xl border border-border bg-surface p-6 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-primary/60">
+            <Link href="/campeonatos" className="group flex h-full flex-col justify-between rounded-2xl border border-border bg-surface p-6 transition-[transform,border-color] duration-200 ease-out-strong hover:-translate-y-1 active:scale-[0.985] hover:border-primary/60">
               <CalendarDays className="w-8 h-8 text-primary" aria-hidden="true" />
               <div className="mt-6">
                 <h3 className="text-xl font-bold">Campeonatos</h3>
@@ -241,7 +241,7 @@ export default async function LandingPage() {
         {destacado ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <ScrollReveal className="lg:col-span-3">
-              <Link href={`/campeonatos/${destacado.id}`} className="group flex h-full min-h-[220px] flex-col justify-between rounded-2xl border border-border bg-surface p-8 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-primary/60">
+              <Link href={`/campeonatos/${destacado.id}`} className="group flex h-full min-h-[220px] flex-col justify-between rounded-2xl border border-border bg-surface p-8 transition-[transform,border-color] duration-200 ease-out-strong hover:-translate-y-1 active:scale-[0.985] hover:border-primary/60">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1.5 rounded-md">
                     <ClaseIcon nombreClase={destacado.clase.nombre} className="w-6 h-6 shrink-0" />
@@ -258,7 +258,7 @@ export default async function LandingPage() {
             <div className="lg:col-span-2 flex flex-col gap-4">
               {otros.map((camp, i) => (
                 <ScrollReveal key={camp.id} delay={(i + 1) * 80} className="flex-1">
-                  <Link href={`/campeonatos/${camp.id}`} className="group flex h-full items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-primary/60">
+                  <Link href={`/campeonatos/${camp.id}`} className="group flex h-full items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 active:scale-[0.985] hover:border-primary/60">
                     <div className="min-w-0">
                       <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
                         <ClaseIcon nombreClase={camp.clase.nombre} className="w-5 h-5 shrink-0" />

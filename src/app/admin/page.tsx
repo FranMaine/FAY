@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
                 <Link
                   key={a.href}
                   href={a.href}
-                  className="group relative flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="group relative flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color,box-shadow] duration-200 ease-out-strong hover:-translate-y-1 active:scale-[0.985] hover:border-primary/60 hover:shadow-lg hover:shadow-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <span className="flex items-center justify-between">
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">

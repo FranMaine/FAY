@@ -32,7 +32,7 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
       href={`/campeonatos/${campeonato.id}`}
       className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
-      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color,box-shadow] duration-200 ease-out group-hover:-translate-y-1 group-hover:border-primary/60 group-hover:shadow-lg group-hover:shadow-primary/5">
+      <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color,box-shadow] duration-200 ease-out-strong group-hover:-translate-y-1 group-active:scale-[0.985] group-hover:border-primary/60 group-hover:shadow-lg group-hover:shadow-primary/5">
         <div className="flex items-start justify-between gap-3">
           <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
             <ClaseIcon nombreClase={campeonato.clase} className="h-5 w-5 shrink-0 object-contain" />
@@ -77,7 +77,7 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
         </dl>
 
         <ArrowUpRight
-          className="absolute bottom-5 right-5 h-5 w-5 text-primary opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+          className="absolute bottom-5 right-5 h-5 w-5 text-primary opacity-0 transition-[opacity,transform] duration-200 ease-out-strong group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
           aria-hidden="true"
         />
       </article>

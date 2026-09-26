@@ -6,12 +6,14 @@ import { cn } from "@/lib/utils";
 // Los 3 modales de admin (nuevo campeonato, editar regatista, subir CSV)
 // aparecían y desaparecían instantáneo -se montaban/desmontaban con
 // `{isOpen && (...)}`, sin ninguna transición. Este wrapper compartido les
-// da entrada/salida (fade del fondo + scale 0.95→1, 200ms ease-out -rango
+// da entrada/salida (fade del fondo + scale 0.95→1, 220ms/150ms con curva fuerte -rango
 // de duración de modal según la guía de motion) sin que cada uno tenga que
 // reimplementar el manejo de mount/unmount demorado que hace falta para
 // poder animar la SALIDA (con solo CSS no alcanza: hay que seguir montado
 // unos ms más después de que isOpen pasa a false).
-const DURACION_MS = 200;
+// Entrada de 220 ms (duration-[220ms] abajo), un poco más pausada que la salida: al abrir el usuario mira, al
+// cerrar solo quiere que el sistema responda rápido.
+const SALIDA_MS = 150;
 
 interface ModalProps {
   isOpen: boolean;
@@ -46,7 +48,7 @@ export function Modal({ isOpen, onClose, children, className }: ModalProps) {
       setEntered(false);
       setClosing(true);
     });
-    const timeout = setTimeout(() => setClosing(false), DURACION_MS);
+    const timeout = setTimeout(() => setClosing(false), SALIDA_MS);
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(timeout);
@@ -58,15 +60,15 @@ export function Modal({ isOpen, onClose, children, className }: ModalProps) {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-opacity duration-200 ease-out",
-        entered ? "opacity-100" : "opacity-0"
+        "fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-opacity ease-out-strong motion-reduce:transition-none",
+        entered ? "opacity-100 duration-[220ms]" : "opacity-0 duration-150"
       )}
       onClick={onClose}
     >
       <div
         className={cn(
-          "bg-surface border border-border rounded-xl shadow-xl overflow-hidden flex flex-col transition-[opacity,transform] duration-200 ease-out",
-          entered ? "opacity-100 scale-100" : "opacity-0 scale-95",
+          "bg-surface border border-border rounded-2xl shadow-xl overflow-hidden flex flex-col transition-[opacity,transform] ease-out-strong motion-reduce:transition-none",
+          entered ? "opacity-100 scale-100 duration-[220ms]" : "opacity-0 scale-[0.96] duration-150",
           className
         )}
         onClick={(e) => e.stopPropagation()}
