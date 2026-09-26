@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { SearchIcon, UsersIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
 import { ClubAvatar } from "@/components/icons/club-avatar";
 
@@ -64,23 +63,21 @@ export function ClubSearch({ clubes }: ClubSearchProps) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtrados.map((c) => (
-            <Link key={c.id} href={`/clubes/${c.id}`}>
-              <Card className="h-full bg-surface border-border hover:border-primary/50 hover:-translate-y-0.5 transition-[transform,border-color]">
-                <CardContent className="p-5 flex items-start gap-3">
-                  <ClubAvatar nombre={c.nombre} logoUrl={c.logoUrl} className="w-10 h-10 text-sm" />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-foreground truncate">{c.nombre}</p>
-                    {(c.nombreCompleto || CLUB_ALIASES[c.nombre]) && (
-                      <p className="text-xs text-muted-foreground truncate">{c.nombreCompleto || CLUB_ALIASES[c.nombre]}</p>
-                    )}
-                    {c.ciudad && <p className="text-xs text-muted-foreground truncate">{c.ciudad}</p>}
-                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                      <UsersIcon className="w-3.5 h-3.5" />
-                      {c.regatistasCount} regatista{c.regatistasCount === 1 ? "" : "s"}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+            <Link key={c.id} href={`/clubes/${c.id}`} className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              <div className="flex h-full items-center gap-4 rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color,box-shadow] duration-200 group-hover:-translate-y-1 group-hover:border-primary/60 group-hover:shadow-lg group-hover:shadow-primary/5">
+                <ClubAvatar nombre={c.nombre} logoUrl={c.logoUrl} className="w-14 h-14 text-base" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-lg font-bold text-foreground truncate group-hover:text-primary transition-colors">{c.nombre}</p>
+                  {(c.nombreCompleto || CLUB_ALIASES[c.nombre]) && (
+                    <p className="text-sm text-muted-foreground truncate">{c.nombreCompleto || CLUB_ALIASES[c.nombre]}</p>
+                  )}
+                  <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    <UsersIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span className="tabular-nums">{c.regatistasCount}</span> regatista{c.regatistasCount === 1 ? "" : "s"}
+                    {c.ciudad && <span className="text-muted-foreground font-normal">· {c.ciudad}</span>}
+                  </p>
+                </div>
+              </div>
             </Link>
           ))}
         </div>

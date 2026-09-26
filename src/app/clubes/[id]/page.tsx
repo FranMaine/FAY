@@ -142,16 +142,17 @@ export default async function ClubDetailPage({ params }: Props) {
           </Link>
         </div>
 
-        <header className="flex items-start gap-4">
-          <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-20 h-20 text-xl" />
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{club.nombre}</h1>
-            {aliasClub && (
-              <p className="text-muted-foreground">{aliasClub}</p>
-            )}
-            <p className="text-muted-foreground flex items-center gap-2 mt-1">
-              {club.ciudad && <span>{club.ciudad} · </span>}
-              <UsersIcon className="w-4 h-4" /> {regatistasCount} regatista{regatistasCount === 1 ? "" : "s"}
+        <header className="relative flex flex-col sm:flex-row sm:items-center gap-6 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-10">
+          <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-24 h-24 md:w-28 md:h-28 text-2xl" />
+          <div className="min-w-0">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{club.nombre}</h1>
+            {aliasClub && <p className="mt-1 text-lg text-muted-foreground">{aliasClub}</p>}
+            <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground">
+              {club.ciudad && <span>{club.ciudad}</span>}
+              <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                <UsersIcon className="w-4 h-4" aria-hidden="true" />
+                <span className="tabular-nums">{regatistasCount}</span> regatista{regatistasCount === 1 ? "" : "s"}
+              </span>
             </p>
           </div>
         </header>
@@ -170,7 +171,7 @@ export default async function ClubDetailPage({ params }: Props) {
               <h2 className="text-xl font-bold tracking-tight">Por categoría</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categorias.map((cat) => (
-                  <Card key={cat.claseNombre} className="bg-surface border-border">
+                  <Card key={cat.claseNombre} className="bg-surface border-border rounded-2xl">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center gap-2">
                         <ClaseIcon nombreClase={cat.claseNombre} className="w-6 h-6 shrink-0" />

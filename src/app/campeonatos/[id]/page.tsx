@@ -1,8 +1,10 @@
 import { Metadata } from "next";
-import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { Podio } from "@/components/ranking/podio";
+import { ClaseIcon } from "@/components/icons/clase-icons";
 import { ResultadosTable } from "@/components/tables/resultados-table";
 import { CsvDownloadButton } from "@/components/ui/csv-download-button";
-import { CalendarIcon, MapPinIcon, UsersIcon } from "lucide-react";
+import { ArrowLeftIcon, CalendarIcon, FlagIcon, MapPinIcon, ScissorsIcon, UsersIcon } from "lucide-react";
 import prisma from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
 import { notFound } from "next/navigation";
@@ -127,44 +129,73 @@ export default async function CampeonatoDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <div className="max-w-7xl mx-auto space-y-8">
-        <header className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <Badge variant="default" className="text-sm px-3 py-1 bg-primary text-primary-foreground">{campeonato.clase.nombre}</Badge>
-            <Badge variant="muted" className="text-sm px-3 py-1 bg-surface text-foreground">{campeonato.anio}</Badge>
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight">{campeonato.nombre}</h1>
-          <div className="flex flex-wrap items-center gap-6 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="w-5 h-5" />
-              <span>{campeonato.sede?.nombre || 'Sin sede'}</span>
+        <Link href="/campeonatos" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors -mb-2">
+          <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" /> Volver a campeonatos
+        </Link>
+
+        <header className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-10">
+          <ClaseIcon nombreClase={campeonato.clase.nombre} className="absolute -right-6 -top-6 h-48 w-48 object-contain opacity-[0.07]" />
+          <div className="relative space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white">
+                <ClaseIcon nombreClase={campeonato.clase.nombre} className="h-5 w-5 object-contain brightness-0 invert" />
+                {campeonato.clase.nombre}
+              </span>
+              <span className="rounded-lg border border-border bg-background/40 px-3 py-1.5 text-sm font-semibold tabular-nums">{campeonato.anio}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5" />
-              <span>{campeonato.fechaInicio ? new Date(campeonato.fechaInicio).toLocaleDateString('es-AR') : campeonato.anio}</span>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{campeonato.nombre}</h1>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
+              {campeonato.sede && (
+                <div className="flex items-center gap-2">
+                  <MapPinIcon className="w-5 h-5" aria-hidden="true" />
+                  <span>{campeonato.sede.nombre}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5" aria-hidden="true" />
+                <span className="tabular-nums">{campeonato.fechaInicio ? new Date(campeonato.fechaInicio).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) : campeonato.anio}</span>
+              </div>
             </div>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="p-4 bg-surface border border-border rounded-xl flex flex-col gap-1">
-            <span className="text-sm text-muted-foreground flex items-center gap-2"><UsersIcon className="w-4 h-4" /> Regatistas</span>
-            <span className="text-2xl font-semibold">{regatistasList.length}</span>
-          </div>
-          <div className="p-4 bg-surface border border-border rounded-xl flex flex-col gap-1">
-            <span className="text-sm text-muted-foreground">Regatas Disputadas</span>
-            <span className="text-2xl font-semibold">{campeonato.regatas.length}</span>
-          </div>
-          <div className="p-4 bg-surface border border-border rounded-xl flex flex-col gap-1">
-            <span className="text-sm text-muted-foreground">Descartes Aplicados</span>
-            <span className="text-2xl font-semibold">{campeonato.descartes}</span>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { icono: UsersIcon, etiqueta: "Regatistas", valor: regatistasList.length },
+            { icono: FlagIcon, etiqueta: "Regatas disputadas", valor: campeonato.regatas.length },
+            { icono: ScissorsIcon, etiqueta: "Descartes aplicados", valor: campeonato.descartes },
+          ].map(({ icono: Icono, etiqueta, valor }) => (
+            <div key={etiqueta} className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-5">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Icono className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-3xl font-bold leading-none tabular-nums">{valor}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{etiqueta}</p>
+              </div>
+            </div>
+          ))}
         </div>
+
+        <Podio
+          unidad="pts netos"
+          items={[...clasificacionTabla]
+            .sort((x, y) => x.posicion - y.posicion)
+            .slice(0, 3)
+            .map((c) => ({
+              id: c.id,
+              href: `/regatistas/${c.integrantes?.[0]?.regatistaId ?? c.id}`,
+              titulo: c.nombre,
+              subtitulo: c.club,
+              puntos: c.totalNeto,
+            }))}
+        />
 
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-baseline gap-3">
               <h2 className="text-2xl font-bold">Clasificación General</h2>
-              <a href="/reglas" className="text-xs text-muted-foreground hover:text-primary hover:underline">¿Cómo se calcula esto?</a>
+              <Link href="/reglas" className="text-xs text-muted-foreground hover:text-primary hover:underline">¿Cómo se calcula esto?</Link>
             </div>
             <CsvDownloadButton
               filename={`${campeonato.nombre} ${campeonato.anio}.csv`}

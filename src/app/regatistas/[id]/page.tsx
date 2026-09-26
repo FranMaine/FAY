@@ -196,6 +196,20 @@ export default async function RegatistaProfilePage({ params }: Props) {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+        {historial.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
+            {[
+              { etiqueta: "Campeonatos", valor: `${historial.length}` },
+              { etiqueta: "Podios", valor: `${historial.filter((h) => h.posicion <= 3).length}` },
+              { etiqueta: "Mejor puesto", valor: `${Math.min(...historial.map((h) => h.posicion))}°` },
+            ].map((e) => (
+              <div key={e.etiqueta} className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+                <p className="text-2xl sm:text-4xl font-extrabold tracking-tight tabular-nums">{e.valor}</p>
+                <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{e.etiqueta}</p>
+              </div>
+            ))}
+          </div>
+        )}
         {historial.length === 0 ? (
           <Card className="bg-surface border-border text-center py-12">
             <CardContent>

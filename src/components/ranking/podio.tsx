@@ -20,7 +20,7 @@ const ESTILOS = [
   { pos: 3, orden: "sm:order-3", alto: "", medalla: "bg-amber-700 text-amber-50", borde: "border-amber-700/50", brillo: "from-amber-700/20" },
 ];
 
-export function Podio({ items }: { items: ItemPodio[] }) {
+export function Podio({ items, unidad = "pts" }: { items: ItemPodio[]; unidad?: string }) {
   if (items.length < 3) return null;
   return (
     <ol className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:items-end" aria-label="Podio">
@@ -48,7 +48,7 @@ export function Podio({ items }: { items: ItemPodio[] }) {
                 </div>
               </div>
               <p className="mt-auto text-3xl font-extrabold tracking-tight tabular-nums">
-                {item.puntos.toLocaleString("es-AR")} <span className="text-sm font-medium text-muted-foreground">pts</span>
+                {item.puntos.toLocaleString("es-AR")} <span className="text-sm font-medium text-muted-foreground">{unidad}</span>
               </p>
             </Link>
           </li>
