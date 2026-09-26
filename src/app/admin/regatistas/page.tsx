@@ -121,10 +121,10 @@ export default function AdminRegatistasPage() {
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                 <tr>
-                  <th className="px-6 py-4 font-medium">Nombre</th>
-                  <th className="px-6 py-4 font-medium">Club</th>
-                  <th className="px-6 py-4 font-medium">País</th>
-                  <th className="px-6 py-4 font-medium text-right">Acciones</th>
+                  <th scope="col" className="px-6 py-4 font-medium">Nombre</th>
+                  <th scope="col" className="px-6 py-4 font-medium">Club</th>
+                  <th scope="col" className="px-6 py-4 font-medium">País</th>
+                  <th scope="col" className="px-6 py-4 font-medium text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

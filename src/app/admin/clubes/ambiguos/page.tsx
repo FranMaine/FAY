@@ -109,7 +109,7 @@ export default function AdminClubesPage() {
           </div>
         </header>
 
-        {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>}
+        {error && <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>}
 
         <section className="space-y-4">
           <div>

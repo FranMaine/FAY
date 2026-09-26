@@ -64,7 +64,7 @@ export default function AdminAuditoriaPage() {
           </Button>
         </header>
 
-        {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>}
+        {error && <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>}
 
         {isLoading ? (
           <div className="flex justify-center py-16"><Loader2Icon className="w-8 h-8 animate-spin text-muted-foreground" /></div>
@@ -79,11 +79,11 @@ export default function AdminAuditoriaPage() {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                     <tr>
-                      <th className="px-6 py-3 font-medium">Fecha</th>
-                      <th className="px-6 py-3 font-medium">Quién</th>
-                      <th className="px-6 py-3 font-medium">Acción</th>
-                      <th className="px-6 py-3 font-medium">Entidad</th>
-                      <th className="px-6 py-3 font-medium">Detalle</th>
+                      <th scope="col" className="px-6 py-3 font-medium">Fecha</th>
+                      <th scope="col" className="px-6 py-3 font-medium">Quién</th>
+                      <th scope="col" className="px-6 py-3 font-medium">Acción</th>
+                      <th scope="col" className="px-6 py-3 font-medium">Entidad</th>
+                      <th scope="col" className="px-6 py-3 font-medium">Detalle</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">

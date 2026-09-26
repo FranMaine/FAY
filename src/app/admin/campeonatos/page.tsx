@@ -164,7 +164,7 @@ export default function AdminCampeonatosPage() {
         </header>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
+          <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
         )}
 
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
@@ -172,9 +172,9 @@ export default function AdminCampeonatosPage() {
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                 <tr>
-                  <th className="px-6 py-4 font-medium">Evento / Clase</th>
-                  <th className="px-6 py-4 font-medium">Estado</th>
-                  <th className="px-6 py-4 font-medium text-right">Acciones</th>
+                  <th scope="col" className="px-6 py-4 font-medium">Evento / Clase</th>
+                  <th scope="col" className="px-6 py-4 font-medium">Estado</th>
+                  <th scope="col" className="px-6 py-4 font-medium text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

@@ -476,7 +476,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                 </CardHeader>
                 <CardContent className="pt-6">
                   {saveError && (
-                    <div className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 p-3 rounded-md mb-4">
+                    <div role="alert" className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 p-3 rounded-md mb-4">
                       <AlertCircleIcon className="w-4 h-4 flex-shrink-0" />
                       <p>{saveError}</p>
                     </div>
@@ -513,12 +513,12 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                     <table className="w-full text-sm text-left">
                       <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                         <tr>
-                          <th className="px-4 py-3 font-medium">Regatista</th>
-                          <th className="px-4 py-3 font-medium w-24">Vela</th>
-                          <th className="px-4 py-3 font-medium w-24">Puesto</th>
-                          <th className="px-4 py-3 font-medium w-24">Puntos</th>
-                          <th className="px-4 py-3 font-medium w-32">Obs (UFD, etc)</th>
-                          <th className="px-2 py-3 w-10" />
+                          <th scope="col" className="px-4 py-3 font-medium">Regatista</th>
+                          <th scope="col" className="px-4 py-3 font-medium w-24">Vela</th>
+                          <th scope="col" className="px-4 py-3 font-medium w-24">Puesto</th>
+                          <th scope="col" className="px-4 py-3 font-medium w-24">Puntos</th>
+                          <th scope="col" className="px-4 py-3 font-medium w-32">Obs (UFD, etc)</th>
+                          <th scope="col" className="px-2 py-3 w-10" />
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">

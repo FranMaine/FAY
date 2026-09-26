@@ -90,14 +90,14 @@ export default function OlvidePasswordPage() {
                 />
               </div>
               {error && (
-                <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
+                <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
                   {error}
                 </div>
               )}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
                 <Input {...form.register("email")} type="email" placeholder="tu@email.com" className="bg-background border-border" />
-                {form.formState.errors.email && <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>}
+                {form.formState.errors.email && <p role="alert" className="text-xs text-red-500">{form.formState.errors.email.message}</p>}
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Enviando..." : "Enviar enlace"}

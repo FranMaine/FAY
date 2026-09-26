@@ -222,7 +222,7 @@ export default function AdminEscudosClubesPage() {
         </div>
 
         {error && (
-          <div className="p-3 rounded-md bg-red-500/10 border border-red-500/50 text-red-500 text-sm flex items-center gap-2">
+          <div role="alert" className="p-3 rounded-md bg-red-500/10 border border-red-500/50 text-red-500 text-sm flex items-center gap-2">
             <AlertCircleIcon className="w-4 h-4 shrink-0" /> {error}
           </div>
         )}

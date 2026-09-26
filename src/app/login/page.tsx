@@ -96,7 +96,7 @@ function LoginForm() {
             </div>
           )}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center">
+            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center">
               {error}
             </div>
           )}
@@ -125,7 +125,7 @@ function LoginForm() {
                 className="bg-background border-border"
               />
               {form.formState.errors.email && (
-                <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>
+                <p role="alert" className="text-xs text-red-500">{form.formState.errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -144,7 +144,7 @@ function LoginForm() {
                 className="bg-background border-border"
               />
               {form.formState.errors.password && (
-                <p className="text-xs text-red-500">{form.formState.errors.password.message}</p>
+                <p role="alert" className="text-xs text-red-500">{form.formState.errors.password.message}</p>
               )}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>

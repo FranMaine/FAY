@@ -28,9 +28,9 @@ export default function CookiesPage() {
             <table className="w-full text-sm border border-border rounded-lg overflow-hidden">
               <thead className="bg-surface-hover text-left">
                 <tr>
-                  <th className="p-3 font-semibold">Cookie</th>
-                  <th className="p-3 font-semibold">Finalidad</th>
-                  <th className="p-3 font-semibold">Duración</th>
+                  <th scope="col" className="p-3 font-semibold">Cookie</th>
+                  <th scope="col" className="p-3 font-semibold">Finalidad</th>
+                  <th scope="col" className="p-3 font-semibold">Duración</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

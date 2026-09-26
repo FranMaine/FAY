@@ -157,7 +157,7 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
           />
 
           {error && (
-            <div className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 p-3 rounded-md">
+            <div role="alert" className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 p-3 rounded-md">
               <AlertCircleIcon className="w-4 h-4 flex-shrink-0" />
               <p>{error}</p>
             </div>
@@ -201,7 +201,7 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
                 Agregar
               </Button>
             </div>
-            {errorClubes && <p className="text-xs text-red-500">{errorClubes}</p>}
+            {errorClubes && <p role="alert" className="text-xs text-red-500">{errorClubes}</p>}
           </div>
         )}
 

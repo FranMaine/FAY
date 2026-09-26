@@ -71,7 +71,7 @@ function ResetPasswordForm() {
         </CardHeader>
         <CardContent>
           {enlaceInvalido ? (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
+            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
               Este enlace es inválido. Pedí uno nuevo desde{" "}
               <Link href="/olvide-password" className="underline font-medium">
                 recuperar contraseña
@@ -80,19 +80,19 @@ function ResetPasswordForm() {
           ) : (
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {error && (
-                <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
+                <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
                   {error}
                 </div>
               )}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Nueva contraseña</label>
                 <Input {...form.register("password")} type="password" placeholder="••••••••" className="bg-background border-border" />
-                {form.formState.errors.password && <p className="text-xs text-red-500">{form.formState.errors.password.message}</p>}
+                {form.formState.errors.password && <p role="alert" className="text-xs text-red-500">{form.formState.errors.password.message}</p>}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Confirmar contraseña</label>
                 <Input {...form.register("confirmPassword")} type="password" placeholder="••••••••" className="bg-background border-border" />
-                {form.formState.errors.confirmPassword && <p className="text-xs text-red-500">{form.formState.errors.confirmPassword.message}</p>}
+                {form.formState.errors.confirmPassword && <p role="alert" className="text-xs text-red-500">{form.formState.errors.confirmPassword.message}</p>}
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Guardando..." : "Restablecer contraseña"}

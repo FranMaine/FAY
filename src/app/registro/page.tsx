@@ -176,7 +176,7 @@ export default function RegistroPage() {
         </CardHeader>
         <CardContent>
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center">
+            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center">
               {error}
             </div>
           )}
@@ -202,22 +202,22 @@ export default function RegistroPage() {
               <div className="space-y-2">
                 <label htmlFor="reg-name" className="text-sm font-medium">Nombre completo</label>
                 <Input {...form.register("name")} id="reg-name" autoComplete="name" placeholder="Juan Pérez" className="bg-background border-border" />
-                {form.formState.errors.name && <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>}
+                {form.formState.errors.name && <p role="alert" className="text-xs text-red-500">{form.formState.errors.name.message}</p>}
               </div>
               <div className="space-y-2">
                 <label htmlFor="reg-email" className="text-sm font-medium">Email</label>
                 <Input {...form.register("email")} id="reg-email" autoComplete="email" spellCheck={false} type="email" placeholder="tu@email.com" className="bg-background border-border" />
-                {form.formState.errors.email && <p className="text-xs text-red-500">{form.formState.errors.email.message}</p>}
+                {form.formState.errors.email && <p role="alert" className="text-xs text-red-500">{form.formState.errors.email.message}</p>}
               </div>
               <div className="space-y-2">
                 <label htmlFor="reg-password" className="text-sm font-medium">Contraseña</label>
                 <Input {...form.register("password")} id="reg-password" autoComplete="new-password" type="password" placeholder="••••••••" className="bg-background border-border" />
-                {form.formState.errors.password && <p className="text-xs text-red-500">{form.formState.errors.password.message}</p>}
+                {form.formState.errors.password && <p role="alert" className="text-xs text-red-500">{form.formState.errors.password.message}</p>}
               </div>
               <div className="space-y-2">
                 <label htmlFor="reg-confirm" className="text-sm font-medium">Confirmar contraseña</label>
                 <Input {...form.register("confirmPassword")} id="reg-confirm" autoComplete="new-password" type="password" placeholder="••••••••" className="bg-background border-border" />
-                {form.formState.errors.confirmPassword && <p className="text-xs text-red-500">{form.formState.errors.confirmPassword.message}</p>}
+                {form.formState.errors.confirmPassword && <p role="alert" className="text-xs text-red-500">{form.formState.errors.confirmPassword.message}</p>}
               </div>
               <div className="space-y-1.5">
                 <label className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -239,7 +239,7 @@ export default function RegistroPage() {
                   </span>
                 </label>
                 {form.formState.errors.aceptoTerminos && (
-                  <p className="text-xs text-red-500">{form.formState.errors.aceptoTerminos.message}</p>
+                  <p role="alert" className="text-xs text-red-500">{form.formState.errors.aceptoTerminos.message}</p>
                 )}
               </div>
               <Button type="submit" className="w-full mt-2">Siguiente</Button>

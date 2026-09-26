@@ -70,7 +70,7 @@ export default function SolicitudesAdminPage() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
+        <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
       )}
 
       <Card className="bg-surface border-border">
@@ -88,11 +88,11 @@ export default function SolicitudesAdminPage() {
               <table className="w-full text-sm text-left">
                 <thead className="text-xs text-muted-foreground uppercase bg-surface border-b border-border">
                   <tr>
-                    <th className="px-6 py-4 font-medium">Usuario</th>
-                    <th className="px-6 py-4 font-medium">Email</th>
-                    <th className="px-6 py-4 font-medium">Reclama el perfil de</th>
-                    <th className="px-6 py-4 font-medium">Club</th>
-                    <th className="px-6 py-4 font-medium text-right">Acciones</th>
+                    <th scope="col" className="px-6 py-4 font-medium">Usuario</th>
+                    <th scope="col" className="px-6 py-4 font-medium">Email</th>
+                    <th scope="col" className="px-6 py-4 font-medium">Reclama el perfil de</th>
+                    <th scope="col" className="px-6 py-4 font-medium">Club</th>
+                    <th scope="col" className="px-6 py-4 font-medium text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">

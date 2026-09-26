@@ -215,12 +215,12 @@ export default async function ClubDetailPage({ params }: Props) {
                     <table className="w-full text-sm text-left">
                       <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                         <tr>
-                          <th className="px-6 py-4 font-medium w-16 text-center">Pos</th>
-                          <th className="px-6 py-4 font-medium">Regatista</th>
-                          <th className="px-6 py-4 font-medium text-center">Resultados</th>
-                          <th className="px-6 py-4 font-medium text-center">Victorias</th>
-                          <th className="px-6 py-4 font-medium text-center">Podios</th>
-                          <th className="px-6 py-4 font-medium text-right">Mejor puesto</th>
+                          <th scope="col" className="px-6 py-4 font-medium w-16 text-center">Pos</th>
+                          <th scope="col" className="px-6 py-4 font-medium">Regatista</th>
+                          <th scope="col" className="px-6 py-4 font-medium text-center">Resultados</th>
+                          <th scope="col" className="px-6 py-4 font-medium text-center">Victorias</th>
+                          <th scope="col" className="px-6 py-4 font-medium text-center">Podios</th>
+                          <th scope="col" className="px-6 py-4 font-medium text-right">Mejor puesto</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">

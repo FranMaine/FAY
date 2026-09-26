@@ -196,7 +196,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, event
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 p-3 rounded-md">
+            <div role="alert" className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 p-3 rounded-md">
               <AlertCircleIcon className="w-4 h-4 flex-shrink-0" />
               <p>{error}</p>
             </div>
