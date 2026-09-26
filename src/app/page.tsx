@@ -3,7 +3,7 @@ import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Trophy, ArrowRight, BarChart3, Building2, Medal, CalendarDays } from "lucide-react";
+import { Trophy, ArrowRight, Building2, Medal, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { SailorSearch } from "@/components/search/sailor-search";
@@ -11,6 +11,8 @@ import { ClaseMarquee } from "@/components/marquee/clase-marquee";
 import { ClaseIcon } from "@/components/icons/clase-icons";
 import { clubesConMasPodios } from "@/lib/podios-clubes";
 import { ClubAvatar } from "@/components/icons/club-avatar";
+import { getRankingGeneral } from "@/lib/ranking-general";
+import { PodioPortada, type PodioDeClase } from "@/components/ranking/podio-portada";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 // Foto de fondo del hero (ver sección HERO más abajo) -mientras no esté,
@@ -70,8 +72,37 @@ async function getStats() {
   };
 }
 
+// Top 3 de cada clase con más campeonatos en la temporada más reciente (hasta
+// 6 clases, para que el selector no se desborde). Las clases sin al menos 3
+// regatistas rankeados quedan afuera: no alcanzan para armar un podio.
+async function getPodiosPortada(anio: number | null): Promise<PodioDeClase[]> {
+  if (!anio) return [];
+  const porClase = await prisma.campeonato.groupBy({
+    by: ['claseId'],
+    where: { estado: 'PUBLICADO', anio },
+    _count: { _all: true },
+    orderBy: { _count: { claseId: 'desc' } },
+    take: 6,
+  });
+  const clases = await prisma.clase.findMany({ where: { id: { in: porClase.map((c) => c.claseId) } } });
+  const nombre = new Map(clases.map((c) => [c.id, c.nombre]));
+  const podios = await Promise.all(
+    porClase.map(async ({ claseId }): Promise<PodioDeClase | null> => {
+      const ranking = await getRankingGeneral(claseId, anio);
+      if (ranking.length < 3) return null;
+      return {
+        claseId,
+        clase: nombre.get(claseId) ?? '',
+        items: ranking.slice(0, 3).map((r) => ({ id: r.id, href: `/regatistas/${r.id}`, titulo: r.nombre, subtitulo: r.club, puntos: r.puntosRanking })),
+      };
+    })
+  );
+  return podios.filter((p): p is PodioDeClase => p !== null);
+}
+
 export default async function LandingPage() {
   const [campeonatos, stats, topClubes] = await Promise.all([getUltimosCampeonatos(), getStats(), clubesConMasPodios(5)]);
+  const podios = await getPodiosPortada(stats.hasta);
   const tieneFotoHero = fs.existsSync(FOTO_HERO_PATH);
   const [destacado, ...otros] = campeonatos;
 
@@ -166,14 +197,14 @@ export default async function LandingPage() {
         </ScrollReveal>
         <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4">
           <ScrollReveal className="md:col-span-2 md:row-span-2">
-            <Link href="/rankings" className="group relative flex h-full min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/25 via-surface to-surface p-8 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-primary/60">
-              <BarChart3 className="absolute right-6 top-6 w-24 h-24 text-primary/15 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
-              <h3 className="text-3xl font-bold tracking-tight">Rankings</h3>
-              <p className="mt-2 max-w-md text-muted-foreground">Quién va primero en cada clase, por temporada o de todos los años.</p>
-              <span className="mt-4 inline-flex items-center gap-1 font-medium text-primary">
-                Ver rankings <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
-              </span>
-            </Link>
+            {podios.length > 0 ? (
+              <PodioPortada podios={podios} anio={stats.hasta!} />
+            ) : (
+              <Link href="/rankings" className="group flex h-full min-h-[260px] flex-col justify-end rounded-2xl border border-border bg-surface p-8 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-primary/60">
+                <h3 className="text-3xl font-bold tracking-tight">Rankings</h3>
+                <p className="mt-2 max-w-md text-muted-foreground">Quién va primero en cada clase, por temporada o de todos los años.</p>
+              </Link>
+            )}
           </ScrollReveal>
           <ScrollReveal delay={80}>
             <Link href="/clubes" className="group flex h-full flex-col justify-between rounded-2xl border border-border bg-surface p-6 transition-[transform,border-color] duration-200 hover:-translate-y-1 hover:border-primary/60">
