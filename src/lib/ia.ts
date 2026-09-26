@@ -5,7 +5,7 @@ import { z } from 'zod';
 // llega al navegador) y siempre después de verificar que el usuario es ADMIN.
 // GEMINI_MODEL permite cambiar de modelo sin tocar código si Google retira
 // o renombra el actual.
-const MODELO = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+export const MODELO = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 
 export class IaNoConfiguradaError extends Error {
   constructor() {

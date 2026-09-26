@@ -3,13 +3,12 @@ import { z } from 'zod';
 import { GoogleGenAI, type Content } from '@google/genai';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-error';
-import { iaDisponible, errorDeGemini } from '@/lib/ia';
+import { iaDisponible, errorDeGemini, MODELO } from '@/lib/ia';
 import { DECLARACIONES, ejecutarHerramienta } from '@/lib/ia-herramientas';
 import { permitir } from '@/lib/rate-limit';
 
 export const maxDuration = 45;
 
-const MODELO = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_VUELTAS = 4; // cuántas veces puede pedir herramientas antes de tener que responder
 
 const bodySchema = z.object({
