@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { GoogleGenAI, type Content } from '@google/genai';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-error';
-import { iaDisponible } from '@/lib/ia';
+import { iaDisponible, errorDeGemini } from '@/lib/ia';
 import { DECLARACIONES, ejecutarHerramienta } from '@/lib/ia-herramientas';
 import { permitir } from '@/lib/rate-limit';
 
@@ -76,6 +76,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ respuesta: 'La consulta necesitó demasiados pasos. Probá preguntarlo de forma más simple.' });
   } catch (error) {
+    const deGemini = errorDeGemini(error);
+    if (deGemini) return NextResponse.json({ error: deGemini.mensaje }, { status: deGemini.status });
     return handleApiError(error, 'POST /api/admin/ia/chat');
   }
 }

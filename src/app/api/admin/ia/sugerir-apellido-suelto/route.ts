@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
-import { iaDisponible, pedirJson, IaNoConfiguradaError } from '@/lib/ia';
+import { iaDisponible, pedirJson, IaNoConfiguradaError, errorDeGemini } from '@/lib/ia';
 import { permitir } from '@/lib/rate-limit';
 
 export const maxDuration = 30;
@@ -107,6 +107,8 @@ Respondé SOLO un JSON con esta forma:
     if (error instanceof IaNoConfiguradaError) {
       return NextResponse.json({ error: 'La IA no está configurada todavía.' }, { status: 503 });
     }
+    const deGemini = errorDeGemini(error);
+    if (deGemini) return NextResponse.json({ error: deGemini.mensaje }, { status: deGemini.status });
     return handleApiError(error, 'POST /api/admin/ia/sugerir-apellido-suelto');
   }
 }
