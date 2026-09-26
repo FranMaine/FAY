@@ -64,12 +64,12 @@ function Selector({ etiqueta, valor, onChange, buscar }: { etiqueta: string; val
             <input
               value={texto}
               onChange={(e) => setTexto(e.target.value)}
-              placeholder="Buscar..."
+              placeholder="Buscar…"
               className="w-full text-sm bg-background border border-border rounded-md pl-9 pr-3 py-2"
             />
           </div>
           <div className="max-h-44 overflow-y-auto rounded-md border border-border divide-y divide-border">
-            {buscando && <p className="p-3 text-xs text-muted-foreground">Buscando...</p>}
+            {buscando && <p className="p-3 text-xs text-muted-foreground">Buscando…</p>}
             {!buscando && resultados.length === 0 && <p className="p-3 text-xs text-muted-foreground">Sin resultados</p>}
             {resultados.map((r) => (
               <button key={r.id} type="button" onClick={() => onChange(r)} className="w-full text-left px-3 py-2 hover:bg-background/60">

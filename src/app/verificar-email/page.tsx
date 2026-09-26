@@ -64,7 +64,7 @@ function VerificarEmailContent() {
             <SailingBoat className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Confirmar email</CardTitle>
-          {estado === "verificando" && <CardDescription>Un momento, estamos confirmando tu cuenta...</CardDescription>}
+          {estado === "verificando" && <CardDescription>Un momento, estamos confirmando tu cuenta…</CardDescription>}
         </CardHeader>
         <CardContent>
           {estado === "verificando" && (

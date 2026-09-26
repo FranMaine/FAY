@@ -62,6 +62,14 @@
   --color-error: #ef4444;         /* red-500 */
 }
 
+/* Evita viudas en títulos y alinea los dígitos de tablas de posiciones/puntajes. */
+h1, h2, h3 {
+  text-wrap: balance;
+}
+td, th {
+  font-variant-numeric: tabular-nums;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);

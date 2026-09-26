@@ -281,7 +281,7 @@ export default function RegistroPage() {
                 <div className="relative">
                   <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Buscar por nombre o club..."
+                    placeholder="Buscar por nombre o club…"
                     className="pl-9 bg-background border-border"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}

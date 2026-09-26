@@ -147,7 +147,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, event
             />
             <Select
               label="Clase"
-              placeholder="Seleccionar..."
+              placeholder="Seleccionar…"
               value={claseId}
               onChange={(e) => setClaseId(e.target.value)}
               options={clases.map((c) => ({ value: c.id, label: c.nombre }))}

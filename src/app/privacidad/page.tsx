@@ -17,7 +17,7 @@ export default function PrivacidadPage() {
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-8">
         <header className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Política de privacidad</h1>
-          <p className="text-sm text-muted-foreground">Última actualización: {new Date().toLocaleDateString("es-AR", { year: "numeric", month: "long" })}</p>
+          <p className="text-sm text-muted-foreground">Última actualización: septiembre de 2026</p>
         </header>
 
         <section className="space-y-3 text-foreground/90">

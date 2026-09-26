@@ -230,7 +230,7 @@ export default function AdminEscudosClubesPage() {
         <Input
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar club por nombre..."
+          placeholder="Buscar club por nombre…"
           className="bg-surface border-border max-w-sm"
         />
 

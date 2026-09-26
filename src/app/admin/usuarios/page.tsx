@@ -93,7 +93,7 @@ export default function AdminUsuariosPage() {
           <div className="relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por email o nombre..."
+              placeholder="Buscar por email o nombre…"
               className="pl-9 bg-surface border-border"
               value={query}
               onChange={(e) => setQuery(e.target.value)}

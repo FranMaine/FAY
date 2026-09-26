@@ -80,7 +80,7 @@ export function SailorSearch() {
             router.push(`/regatistas/${results[0].id}`);
           }
         }}
-        className="flex items-center w-full rounded-full bg-surface shadow-xl p-1.5 sm:p-2 gap-1 sm:gap-2"
+        className="flex items-center w-full rounded-full bg-surface shadow-xl p-1.5 sm:p-2 gap-1 sm:gap-2 focus-within:ring-2 focus-within:ring-primary"
       >
         <SearchIcon className="hidden sm:block ml-2.5 w-5 h-5 text-muted-foreground shrink-0" aria-hidden="true" />
         <input
@@ -88,7 +88,7 @@ export function SailorSearch() {
           // Placeholder corto -el largo ("...por nombre o club...") se
           // recortaba a la mitad en pantallas angostas, con el padding y el
           // tamaño de fuente grandes de este input no entraba entero.
-          placeholder="Buscar regatista por nombre..."
+          placeholder="Buscar regatista por nombre…"
           className="flex-1 min-w-0 bg-transparent border-0 outline-none text-foreground placeholder:text-muted-foreground text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-1"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

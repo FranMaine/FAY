@@ -178,7 +178,7 @@ export default function AdminClubesPage() {
                         {combo.nuevos.map((n) => (
                           <option key={n} value={`nuevo:${n}`}>Crear club nuevo: {n}</option>
                         ))}
-                        <option value="__otro__">Crear club nuevo con otro nombre...</option>
+                        <option value="__otro__">Crear club nuevo con otro nombre…</option>
                         <option value="__sin_club__">Sin club</option>
                       </select>
                       </div>

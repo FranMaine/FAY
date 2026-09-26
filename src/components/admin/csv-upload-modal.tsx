@@ -376,7 +376,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
           {etapa === 'importando' && (
             <div className="flex flex-col items-center justify-center py-10">
               <Loader2Icon className="w-8 h-8 animate-spin text-primary mb-3" />
-              <p className="text-sm text-muted-foreground">Importando...</p>
+              <p className="text-sm text-muted-foreground">Importando…</p>
             </div>
           )}
 

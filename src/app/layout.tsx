@@ -80,8 +80,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
         <SessionProvider>
+          <a
+            href="#contenido"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+          >
+            Saltar al contenido
+          </a>
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main id="contenido" className="flex-1">{children}</main>
           <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
             <p>Regateando © {new Date().getFullYear()} — Estadísticas de Vela Argentina</p>
             <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">

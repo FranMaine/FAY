@@ -136,7 +136,7 @@ export function Navbar() {
             <button
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
-              className="relative inline-flex items-center justify-center rounded-md p-2 h-9 w-9 text-muted hover:bg-surface-hover hover:text-foreground focus:outline-none active:scale-90 transition-transform"
+              className="relative inline-flex items-center justify-center rounded-md p-2 h-9 w-9 text-muted hover:bg-surface-hover hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-90 transition-transform"
             >
               <Menu className={cn(
                 'h-6 w-6 absolute transition-[opacity,transform] duration-200 ease-out',

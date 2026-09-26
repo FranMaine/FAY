@@ -50,7 +50,7 @@ export function ClubSearch({ clubes }: ClubSearchProps) {
       <div className="relative max-w-md">
         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Buscar club por nombre..."
+          placeholder="Buscar club por nombre…"
           className="pl-9 bg-surface border-border"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
