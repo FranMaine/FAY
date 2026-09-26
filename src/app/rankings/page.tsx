@@ -6,6 +6,7 @@ import { MedalIcon, ArrowRightIcon, AlertCircleIcon } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { RankingFilters } from "@/components/filters/ranking-filters";
+import { Podio } from "@/components/ranking/podio";
 
 export const metadata: Metadata = {
   title: "Rankings Oficiales",
@@ -150,47 +151,67 @@ export default async function RankingsPage({
             <p className="text-sm">No hay campeonatos publicados de {selectedClaseNombre} {activeAnio === 0 ? "en ningún año" : `para el año ${activeAnio}`}.</p>
           </div>
         ) : (
-          <Card className="bg-surface border-border overflow-hidden">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
-                    <tr>
-                      <th className="px-6 py-4 font-medium w-16 text-center">Pos</th>
-                      <th className="px-6 py-4 font-medium">Regatista</th>
-                      <th className="px-6 py-4 font-medium">Club</th>
-                      <th className="px-6 py-4 font-medium text-center">Campeonatos</th>
-                      <th className="px-6 py-4 font-medium text-right">Puntaje</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {ranking.map((r, i) => {
-                      const pos = i + 1;
-                      return (
-                        <tr key={r.id} className="hover:bg-background/50 transition-colors">
-                          <td className="px-6 py-4 font-bold text-center">
-                            {pos === 1 ? <MedalIcon className="w-6 h-6 text-yellow-500 mx-auto" /> : 
-                             pos === 2 ? <MedalIcon className="w-6 h-6 text-gray-400 mx-auto" /> : 
-                             pos === 3 ? <MedalIcon className="w-6 h-6 text-amber-700 mx-auto" /> : 
-                             <span className="text-muted-foreground">{pos}</span>}
-                          </td>
-                          <td className="px-6 py-4 font-medium text-lg">
-                            <Link href={`/regatistas/${r.id}`} className="hover:text-primary transition-colors flex items-center gap-2 group">
-                              {r.nombre}
-                              <ArrowRightIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </Link>
-                          </td>
-                          <td className="px-6 py-4 text-muted-foreground">{r.club}</td>
-                          <td className="px-6 py-4 text-center">{r.campeonatos}</td>
-                          <td className="px-6 py-4 text-right font-bold text-primary text-lg">{r.puntosRanking} pts</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Podio
+              items={ranking.slice(0, 3).map((r) => ({
+                id: r.id,
+                href: `/regatistas/${r.id}`,
+                titulo: r.nombre,
+                subtitulo: r.club,
+                puntos: r.puntosRanking,
+              }))}
+            />
+            <Card className="bg-surface border-border overflow-hidden">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <caption className="sr-only">Ranking de regatistas de {selectedClaseNombre}</caption>
+                    <thead className="sticky top-0 text-xs text-muted-foreground uppercase bg-surface border-b border-border">
+                      <tr>
+                        <th scope="col" className="px-3 sm:px-6 py-3 font-medium w-14 text-center">Pos</th>
+                        <th scope="col" className="px-3 sm:px-6 py-3 font-medium">Regatista</th>
+                        <th scope="col" className="hidden md:table-cell px-6 py-3 font-medium">Club</th>
+                        <th scope="col" className="hidden sm:table-cell px-6 py-3 font-medium text-center">Campeonatos</th>
+                        <th scope="col" className="px-3 sm:px-6 py-3 font-medium text-right">Puntaje</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {ranking.map((r, i) => {
+                        const pos = i + 1;
+                        const lider = ranking[0].puntosRanking || 1;
+                        return (
+                          <tr key={r.id} className={`hover:bg-background/50 transition-colors ${pos <= 3 ? "bg-primary/[0.04]" : ""}`}>
+                            <td className="px-3 sm:px-6 py-3 text-center">
+                              {pos <= 3 ? (
+                                <MedalIcon aria-label={`Puesto ${pos}`} className={`w-5 h-5 mx-auto ${pos === 1 ? "text-yellow-500" : pos === 2 ? "text-slate-400" : "text-amber-700"}`} />
+                              ) : (
+                                <span className="font-medium text-muted-foreground">{pos}</span>
+                              )}
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 font-medium">
+                              <Link href={`/regatistas/${r.id}`} className="hover:text-primary transition-colors flex items-center gap-2 group min-w-0">
+                                <span className="truncate">{r.nombre}</span>
+                                <ArrowRightIcon className="w-4 h-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                              </Link>
+                              <span className="md:hidden block text-xs text-muted-foreground truncate">{r.club}</span>
+                            </td>
+                            <td className="hidden md:table-cell px-6 py-3 text-muted-foreground">{r.club}</td>
+                            <td className="hidden sm:table-cell px-6 py-3 text-center">{r.campeonatos}</td>
+                            <td className="px-3 sm:px-6 py-3 text-right">
+                              <span className="font-bold text-primary">{r.puntosRanking.toLocaleString("es-AR")} pts</span>
+                              <span className="mt-1 ml-auto block h-1 w-16 sm:w-24 rounded-full bg-border overflow-hidden" aria-hidden="true">
+                                <span className="block h-full rounded-full bg-primary/70" style={{ width: `${Math.max(4, Math.round((r.puntosRanking / lider) * 100))}%` }} />
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </main>

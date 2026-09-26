@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDownIcon, SailboatIcon } from "lucide-react";
 import { CampeonatoCard, type Campeonato } from "@/components/ui/campeonato-card";
+import { ClaseIcon } from "@/components/icons/clase-icons";
 import { cn } from "@/lib/utils";
 
 // Un mismo evento (ej: "Vela Fest 2026") se carga como un Campeonato por
@@ -42,7 +43,7 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
               type="button"
               onClick={() => toggle(g.clave)}
               aria-expanded={abierta}
-              className="text-left rounded-xl border border-border bg-surface p-5 h-full flex flex-col transition-[transform,border-color] duration-200 ease-out hover:scale-[1.02] hover:border-primary/50"
+              className="text-left rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-surface p-5 h-full flex flex-col transition-[transform,border-color] duration-200 ease-out hover:-translate-y-1 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <div className="flex justify-between items-start mb-4">
                 <span className="w-11 h-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center"><SailboatIcon className="w-6 h-6" /></span>
@@ -50,7 +51,16 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
               </div>
               <h3 className="text-lg font-bold text-foreground mb-1 line-clamp-2">{g.nombre}</h3>
               <p className="text-sm text-primary mb-4 font-mono">{g.anio}</p>
-              <p className="mt-auto text-sm text-muted">{g.items.length} categorías</p>
+              <div className="mt-auto flex items-center justify-between gap-3 pt-6">
+                <p className="text-sm text-muted-foreground">{g.items.length} categorías</p>
+                <span className="flex -space-x-1.5" aria-hidden="true">
+                  {g.items.slice(0, 5).map((c) => (
+                    <span key={c.id} className="flex h-7 w-7 items-center justify-center rounded-full border border-border bg-surface">
+                      <ClaseIcon nombreClase={c.clase} className="h-4 w-4 object-contain" />
+                    </span>
+                  ))}
+                </span>
+              </div>
             </button>
             {abierta && g.items.map((c) => <CampeonatoCard key={c.id} campeonato={c} />)}
           </div>

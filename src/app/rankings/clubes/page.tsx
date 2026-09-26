@@ -7,6 +7,7 @@ import { ClubAvatar } from "@/components/icons/club-avatar";
 import { prisma } from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { RankingFilters } from "@/components/filters/ranking-filters";
+import { Podio } from "@/components/ranking/podio";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
 
 export const metadata: Metadata = {
@@ -164,49 +165,72 @@ export default async function RankingClubesPage({
             <p className="text-sm">No hay campeonatos publicados de {selectedClaseNombre} {activeAnio === 0 ? "en ningún año" : `para el año ${activeAnio}`}.</p>
           </div>
         ) : (
-          <Card className="bg-surface border-border overflow-hidden">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
-                    <tr>
-                      <th className="px-6 py-4 font-medium w-16 text-center">Pos</th>
-                      <th className="px-6 py-4 font-medium">Club</th>
-                      <th className="px-6 py-4 font-medium text-center">Regatistas</th>
-                      <th className="px-6 py-4 font-medium text-right">Puntaje</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {ranking.map((r, i) => {
-                      const pos = i + 1;
-                      const nombreCompleto = r.completo || CLUB_ALIASES[r.nombre] || r.nombre;
-                      return (
-                        <tr key={r.id} className="hover:bg-background/50 transition-colors">
-                          <td className="px-6 py-4 font-bold text-center">
-                            {pos === 1 ? <MedalIcon className="w-6 h-6 text-yellow-500 mx-auto" /> :
-                             pos === 2 ? <MedalIcon className="w-6 h-6 text-gray-400 mx-auto" /> :
-                             pos === 3 ? <MedalIcon className="w-6 h-6 text-amber-700 mx-auto" /> :
-                             <span className="text-muted-foreground">{pos}</span>}
-                          </td>
-                          <td className="px-6 py-4 font-medium text-lg">
-                            <Link href={`/clubes/${r.id}`} className="hover:text-primary transition-colors flex items-center gap-3 group">
-                              <ClubAvatar nombre={r.nombre} logoUrl={r.logoUrl} className="w-8 h-8 text-xs" />
-                              <span title={nombreCompleto}>{r.nombre}</span>
-                              <ArrowRightIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </Link>
-                          </td>
-                          <td className="px-6 py-4 text-center text-muted-foreground">
-                            <span className="inline-flex items-center gap-1"><UsersIcon className="w-3.5 h-3.5" /> {r.regatistas}</span>
-                          </td>
-                          <td className="px-6 py-4 text-right font-bold text-primary text-lg">{r.puntosRanking} pts</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Podio
+              items={ranking.slice(0, 3).map((r) => ({
+                id: r.id,
+                href: `/clubes/${r.id}`,
+                titulo: r.nombre,
+                subtitulo: r.completo || CLUB_ALIASES[r.nombre] || null,
+                puntos: r.puntosRanking,
+                avatar: <ClubAvatar nombre={r.nombre} logoUrl={r.logoUrl} className="w-11 h-11 text-sm" />,
+              }))}
+            />
+            <Card className="bg-surface border-border overflow-hidden">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <caption className="sr-only">Ranking de clubes de {selectedClaseNombre}</caption>
+                    <thead className="sticky top-0 text-xs text-muted-foreground uppercase bg-surface border-b border-border">
+                      <tr>
+                        <th scope="col" className="px-3 sm:px-6 py-3 font-medium w-14 text-center">Pos</th>
+                        <th scope="col" className="px-3 sm:px-6 py-3 font-medium">Club</th>
+                        <th scope="col" className="hidden sm:table-cell px-6 py-3 font-medium text-center">Regatistas</th>
+                        <th scope="col" className="px-3 sm:px-6 py-3 font-medium text-right">Puntaje</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {ranking.map((r, i) => {
+                        const pos = i + 1;
+                        const nombreCompleto = r.completo || CLUB_ALIASES[r.nombre] || r.nombre;
+                        const lider = ranking[0].puntosRanking || 1;
+                        return (
+                          <tr key={r.id} className={`hover:bg-background/50 transition-colors ${pos <= 3 ? "bg-primary/[0.04]" : ""}`}>
+                            <td className="px-3 sm:px-6 py-3 text-center">
+                              {pos <= 3 ? (
+                                <MedalIcon aria-label={`Puesto ${pos}`} className={`w-5 h-5 mx-auto ${pos === 1 ? "text-yellow-500" : pos === 2 ? "text-slate-400" : "text-amber-700"}`} />
+                              ) : (
+                                <span className="font-medium text-muted-foreground">{pos}</span>
+                              )}
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 font-medium">
+                              <Link href={`/clubes/${r.id}`} className="hover:text-primary transition-colors flex items-center gap-3 group min-w-0">
+                                <ClubAvatar nombre={r.nombre} logoUrl={r.logoUrl} className="w-8 h-8 text-xs" />
+                                <span className="min-w-0">
+                                  <span className="block truncate" title={nombreCompleto}>{r.nombre}</span>
+                                  <span className="sm:hidden block text-xs text-muted-foreground">{r.regatistas} regatistas</span>
+                                </span>
+                                <ArrowRightIcon className="w-4 h-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                              </Link>
+                            </td>
+                            <td className="hidden sm:table-cell px-6 py-3 text-center text-muted-foreground">
+                              <span className="inline-flex items-center gap-1"><UsersIcon className="w-3.5 h-3.5" aria-hidden="true" /> {r.regatistas}</span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 text-right">
+                              <span className="font-bold text-primary">{r.puntosRanking.toLocaleString("es-AR")} pts</span>
+                              <span className="mt-1 ml-auto block h-1 w-16 sm:w-24 rounded-full bg-border overflow-hidden" aria-hidden="true">
+                                <span className="block h-full rounded-full bg-primary/70" style={{ width: `${Math.max(4, Math.round((r.puntosRanking / lider) * 100))}%` }} />
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </main>
