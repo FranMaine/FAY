@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo, Fragment } from "react";
+import { useState, useEffect, useMemo, useRef, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon } from "lucide-react";
+import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
@@ -64,6 +64,14 @@ export default function AdminCampeonatosPage() {
   // es una lista corta de eventos en vez de la lista larga de siempre.
   const [abiertas, setAbiertas] = useState<Set<string>>(new Set());
 
+  // Subir/quitar el logo de un evento directo desde esta lista, sin tener
+  // que entrar a cada campeonato individual -se aplica a TODOS los
+  // campeonatos del grupo, así queda consistente sin importar cuál se
+  // termine mostrando (ver logoUrl derivado en agruparPorEvento).
+  const [subiendoLogoGrupo, setSubiendoLogoGrupo] = useState<string | null>(null);
+  const [errorLogoGrupo, setErrorLogoGrupo] = useState<{ clave: string; mensaje: string } | null>(null);
+  const logoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -97,6 +105,29 @@ export default function AdminCampeonatosPage() {
       return next;
     });
   }
+
+  const subirLogoDelGrupo = async (clave: string, ids: string[], file: File) => {
+    setSubiendoLogoGrupo(clave);
+    setErrorLogoGrupo(null);
+    try {
+      const resultados = await Promise.all(
+        ids.map(async (id) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          const res = await fetch(`/api/admin/campeonatos/${id}/logo`, { method: "PATCH", body: formData });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "No se pudo subir el logo");
+          return { id, logoUrl: data.logoUrl as string };
+        })
+      );
+      const logoPorId = new Map(resultados.map((r) => [r.id, r.logoUrl]));
+      setCampeonatos((prev) => prev.map((c) => (logoPorId.has(c.id) ? { ...c, logoUrl: logoPorId.get(c.id)! } : c)));
+    } catch (err) {
+      setErrorLogoGrupo({ clave, mensaje: mensajeDeError(err) });
+    } finally {
+      setSubiendoLogoGrupo(null);
+    }
+  };
 
   const handleEliminar = async (c: Campeonato) => {
     // La confirmación ahora la maneja ConfirmDeleteButton (in-place, no un
@@ -261,8 +292,38 @@ export default function AdminCampeonatosPage() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4" />
+                          <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              ref={(el) => { logoInputRefs.current[clave] = el; }}
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp,image/avif"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) subirLogoDelGrupo(clave, grupo.items.map((c) => c.id), file);
+                                e.target.value = "";
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary"
+                              aria-label={grupo.logoUrl ? "Reemplazar logo del evento" : "Subir logo del evento"}
+                              disabled={subiendoLogoGrupo === clave}
+                              onClick={() => logoInputRefs.current[clave]?.click()}
+                            >
+                              {subiendoLogoGrupo === clave ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                            </Button>
+                          </td>
                         </tr>
+                        {errorLogoGrupo?.clave === clave && (
+                          <tr>
+                            <td colSpan={3} className="px-6 pb-2">
+                              <p role="alert" className="text-xs text-red-500">{errorLogoGrupo.mensaje}</p>
+                            </td>
+                          </tr>
+                        )}
                         {abierta && grupo.items.map((c) => filaClase(c))}
                       </Fragment>
                     );
