@@ -24,9 +24,16 @@ interface CandidatoApellidoSuelto {
   candidatos: RegatistaDup[];
 }
 
+interface ParSimilar {
+  clave: string;
+  a: RegatistaDup;
+  b: RegatistaDup;
+}
+
 export default function DuplicadosPage() {
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [apellidosSueltos, setApellidosSueltos] = useState<CandidatoApellidoSuelto[]>([]);
+  const [nombresSimilares, setNombresSimilares] = useState<ParSimilar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,6 +64,13 @@ export default function DuplicadosPage() {
   const [nombreNuevoPorSuelto, setNombreNuevoPorSuelto] = useState<Record<string, string>>({});
   const [creandoNuevo, setCreandoNuevo] = useState<string | null>(null);
 
+  // Sección 3 (nombre parecido): por par, cuál de los dos queda como
+  // canónico -tampoco se preselecciona: aunque acá suele ser más obvio
+  // que en "apellido suelto" (son solo 2 opciones), sigue siendo una
+  // decisión de una persona, no algo que convenga adivinar mal por defecto.
+  const [canonicoPorSimilar, setCanonicoPorSimilar] = useState<Record<string, string>>({});
+  const [fusionandoSimilar, setFusionandoSimilar] = useState<string | null>(null);
+
   // Sugerencias de la IA por apellido suelto (solo orientan: no fusionan nada).
   const [sugerencias, setSugerencias] = useState<Record<string, { candidatoNombre: string | null; confianza: string; motivo: string }>>({});
   const [pidiendoIa, setPidiendoIa] = useState<string | null>(null);
@@ -81,6 +95,7 @@ export default function DuplicadosPage() {
       setCanonicoPorGrupo(iniciales);
 
       setApellidosSueltos(data.apellidosSueltos || []);
+      setNombresSimilares(data.nombresSimilares || []);
     } catch (err) {
       setError(mensajeDeError(err));
     } finally {
@@ -205,6 +220,40 @@ export default function DuplicadosPage() {
     setApellidosSueltos((prev) => prev.filter((x) => x.suelto.id !== clave));
   };
 
+  const fusionarSimilar = async (par: ParSimilar) => {
+    const canonicoId = canonicoPorSimilar[par.clave];
+    if (!canonicoId) return;
+    const otroId = canonicoId === par.a.id ? par.b.id : par.a.id;
+
+    setFusionandoSimilar(par.clave);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/regatistas/merge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ canonicoId, duplicadoIds: [otroId] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo fusionar");
+
+      setExitos((prev) => [
+        `"${par.a.nombre}" y "${par.b.nombre}" fusionados: ${data.resumen.resultadosMovidos} resultado(s) movidos.`,
+        ...prev,
+      ]);
+      setNombresSimilares((prev) => prev.filter((x) => x.clave !== par.clave));
+    } catch (err) {
+      setError(mensajeDeError(err));
+    } finally {
+      setFusionandoSimilar(null);
+    }
+  };
+
+  const descartarSimilar = (clave: string) => {
+    // Son personas distintas de nombre parecido (ej: dos hermanos, o dos
+    // apellidos que casi coinciden) -se saca de la lista sin tocar la base.
+    setNombresSimilares((prev) => prev.filter((x) => x.clave !== clave));
+  };
+
   return (
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-5xl mx-auto space-y-10">
@@ -217,8 +266,9 @@ export default function DuplicadosPage() {
           </Link>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Regatistas Duplicados</h1>
           <p className="text-muted-foreground">
-            Dos formas en que la misma persona termina con más de una ficha: nombre repetido tal cual, o un campeonato
-            que solo trajo el apellido y se cargó como regatista nuevo en vez de reconocer al que ya existía.
+            Tres formas en que la misma persona termina con más de una ficha: nombre repetido tal cual, un campeonato
+            que solo trajo el apellido y se cargó como regatista nuevo, o un nombre casi idéntico (falta una palabra o
+            está mal tipeado) que no llega a coincidir del todo.
           </p>
         </div>
 
@@ -425,6 +475,73 @@ export default function DuplicadosPage() {
                           )}
                         </>
                       )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Sección 3: nombre completo casi idéntico (falta/sobra una
+                palabra, o una palabra está mal tipeada) -a diferencia de
+                "apellido suelto", acá son siempre pares de a dos, así que
+                alcanza con elegir cuál de los dos queda. */}
+            <section className="space-y-4">
+              <h2 className="text-xl font-semibold">Nombre parecido ({nombresSimilares.length})</h2>
+              <p className="text-sm text-muted-foreground -mt-2">
+                Dos fichas de nombre completo casi igual -a una le falta o le sobra una palabra, o una palabra está mal
+                tipeada. Elegí cuál de las dos queda (la otra se fusiona en esa), o descartá si son dos personas
+                distintas que solo comparten parte del nombre.
+              </p>
+              {nombresSimilares.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-border rounded-2xl bg-surface/50 text-muted-foreground">
+                  <CheckCircleIcon className="w-7 h-7 mb-2 opacity-50" />
+                  <p className="text-sm">Sin nombres parecidos pendientes de revisar.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {nombresSimilares.map((par) => (
+                    <div key={par.clave} className="bg-surface border border-border rounded-2xl p-5">
+                      <h3 className="font-semibold mb-3">
+                        &quot;{par.a.nombre}&quot; / &quot;{par.b.nombre}&quot;
+                      </h3>
+
+                      <div className="space-y-2 mb-4">
+                        {[par.a, par.b].map((r) => (
+                          <label
+                            key={r.id}
+                            className="flex flex-wrap items-center gap-3 p-2 rounded-lg hover:bg-background/50 cursor-pointer text-sm"
+                          >
+                            <input
+                              type="radio"
+                              name={`similar-${par.clave}`}
+                              checked={canonicoPorSimilar[par.clave] === r.id}
+                              onChange={() => setCanonicoPorSimilar((prev) => ({ ...prev, [par.clave]: r.id }))}
+                              className="accent-primary"
+                            />
+                            <span className="font-medium">{r.nombre}</span>
+                            <span className="text-muted-foreground">club: {r.club || "-"}</span>
+                            <span className="text-muted-foreground">{r.resultadosCount} resultado(s)</span>
+                            <span className="text-xs text-muted-foreground">
+                              creado {new Date(r.createdAt).toLocaleDateString("es-AR")}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => fusionarSimilar(par)}
+                          disabled={fusionandoSimilar === par.clave || !canonicoPorSimilar[par.clave]}
+                          className="gap-2"
+                        >
+                          {fusionandoSimilar === par.clave ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <MergeIcon className="w-4 h-4" />}
+                          Fusionar en la ficha seleccionada
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => descartarSimilar(par.clave)} disabled={fusionandoSimilar === par.clave}>
+                          Son personas distintas -descartar
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>

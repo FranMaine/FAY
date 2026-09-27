@@ -227,3 +227,123 @@ export async function buscarCandidatosApellidoSuelto(): Promise<CandidatoApellid
   }
   return resultado;
 }
+
+// Distancia de edición (Levenshtein) entre dos strings cortos -acá solo se
+// usa sobre palabras individuales de un nombre (no sobre el nombre entero),
+// así que el costo O(n*m) es insignificante.
+function distanciaEdicion(a: string, b: string): number {
+  const fila = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    let anterior = fila[0];
+    fila[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const temp = fila[j];
+      fila[j] = a[i - 1] === b[j - 1] ? anterior : 1 + Math.min(anterior, fila[j], fila[j - 1]);
+      anterior = temp;
+    }
+  }
+  return fila[b.length];
+}
+
+export interface ParDuplicadoSimilar {
+  clave: string;
+  a: RegatistaInfo;
+  b: RegatistaInfo;
+}
+
+/**
+ * Compara dos nombres COMPLETOS (2+ palabras cada uno) palabra por palabra
+ * y dice si son "casi el mismo nombre" -pensada para nombres que
+ * normalizarNombre() NO junta (no son idénticos) pero que probablemente
+ * sean la misma persona: le falta o le sobra una palabra a uno respecto
+ * del otro (ej: "Sofía Mainero" / "Sofía Valentina Mainero"), o una
+ * palabra está mal tipeada (ej: "Mainero" / "Maynero", algo que puede
+ * pasar al tipear a mano un resultado o al leer un PDF escaneado).
+ *
+ * Regla, pensada para evitar el falso positivo más obvio (dos personas
+ * DISTINTAS que comparten apellido, ej. "Juan Perez" / "Pedro Perez"): se
+ * hace un emparejamiento de palabras entre los dos nombres (iguales o a
+ * distancia de edición 1) y se exige que la SUMA de palabras sin pareja
+ * de ambos lados sea como mucho 1. Dos "Perez" con nombre de pila
+ * distinto tienen 1 palabra sin pareja de cada lado (suma 2) y quedan
+ * afuera; a "Sofía Mainero" le sobra o le falta una sola palabra respecto
+ * de la otra variante (suma como mucho 1) y sí cuenta como parecido.
+ */
+export function sonNombresParecidos(nombreA: string, nombreB: string): boolean {
+  const tokensDe = (nombre: string) => normalizarNombre(nombre).split(' ').filter(Boolean);
+  const tokensA = tokensDe(nombreA);
+  const tokensB = tokensDe(nombreB);
+  if (tokensA.length < 2 || tokensB.length < 2) return false;
+  if (normalizarNombre(nombreA) === normalizarNombre(nombreB)) return false; // idénticos: no es este caso
+
+  const restantesB = [...tokensB];
+  let sinPareja = 0;
+  for (const t of tokensA) {
+    const idx = restantesB.findIndex((p) => p === t || distanciaEdicion(t, p) <= 1);
+    if (idx === -1) sinPareja++;
+    else restantesB.splice(idx, 1);
+  }
+  sinPareja += restantesB.length; // palabras de B que quedaron sin usar
+
+  return sinPareja <= 1;
+}
+
+/**
+ * Detecta pares de regatistas de nombre completo (a diferencia de
+ * buscarCandidatosApellidoSuelto, que busca nombres de una sola palabra)
+ * que sonNombresParecidos() considera casi el mismo nombre -ver ahí la
+ * regla exacta.
+ */
+export async function buscarCandidatosNombreSimilar(): Promise<ParDuplicadoSimilar[]> {
+  const regatistas = await prisma.regatista.findMany({
+    include: { club: true, _count: { select: { resultados: true } } },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  const toInfo = (r: (typeof regatistas)[number]): RegatistaInfo => ({
+    id: r.id,
+    nombre: r.nombre,
+    club: r.club?.nombre ?? null,
+    resultadosCount: r._count.resultados,
+    createdAt: r.createdAt,
+  });
+
+  const tokensDe = (nombre: string) => normalizarNombre(nombre).split(' ').filter(Boolean);
+  const multiPalabra = regatistas.filter((r) => tokensDe(r.nombre).length >= 2);
+
+  // Índice palabra->fichas: para no comparar cada nombre contra TODOS los
+  // demás (con varios miles de regatistas, esa comparación de a pares
+  // sería demasiado lenta acá adentro de una función serverless). Solo se
+  // comparan nombres que ya comparten al menos una palabra exacta -alcanza,
+  // porque sonNombresParecidos() exige que casi todas las palabras
+  // coincidan, así que dos nombres realmente parecidos van a compartir
+  // alguna palabra exacta salvo el caso raro de que la ÚNICA palabra
+  // distinta sea, a la vez, la única que tienen en común dos personas de
+  // nombre corto (2 palabras): un costo aceptable a cambio de que esto siga
+  // siendo rápido.
+  const porToken = new Map<string, typeof multiPalabra>();
+  for (const r of multiPalabra) {
+    for (const t of tokensDe(r.nombre)) {
+      if (!porToken.has(t)) porToken.set(t, []);
+      porToken.get(t)!.push(r);
+    }
+  }
+
+  const vistos = new Set<string>(); // pares ya emitidos, por par de ids ordenado
+  const resultado: ParDuplicadoSimilar[] = [];
+
+  for (const r of multiPalabra) {
+    const candidatos = new Set<(typeof multiPalabra)[number]>();
+    for (const t of tokensDe(r.nombre)) for (const c of porToken.get(t) ?? []) candidatos.add(c);
+
+    for (const c of candidatos) {
+      if (c.id === r.id) continue;
+      const parKey = [r.id, c.id].sort().join('|');
+      if (vistos.has(parKey) || !sonNombresParecidos(r.nombre, c.nombre)) continue;
+      vistos.add(parKey);
+      resultado.push({ clave: parKey, a: toInfo(r), b: toInfo(c) });
+    }
+  }
+
+  return resultado;
+}
