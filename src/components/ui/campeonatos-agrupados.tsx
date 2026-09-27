@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRightIcon, SailboatIcon } from "lucide-react";
@@ -40,7 +41,9 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
           >
             <div className="flex items-start justify-between gap-3">
               {g.logoUrl ? (
-                <Image src={g.logoUrl} alt="" width={160} height={160} className="h-16 w-16 shrink-0 object-contain" />
+                <ViewTransition name={`evento-logo-${g.anio}-${slugificar(g.nombre)}`} share="morph" default="none">
+                  <Image src={g.logoUrl} alt="" width={160} height={160} className="h-16 w-16 shrink-0 object-contain" />
+                </ViewTransition>
               ) : (
                 <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
                   <SailboatIcon className="h-8 w-8" />

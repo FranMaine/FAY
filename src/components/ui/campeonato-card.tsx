@@ -39,7 +39,9 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
         <div className="flex items-start justify-between gap-3">
           <span className="flex items-center gap-2">
             {campeonato.logoUrl && (
-              <Image src={campeonato.logoUrl} alt="" width={72} height={72} className="h-9 w-9 shrink-0 rounded-lg border border-border bg-surface object-contain p-1" />
+              <ViewTransition name={`campeonato-logo-${campeonato.id}`} share="morph" default="none">
+                <Image src={campeonato.logoUrl} alt="" width={72} height={72} className="h-9 w-9 shrink-0 rounded-lg border border-border bg-surface object-contain p-1" />
+              </ViewTransition>
             )}
             <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
               <ClaseIcon nombreClase={campeonato.clase} className="h-5 w-5 shrink-0 object-contain" />

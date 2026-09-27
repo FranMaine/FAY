@@ -139,13 +139,15 @@ export default async function CampeonatoDetailPage({ params }: Props) {
           <ClaseIcon nombreClase={campeonato.clase.nombre} className="absolute -right-6 -top-6 h-48 w-48 object-contain opacity-[0.07]" />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start">
             {campeonato.logoUrl && (
-              <Image
-                src={campeonato.logoUrl}
-                alt=""
-                width={200}
-                height={200}
-                className="h-20 w-20 shrink-0 rounded-2xl border border-border bg-surface object-contain p-2 sm:h-24 sm:w-24"
-              />
+              <ViewTransition name={`campeonato-logo-${campeonato.id}`} share="morph" default="none">
+                <Image
+                  src={campeonato.logoUrl}
+                  alt=""
+                  width={200}
+                  height={200}
+                  className="h-20 w-20 shrink-0 rounded-2xl border border-border bg-surface object-contain p-2 sm:h-24 sm:w-24"
+                />
+              </ViewTransition>
             )}
             <div className="min-w-0 space-y-4">
               <div className="flex flex-wrap items-center gap-3">
