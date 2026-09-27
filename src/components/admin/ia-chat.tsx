@@ -10,7 +10,7 @@ interface Mensaje {
   texto: string;
 }
 
-// Frases mientras Vigía consulta: van rotando con cada pregunta.
+// Frases mientras VigIA consulta: van rotando con cada pregunta.
 const ESPERAS = ["Oteando el horizonte…", "Revisando las cartas de navegación…", "Sondeando la base de datos…", "Mirando desde el mástil…"];
 
 const SUGERENCIAS = [
@@ -20,7 +20,7 @@ const SUGERENCIAS = [
   "Mostrame el ranking de 420 de 2026",
 ];
 
-// Vigía, el asistente para el admin: botón anclado al borde derecho que abre un panel
+// VigIA, el asistente para el admin: botón anclado al borde derecho que abre un panel
 // lateral de chat. Solo consulta datos (el servidor le da herramientas de
 // lectura, ver /api/admin/ia/chat): no puede modificar nada.
 export function IaChat() {
@@ -71,13 +71,33 @@ export function IaChat() {
     }
   }
 
+  const yaPreguntadas = new Set(mensajes.filter((m) => m.rol === "usuario").map((m) => m.texto));
+  const sugeridas = SUGERENCIAS.filter((sug) => !yaPreguntadas.has(sug));
+
+  // Botones "flotando" debajo de una respuesta de VigIA.
+  const botonesBase = (
+    <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Preguntas frecuentes">
+      {sugeridas.map((sug) => (
+        <button
+          key={sug}
+          type="button"
+          disabled={enviando}
+          onClick={() => enviar(sug)}
+          className="rounded-full border border-border bg-background/60 px-3 py-1.5 text-left text-xs shadow-sm transition-[transform,border-color] duration-150 ease-out-strong hover:-translate-y-0.5 hover:border-primary/50 active:scale-95 disabled:opacity-50"
+        >
+          {sug}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <>
       {/* Pestaña anclada al borde derecho, siempre a la vista. */}
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        aria-label="Abrir a Vigía, el asistente de IA"
+        aria-label="Abrir a VigIA, el asistente de IA"
         aria-expanded={abierto}
         className={cn(
           "fixed right-0 top-1/2 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-2xl border border-r-0 border-border bg-primary-solid px-3 py-4 text-white shadow-lg transition-[transform,opacity] duration-200 ease-out-strong hover:pr-4 active:scale-95",
@@ -85,7 +105,7 @@ export function IaChat() {
         )}
       >
         <BinocularsIcon className="h-5 w-5" aria-hidden="true" />
-        <span className="text-sm font-semibold [writing-mode:vertical-rl]">Vigía</span>
+        <span className="text-sm font-semibold [writing-mode:vertical-rl]">VigIA</span>
       </button>
 
       <div
@@ -98,7 +118,7 @@ export function IaChat() {
       />
       <aside
         role="dialog"
-        aria-label="Vigía, asistente de IA"
+        aria-label="VigIA, asistente de IA"
         aria-hidden={!abierto}
         inert={!abierto}
         className={cn(
@@ -109,21 +129,24 @@ export function IaChat() {
         <header className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
             <BinocularsIcon className="h-5 w-5 text-primary" aria-hidden="true" />
-            <h2 className="font-bold">Vigía</h2>
+            <h2 className="font-bold">VigIA</h2>
           </div>
-          <Button variant="ghost" size="icon" aria-label="Cerrar a Vigía" onClick={() => setAbierto(false)}>
+          <Button variant="ghost" size="icon" aria-label="Cerrar a VigIA" onClick={() => setAbierto(false)}>
             <XIcon className="h-5 w-5" />
           </Button>
         </header>
 
         <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4" aria-live="polite">
           {mensajes.length === 0 && (
+            <div>
             <p className="text-sm text-muted-foreground">
-              ¡Hola! Soy Vigía. Desde acá arriba del mástil veo todos los datos del sitio: regatistas, campeonatos, rankings y clubes. Preguntame lo que necesites. Yo solo miro y aviso, no toco nada.
+              ¡Hola! Soy VigIA. Desde acá arriba del mástil veo todos los datos del sitio: regatistas, campeonatos, rankings y clubes. Preguntame lo que necesites. Yo solo miro y aviso, no toco nada.
             </p>
+            {botonesBase}
+            </div>
           )}
           {mensajes.map((m, i) => (
-            <div key={i} className={cn("flex", m.rol === "usuario" ? "justify-end" : "justify-start")}>
+            <div key={i} className={cn("flex flex-col", m.rol === "usuario" ? "items-end" : "items-start")}>
               <p
                 className={cn(
                   "max-w-[88%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm",
@@ -132,6 +155,7 @@ export function IaChat() {
               >
                 {m.texto}
               </p>
+              {m.rol === "ia" && i === mensajes.length - 1 && !enviando && botonesBase}
             </div>
           ))}
           {enviando && (
@@ -147,26 +171,12 @@ export function IaChat() {
           <div ref={finRef} />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto border-t border-border px-3 pt-3" role="group" aria-label="Preguntas frecuentes">
-          {SUGERENCIAS.map((sug) => (
-            <button
-              key={sug}
-              type="button"
-              disabled={enviando}
-              onClick={() => enviar(sug)}
-              className="shrink-0 rounded-full border border-border px-3 py-1.5 text-xs transition-colors hover:border-primary/50 hover:bg-background/60 disabled:opacity-50"
-            >
-              {sug}
-            </button>
-          ))}
-        </div>
-
         <form
           onSubmit={(e) => {
             e.preventDefault();
             enviar(texto);
           }}
-          className="flex items-center gap-2 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
+          className="flex items-center gap-2 border-t border-border p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
         >
           <input
             ref={inputRef}
