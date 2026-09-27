@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2Icon, SendIcon, SparklesIcon, XIcon } from "lucide-react";
+import { BinocularsIcon, Loader2Icon, SendIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, mensajeDeError } from "@/lib/utils";
 
@@ -10,6 +10,9 @@ interface Mensaje {
   texto: string;
 }
 
+// Frases mientras Vigía consulta: van rotando con cada pregunta.
+const ESPERAS = ["Oteando el horizonte…", "Revisando las cartas de navegación…", "Sondeando la base de datos…", "Mirando desde el mástil…"];
+
 const SUGERENCIAS = [
   "¿Cuántos regatistas y campeonatos hay cargados?",
   "¿Qué clubes tienen más podios?",
@@ -17,7 +20,7 @@ const SUGERENCIAS = [
   "Mostrame el ranking de 420 de 2026",
 ];
 
-// Asistente para el admin: botón anclado al borde derecho que abre un panel
+// Vigía, el asistente para el admin: botón anclado al borde derecho que abre un panel
 // lateral de chat. Solo consulta datos (el servidor le da herramientas de
 // lectura, ver /api/admin/ia/chat): no puede modificar nada.
 export function IaChat() {
@@ -26,6 +29,7 @@ export function IaChat() {
   const [texto, setTexto] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [espera, setEspera] = useState(ESPERAS[0]);
   const finRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +53,7 @@ export function IaChat() {
     setTexto("");
     setError(null);
     setEnviando(true);
+    setEspera(ESPERAS[nuevos.length % ESPERAS.length]);
     try {
       const res = await fetch("/api/admin/ia/chat", {
         method: "POST",
@@ -72,15 +77,15 @@ export function IaChat() {
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        aria-label="Abrir el asistente de IA"
+        aria-label="Abrir a Vigía, el asistente de IA"
         aria-expanded={abierto}
         className={cn(
           "fixed right-0 top-1/2 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-2xl border border-r-0 border-border bg-primary-solid px-3 py-4 text-white shadow-lg transition-[transform,opacity] duration-200 ease-out-strong hover:pr-4 active:scale-95",
           abierto && "pointer-events-none opacity-0"
         )}
       >
-        <SparklesIcon className="h-5 w-5" aria-hidden="true" />
-        <span className="text-sm font-semibold [writing-mode:vertical-rl]">Asistente IA</span>
+        <BinocularsIcon className="h-5 w-5" aria-hidden="true" />
+        <span className="text-sm font-semibold [writing-mode:vertical-rl]">Vigía</span>
       </button>
 
       <div
@@ -93,7 +98,7 @@ export function IaChat() {
       />
       <aside
         role="dialog"
-        aria-label="Asistente de IA"
+        aria-label="Vigía, asistente de IA"
         aria-hidden={!abierto}
         inert={!abierto}
         className={cn(
@@ -103,33 +108,19 @@ export function IaChat() {
       >
         <header className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
-            <SparklesIcon className="h-5 w-5 text-primary" aria-hidden="true" />
-            <h2 className="font-bold">Asistente IA</h2>
+            <BinocularsIcon className="h-5 w-5 text-primary" aria-hidden="true" />
+            <h2 className="font-bold">Vigía</h2>
           </div>
-          <Button variant="ghost" size="icon" aria-label="Cerrar el asistente" onClick={() => setAbierto(false)}>
+          <Button variant="ghost" size="icon" aria-label="Cerrar a Vigía" onClick={() => setAbierto(false)}>
             <XIcon className="h-5 w-5" />
           </Button>
         </header>
 
         <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4" aria-live="polite">
           {mensajes.length === 0 && (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Preguntame lo que quieras sobre los datos del sitio: regatistas, campeonatos, rankings, clubes. Solo consulto, no modifico nada.
-              </p>
-              <div className="flex flex-col gap-2">
-                {SUGERENCIAS.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => enviar(s)}
-                    className="rounded-xl border border-border px-3 py-2 text-left text-sm transition-colors hover:border-primary/50 hover:bg-background/60"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              ¡Hola! Soy Vigía. Desde acá arriba del mástil veo todos los datos del sitio: regatistas, campeonatos, rankings y clubes. Preguntame lo que necesites. Yo solo miro y aviso, no toco nada.
+            </p>
           )}
           {mensajes.map((m, i) => (
             <div key={i} className={cn("flex", m.rol === "usuario" ? "justify-end" : "justify-start")}>
@@ -145,7 +136,7 @@ export function IaChat() {
           ))}
           {enviando && (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden="true" /> Consultando…
+              <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden="true" /> {espera}
             </p>
           )}
           {error && (
@@ -156,12 +147,26 @@ export function IaChat() {
           <div ref={finRef} />
         </div>
 
+        <div className="flex gap-2 overflow-x-auto border-t border-border px-3 pt-3" role="group" aria-label="Preguntas frecuentes">
+          {SUGERENCIAS.map((sug) => (
+            <button
+              key={sug}
+              type="button"
+              disabled={enviando}
+              onClick={() => enviar(sug)}
+              className="shrink-0 rounded-full border border-border px-3 py-1.5 text-xs transition-colors hover:border-primary/50 hover:bg-background/60 disabled:opacity-50"
+            >
+              {sug}
+            </button>
+          ))}
+        </div>
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
             enviar(texto);
           }}
-          className="flex items-center gap-2 border-t border-border p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
+          className="flex items-center gap-2 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
         >
           <input
             ref={inputRef}
