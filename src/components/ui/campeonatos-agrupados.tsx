@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { ChevronDownIcon, SailboatIcon } from "lucide-react";
 import { CampeonatoCard, type Campeonato } from "@/components/ui/campeonato-card";
 import { ClaseIcon } from "@/components/icons/clase-icons";
@@ -20,7 +21,13 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
       if (!map.has(clave)) map.set(clave, { nombre: nombreGrupo, anio: c.anio, items: [] });
       map.get(clave)!.items.push(c);
     }
-    return [...map.entries()].map(([clave, g]) => ({ clave, ...g }));
+    return [...map.entries()].map(([clave, g]) => ({
+      clave,
+      ...g,
+      // Logo propio del evento: el de cualquiera de sus campeonatos que
+      // tenga uno cargado (en la práctica todos comparten el mismo).
+      logoUrl: g.items.find((c) => c.logoUrl)?.logoUrl ?? null,
+    }));
   }, [campeonatos]);
 
   function toggle(clave: string) {
@@ -46,7 +53,11 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
               className="text-left rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-surface p-5 h-full flex flex-col transition-[transform,border-color] duration-200 ease-out-strong hover:-translate-y-1 active:scale-[0.985] hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <div className="flex justify-between items-start mb-4">
-                <span className="w-11 h-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center"><SailboatIcon className="w-6 h-6" /></span>
+                {g.logoUrl ? (
+                  <Image src={g.logoUrl} alt="" width={88} height={88} className="w-11 h-11 rounded-xl border border-border bg-surface object-contain p-1" />
+                ) : (
+                  <span className="w-11 h-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center"><SailboatIcon className="w-6 h-6" /></span>
+                )}
                 <ChevronDownIcon className={cn("w-5 h-5 text-muted transition-transform", abierta && "rotate-180")} />
               </div>
               <p className="text-lg font-bold text-foreground mb-1 line-clamp-2">{g.nombre}</p>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, Fragment } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon } from "lucide-react";
@@ -18,6 +19,7 @@ interface Campeonato {
   anio: number;
   estado: "BORRADOR" | "PUBLICADO";
   clase: { id: string; nombre: string };
+  logoUrl?: string | null;
 }
 
 interface Clase {
@@ -44,7 +46,9 @@ function agruparPorEvento(campeonatos: Campeonato[]) {
     if (!grupos.has(clave)) grupos.set(clave, { nombre: nombreGrupo, anio: c.anio, items: [] });
     grupos.get(clave)!.items.push(c);
   }
-  return [...grupos.values()].sort((a, b) => b.anio - a.anio || a.nombre.localeCompare(b.nombre));
+  return [...grupos.values()]
+    .map((g) => ({ ...g, logoUrl: g.items.find((c) => c.logoUrl)?.logoUrl ?? null }))
+    .sort((a, b) => b.anio - a.anio || a.nombre.localeCompare(b.nombre));
 }
 
 export default function AdminCampeonatosPage() {
@@ -246,7 +250,11 @@ export default function AdminCampeonatosPage() {
                           <td className="px-6 py-4 font-semibold" colSpan={2}>
                             <div className="flex items-center gap-2">
                               <ChevronRightIcon className={cn("w-4 h-4 text-muted-foreground transition-transform", abierta && "rotate-90")} />
-                              <SailboatIcon className="w-4 h-4 text-primary" />
+                              {grupo.logoUrl ? (
+                                <Image src={grupo.logoUrl} alt="" width={32} height={32} className="h-4 w-4 object-contain" />
+                              ) : (
+                                <SailboatIcon className="w-4 h-4 text-primary" />
+                              )}
                               {grupo.nombre} <span className="text-muted-foreground font-normal">{grupo.anio}</span>
                               <span className="text-muted-foreground font-normal text-xs">
                                 ({grupo.items.length} categorías)
