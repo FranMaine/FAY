@@ -91,17 +91,17 @@ function LoginForm() {
         </CardHeader>
         <CardContent>
           {passwordRecienRestablecida && !error && (
-            <div className="bg-green-500/10 border border-green-500/50 text-green-500 text-sm p-3 rounded-md mb-4 text-center">
+            <div className="bg-green-500/10 border border-green-500/50 text-green-500 text-sm p-3 rounded-md mb-4 text-center fade-in-up">
               Tu contraseña se actualizó correctamente. Ya podés iniciar sesión.
             </div>
           )}
           {error && (
-            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center">
+            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center fade-in-up">
               {error}
             </div>
           )}
           {emailNoVerificado && (
-            <div className="bg-amber-500/10 border border-amber-500/50 text-amber-500 text-sm p-3 rounded-md mb-4 text-center space-y-2">
+            <div className="bg-amber-500/10 border border-amber-500/50 text-amber-500 text-sm p-3 rounded-md mb-4 text-center space-y-2 fade-in-up">
               <p>Todavía no confirmaste tu email. Revisá tu casilla, o pedimos un nuevo enlace.</p>
               {reenviado ? (
                 <p className="font-medium">Listo, te mandamos un nuevo enlace.</p>

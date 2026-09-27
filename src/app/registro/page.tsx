@@ -176,7 +176,7 @@ export default function RegistroPage() {
         </CardHeader>
         <CardContent>
           {error && (
-            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center">
+            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center fade-in-up">
               {error}
             </div>
           )}

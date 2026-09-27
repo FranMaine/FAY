@@ -218,7 +218,7 @@ export default function VincularPage() {
           )}
 
           {error && (
-            <div role="alert" className="flex items-center gap-2 p-4 rounded-xl border border-red-500/50 bg-red-500/10 text-red-500 text-sm">
+            <div role="alert" className="flex items-center gap-2 p-4 rounded-xl border border-red-500/50 bg-red-500/10 text-red-500 text-sm fade-in-up">
               <AlertCircleIcon className="w-4 h-4 shrink-0" />
               {error}
             </div>

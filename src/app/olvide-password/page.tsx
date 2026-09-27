@@ -90,7 +90,7 @@ export default function OlvidePasswordPage() {
                 />
               </div>
               {error && (
-                <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
+                <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center fade-in-up">
                   {error}
                 </div>
               )}

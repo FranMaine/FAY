@@ -71,7 +71,7 @@ function ResetPasswordForm() {
         </CardHeader>
         <CardContent>
           {enlaceInvalido ? (
-            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
+            <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center fade-in-up">
               Este enlace es inválido. Pedí uno nuevo desde{" "}
               <Link href="/olvide-password" className="underline font-medium">
                 recuperar contraseña
@@ -80,7 +80,7 @@ function ResetPasswordForm() {
           ) : (
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {error && (
-                <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center">
+                <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md text-center fade-in-up">
                   {error}
                 </div>
               )}
