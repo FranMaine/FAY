@@ -9,6 +9,19 @@ import type { NextConfig } from "next";
 const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 
 const nextConfig: NextConfig = {
+  // Sin esto, React <ViewTransition> (usado en el escudo de club, el logo
+  // y el título de campeonato -ver ClubAvatar, CampeonatoCard, etc.) NO
+  // funciona: renderiza sin tirar error, pero document.startViewTransition()
+  // arranca y nunca termina -la navegación queda colgada un instante y el
+  // contenido aparece sin ninguna animación. Confirmado con un repro
+  // mínimo fuera de este código (dos páginas con un solo <ViewTransition>
+  // entre ellas): sin este flag, la promesa `finished` nunca resuelve; con
+  // él, sí. Es la forma en que Next activa el canal "experimental" de
+  // React (ver needsExperimentalReact en el propio Next) que esta función
+  // de React todavía necesita -Next lo marca "usar con cuidado" porque
+  // afecta el runtime de React del sitio entero, no solo estas
+  // transiciones puntuales.
+  experimental: { gestureTransition: true },
   // Los tests e2e (ver playwright.config.ts) levantan `next dev` y navegan
   // por 127.0.0.1 en vez de localhost -sin esto, Next.js bloquea esas
   // requests de desarrollo (HMR, etc.) por default como protección
