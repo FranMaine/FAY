@@ -1,5 +1,6 @@
 import { ViewTransition } from "react";
 import { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Podio } from "@/components/ranking/podio";
 import { ClaseIcon } from "@/components/icons/clase-icons";
@@ -136,27 +137,38 @@ export default async function CampeonatoDetailPage({ params }: Props) {
 
         <header className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-10">
           <ClaseIcon nombreClase={campeonato.clase.nombre} className="absolute -right-6 -top-6 h-48 w-48 object-contain opacity-[0.07]" />
-          <div className="relative space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-lg bg-primary-solid px-3 py-1.5 text-sm font-semibold text-white">
-                <ClaseIcon nombreClase={campeonato.clase.nombre} className="h-5 w-5 object-contain brightness-0 invert" />
-                {campeonato.clase.nombre}
-              </span>
-              <span className="rounded-lg border border-border bg-background/40 px-3 py-1.5 text-sm font-semibold tabular-nums">{campeonato.anio}</span>
-            </div>
-            <ViewTransition name={`campeonato-${campeonato.id}`} share="morph" default="none">
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{campeonato.nombre}</h1>
-            </ViewTransition>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
-              {campeonato.sede && (
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start">
+            {campeonato.logoUrl && (
+              <Image
+                src={campeonato.logoUrl}
+                alt=""
+                width={200}
+                height={200}
+                className="h-20 w-20 shrink-0 rounded-2xl border border-border bg-surface object-contain p-2 sm:h-24 sm:w-24"
+              />
+            )}
+            <div className="min-w-0 space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-2 rounded-lg bg-primary-solid px-3 py-1.5 text-sm font-semibold text-white">
+                  <ClaseIcon nombreClase={campeonato.clase.nombre} className="h-5 w-5 object-contain brightness-0 invert" />
+                  {campeonato.clase.nombre}
+                </span>
+                <span className="rounded-lg border border-border bg-background/40 px-3 py-1.5 text-sm font-semibold tabular-nums">{campeonato.anio}</span>
+              </div>
+              <ViewTransition name={`campeonato-${campeonato.id}`} share="morph" default="none">
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{campeonato.nombre}</h1>
+              </ViewTransition>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
+                {campeonato.sede && (
+                  <div className="flex items-center gap-2">
+                    <MapPinIcon className="w-5 h-5" aria-hidden="true" />
+                    <span>{campeonato.sede.nombre}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
-                  <MapPinIcon className="w-5 h-5" aria-hidden="true" />
-                  <span>{campeonato.sede.nombre}</span>
+                  <CalendarIcon className="w-5 h-5" aria-hidden="true" />
+                  <span className="tabular-nums">{campeonato.fechaInicio ? new Date(campeonato.fechaInicio).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) : campeonato.anio}</span>
                 </div>
-              )}
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5" aria-hidden="true" />
-                <span className="tabular-nums">{campeonato.fechaInicio ? new Date(campeonato.fechaInicio).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) : campeonato.anio}</span>
               </div>
             </div>
           </div>

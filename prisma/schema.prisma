@@ -148,6 +148,10 @@ model Campeonato {
   fechaInicio DateTime?
   fechaFin    DateTime?
   fuenteUrl   String?
+  // Logo/isotipo propio del campeonato (distinto del logo del club sede),
+  // cargado a mano por un admin desde /admin/campeonatos/[id] -si es null
+  // se muestra el ícono genérico de la clase.
+  logoUrl     String?
   estado      EstadoCampeonato   @default(BORRADOR)
   descartes   Int                @default(0)
   regatas     Regata[]

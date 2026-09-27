@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, useRef, use } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { PlusIcon, SaveIcon, UploadIcon, CheckCircleIcon, Loader2Icon, TrashIcon, AlertCircleIcon, PencilIcon, XIcon } from "lucide-react";
+import Image from "next/image";
+import { PlusIcon, SaveIcon, UploadIcon, CheckCircleIcon, Loader2Icon, TrashIcon, AlertCircleIcon, PencilIcon, XIcon, ImageIcon } from "lucide-react";
 
 import { CsvUploadModal } from "@/components/admin/csv-upload-modal";
+import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
 import { mensajeDeError } from "@/lib/utils";
 
 interface Resultado {
@@ -36,6 +38,7 @@ interface Campeonato {
   descartes: number;
   clase: { nombre: string };
   regatas: Regata[];
+  logoUrl?: string | null;
 }
 
 interface EditRow {
@@ -87,6 +90,10 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
   const [nombreInput, setNombreInput] = useState("");
   const [eventoInput, setEventoInput] = useState("");
   const [sedeIdInput, setSedeIdInput] = useState("");
+
+  const [subiendoLogo, setSubiendoLogo] = useState(false);
+  const [errorLogo, setErrorLogo] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [clubes, setClubes] = useState<{ id: string; nombre: string }[]>([]);
   const [isSavingNombre, setIsSavingNombre] = useState(false);
 
@@ -284,6 +291,35 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
     }
   };
 
+  const subirLogo = async (file: File) => {
+    setSubiendoLogo(true);
+    setErrorLogo(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/admin/campeonatos/${id}/logo`, { method: "PATCH", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo subir el logo");
+      setCampeonato((prev) => (prev ? { ...prev, logoUrl: data.logoUrl } : prev));
+    } catch (err) {
+      setErrorLogo(mensajeDeError(err));
+    } finally {
+      setSubiendoLogo(false);
+    }
+  };
+
+  const quitarLogo = async () => {
+    setErrorLogo(null);
+    try {
+      const res = await fetch(`/api/admin/campeonatos/${id}/logo`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo quitar el logo");
+      setCampeonato((prev) => (prev ? { ...prev, logoUrl: null } : prev));
+    } catch (err) {
+      setErrorLogo(mensajeDeError(err));
+    }
+  };
+
   const handlePublicar = async () => {
     if (!campeonato) return;
     setIsPublishing(true);
@@ -325,7 +361,52 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
+          <div className="flex items-start gap-4">
+            <div className="shrink-0">
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/avif"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) subirLogo(file);
+                  e.target.value = "";
+                }}
+              />
+              {campeonato.logoUrl ? (
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={subiendoLogo}
+                  title="Reemplazar logo del campeonato"
+                  className="block w-16 h-16 rounded-xl border border-border bg-surface p-1.5 transition-colors hover:border-primary/50"
+                >
+                  {subiendoLogo ? (
+                    <Loader2Icon className="w-full h-full animate-spin text-muted-foreground" />
+                  ) : (
+                    <Image src={campeonato.logoUrl} alt="" width={56} height={56} className="w-full h-full object-contain" />
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={subiendoLogo}
+                  title="Subir logo del campeonato"
+                  className="flex w-16 h-16 items-center justify-center rounded-xl border border-dashed border-border text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+                >
+                  {subiendoLogo ? <Loader2Icon className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+                </button>
+              )}
+              {campeonato.logoUrl && (
+                <div className="mt-1 flex justify-center">
+                  <ConfirmDeleteButton onConfirm={quitarLogo} label="Quitar logo del campeonato" />
+                </div>
+              )}
+              {errorLogo && <p role="alert" className="mt-1 max-w-[9rem] text-xs text-red-500">{errorLogo}</p>}
+            </div>
+            <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Carga de Resultados</h1>
               <Badge
@@ -385,6 +466,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                 </button>
               </p>
             )}
+            </div>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button variant="secondary" onClick={handleNuevaRegata} disabled={isCreatingRegata}>

@@ -1,4 +1,5 @@
 import { ViewTransition } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin, Users, ArrowUpRight } from 'lucide-react';
 import { ClaseIcon } from '@/components/icons/clase-icons';
@@ -13,6 +14,8 @@ export interface Campeonato {
   fechaInicio: string;
   estado: 'PUBLICADO' | 'BORRADOR';
   totalRegatistas: number;
+  /** Logo propio del campeonato (cargado desde /admin/campeonatos/[id]) -si no hay, no se muestra nada en su lugar. */
+  logoUrl?: string | null;
 }
 
 interface CampeonatoCardProps {
@@ -34,9 +37,14 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
     >
       <article className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface p-5 transition-[transform,border-color,box-shadow] duration-200 ease-out-strong group-hover:-translate-y-1 group-active:scale-[0.985] group-hover:border-primary/60 group-hover:shadow-lg group-hover:shadow-primary/5">
         <div className="flex items-start justify-between gap-3">
-          <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-            <ClaseIcon nombreClase={campeonato.clase} className="h-5 w-5 shrink-0 object-contain" />
-            {campeonato.clase}
+          <span className="flex items-center gap-2">
+            {campeonato.logoUrl && (
+              <Image src={campeonato.logoUrl} alt="" width={72} height={72} className="h-9 w-9 shrink-0 rounded-lg border border-border bg-surface object-contain p-1" />
+            )}
+            <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
+              <ClaseIcon nombreClase={campeonato.clase} className="h-5 w-5 shrink-0 object-contain" />
+              {campeonato.clase}
+            </span>
           </span>
           <span className="flex items-center gap-2">
             {campeonato.estado === 'BORRADOR' && (

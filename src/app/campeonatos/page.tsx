@@ -87,6 +87,7 @@ export default async function CampeonatosPage({
     totalRegatistas: inscriptosPorCampeonato.get(c.id)?.size || 0,
     estado: c.estado,
     fechaInicio: c.fechaInicio ? c.fechaInicio.toISOString().split('T')[0] : `${c.anio}-01-01`,
+    logoUrl: c.logoUrl,
   }));
 
 
