@@ -71,6 +71,11 @@ export default function DuplicadosPage() {
   const [canonicoPorSimilar, setCanonicoPorSimilar] = useState<Record<string, string>>({});
   const [fusionandoSimilar, setFusionandoSimilar] = useState<string | null>(null);
 
+  // Sugerencias de la IA por par (nombre parecido): solo orientan, no fusionan.
+  const [sugerenciasSimilar, setSugerenciasSimilar] = useState<Record<string, { mismaPersona: boolean; canonicoId: string | null; confianza: string; motivo: string }>>({});
+  const [pidiendoIaSimilar, setPidiendoIaSimilar] = useState<string | null>(null);
+  const [errorIaSimilar, setErrorIaSimilar] = useState<Record<string, string>>({});
+
   // Sugerencias de la IA por apellido suelto (solo orientan: no fusionan nada).
   const [sugerencias, setSugerencias] = useState<Record<string, { candidatoNombre: string | null; confianza: string; motivo: string }>>({});
   const [pidiendoIa, setPidiendoIa] = useState<string | null>(null);
@@ -252,6 +257,27 @@ export default function DuplicadosPage() {
     // Son personas distintas de nombre parecido (ej: dos hermanos, o dos
     // apellidos que casi coinciden) -se saca de la lista sin tocar la base.
     setNombresSimilares((prev) => prev.filter((x) => x.clave !== clave));
+  };
+
+  const sugerirConIaSimilar = async (par: ParSimilar) => {
+    setPidiendoIaSimilar(par.clave);
+    setErrorIaSimilar((prev) => ({ ...prev, [par.clave]: "" }));
+    try {
+      const res = await fetch("/api/admin/ia/sugerir-nombre-parecido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ aId: par.a.id, bId: par.b.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo pedir la sugerencia");
+      setSugerenciasSimilar((prev) => ({ ...prev, [par.clave]: data }));
+      // Deja marcada la ficha sugerida como canónica; igual hay que apretar "Fusionar".
+      if (data.canonicoId) setCanonicoPorSimilar((prev) => ({ ...prev, [par.clave]: data.canonicoId }));
+    } catch (err) {
+      setErrorIaSimilar((prev) => ({ ...prev, [par.clave]: mensajeDeError(err) }));
+    } finally {
+      setPidiendoIaSimilar(null);
+    }
   };
 
   return (
@@ -538,10 +564,36 @@ export default function DuplicadosPage() {
                           {fusionandoSimilar === par.clave ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <MergeIcon className="w-4 h-4" />}
                           Fusionar en la ficha seleccionada
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => sugerirConIaSimilar(par)}
+                          disabled={pidiendoIaSimilar === par.clave || fusionandoSimilar === par.clave}
+                          className="gap-2"
+                        >
+                          {pidiendoIaSimilar === par.clave ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <SparklesIcon className="w-4 h-4" />}
+                          Sugerir con IA
+                        </Button>
                         <Button size="sm" variant="ghost" onClick={() => descartarSimilar(par.clave)} disabled={fusionandoSimilar === par.clave}>
                           Son personas distintas -descartar
                         </Button>
                       </div>
+
+                      {errorIaSimilar[par.clave] && (
+                        <p role="alert" className="mt-3 text-sm text-red-500">{errorIaSimilar[par.clave]}</p>
+                      )}
+                      {sugerenciasSimilar[par.clave] && (
+                        <p className="mt-3 rounded-lg border border-border bg-background/50 p-3 text-sm" role="status">
+                          <span className="font-medium">
+                            {sugerenciasSimilar[par.clave].mismaPersona
+                              ? `La IA sugiere: son la misma persona, quedarse con "${
+                                  [par.a, par.b].find((r) => r.id === sugerenciasSimilar[par.clave].canonicoId)?.nombre
+                                }" (confianza ${sugerenciasSimilar[par.clave].confianza}).`
+                              : "La IA sugiere que son personas distintas."}
+                          </span>{" "}
+                          <span className="text-muted-foreground">{sugerenciasSimilar[par.clave].motivo} Es solo una orientación: revisalo antes de decidir.</span>
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
