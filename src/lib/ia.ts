@@ -19,16 +19,38 @@ export class IaNoConfiguradaError extends Error {
   }
 }
 
+// Google devuelve en el 429 de "por minuto" cuánto esperar ("Please retry
+// in 8.3s"). Si es corto, conviene esperarlo y reintentar en vez de mostrarle
+// el error al admin -la cuota se comparte entre todos los usos de la clave.
+const ESPERA_MAXIMA_CUOTA_MS = 15_000;
+
+function esperaPorCuotaMinuto(error: ApiError): number | null {
+  if (error.status !== 429 || !error.message.includes('PerMinute')) return null;
+  const segundos = Number(error.message.match(/retry in ([\d.]+)s/i)?.[1]);
+  if (!Number.isFinite(segundos)) return null;
+  const ms = Math.ceil(segundos * 1000) + 500;
+  return ms <= ESPERA_MAXIMA_CUOTA_MS ? ms : null;
+}
+
 /**
  * Reintenta ante errores pasajeros de Gemini (503 saturado, 500 interno):
- * hasta 2 reintentos con 1 s y 2 s de espera. Los demás errores (clave,
- * modelo, cuota) no se reintentan porque volverían a fallar igual.
+ * hasta 2 reintentos con 1 s y 2 s de espera. Si es el 429 de cuota por
+ * minuto y Google pide esperar poco, espera ese tiempo y reintenta una vez.
+ * Los demás errores (clave, modelo, cuota diaria) no se reintentan porque
+ * volverían a fallar igual.
  */
 export async function conReintentos<T>(fn: () => Promise<T>): Promise<T> {
+  let reintentoCuota = false;
   for (let intento = 0; ; intento++) {
     try {
       return await fn();
     } catch (error) {
+      const esperaCuota = error instanceof ApiError && !reintentoCuota ? esperaPorCuotaMinuto(error) : null;
+      if (esperaCuota !== null) {
+        reintentoCuota = true;
+        await new Promise((r) => setTimeout(r, esperaCuota));
+        continue;
+      }
       const pasajero = error instanceof ApiError && (error.status === 503 || error.status === 500);
       if (!pasajero || intento >= 2) throw error;
       await new Promise((r) => setTimeout(r, 1000 * (intento + 1)));
@@ -88,7 +110,10 @@ export function errorDeGemini(error: unknown): { mensaje: string; status: number
     return { status: 502, mensaje: `El modelo "${MODELO}" no existe o no está disponible. Cargá GEMINI_MODEL en Vercel con un modelo vigente de AI Studio.` };
   }
   if (error.status === 429) {
-    return { status: 429, mensaje: 'Llegaste al límite gratuito de Gemini (por minuto o por día). Probá de nuevo más tarde.' };
+    if (error.message.includes('PerDay')) {
+      return { status: 429, mensaje: 'Se agotó la cuota diaria gratuita de Gemini. Vuelve a andar mañana (o pasando la clave a un plan pago).' };
+    }
+    return { status: 429, mensaje: 'Gemini recibió demasiados pedidos en el último minuto (la cuota gratuita es de 5 por minuto, compartida con VigIA). Esperá unos segundos y probá de nuevo.' };
   }
   if (error.status === 503) {
     return { status: 503, mensaje: 'Los servidores de Gemini están saturados en este momento. Probá de nuevo en un minuto.' };
