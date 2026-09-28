@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Podio } from "@/components/ranking/podio";
 import { ClaseIcon } from "@/components/icons/clase-icons";
 import { ResultadosTable } from "@/components/tables/resultados-table";
-import { CsvDownloadButton } from "@/components/ui/csv-download-button";
+import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { ArrowLeftIcon, CalendarIcon, FlagIcon, MapPinIcon, ScissorsIcon, UsersIcon } from "lucide-react";
 import prisma from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
@@ -214,8 +214,9 @@ export default async function CampeonatoDetailPage({ params }: Props) {
               <h2 className="text-2xl font-bold">Clasificación General</h2>
               <Link href="/reglas" className="text-xs text-muted-foreground hover:text-primary hover:underline">¿Cómo se calcula esto?</Link>
             </div>
-            <CsvDownloadButton
-              filename={`${campeonato.nombre} ${campeonato.anio}.csv`}
+            <ExcelDownloadButton
+              filename={`${campeonato.nombre} ${campeonato.anio}.xlsx`}
+              sheetName="Clasificación"
               headers={["Posición", "Regatista", "Club", ...regatas.map((r) => `R${r}`), "Total Neto", ...columnasExtra]}
               rows={clasificacionTabla.map((c) => {
                 const puntajesPorRegata = new Map(c.puntajes.map((p) => [p.regata, p]));

@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ClaseIcon } from "@/components/icons/clase-icons";
 import { ClubAvatar, colorDeClub } from "@/components/icons/club-avatar";
-import { CsvDownloadButton } from "@/components/ui/csv-download-button";
+import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { SITE_URL } from "@/lib/site";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
 import { jsonLdSeguro } from "@/lib/json-ld";
@@ -200,8 +200,9 @@ export default async function ClubDetailPage({ params }: Props) {
                 <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
                   <TrophyIcon className="w-5 h-5 text-primary" /> Ranking del club
                 </h2>
-                <CsvDownloadButton
-                  filename={`${club.nombre} - ranking.csv`}
+                <ExcelDownloadButton
+                  filename={`${club.nombre} - ranking.xlsx`}
+                  sheetName="Ranking"
                   headers={["Posición", "Regatista", "Resultados", "Victorias", "Podios", "Mejor puesto"]}
                   rows={rankingInterno.map((r, i) => [i + 1, r.nombre, r.resultados, r.victorias, r.podios, r.mejorPuesto])}
                 />

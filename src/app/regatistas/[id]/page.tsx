@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon } from "lucide-react";
-import { CsvDownloadButton } from "@/components/ui/csv-download-button";
+import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { jsonLdSeguro } from "@/lib/json-ld";
 
 // Mismo caso que /campeonatos/[id]: sin esto, el perfil queda cacheado
@@ -233,8 +233,9 @@ export default async function RegatistaProfilePage({ params }: Props) {
             <div>
               <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                 <h2 className="text-2xl font-bold tracking-tight">Historial de Resultados</h2>
-                <CsvDownloadButton
-                  filename={`${regatista.nombre} - historial.csv`}
+                <ExcelDownloadButton
+                  filename={`${regatista.nombre} - historial.xlsx`}
+                  sheetName="Historial"
                   headers={["Campeonato", "Año", "Clase", "Posición", "Inscriptos", "Puntos Netos"]}
                   rows={historial.map((h) => [
                     h.campeonato.nombre,
