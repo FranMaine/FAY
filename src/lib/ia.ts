@@ -7,6 +7,12 @@ import { z } from 'zod';
 // o renombra el actual.
 export const MODELO = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 
+export class IaRespuestaInvalidaError extends Error {
+  constructor(motivo: string) {
+    super(motivo);
+  }
+}
+
 export class IaNoConfiguradaError extends Error {
   constructor() {
     super('La IA no está configurada (falta GEMINI_API_KEY)');
@@ -47,13 +53,24 @@ export async function pedirJson<T extends z.ZodType>(prompt: string, esquema: T)
     ai.models.generateContent({
       model: MODELO,
       contents: prompt,
-      config: { responseMimeType: 'application/json', temperature: 0, maxOutputTokens: 600 },
+      config: { responseMimeType: 'application/json', temperature: 0, maxOutputTokens: 1024 },
     })
   );
 
   const texto = respuesta.text;
-  if (!texto) throw new Error('La IA no devolvió respuesta');
-  return esquema.parse(JSON.parse(texto));
+  if (!texto) throw new IaRespuestaInvalidaError('La IA no devolvió respuesta. Probá de nuevo.');
+  // Si el modelo se queda sin tokens a mitad de la respuesta, el JSON llega
+  // cortado y JSON.parse explota con un error críptico.
+  if (respuesta.candidates?.[0]?.finishReason === 'MAX_TOKENS') {
+    throw new IaRespuestaInvalidaError('La respuesta de la IA se cortó por ser demasiado larga. Probá de nuevo.');
+  }
+  let json: unknown;
+  try {
+    json = JSON.parse(texto);
+  } catch {
+    throw new IaRespuestaInvalidaError('La IA devolvió una respuesta que no se pudo leer. Probá de nuevo.');
+  }
+  return esquema.parse(json);
 }
 
 /**
@@ -61,6 +78,7 @@ export async function pedirJson<T extends z.ZodType>(prompt: string, esquema: T)
  * deja en el log del servidor). Devuelve null si el error no es de Gemini.
  */
 export function errorDeGemini(error: unknown): { mensaje: string; status: number } | null {
+  if (error instanceof IaRespuestaInvalidaError) return { status: 502, mensaje: error.message };
   if (!(error instanceof ApiError)) return null;
   console.error('[gemini]', error.status, error.message);
   if (error.status === 400 || error.status === 401 || error.status === 403) {

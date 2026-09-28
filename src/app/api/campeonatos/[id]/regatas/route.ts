@@ -16,6 +16,11 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
+    const campeonato = await prisma.campeonato.findUnique({ where: { id }, select: { id: true } });
+    if (!campeonato) {
+      return NextResponse.json({ error: 'Campeonato no encontrado' }, { status: 404 });
+    }
+
     const json = await request.json();
     
     const body = resultadosBulkSchema.parse(json);

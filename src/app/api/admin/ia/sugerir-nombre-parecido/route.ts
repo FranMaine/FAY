@@ -6,7 +6,7 @@ import { iaDisponible, pedirJson, IaNoConfiguradaError, errorDeGemini } from '@/
 import { armarFichaRegatista } from '@/lib/ia-fichas';
 import { permitir } from '@/lib/rate-limit';
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const bodySchema = z.object({
   aId: z.string().min(1),
@@ -33,6 +33,12 @@ export async function POST(request: Request) {
     }
     if (!iaDisponible()) {
       return NextResponse.json({ error: 'La IA no está configurada todavía.' }, { status: 503 });
+    }
+    // Tope por minuto: la cuota gratuita de Gemini es de ~5 pedidos por
+    // minuto, y el límite por hora solo no lo frena (se pasaba de largo y
+    // el usuario veía el error 429 de Google en vez de un aviso claro).
+    if (!(await permitir(`ia-sugerir-min:${session.user.id}`, 5, 60 * 1000))) {
+      return NextResponse.json({ error: 'Vas muy rápido con la IA. Esperá un minuto y probá de nuevo.' }, { status: 429 });
     }
     if (!(await permitir(`ia-sugerir:${session.user.id}`, 30, 60 * 60 * 1000))) {
       return NextResponse.json({ error: 'Llegaste al límite de sugerencias por hora. Probá más tarde.' }, { status: 429 });

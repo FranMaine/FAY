@@ -10,7 +10,10 @@ export async function GET(
   try {
     const { id } = await params;
     const resultados = await prisma.resultado.findMany({
-      where: { regatistaId: id },
+      // Solo campeonatos PUBLICADOS: esta ruta es pública, y sin el filtro
+      // se podían ver resultados de uno en borrador pidiendo las stats de
+      // cualquier regatista que participó.
+      where: { regatistaId: id, regata: { campeonato: { estado: 'PUBLICADO' } } },
       include: {
         regata: {
           include: {

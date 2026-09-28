@@ -7,6 +7,12 @@ import bcrypt from 'bcryptjs';
 import { prisma } from './db';
 import { permitir } from './rate-limit';
 
+// Hash de una clave que nadie conoce, para gastar el mismo tiempo de bcrypt
+// cuando el email no existe -sin esto, el login responde ~100 ms más rápido
+// con un email inexistente que con una clave incorrecta, y eso permite
+// averiguar qué emails tienen cuenta midiendo tiempos.
+const HASH_FALSO = '$2b$10$Qm9a.6cn5ZcDQGG8rzu02OD6FkQlfC.0jovaXQJOhbAzimik2sCjW';
+
 // Subclase propia para poder distinguir este caso puntual del resto de
 // credenciales inválidas -ver el `code` custom, que sí viaja hasta el
 // cliente (a diferencia del mensaje del Error, que Auth.js no expone).
@@ -74,14 +80,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email },
         });
 
-        if (!user || !user.passwordHash) return null;
-
         const isValid = await bcrypt.compare(
           credentials.password as string,
-          user.passwordHash
+          user?.passwordHash ?? HASH_FALSO
         );
 
-        if (!isValid) return null;
+        if (!user || !user.passwordHash || !isValid) return null;
 
         // Se manda un mail de verificación al registrarse (ver
         // /api/registro), pero antes esto nunca se chequeaba acá: se podía
