@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { mensajeDeError } from "@/lib/utils";
+import { toast } from "sonner";
 
 type Rol = "ADMIN" | "ORGANIZADOR" | "REGULAR";
 
@@ -55,7 +56,6 @@ export default function AdminUsuariosPage() {
   async function cambiarRol(usuario: Usuario, nuevoRol: Rol) {
     if (nuevoRol === usuario.role) return;
     setGuardando(usuario.id);
-    setError(null);
     try {
       const res = await fetch(`/api/admin/usuarios/${usuario.id}`, {
         method: "PATCH",
@@ -65,8 +65,9 @@ export default function AdminUsuariosPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo cambiar el rol");
       setResultados((prev) => prev.map((u) => (u.id === usuario.id ? { ...u, role: nuevoRol } : u)));
+      toast.success(`${usuario.name || usuario.email} ahora es ${ETIQUETA_ROL[nuevoRol]}`);
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setGuardando(null);
     }

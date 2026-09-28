@@ -10,6 +10,7 @@ import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
 import { mensajeDeError, cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { ClaseIcon } from "@/components/icons/clase-icons";
 
 interface Campeonato {
@@ -59,7 +60,6 @@ export default function AdminCampeonatosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   // Carpetas abiertas -por defecto todas cerradas, así la vista inicial
   // es una lista corta de eventos en vez de la lista larga de siempre.
   const [abiertas, setAbiertas] = useState<Set<string>>(new Set());
@@ -133,7 +133,6 @@ export default function AdminCampeonatosPage() {
     // La confirmación ahora la maneja ConfirmDeleteButton (in-place, no un
     // window.confirm nativo) -acá ya llega confirmado.
     setDeletingId(c.id);
-    setError(null);
     try {
       const res = await fetch(`/api/campeonatos/${c.id}`, { method: "DELETE" });
       if (!res.ok) {
@@ -141,8 +140,9 @@ export default function AdminCampeonatosPage() {
         throw new Error(data.error || "No se pudo eliminar el campeonato");
       }
       await fetchData();
+      toast.success("Campeonato eliminado");
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setDeletingId(null);
     }
@@ -197,10 +197,6 @@ export default function AdminCampeonatosPage() {
             <PlusIcon className="w-4 h-4" /> Nuevo Campeonato
           </Button>
         </header>
-
-        {error && (
-          <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
-        )}
 
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">

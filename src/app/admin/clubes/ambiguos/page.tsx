@@ -6,6 +6,7 @@ import { AlertCircleIcon, ArrowLeftIcon, Loader2Icon, RefreshCwIcon } from "luci
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { mensajeDeError } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface RegatistaItem {
   id: string;
@@ -72,8 +73,9 @@ export default function AdminClubesPage() {
           .map((c) => (c.id === comboId ? { ...c, regatistas: c.regatistas.filter((r) => r.id !== regatistaId) } : c))
           .filter((c) => c.regatistas.length > 0)
       );
+      toast.success("Club asignado");
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setGuardando(null);
     }

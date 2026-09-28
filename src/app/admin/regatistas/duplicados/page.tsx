@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, Loader2Icon, MergeIcon, AlertCircleIcon, CheckCircleIcon, UserPlusIcon, SparklesIcon } from "lucide-react";
 import { mensajeDeError } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface RegatistaDup {
   id: string;
@@ -121,7 +122,6 @@ export default function DuplicadosPage() {
     if (duplicadoIds.length === 0) return;
 
     setFusionandoGrupo(clave);
-    setError(null);
     try {
       const res = await fetch("/api/admin/regatistas/merge", {
         method: "POST",
@@ -137,7 +137,7 @@ export default function DuplicadosPage() {
       ]);
       setGrupos((prev) => prev.filter((g) => g.nombreNormalizado !== clave));
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setFusionandoGrupo(null);
     }
@@ -149,7 +149,6 @@ export default function DuplicadosPage() {
     if (!canonicoId) return;
 
     setFusionandoSuelto(clave);
-    setError(null);
     try {
       const res = await fetch("/api/admin/regatistas/merge", {
         method: "POST",
@@ -165,7 +164,7 @@ export default function DuplicadosPage() {
       ]);
       setApellidosSueltos((prev) => prev.filter((x) => x.suelto.id !== clave));
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setFusionandoSuelto(null);
     }
@@ -177,7 +176,6 @@ export default function DuplicadosPage() {
     if (nombre.length < 2) return;
 
     setCreandoNuevo(clave);
-    setError(null);
     try {
       const res = await fetch(`/api/admin/regatistas/${item.suelto.id}`, {
         method: "PATCH",
@@ -190,7 +188,7 @@ export default function DuplicadosPage() {
       setExitos((prev) => [`"${item.suelto.nombre}" confirmado como persona nueva: "${nombre}".`, ...prev]);
       setApellidosSueltos((prev) => prev.filter((x) => x.suelto.id !== clave));
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setCreandoNuevo(null);
     }
@@ -231,7 +229,6 @@ export default function DuplicadosPage() {
     const otroId = canonicoId === par.a.id ? par.b.id : par.a.id;
 
     setFusionandoSimilar(par.clave);
-    setError(null);
     try {
       const res = await fetch("/api/admin/regatistas/merge", {
         method: "POST",
@@ -247,7 +244,7 @@ export default function DuplicadosPage() {
       ]);
       setNombresSimilares((prev) => prev.filter((x) => x.clave !== par.clave));
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setFusionandoSimilar(null);
     }

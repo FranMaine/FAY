@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2Icon, CheckIcon, XIcon } from "lucide-react";
+import { toast } from "sonner";
 
 interface Solicitud {
   id: string;
@@ -14,7 +15,6 @@ interface Solicitud {
 export default function SolicitudesAdminPage() {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [procesando, setProcesando] = useState<string | null>(null);
 
   const fetchSolicitudes = useCallback(async () => {
@@ -39,7 +39,6 @@ export default function SolicitudesAdminPage() {
 
   const handleAction = async (id: string, action: 'APROBAR' | 'RECHAZAR') => {
     setProcesando(id);
-    setError(null);
     try {
       const res = await fetch(`/api/admin/solicitudes/${id}`, {
         method: 'PATCH',
@@ -52,11 +51,11 @@ export default function SolicitudesAdminPage() {
       }
 
       // La fila desaparece sola al recargar la lista (esta pantalla solo
-      // muestra las PENDIENTES) -eso ya es la confirmación visual, sin
-      // necesidad de un alert() nativo encima.
+      // muestra las PENDIENTES); el toast confirma qué se hizo.
       await fetchSolicitudes();
+      toast.success(action === 'APROBAR' ? "Solicitud aprobada" : "Solicitud rechazada");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ocurrió un error");
+      toast.error(err instanceof Error ? err.message : "Ocurrió un error");
     } finally {
       setProcesando(null);
     }
@@ -68,10 +67,6 @@ export default function SolicitudesAdminPage() {
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Solicitudes de Vinculación</h1>
         <p className="text-muted-foreground mt-2">Revisá las peticiones de los usuarios para reclamar perfiles de regatistas.</p>
       </div>
-
-      {error && (
-        <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>
-      )}
 
       <Card className="bg-surface border-border">
         <CardContent className="p-0">

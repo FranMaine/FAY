@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { ClubAvatar } from "@/components/icons/club-avatar";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
+import { toast } from "sonner";
 import { mensajeDeError } from "@/lib/utils";
 import { FusionarModal, type ItemFusion } from "@/components/admin/fusionar-modal";
 
@@ -22,7 +23,6 @@ interface ClubItem {
 function FilaClub({ club, onUpdated, onCambio, onEliminado }: { club: ClubItem; onUpdated: (id: string, logoUrl: string | null) => void; onCambio: (id: string, datos: { nombre: string; nombreCompleto: string | null }) => void; onEliminado: (id: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [subiendo, setSubiendo] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [editando, setEditando] = useState(false);
   const [nombre, setNombre] = useState(club.nombre);
   const [completo, setCompleto] = useState(club.nombreCompleto || "");
@@ -30,7 +30,6 @@ function FilaClub({ club, onUpdated, onCambio, onEliminado }: { club: ClubItem; 
 
   async function guardar() {
     setGuardando(true);
-    setError(null);
     try {
       const res = await fetch(`/api/admin/clubes/${club.id}`, {
         method: "PATCH",
@@ -41,28 +40,28 @@ function FilaClub({ club, onUpdated, onCambio, onEliminado }: { club: ClubItem; 
       if (!res.ok) throw new Error(data.error || "No se pudo guardar");
       onCambio(club.id, { nombre: data.nombre, nombreCompleto: data.nombreCompleto });
       setEditando(false);
+      toast.success("Club actualizado");
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setGuardando(false);
     }
   }
 
   async function eliminar() {
-    setError(null);
     try {
       const res = await fetch(`/api/admin/clubes/${club.id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo eliminar");
       onEliminado(club.id);
+      toast.success(`Club "${club.nombre}" eliminado`);
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     }
   }
 
   async function subir(file: File) {
     setSubiendo(true);
-    setError(null);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -70,22 +69,23 @@ function FilaClub({ club, onUpdated, onCambio, onEliminado }: { club: ClubItem; 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo subir el escudo");
       onUpdated(club.id, data.logoUrl);
+      toast.success("Escudo actualizado");
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     } finally {
       setSubiendo(false);
     }
   }
 
   async function quitar() {
-    setError(null);
     try {
       const res = await fetch(`/api/admin/clubes/${club.id}/logo`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo quitar el escudo");
       onUpdated(club.id, null);
+      toast.success("Escudo quitado");
     } catch (err) {
-      setError(mensajeDeError(err));
+      toast.error(mensajeDeError(err));
     }
   }
 
@@ -113,7 +113,6 @@ function FilaClub({ club, onUpdated, onCambio, onEliminado }: { club: ClubItem; 
           </>
         )}
         <p className="text-xs text-muted-foreground">{club.regatistasCount} regatista{club.regatistasCount === 1 ? "" : "s"}</p>
-        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <a
