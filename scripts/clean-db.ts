@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from "@prisma/adapter-pg";
 
 // Borra TODOS los resultados/regatas/campeonatos/regatistas -sin soft
 // delete, sin papelera, sin vuelta atrás. Antes no tenía ningún guard: un
@@ -20,7 +21,7 @@ async function main() {
     process.exit(1);
   }
 
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
   try {
     await prisma.resultado.deleteMany();
     await prisma.regata.deleteMany();

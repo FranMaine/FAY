@@ -4,9 +4,10 @@
 // campeonatos que puedan haberse importado mal (muchos participantes con
 // nombre de una sola palabra), y otros datos atípicos generales.
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { normalizarNombre } from "../src/lib/nombres";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 
 function tokens(nombre: string): string[] {
   return normalizarNombre(nombre).split(" ").filter(Boolean);

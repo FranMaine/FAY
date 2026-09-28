@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { PrismaPg } from "@prisma/adapter-pg";
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 async function main() {
   const clase = await prisma.clase.upsert({ where: { nombre: 'Optimist Timoneles' }, update: {}, create: { nombre: 'Optimist Timoneles' } });
   const club = await prisma.club.upsert({ where: { nombre: 'YCA' }, update: {}, create: { nombre: 'YCA', ciudad: 'Buenos Aires' } });
