@@ -30,10 +30,10 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  // Sin el "| Regateando" acá: el layout raíz ya le agrega ese sufijo a
+  // Sin el "| Orzando" acá: el layout raíz ya le agrega ese sufijo a
   // cualquier título que devuelva una página hija (title.template) -antes
   // esto lo agregaba manual ACÁ TAMBIÉN, así que el <title> real terminaba
-  // duplicado ("Vela Fest 2025 | Regateando | Regateando").
+  // duplicado ("Vela Fest 2025 | Orzando | Orzando").
   const c = await prisma.campeonato.findUnique({
     where: { id },
     select: { nombre: true, anio: true, clase: { select: { nombre: true } }, sede: { select: { nombre: true } } },

@@ -35,19 +35,19 @@ export const metadata: Metadata = {
   // por default para cualquier página que no declare la suya.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Regateando',
-    template: '%s | Regateando',
+    default: 'Orzando',
+    template: '%s | Orzando',
   },
   description: SITE_DESCRIPTION,
   openGraph: {
-    siteName: 'Regateando',
+    siteName: 'Orzando',
     description: SITE_DESCRIPTION,
     locale: 'es_AR',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Regateando',
+    title: 'Orzando',
     description: SITE_DESCRIPTION,
   },
 };
@@ -103,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           <main id="contenido" className="flex-1">{children}</main>
           <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
-            <p>Regateando © {new Date().getFullYear()} - Estadísticas de Vela Argentina</p>
+            <p>Orzando © {new Date().getFullYear()} - Estadísticas de Vela Argentina</p>
             <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">
               <a href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</a>
               <a href="/contacto" className="hover:text-foreground hover:underline">Contacto</a>

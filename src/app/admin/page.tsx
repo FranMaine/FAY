@@ -67,7 +67,7 @@ export default async function AdminDashboardPage() {
       <div className="max-w-7xl mx-auto space-y-10">
         <header>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Panel de administración</h1>
-          <p className="text-muted-foreground text-lg">Resumen y gestión de Regateando</p>
+          <p className="text-muted-foreground text-lg">Resumen y gestión de Orzando</p>
         </header>
 
         <section aria-label="Resumen" className="grid grid-cols-2 lg:grid-cols-5 gap-4">

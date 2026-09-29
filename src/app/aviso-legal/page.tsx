@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Aviso legal",
-  description: "Aviso legal de Regateando: titularidad, condiciones de uso y propiedad intelectual del sitio.",
+  description: "Aviso legal de Orzando: titularidad, condiciones de uso y propiedad intelectual del sitio.",
 };
 
 // Contenido genérico de referencia -las partes marcadas [entre corchetes]
@@ -22,7 +22,7 @@ export default function AvisoLegalPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">1. Titularidad del sitio</h2>
           <p>
-            Regateando es un sitio operado por [completar: razón social y CUIT
+            Orzando es un sitio operado por [completar: razón social y CUIT
             exactos], con domicilio en
             [completar domicilio legal], República Argentina.
           </p>
@@ -31,7 +31,7 @@ export default function AvisoLegalPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">2. Objeto del sitio</h2>
           <p>
-            Regateando publica resultados oficiales, clasificaciones, rankings y
+            Orzando publica resultados oficiales, clasificaciones, rankings y
             estadísticas de regatas de vela correspondientes a campeonatos
             organizados por clubes y asociaciones de vela. La
             información se carga a partir de los resultados provistos por cada
@@ -46,7 +46,7 @@ export default function AvisoLegalPage() {
             El acceso y consulta del contenido público de este sitio es libre y
             gratuito. La creación de una cuenta y la vinculación de una cuenta a
             un perfil de regatista están sujetas a la veracidad de los datos
-            aportados por el usuario; Regateando se reserva el derecho de rechazar o
+            aportados por el usuario; Orzando se reserva el derecho de rechazar o
             dar de baja una cuenta o una vinculación cuando existan indicios de
             uso indebido o de datos falsos.
           </p>
@@ -60,7 +60,7 @@ export default function AvisoLegalPage() {
             únicamente con fines identificatorios de cada categoría, sin que
             ello implique afiliación, patrocinio o respaldo por parte de esas
             asociaciones. El resto del contenido propio del sitio (marca
-            &quot;Regateando&quot;, diseño, textos) pertenece a su titular
+            &quot;Orzando&quot;, diseño, textos) pertenece a su titular
             (ver punto 1).
           </p>
         </section>
@@ -68,7 +68,7 @@ export default function AvisoLegalPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">5. Exactitud de la información</h2>
           <p>
-            Regateando realiza sus mejores esfuerzos para que los resultados publicados
+            Orzando realiza sus mejores esfuerzos para que los resultados publicados
             sean fieles a los resultados oficiales de cada regata, pero no
             garantiza la ausencia total de errores u omisiones derivados de la
             carga de datos. Cualquier error detectado puede reportarse para su

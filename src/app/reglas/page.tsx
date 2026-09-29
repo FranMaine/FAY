@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Cómo se calculan los puntajes",
-  description: "Explicación del sistema de puntaje, descartes y flotas que usa Regateando para armar la tabla de posiciones de cada campeonato.",
+  description: "Explicación del sistema de puntaje, descartes y flotas que usa Orzando para armar la tabla de posiciones de cada campeonato.",
 };
 
 export default function ReglasPage() {
@@ -60,7 +60,7 @@ export default function ReglasPage() {
           <h2 className="flex items-center gap-3 text-xl font-semibold"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary tabular-nums">5</span>Cuando el resultado oficial ya viene calculado</h2>
           <p>
             Cuando la fuente de un campeonato (por ejemplo, un archivo exportado de Sailwave) ya trae el puesto y el
-            puntaje final de cada regatista calculados, Regateando muestra esos valores tal cual en vez de
+            puntaje final de cada regatista calculados, Orzando muestra esos valores tal cual en vez de
             recalcularlos desde cero -así la tabla coincide exactamente con el resultado que publicó el club
             organizador, sin discrepancias por una diferencia de criterio en el desempate o el orden de las flotas.
           </p>

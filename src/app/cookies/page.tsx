@@ -3,7 +3,7 @@ import { CambiarCookiesButton } from "@/components/layout/cambiar-cookies-button
 
 export const metadata: Metadata = {
   title: "Aviso de cookies",
-  description: "Qué cookies usa Regateando y para qué sirve cada una.",
+  description: "Qué cookies usa Orzando y para qué sirve cada una.",
 };
 
 export default function CookiesPage() {
@@ -17,7 +17,7 @@ export default function CookiesPage() {
 
         <section className="space-y-3 text-foreground/90">
           <p>
-            Regateando usa tres categorías de cookies: las necesarias para
+            Orzando usa tres categorías de cookies: las necesarias para
             que el sitio funcione (siempre activas), y las de analítica y
             publicidad (opcionales, solo si las aceptás). Podés elegir cuáles
             aceptar desde el aviso que aparece al entrar, o cambiar tu

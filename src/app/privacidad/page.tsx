@@ -2,11 +2,11 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Política de privacidad",
-  description: "Qué datos personales recolecta Regateando, para qué los usa y cómo ejercer tus derechos sobre ellos.",
+  description: "Qué datos personales recolecta Orzando, para qué los usa y cómo ejercer tus derechos sobre ellos.",
 };
 
 // Redactada según lo que el sistema efectivamente hace hoy (ver
-// prisma/schema.prisma: User, Regatista, SolicitudVinculacion). Regateando
+// prisma/schema.prisma: User, Regatista, SolicitudVinculacion). Orzando
 // va a sumar analítica y publicidad (Google) más adelante -por eso esta
 // página ya explica esas categorías y el consentimiento (ver
 // src/lib/consentimiento.ts y /cookies), pero sin afirmar que ya están
@@ -41,7 +41,7 @@ export default function PrivacidadPage() {
             <li>Procesar tu solicitud de vinculación entre tu cuenta y tu perfil de regatista.</li>
             <li>Enviarte el email de verificación de cuenta o de recuperación de contraseña cuando lo pedís.</li>
             <li>Prevenir abuso (cuentas falsas, fuerza bruta sobre el login, spam en los formularios).</li>
-            <li>Si aceptás la categoría de publicidad, mostrarte los anuncios que sostienen el sitio (Regateando es de acceso gratuito). No vendemos tus datos a nadie; el único uso publicitario es el de Google como plataforma de anuncios, y solo con tu consentimiento.</li>
+            <li>Si aceptás la categoría de publicidad, mostrarte los anuncios que sostienen el sitio (Orzando es de acceso gratuito). No vendemos tus datos a nadie; el único uso publicitario es el de Google como plataforma de anuncios, y solo con tu consentimiento.</li>
           </ul>
         </section>
 
@@ -68,7 +68,7 @@ export default function PrivacidadPage() {
           <p>
             Los datos de cuenta se conservan mientras la cuenta esté activa.
             Los resultados deportivos se conservan como parte del historial
-            de resultados de Regateando, sin plazo de baja automática, dado
+            de resultados de Orzando, sin plazo de baja automática, dado
             su valor como registro histórico.
           </p>
         </section>

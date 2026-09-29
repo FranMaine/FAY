@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { leerConsentimiento, guardarConsentimiento } from "@/lib/consentimiento";
 
-// Regateando está sumando analítica y publicidad (Google): mientras el
+// Orzando está sumando analítica y publicidad (Google): mientras el
 // visitante no elija, esas categorías quedan apagadas -solo las cookies
 // necesarias para el login funcionan sin pedir nada, porque están exentas
 // de consentimiento por ser imprescindibles para el servicio pedido.

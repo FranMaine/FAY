@@ -6,8 +6,8 @@ import type { MetadataRoute } from 'next';
 // src/app/icon.png y apple-icon.png -no hace falta generar assets nuevos.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Regateando',
-    short_name: 'Regateando',
+    name: 'Orzando',
+    short_name: 'Orzando',
     description: 'Resultados, rankings y estadísticas de regatas de vela de Argentina.',
     start_url: '/',
     display: 'standalone',

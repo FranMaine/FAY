@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 import { AlertCircleIcon } from "lucide-react";
 
-// Sin "| Regateando" acá: el layout raíz ya lo agrega vía title.template
+// Sin "| Orzando" acá: el layout raíz ya lo agrega vía title.template
 // -ponerlo también acá duplicaba el sufijo en el <title> real.
 export const metadata: Metadata = {
   title: "Campeonatos",

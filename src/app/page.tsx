@@ -25,8 +25,8 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 const FOTO_HERO_PATH = path.join(process.cwd(), "public", "hero", "velero-hero.jpg");
 
 export const metadata: Metadata = {
-  // Sin "title" acá, el template del layout raíz ("%s | Regateando") lo
-  // duplicaría en la home ("Regateando | Regateando"). El layout ya define
+  // Sin "title" acá, el template del layout raíz ("%s | Orzando") lo
+  // duplicaría en la home ("Orzando | Orzando"). El layout ya define
   // el default correcto para "/" -acá solo agregamos una descripción más
   // específica que la genérica del layout.
   description: "Ranking Nacional, resultados históricos y perfiles de regatistas de vela de Argentina, con los resultados de los campeonatos de todo el país.",

@@ -15,7 +15,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const titulo = campeonato ? `${campeonato.nombre} ${campeonato.anio}` : "Campeonato";
   const subtitulo = campeonato
     ? `${campeonato.clase.nombre}${campeonato.sede ? ` · ${campeonato.sede.nombre}` : ""}`
-    : "Regateando";
+    : "Orzando";
 
   return new ImageResponse(
     (
@@ -33,7 +33,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         }}
       >
         <div style={{ display: "flex", fontSize: 28, color: "#7dd3fc", fontWeight: 700, letterSpacing: 2 }}>
-          REGATEANDO
+          ORZANDO
         </div>
         <div style={{ display: "flex", fontSize: 64, fontWeight: 800, marginTop: 24, lineHeight: 1.1, maxWidth: 1000 }}>
           {titulo}

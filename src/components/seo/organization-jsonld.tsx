@@ -4,7 +4,7 @@ import { jsonLdSeguro } from "@/lib/json-ld";
 // Datos estructurados (schema.org) de la organización, en el layout raíz
 // -así aparece en TODAS las páginas sin tener que repetirlo. Ayuda a que
 // buscadores (y el panel de conocimiento de Google) entiendan que este
-// sitio es Regateando, no contenido suelto sin dueño. Va como JSON-LD (el formato que Google recomienda)
+// sitio es Orzando, no contenido suelto sin dueño. Va como JSON-LD (el formato que Google recomienda)
 // en vez de microdatos inline, que ensuciarían cada componente.
 export function OrganizationJsonLd() {
   const data = {
