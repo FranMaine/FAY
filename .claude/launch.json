@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "fay-build-local",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "start", "-p", "3001"],
+      "port": 3001
     }
   ]
 }
