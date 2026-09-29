@@ -134,6 +134,27 @@ body {
 .fade-in-up {
   animation: fade-in-up 320ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
 }
+
+/* Pop de entrada para el ícono del modal de "primeras etapas" (ver
+   BetaBanner): un modal es de los pocos lugares donde el presupuesto de
+   "delight" del proyecto aplica -aparece una sola vez por visitante, no es
+   algo que se vea cientos de veces por día. Overshoot leve (no hay nada de
+   la escala 1.08 en la naturaleza, por eso "back ease" en vez de
+   ease-out-strong acá) -curva de easings.co (easeOutBack), el resto de
+   ease-* del proyecto no tiene rebote. */
+@keyframes icon-pop-in {
+  0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
+  60%  { opacity: 1; transform: scale(1.08) rotate(4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.icon-pop-in {
+  animation: icon-pop-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .icon-pop-in {
+    animation: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .fade-in-up {
     animation-duration: 1ms;

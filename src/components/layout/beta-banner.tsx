@@ -50,12 +50,14 @@ export function BetaBanner() {
   return (
     <Modal isOpen={visible} onClose={cerrar} className="w-full max-w-sm">
       <div className="p-6 space-y-4 text-center">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
+        <span className="icon-pop-in mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
           <InfoIcon className="h-6 w-6" />
         </span>
         <div className="space-y-1.5">
-          <h2 className="text-lg font-bold text-foreground">Orzando está en sus primeras etapas</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="fade-in-up text-lg font-bold text-foreground" style={{ animationDelay: "80ms" }}>
+            Orzando está en sus primeras etapas
+          </h2>
+          <p className="fade-in-up text-sm text-muted-foreground" style={{ animationDelay: "140ms" }}>
             Si ves un error o tu nombre está duplicado, avisanos desde la{" "}
             <Link href="/contacto" onClick={cerrar} className="text-primary hover:underline font-medium">
               página de contacto
@@ -63,7 +65,7 @@ export function BetaBanner() {
             .
           </p>
         </div>
-        <Button onClick={cerrar} className="w-full rounded-full">
+        <Button onClick={cerrar} className="fade-in-up w-full rounded-full" style={{ animationDelay: "200ms" }}>
           Entendido
         </Button>
       </div>
