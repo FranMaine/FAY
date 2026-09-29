@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { XIcon, InfoIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 
 const CLAVE_STORAGE = "fay-beta-aviso-visto";
 
 // Aviso de que el sitio está en sus primeras etapas -a pedido explícito,
 // pese a que va contra el criterio de minimizar avisos en la primera
-// visita de un sitio público (ver conversación): el objetivo acá es que
-// alguien que se vea mal cargado (nombre duplicado, dato incorrecto) sepa
-// que puede avisar, en vez de asumir que el sitio no sirve. Arriba de
-// todo (no abajo, donde ya está el aviso de cookies) y descartable, para
-// no acumular dos avisos fijos en pantalla al mismo tiempo.
+// visita de un sitio público: el objetivo acá es que alguien que se vea
+// mal cargado (nombre duplicado, dato incorrecto) sepa que puede avisar,
+// en vez de asumir que el sitio no sirve. Modal centrado (no una franja)
+// para que se note más -aparece una sola vez por visitante, se guarda en
+// localStorage igual que el aviso de cookies.
 function yaVioElAviso(): boolean {
   try {
     return !!localStorage.getItem(CLAVE_STORAGE);
@@ -45,28 +47,26 @@ export function BetaBanner() {
     }
   }
 
-  if (!visible) return null;
-
   return (
-    <div role="region" aria-label="Aviso" className="bg-amber-500/15 border-b border-amber-500/30">
-      <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-3">
-        <InfoIcon className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
-        <p className="text-sm text-foreground/90 flex-1">
-          Orzando está en sus primeras etapas. Si ves un error o tu nombre
-          está duplicado,{" "}
-          <Link href="/contacto" className="text-primary hover:underline font-medium">
-            contactanos
-          </Link>
-          .
-        </p>
-        <button
-          onClick={cerrar}
-          aria-label="Cerrar aviso"
-          className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0"
-        >
-          <XIcon className="w-4 h-4" />
-        </button>
+    <Modal isOpen={visible} onClose={cerrar} className="w-full max-w-sm">
+      <div className="p-6 space-y-4 text-center">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
+          <InfoIcon className="h-6 w-6" />
+        </span>
+        <div className="space-y-1.5">
+          <h2 className="text-lg font-bold text-foreground">Orzando está en sus primeras etapas</h2>
+          <p className="text-sm text-muted-foreground">
+            Si ves un error o tu nombre está duplicado, avisanos desde la{" "}
+            <Link href="/contacto" onClick={cerrar} className="text-primary hover:underline font-medium">
+              página de contacto
+            </Link>
+            .
+          </p>
+        </div>
+        <Button onClick={cerrar} className="w-full rounded-full">
+          Entendido
+        </Button>
       </div>
-    </div>
+    </Modal>
   );
 }
