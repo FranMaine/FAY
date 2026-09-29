@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { InfoIcon } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { SailingBoat } from "@/components/icons/sailing-boat";
 
 const CLAVE_STORAGE = "fay-beta-aviso-visto";
 
@@ -48,13 +48,25 @@ export function BetaBanner() {
   }
 
   return (
-    <Modal isOpen={visible} onClose={cerrar} className="w-full max-w-sm">
-      <div className="p-6 space-y-4 text-center">
-        <span className="icon-pop-in mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
-          <InfoIcon className="h-6 w-6" />
-        </span>
+    <Modal isOpen={visible} onClose={cerrar} className="w-full max-w-sm bg-gradient-to-br from-primary/10 via-surface to-surface">
+      <div className="p-6 pt-8 space-y-4 text-center">
+        {/* Mismo velero de marca que usan /login, /registro y la 404 (ver
+            SailingBoat) en vez de un ícono de información genérico -ya se
+            mece solo (.boat-sway, adentro del propio componente), así que
+            el "pop" de entrada solo hace falta en el círculo que lo
+            envuelve. La insignia ámbar es el mismo lenguaje que ya usa el
+            sitio para "atención" (ver badges de campeonato en curso). */}
+        <div className="icon-pop-in relative mx-auto h-20 w-20">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/25 to-primary/5" aria-hidden="true" />
+          <div className="relative flex h-full w-full items-center justify-center">
+            <SailingBoat className="h-10 w-10 text-primary" />
+          </div>
+          <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white shadow-md ring-2 ring-surface">
+            !
+          </span>
+        </div>
         <div className="space-y-1.5">
-          <h2 className="fade-in-up text-lg font-bold text-foreground" style={{ animationDelay: "80ms" }}>
+          <h2 className="fade-in-up text-xl font-extrabold tracking-tight text-foreground" style={{ animationDelay: "80ms" }}>
             Orzando está en sus primeras etapas
           </h2>
           <p className="fade-in-up text-sm text-muted-foreground" style={{ animationDelay: "140ms" }}>
