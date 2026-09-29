@@ -55,6 +55,7 @@ export const metadata: Metadata = {
 import { SessionProvider } from '@/components/providers/session-provider';
 import { BackToTop } from '@/components/layout/back-to-top';
 import { CookieBanner } from '@/components/layout/cookie-banner';
+import { BetaBanner } from '@/components/layout/beta-banner';
 import { AppToaster } from '@/components/providers/app-toaster';
 import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization-jsonld';
 
@@ -100,6 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           >
             Saltar al contenido
           </a>
+          <BetaBanner />
           <Navbar />
           <main id="contenido" className="flex-1">{children}</main>
           <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
