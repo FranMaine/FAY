@@ -48,7 +48,12 @@ export function BetaBanner() {
   }
 
   return (
-    <Modal isOpen={visible} onClose={cerrar} className="w-full max-w-sm bg-gradient-to-br from-primary/10 via-surface to-surface">
+    <Modal
+      isOpen={visible}
+      onClose={cerrar}
+      closeOnBackdropClick={false}
+      className="w-full max-w-sm bg-gradient-to-br from-primary/10 via-surface to-surface"
+    >
       <div className="p-6 pt-8 space-y-4 text-center">
         {/* Mismo velero de marca que usan /login, /registro y la 404 (ver
             SailingBoat) en vez de un ícono de información genérico -ya se

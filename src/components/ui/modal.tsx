@@ -21,9 +21,13 @@ interface ModalProps {
   children: React.ReactNode;
   /** Ancho/alto del panel (ej: "w-full max-w-md", "w-full max-w-4xl max-h-[90vh]") */
   className?: string;
+  /** false: clickear el fondo NO cierra el modal (solo queda el botón de
+   * adentro) -para un aviso que quiere asegurarse de que se lea antes de
+   * poder seguir navegando. Default true (comportamiento de siempre). */
+  closeOnBackdropClick?: boolean;
 }
 
-export function Modal({ isOpen, onClose, children, className }: ModalProps) {
+export function Modal({ isOpen, onClose, children, className, closeOnBackdropClick = true }: ModalProps) {
   // "closing" mantiene el modal montado el tiempo de la transición de
   // salida después de que isOpen pasa a false -sin esto no hay forma de
   // animar el cierre con solo CSS (el componente ya desapareció del DOM).
@@ -63,7 +67,7 @@ export function Modal({ isOpen, onClose, children, className }: ModalProps) {
         "fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-opacity ease-out-strong motion-reduce:transition-none",
         entered ? "opacity-100 duration-[220ms]" : "opacity-0 duration-150"
       )}
-      onClick={onClose}
+      onClick={closeOnBackdropClick ? onClose : undefined}
     >
       <div
         className={cn(
