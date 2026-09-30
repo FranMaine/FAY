@@ -38,8 +38,8 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
   );
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 p-4 bg-surface border border-border rounded-2xl mb-8">
-      <div className="flex-1 space-y-1.5 min-w-0">
+    <div className="flex flex-col gap-4 p-4 bg-surface border border-border rounded-2xl mb-8">
+      <div className="space-y-1.5 min-w-0">
         <span id="filtro-clase-label" className="text-sm font-medium text-muted-foreground">Clase</span>
         {/* Antes era un <select> nativo -acá el logo de cada clase importa
             más que el nombre para reconocerla de un vistazo, y un <select>
@@ -80,7 +80,7 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
           })}
         </div>
       </div>
-      <div className="flex-1 space-y-1">
+      <div className="space-y-1 sm:max-w-xs">
         <label htmlFor="filtro-anio" className="text-sm font-medium text-muted-foreground">Temporada (Año)</label>
         <select
           id="filtro-anio"
