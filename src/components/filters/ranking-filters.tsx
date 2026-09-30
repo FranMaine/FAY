@@ -48,7 +48,7 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
             "Todas" no tiene logo propio (no representa ninguna clase real)
             y las clases sin uno de los 10 logos procesados caen a sus
             iniciales, igual que ClubAvatar con los clubes sin escudo. */}
-        <div role="group" aria-labelledby="filtro-clase-label" className="flex gap-2 overflow-x-auto pb-1 -mb-1">
+        <div role="group" aria-labelledby="filtro-clase-label" className="flex items-start gap-2 overflow-x-auto pb-1 -mb-1">
           {clases.map((c) => {
             const activa = currentClaseId === c.id;
             const tieneLogo = c.id !== "ALL" && slugDeClase(c.nombre) !== null;
@@ -74,7 +74,12 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
                     {inicialesDeClase(c.nombre)}
                   </span>
                 )}
-                <span className="max-w-[76px] truncate text-[11px] font-medium leading-none">{c.nombre}</span>
+                {/* Antes truncaba a una línea con "..." -"Optimist
+                    Principiantes" quedaba como "Optim...", ilegible. Ahora
+                    envuelve en hasta 2 líneas (w-20 = 80px, suficiente para
+                    "Principiantes"/"(Laser Radial)" en la segunda línea de
+                    los nombres reales más largos) en vez de cortar texto. */}
+                <span className="w-20 text-center text-[11px] font-medium leading-tight">{c.nombre}</span>
               </button>
             );
           })}
