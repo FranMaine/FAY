@@ -44,11 +44,13 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
         {/* Antes era un <select> nativo -acá el logo de cada clase importa
             más que el nombre para reconocerla de un vistazo, y un <select>
             no puede mostrar imágenes dentro de sus opciones en ningún
-            navegador. Fila de chips con scroll horizontal en vez de eso;
-            "Todas" no tiene logo propio (no representa ninguna clase real)
-            y las clases sin uno de los 10 logos procesados caen a sus
-            iniciales, igual que ClubAvatar con los clubes sin escudo. */}
-        <div role="group" aria-labelledby="filtro-clase-label" className="flex items-start gap-2 overflow-x-auto pb-1 -mb-1">
+            navegador. Chips en vez de eso; "Todas" no tiene logo propio (no
+            representa ninguna clase real) y las clases sin uno de los 10
+            logos procesados caen a sus iniciales, igual que ClubAvatar con
+            los clubes sin escudo. Con la fila ocupando todo el ancho, ya
+            entran varias por fila -mejor que envuelvan (se ven todas de
+            entrada) a que haya que scrollear para encontrar una. */}
+        <div role="group" aria-labelledby="filtro-clase-label" className="flex flex-wrap items-start gap-2">
           {clases.map((c) => {
             const activa = currentClaseId === c.id;
             const tieneLogo = c.id !== "ALL" && slugDeClase(c.nombre) !== null;
