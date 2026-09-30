@@ -91,7 +91,7 @@ export default async function EventoPage({ params }: Props) {
         <header className="flex flex-col sm:flex-row sm:items-center gap-6 rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-10">
           {evento.logoUrl ? (
             <ViewTransition name={`evento-logo-${anio}-${slug}`} share="morph" default="none">
-              <Image src={evento.logoUrl} alt="" width={200} height={200} className="h-24 w-24 shrink-0 object-contain md:h-28 md:w-28" />
+              <Image src={evento.logoUrl} alt="" width={400} height={200} className="h-24 w-auto max-w-[280px] shrink-0 rounded-2xl border border-border bg-primary-solid object-contain p-2 md:h-28 md:max-w-[320px]" />
             </ViewTransition>
           ) : (
             <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary md:h-28 md:w-28">

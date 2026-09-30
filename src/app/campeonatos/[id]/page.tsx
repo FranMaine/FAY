@@ -143,9 +143,9 @@ export default async function CampeonatoDetailPage({ params }: Props) {
                 <Image
                   src={campeonato.logoUrl}
                   alt=""
-                  width={200}
-                  height={200}
-                  className="h-20 w-20 shrink-0 rounded-2xl border border-border bg-surface object-contain p-2 sm:h-24 sm:w-24"
+                  width={300}
+                  height={140}
+                  className="h-20 w-auto max-w-[220px] shrink-0 rounded-2xl border border-border bg-primary-solid object-contain p-2 sm:h-24 sm:max-w-[260px]"
                 />
               </ViewTransition>
             )}

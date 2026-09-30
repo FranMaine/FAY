@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon, ImageIcon, SendIcon, UndoIcon } from "lucide-react";
+import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon, ImageIcon, SendIcon, UndoIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
+import { Modal } from "@/components/ui/modal";
 import { mensajeDeError, cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ClaseIcon } from "@/components/icons/clase-icons";
@@ -72,6 +73,22 @@ export default function AdminCampeonatosPage() {
   const [subiendoLogoGrupo, setSubiendoLogoGrupo] = useState<string | null>(null);
   const [errorLogoGrupo, setErrorLogoGrupo] = useState<{ clave: string; mensaje: string } | null>(null);
   const logoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // Publicar de un saque todos los campeonatos en borrador de un evento -sin
+  // esto había que abrir uno por uno y tocar "Publicar" en cada categoría.
+  const [publicandoEventoClave, setPublicandoEventoClave] = useState<string | null>(null);
+
+  // "Personalizar evento": aplica sede y/o descartes a TODOS los
+  // campeonatos del evento en un solo guardado, en vez de repetir la misma
+  // edición en cada categoría -mismo criterio que ya existe para el logo
+  // del grupo (subirLogoDelGrupo). El nombre/clase de cada categoría NO se
+  // toca acá: un evento puede tener categorías con nombres distintos
+  // (ver comentario en agruparPorEvento), así que solo entran los campos
+  // que de verdad suelen ser iguales para todo el evento.
+  const [personalizarClave, setPersonalizarClave] = useState<string | null>(null);
+  const [sedeIdPersonalizar, setSedeIdPersonalizar] = useState("");
+  const [descartesPersonalizar, setDescartesPersonalizar] = useState("");
+  const [guardandoPersonalizar, setGuardandoPersonalizar] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -150,6 +167,94 @@ export default function AdminCampeonatosPage() {
       toast.error(mensajeDeError(err));
     } finally {
       setPublicandoId(null);
+    }
+  };
+
+  const handlePublicarEvento = async (clave: string, items: Campeonato[]) => {
+    const pendientes = items.filter((c) => c.estado !== "PUBLICADO");
+    if (pendientes.length === 0) {
+      toast.message("Ya está todo publicado en este evento");
+      return;
+    }
+    setPublicandoEventoClave(clave);
+    try {
+      const resultados = await Promise.allSettled(
+        pendientes.map((c) =>
+          fetch(`/api/campeonatos/${c.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estado: "PUBLICADO" }),
+          }).then(async (res) => {
+            if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || "No se pudo publicar");
+            return c.id;
+          })
+        )
+      );
+      const publicados = new Set(
+        resultados.filter((r): r is PromiseFulfilledResult<string> => r.status === "fulfilled").map((r) => r.value)
+      );
+      const fallidos = resultados.length - publicados.size;
+      if (publicados.size > 0) {
+        setCampeonatos((prev) => prev.map((x) => (publicados.has(x.id) ? { ...x, estado: "PUBLICADO" } : x)));
+      }
+      if (fallidos === 0) {
+        toast.success(publicados.size === 1 ? "Categoría publicada" : `${publicados.size} categorías publicadas`);
+      } else {
+        toast.error(`Se publicaron ${publicados.size} de ${pendientes.length} -revisá las que fallaron`);
+      }
+    } finally {
+      setPublicandoEventoClave(null);
+    }
+  };
+
+  function abrirPersonalizar(clave: string) {
+    setSedeIdPersonalizar("");
+    setDescartesPersonalizar("");
+    setPersonalizarClave(clave);
+  }
+
+  const handleGuardarPersonalizar = async (items: Campeonato[]) => {
+    // Vacío = "no tocar este campo" -solo se manda al PATCH lo que el
+    // admin efectivamente completó, así no se pisa por accidente la sede o
+    // los descartes de una categoría con un valor que no quiso cambiar.
+    const body: { sedeId?: string | null; descartes?: number } = {};
+    if (sedeIdPersonalizar !== "") body.sedeId = sedeIdPersonalizar === "NINGUNA" ? null : sedeIdPersonalizar;
+    if (descartesPersonalizar.trim() !== "") {
+      const n = parseInt(descartesPersonalizar, 10);
+      if (Number.isNaN(n) || n < 0) {
+        toast.error("Descartes tiene que ser un número mayor o igual a 0");
+        return;
+      }
+      body.descartes = n;
+    }
+    if (Object.keys(body).length === 0) {
+      toast.error("Completá al menos un campo para aplicar");
+      return;
+    }
+    setGuardandoPersonalizar(true);
+    try {
+      const resultados = await Promise.allSettled(
+        items.map((c) =>
+          fetch(`/api/campeonatos/${c.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }).then(async (res) => {
+            if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || "No se pudo actualizar");
+            return res.json();
+          })
+        )
+      );
+      const fallidos = resultados.filter((r) => r.status === "rejected").length;
+      await fetchData();
+      if (fallidos === 0) {
+        toast.success("Evento actualizado");
+        setPersonalizarClave(null);
+      } else {
+        toast.error(`Se aplicó a ${items.length - fallidos} de ${items.length} categorías -revisá las que fallaron`);
+      }
+    } finally {
+      setGuardandoPersonalizar(false);
     }
   };
 
@@ -358,6 +463,29 @@ export default function AdminCampeonatosPage() {
                               type="button"
                               variant="ghost"
                               size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-green-500"
+                              aria-label="Publicar todas las categorías pendientes del evento"
+                              title="Publicar evento"
+                              disabled={publicandoEventoClave === clave}
+                              onClick={() => handlePublicarEvento(clave, grupo.items)}
+                            >
+                              {publicandoEventoClave === clave ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <SendIcon className="w-4 h-4" />}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary"
+                              aria-label="Personalizar evento (sede y descartes para todas las categorías)"
+                              title="Personalizar evento"
+                              onClick={() => abrirPersonalizar(clave)}
+                            >
+                              <SettingsIcon className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-muted-foreground hover:text-primary"
                               aria-label={grupo.logoUrl ? "Reemplazar logo del evento" : "Subir logo del evento"}
                               disabled={subiendoLogoGrupo === clave}
@@ -396,6 +524,59 @@ export default function AdminCampeonatosPage() {
         clubes={clubes}
         eventos={[...new Set(campeonatos.map((c) => c.evento?.trim() || c.nombre))].sort()}
       />
+
+      {(() => {
+        const grupo = grupos.find((g) => `${g.nombre.trim().toLowerCase()}__${g.anio}` === personalizarClave);
+        if (!grupo) return null;
+        const campoInput = "w-full h-11 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground";
+        return (
+          <Modal isOpen={!!personalizarClave} onClose={() => !guardandoPersonalizar && setPersonalizarClave(null)} className="w-full max-w-md">
+            <div className="p-6 space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-foreground">Personalizar evento</h2>
+                <p className="text-sm text-muted-foreground">
+                  Se aplica a las {grupo.items.length} categorías de &quot;{grupo.nombre}&quot; {grupo.anio}. Dejá un campo vacío para no tocarlo.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="personalizar-sede" className="text-sm font-medium text-muted-foreground">Sede</label>
+                <select
+                  id="personalizar-sede"
+                  className={campoInput}
+                  value={sedeIdPersonalizar}
+                  onChange={(e) => setSedeIdPersonalizar(e.target.value)}
+                >
+                  <option value="">No cambiar</option>
+                  <option value="NINGUNA">Sin sede</option>
+                  {clubes.map((club) => (
+                    <option key={club.id} value={club.id}>{club.nombre}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="personalizar-descartes" className="text-sm font-medium text-muted-foreground">Descartes</label>
+                <input
+                  id="personalizar-descartes"
+                  type="number"
+                  min={0}
+                  placeholder="No cambiar"
+                  className={campoInput}
+                  value={descartesPersonalizar}
+                  onChange={(e) => setDescartesPersonalizar(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setPersonalizarClave(null)} disabled={guardandoPersonalizar}>
+                  Cancelar
+                </Button>
+                <Button type="button" onClick={() => handleGuardarPersonalizar(grupo.items)} disabled={guardandoPersonalizar}>
+                  {guardandoPersonalizar ? <Loader2Icon className="w-4 h-4 animate-spin" /> : "Aplicar a todo el evento"}
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        );
+      })()}
     </main>
   );
 }

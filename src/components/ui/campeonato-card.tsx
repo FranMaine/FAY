@@ -40,7 +40,13 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
           <span className="flex items-center gap-2">
             {campeonato.logoUrl && (
               <ViewTransition name={`campeonato-logo-${campeonato.id}`} share="morph" default="none">
-                <Image src={campeonato.logoUrl} alt="" width={72} height={72} className="h-9 w-9 shrink-0 rounded-lg border border-border bg-surface object-contain p-1" />
+                {/* bg-primary-solid (no bg-surface): fijo sin importar el
+                    tema -un logo con texto blanco (ej: un banner de evento)
+                    se volvía invisible sobre el bg-surface blanco del tema
+                    claro. w-auto+max-w (no w-9 fijo): un logo ancho tipo
+                    banner (no cuadrado como un escudo) quedaba aplastado a
+                    una tira casi sin alto dentro de un cuadrado de 36px. */}
+                <Image src={campeonato.logoUrl} alt="" width={200} height={72} className="h-9 w-auto max-w-24 shrink-0 rounded-lg border border-border bg-primary-solid object-contain p-1" />
               </ViewTransition>
             )}
             <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">

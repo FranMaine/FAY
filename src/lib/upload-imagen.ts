@@ -64,6 +64,17 @@ export async function quitarFondoLiso(buffer: Buffer): Promise<Buffer> {
   // si lo que queda pegado al fondo borrado es un anillo fino de un solo
   // color que rodea toda la imagen, se lo trata también como fondo. Máximo
   // 3 capas, y solo si son finos, para no comerse el escudo en sí.
+  //
+  // El 15% de tolerancia es ACUMULADO entre las 3 pasadas, no por pasada:
+  // un logo con texto (ej: un banner "COPA DON GERARDO" sobre fondo de
+  // color) generaba, pasada tras pasada, una erosión de un par de píxeles
+  // sobre el borde de cada letra -cada pasada individual quedaba debajo
+  // del 15% y nunca frenaba, pero entre las 3 se comían la letra entera
+  // (sobrevivían solo los huecos internos de letras como O/D/P/A,
+  // desconectados del borde). Un marco real, al ser fino, nunca se acerca
+  // al 15% ni en una sola pasada, así que este límite más estricto no le
+  // cambia nada.
+  let borradoPorMarco = 0;
   for (let pasada = 0; pasada < 3; pasada++) {
     const frontera: number[] = [];
     for (let idx = 0; idx < total; idx++) {
@@ -80,7 +91,8 @@ export async function quitarFondoLiso(buffer: Buffer): Promise<Buffer> {
     if (uniformes < frontera.length * 0.85) break;
     const copia = borrado.slice();
     const n = rellenar(base, frontera, false);
-    if (!esBlanco(base) && n > total * 0.15) { borrado.set(copia); break; }
+    borradoPorMarco += n;
+    if (borradoPorMarco > total * 0.15) { borrado.set(copia); break; }
   }
 
   let borrados = 0;
