@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useTransition } from "react";
 import { LayoutGridIcon } from "lucide-react";
 import { ClaseIcon, slugDeClase } from "@/components/icons/clase-icons";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,13 @@ function inicialesDeClase(nombre: string): string {
 export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: RankingFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  // startTransition mantiene el chip recién clickeado marcado como activo
+  // mientras carga la data nueva (no espera a que termine para cambiar el
+  // estilo, React ya sabe qué click "ganó") y deja isPending para avisar
+  // que hay algo en camino -sin esto el cambio de categoría se sentía
+  // instantáneo en el chip pero el contenido de abajo tardaba en aparecer
+  // sin ninguna señal de que se había registrado el click.
+  const [isPending, startTransition] = useTransition();
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -59,12 +66,13 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
                 key={c.id}
                 type="button"
                 aria-pressed={activa}
-                onClick={() => router.push("?" + createQueryString("clase", c.id))}
+                onClick={() => startTransition(() => router.push("?" + createQueryString("clase", c.id)))}
                 className={cn(
-                  "flex shrink-0 flex-col items-center gap-1 rounded-xl border px-3 py-2 transition-colors duration-150",
+                  "flex shrink-0 flex-col items-center gap-1 rounded-xl border px-3 py-2 transition-[background-color,border-color,opacity] duration-150",
                   activa
                     ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                  isPending && activa && "opacity-60"
                 )}
               >
                 {c.id === "ALL" ? (
@@ -94,7 +102,7 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
           className="w-full h-11 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
           value={currentAnio.toString()}
           onChange={(e) => {
-            router.push("?" + createQueryString("anio", e.target.value));
+            startTransition(() => router.push("?" + createQueryString("anio", e.target.value)));
           }}
         >
           {anios.map((a) => (

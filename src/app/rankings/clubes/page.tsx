@@ -158,14 +158,18 @@ export default async function RankingClubesPage({
           currentAnio={activeAnio}
         />
 
+        {/* key con los filtros activos: fuerza a React a tratar esto como
+            un nodo nuevo en cada cambio de clase/año, así la entrada de
+            fade-in-up vuelve a jugar en vez de que la tabla nueva aparezca
+            de un salto. */}
         {ranking.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
+          <div key={`${activeClaseId}-${activeAnio}`} className="fade-in-up flex flex-col items-center justify-center p-12 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
             <AlertCircleIcon className="w-8 h-8 mb-3 opacity-50" />
             <p className="text-lg font-medium">Sin resultados</p>
             <p className="text-sm">No hay campeonatos publicados de {selectedClaseNombre} {activeAnio === 0 ? "en ningún año" : `para el año ${activeAnio}`}.</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div key={`${activeClaseId}-${activeAnio}`} className="fade-in-up space-y-6">
             <Podio
               items={ranking.slice(0, 3).map((r) => ({
                 id: r.id,

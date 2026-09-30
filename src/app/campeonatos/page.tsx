@@ -107,14 +107,21 @@ export default async function CampeonatosPage({
           currentAnio={activeAnio} 
         />
 
+        {/* key con los filtros activos: fuerza a React a tratar esto como
+            un nodo nuevo en cada cambio de clase/año (no una actualización
+            del mismo), así la entrada de fade-in-up vuelve a jugar en vez
+            de que el contenido nuevo aparezca de un salto -mismo criterio
+            que cuando se filtra cualquier otra lista del sitio. */}
         {campeonatos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
+          <div key={`${activeClaseId}-${activeAnio}`} className="fade-in-up flex flex-col items-center justify-center p-12 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
             <AlertCircleIcon className="w-8 h-8 mb-3 opacity-50" />
             <p className="text-lg font-medium">Sin torneos</p>
             <p className="text-sm">No se encontraron campeonatos publicados con esos filtros.</p>
           </div>
         ) : (
-          <CampeonatosAgrupados campeonatos={campeonatos} />
+          <div key={`${activeClaseId}-${activeAnio}`} className="fade-in-up">
+            <CampeonatosAgrupados campeonatos={campeonatos} />
+          </div>
         )}
       </div>
     </main>
