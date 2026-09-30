@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon, ImageIcon } from "lucide-react";
+import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon, ImageIcon, SendIcon, UndoIcon } from "lucide-react";
 import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
@@ -60,6 +60,7 @@ export default function AdminCampeonatosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [publicandoId, setPublicandoId] = useState<string | null>(null);
   // Carpetas abiertas -por defecto todas cerradas, así la vista inicial
   // es una lista corta de eventos en vez de la lista larga de siempre.
   const [abiertas, setAbiertas] = useState<Set<string>>(new Set());
@@ -129,6 +130,29 @@ export default function AdminCampeonatosPage() {
     }
   };
 
+  const handlePublicar = async (c: Campeonato) => {
+    // Mismo PATCH que ya usa /admin/campeonatos/[id] (ver handlePublicar
+    // ahí) -acá evita tener que entrar a cada campeonato solo para
+    // publicarlo o volverlo a borrador.
+    const nuevoEstado = c.estado === "PUBLICADO" ? "BORRADOR" : "PUBLICADO";
+    setPublicandoId(c.id);
+    try {
+      const res = await fetch(`/api/campeonatos/${c.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: nuevoEstado }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo cambiar el estado");
+      setCampeonatos((prev) => prev.map((x) => (x.id === c.id ? { ...x, estado: data.estado } : x)));
+      toast.success(nuevoEstado === "PUBLICADO" ? "Campeonato publicado" : "Campeonato vuelto a borrador");
+    } catch (err) {
+      toast.error(mensajeDeError(err));
+    } finally {
+      setPublicandoId(null);
+    }
+  };
+
   const handleEliminar = async (c: Campeonato) => {
     // La confirmación ahora la maneja ConfirmDeleteButton (in-place, no un
     // window.confirm nativo) -acá ya llega confirmado.
@@ -148,6 +172,34 @@ export default function AdminCampeonatosPage() {
     }
   };
 
+  function botonPublicar(c: Campeonato) {
+    const publicando = publicandoId === c.id;
+    const esPublicado = c.estado === "PUBLICADO";
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={esPublicado ? "Volver a borrador" : "Publicar campeonato"}
+        title={esPublicado ? "Volver a borrador" : "Publicar"}
+        disabled={publicando}
+        onClick={() => handlePublicar(c)}
+        className={cn(
+          "h-8 w-8",
+          esPublicado ? "text-muted-foreground hover:text-amber-500" : "text-muted-foreground hover:text-green-500"
+        )}
+      >
+        {publicando ? (
+          <Loader2Icon className="w-4 h-4 animate-spin" />
+        ) : esPublicado ? (
+          <UndoIcon className="w-4 h-4" />
+        ) : (
+          <SendIcon className="w-4 h-4" />
+        )}
+      </Button>
+    );
+  }
+
   function filaClase(c: Campeonato) {
     return (
       <tr key={c.id} className="hover:bg-background/50 transition-colors">
@@ -165,6 +217,7 @@ export default function AdminCampeonatosPage() {
           </Badge>
         </td>
         <td className="px-6 py-3 text-right space-x-2">
+          {botonPublicar(c)}
           <Link href={`/admin/campeonatos/${c.id}`}>
             <Button variant="ghost" size="icon" aria-label="Ver campeonato" className="h-8 w-8 text-muted-foreground hover:text-primary">
               <EyeIcon className="w-4 h-4" />
@@ -247,6 +300,7 @@ export default function AdminCampeonatosPage() {
                             </Badge>
                           </td>
                           <td className="px-6 py-4 text-right space-x-2">
+                            {botonPublicar(c)}
                             <Link href={`/admin/campeonatos/${c.id}`}>
                               <Button variant="ghost" size="icon" aria-label="Ver campeonato" className="h-8 w-8 text-muted-foreground hover:text-primary">
                                 <EyeIcon className="w-4 h-4" />
