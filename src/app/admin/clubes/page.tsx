@@ -169,6 +169,30 @@ export default function AdminEscudosClubesPage() {
       .finally(() => setIsLoading(false));
   }, []);
 
+  // Barrido manual de los clubes que ya estaban en 0 miembros antes de que
+  // existiera la limpieza automática (ver eliminarClubesVacios) -de acá
+  // en más esos clubes se borran solos al reasignar/editar el club de un
+  // regatista, esto solo resuelve el stock viejo.
+  const [limpiando, setLimpiando] = useState(false);
+  const limpiarVacios = async () => {
+    setLimpiando(true);
+    try {
+      const res = await fetch("/api/admin/clubes/limpiar-vacios", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo limpiar");
+      if (data.borrados === 0) {
+        toast.message("No había clubes vacíos para borrar");
+      } else {
+        toast.success(data.borrados === 1 ? "Se borró 1 club vacío" : `Se borraron ${data.borrados} clubes vacíos`);
+        cargar();
+      }
+    } catch (err) {
+      toast.error(mensajeDeError(err));
+    } finally {
+      setLimpiando(false);
+    }
+  };
+
   useEffect(() => {
     cargar();
   }, [cargar]);
@@ -217,6 +241,13 @@ export default function AdminEscudosClubesPage() {
                 <AlertCircleIcon className="w-4 h-4" /> Clubes ambiguos
               </Button>
             </Link>
+            <ConfirmDeleteButton
+              label="Limpiar clubes vacíos"
+              confirmLabel="¿Borrar todos los clubes sin regatistas (que no sean sede de nada)?"
+              mostrarTexto
+              disabled={limpiando}
+              onConfirm={limpiarVacios}
+            />
           </div>
         </div>
 
