@@ -62,11 +62,15 @@ export default function SolicitudesAdminPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Solicitudes de Vinculación</h1>
-        <p className="text-muted-foreground mt-2">Revisá las peticiones de los usuarios para reclamar perfiles de regatistas.</p>
-      </div>
+    // Al resto de las páginas de admin (campeonatos, clubes, usuarios...)
+    // este <main> con el mismo padding que acá nunca le faltó -a esta sí,
+    // y el título quedaba pegado directo contra el navbar.
+    <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Solicitudes de Vinculación</h1>
+          <p className="text-muted-foreground mt-2">Revisá las peticiones de los usuarios para reclamar perfiles de regatistas.</p>
+        </div>
 
       <Card className="bg-surface border-border">
         <CardContent className="p-0">
@@ -125,6 +129,7 @@ export default function SolicitudesAdminPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </main>
   );
 }
