@@ -145,7 +145,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
                   alt=""
                   width={300}
                   height={140}
-                  className="h-20 w-auto max-w-[220px] shrink-0 rounded-2xl border border-border bg-primary-solid object-contain p-2 sm:h-24 sm:max-w-[260px]"
+                  className="h-20 w-auto max-w-[220px] shrink-0 rounded-2xl border border-border bg-surface object-contain p-2 sm:h-24 sm:max-w-[260px]"
                 />
               </ViewTransition>
             )}

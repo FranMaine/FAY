@@ -42,7 +42,7 @@ export function CampeonatosAgrupados({ campeonatos }: { campeonatos: Campeonato[
             <div className="flex items-start justify-between gap-3">
               {g.logoUrl ? (
                 <ViewTransition name={`evento-logo-${g.anio}-${slugificar(g.nombre)}`} share="morph" default="none">
-                  <Image src={g.logoUrl} alt="" width={320} height={160} className="h-16 w-auto max-w-[220px] shrink-0 rounded-xl border border-border bg-primary-solid object-contain p-1.5" />
+                  <Image src={g.logoUrl} alt="" width={320} height={160} className="h-16 w-auto max-w-[220px] shrink-0 rounded-xl border border-border bg-surface object-contain p-1.5" />
                 </ViewTransition>
               ) : (
                 <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">

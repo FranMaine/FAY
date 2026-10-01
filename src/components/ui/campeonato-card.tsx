@@ -40,13 +40,18 @@ export function CampeonatoCard({ campeonato }: CampeonatoCardProps) {
           <span className="flex items-center gap-2">
             {campeonato.logoUrl && (
               <ViewTransition name={`campeonato-logo-${campeonato.id}`} share="morph" default="none">
-                {/* bg-primary-solid (no bg-surface): fijo sin importar el
-                    tema -un logo con texto blanco (ej: un banner de evento)
-                    se volvía invisible sobre el bg-surface blanco del tema
-                    claro. w-auto+max-w (no w-9 fijo): un logo ancho tipo
-                    banner (no cuadrado como un escudo) quedaba aplastado a
-                    una tira casi sin alto dentro de un cuadrado de 36px. */}
-                <Image src={campeonato.logoUrl} alt="" width={200} height={72} className="h-9 w-auto max-w-24 shrink-0 rounded-lg border border-border bg-primary-solid object-contain p-1" />
+                {/* w-auto+max-w (no w-9 fijo): un logo ancho tipo banner
+                    (no cuadrado como un escudo) quedaba aplastado a una
+                    tira casi sin alto dentro de un cuadrado de 36px -esto
+                    no cambia nada para un logo ya cuadrado (sigue
+                    ocupando los mismos 36x36). Un bg fijo distinto de
+                    bg-surface (ej: azul) se probó para los pocos logos con
+                    texto blanco sin fondo propio, pero le ponía un
+                    recuadro de color ajeno a TODOS los demás escudos -se
+                    volvió a bg-surface; un logo así depende de subirse SIN
+                    sacarle el fondo (su propio color de fondo hace de
+                    contraste, en vez de uno impuesto acá). */}
+                <Image src={campeonato.logoUrl} alt="" width={200} height={72} className="h-9 w-auto max-w-24 shrink-0 rounded-lg border border-border bg-surface object-contain p-1" />
               </ViewTransition>
             )}
             <span className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
