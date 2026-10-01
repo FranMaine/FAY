@@ -69,7 +69,7 @@ export function Navbar() {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
+                      'flex items-center gap-2 rounded-md text-sm font-medium transition-colors hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                       isActive ? 'text-primary' : 'text-muted'
                     )}
                   >
@@ -82,7 +82,7 @@ export function Navbar() {
                 <Link
                   href="/admin"
                   className={cn(
-                    'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
+                    'flex items-center gap-2 rounded-md text-sm font-medium transition-colors hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     pathname.startsWith('/admin') ? 'text-primary' : 'text-accent'
                   )}
                 >
@@ -174,7 +174,7 @@ export function Navbar() {
                   href={link.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium',
+                    'flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     isActive ? 'bg-primary/10 text-primary' : 'text-muted hover:bg-surface-hover hover:text-foreground'
                   )}
                 >
@@ -188,7 +188,7 @@ export function Navbar() {
                 href="/admin"
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium',
+                  'flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                   pathname.startsWith('/admin') ? 'bg-primary/10 text-primary' : 'text-accent hover:bg-surface-hover'
                 )}
               >

@@ -51,7 +51,7 @@ export function NotificationBell() {
           ? `${count} solicitud${count === 1 ? '' : 'es'} de vinculación pendiente${count === 1 ? '' : 's'}`
           : 'Solicitudes de vinculación'
       }
-      className="relative inline-flex items-center justify-center rounded-md p-2 h-9 w-9 text-muted hover:bg-surface-hover hover:text-foreground transition-colors"
+      className="relative inline-flex items-center justify-center rounded-md p-2 h-9 w-9 text-muted hover:bg-surface-hover hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
     >
       <BellIcon className="h-5 w-5" />
       {hayPendientes && (
