@@ -202,65 +202,11 @@ body {
   }
 }
 
-/* El velero del logo (navbar y las pantallas de auth) "navegando" -un
-   balanceo suave y continuo, como un bote mecido por el agua en vez de
-   quieto. Pivotea desde abajo (transform-origin: bottom center) para que
-   se sienta como que rota apoyado en la línea de flotación, no girando
-   sobre su propio centro. Es decorativo y no interactivo -no compite con
-   ninguna acción del usuario-, así que el movimiento constante acá no
-   entra en conflicto con la regla de "nada de animación en elementos de
-   alta frecuencia": no es una respuesta a una acción, es ambiente de
-   marca, visible pero de fondo. */
-@keyframes boat-sway {
-  0%   { transform: rotate(-4deg) translateY(0); }
-  25%  { transform: rotate(0deg) translateY(-1.5px); }
-  50%  { transform: rotate(4deg) translateY(0); }
-  75%  { transform: rotate(0deg) translateY(-1.5px); }
-  100% { transform: rotate(-4deg) translateY(0); }
-}
-.boat-sway {
-  display: inline-block;
-  transform-origin: bottom center;
-  animation: boat-sway 4s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .boat-sway {
-    animation: none;
-  }
-}
-
-/* El agua debajo del velero (ver SailingBoat): cada path dibuja un patrón
-   de onda periódico (período de 5 de las 40 unidades del viewBox = 12.5%
-   del ancho) -trasladarlo exactamente un período y en loop da un flujo
-   continuo sin salto en el empalme, el mismo truco que .marquee-track pero
-   sin necesitar duplicar el contenido. El trazo de atrás (más tenue) va un
-   poco más lento y arranca con un pequeño delay negativo -esa diferencia
-   de velocidad entre las dos capas es lo que da sensación de profundidad
-   (una ola "cerca" y otra "lejos") en vez de una sola línea plana
-   calcada. */
-@keyframes water-flow {
-  from { transform: translateX(0); }
-  to { transform: translateX(-12.5%); }
-}
-.water-ripple path {
-  animation: water-flow 1.2s linear infinite;
-}
-.water-ripple .water-ripple-back {
-  animation-duration: 1.8s;
-  animation-delay: -0.6s;
-}
-@media (prefers-reduced-motion: reduce) {
-  .water-ripple path {
-    animation: none;
-  }
-}
-
 /* Página 404 (ver src/app/not-found.tsx): el mismo <SailingBoat> del resto
-   del sitio, pero "a la deriva" -un balanceo más marcado que .boat-sway
-   (más grados, más recorrido vertical) más un vaivén horizontal lento, en
-   vez del sway sutil de navbar/login. Un bote que se mece MUCHO y encima
-   deriva de lado a lado lee como "perdido, sin rumbo" -la idea completa de
-   la página- en vez de solo "navegando" como en el resto del sitio. Mismo
+   del sitio, pero "a la deriva" -un balanceo marcado más un vaivén
+   horizontal lento, a diferencia del resto del sitio donde el ícono queda
+   quieto. Un bote que se mece MUCHO y encima deriva de lado a lado lee
+   como "perdido, sin rumbo" -la idea completa de la página. Mismo
    transform-origin en el centro (no abajo): acá no está "apoyado" en nada,
    está flotando sin control. */
 @keyframes boat-adrift {

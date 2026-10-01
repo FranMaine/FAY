@@ -56,11 +56,10 @@ export function BetaBanner() {
     >
       <div className="p-6 pt-8 space-y-4 text-center">
         {/* Mismo velero de marca que usan /login, /registro y la 404 (ver
-            SailingBoat) en vez de un ícono de información genérico -ya se
-            mece solo (.boat-sway, adentro del propio componente), así que
-            el "pop" de entrada solo hace falta en el círculo que lo
-            envuelve. La insignia ámbar es el mismo lenguaje que ya usa el
-            sitio para "atención" (ver badges de campeonato en curso). */}
+            SailingBoat) en vez de un ícono de información genérico -el
+            "pop" de entrada es del círculo que lo envuelve, el ícono en sí
+            es estático. La insignia ámbar es el mismo lenguaje que ya usa
+            el sitio para "atención" (ver badges de campeonato en curso). */}
         <div className="icon-pop-in relative mx-auto h-20 w-20">
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/25 to-primary/5" aria-hidden="true" />
           <div className="relative flex h-full w-full items-center justify-center">
