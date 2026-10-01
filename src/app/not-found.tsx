@@ -6,10 +6,9 @@ import { SailingBoat } from "@/components/icons/sailing-boat";
 // Página 404 -Next.js la muestra automáticamente para cualquier ruta que
 // no matchee nada (y también podemos forzarla a mano con notFound() desde
 // una página dinámica, como ya hace /campeonatos/[id] y /regatistas/[id]
-// para un id inexistente). Un velero "a la deriva" (mismo ícono de marca
-// que el resto del sitio, ver SailingBoat) en vez de un mensaje de error
-// genérico -la idea es la misma que ya usa el sitio (marca + humor sutil)
-// pero apuntada al caso de "esta página no existe".
+// para un id inexistente). El mismo velero de marca que el resto del sitio
+// (ver SailingBoat), grande y con el signo de pregunta flotando al lado,
+// en vez de un mensaje de error genérico.
 export default function NotFound() {
   return (
     <main className="min-h-[70vh] flex items-center justify-center px-6 py-20 bg-background">
@@ -18,9 +17,7 @@ export default function NotFound() {
           {/* Círculo de fondo, mismo estilo que el resto del sitio usa para
               destacar un ícono central (ver registro/login). */}
           <div className="absolute inset-0 rounded-full bg-primary/10" aria-hidden="true" />
-          <span className="boat-adrift relative">
-            <SailingBoat className="w-20 h-20 text-primary" />
-          </span>
+          <SailingBoat className="relative w-20 h-20 text-primary" />
           <span
             className="float-question absolute -top-2 -right-1 text-3xl font-bold text-accent select-none"
             aria-hidden="true"

@@ -1,16 +1,20 @@
 import type { LucideProps } from "lucide-react";
 
 // Marca del velero, vectorizada a partir del logo que mandó el usuario
-// (silueta sólida: mayor + foque + casco + estela, un solo color). Sin
-// balanceo propio ni agua animada por separado -eso lo tenía la versión
-// anterior porque el ícono de lucide-react no traía nada de eso dibujado;
-// este ya incluye su propia estela como parte del trazo. Una página que
-// igual quiera moverlo (ver boat-adrift en not-found.tsx) lo envuelve ella
-// misma en un span con la animación -el componente de acá no le impone
-// movimiento a nadie.
+// (silueta sólida: mayor + foque + casco + estela, un solo color). Estático
+// en todo el sitio, sin balanceo ni agua animada por separado -eso lo tenía
+// la versión anterior porque el ícono de lucide-react no traía nada de eso
+// dibujado; este ya incluye su propia estela como parte del trazo.
+//
+// El viewBox NO es el 0..500 / 0..457 completo que dejó el trazado
+// automático -el dibujo real ocupa solo un recuadro de 220x254 ahí adentro
+// (getBBox() en el navegador lo confirmó), así que con el viewBox completo
+// el velero se veía chico y perdido en el medio de su propio ícono. Acá va
+// recortado a ese recuadro real (+ un margen chico) para que llene el
+// cuadrado igual que hacía el ícono anterior.
 export function SailingBoat({ className, ...props }: LucideProps) {
   return (
-    <svg viewBox="0 0 500 457" fill="none" className={className} {...props}>
+    <svg viewBox="115 96 232 266" fill="none" className={className} {...props}>
       <path
         d="M0 0 C-0.48 8.31 -1.27 16.44 -2.7 24.65 C-3.37 32.12 -1.31 39.22 0.52 46.41 C1.05 48.5 1.57 50.6 2.1 52.7 C2.38 53.8 2.66 54.91 2.94 56.05 C9.75 83.13 15.75 110.35 21.46 137.68 C23.1 145.48 24.76 153.27 26.42 161.06 C27.26 165.01 28.1 168.96 28.93 172.91 C29.47 175.46 30.02 178 30.56 180.54 C31.31 184.06 32.05 187.59 32.8 191.11 C33.02 192.16 33.25 193.21 33.48 194.29 C34.31 198.27 35 201.92 35 206 C30.71 206.55 30.71 206.55 24.73 206.61 C23.67 206.63 22.6 206.64 21.5 206.66 C18.07 206.71 14.63 206.73 11.19 206.75 C8.94 206.78 6.69 206.81 4.44 206.84 C0.05 206.9 -4.35 206.93 -8.75 206.95 C-12.79 206.97 -16.8 207.06 -20.84 207.19 C-22.57 207.24 -24.3 207.28 -26.07 207.33 C-26.83 207.36 -26.83 207.36 -30.67 207.5 C-31.22 207.42 -31.22 207.42 -34 207 C-35 202 -35 202 -35 199 C-35.17 199.64 -35.17 199.64 -36.06 202.9 C-36.51 204.56 -36.97 206.23 -37.44 207.94 C-37.66 208.77 -37.66 208.77 -38.81 212.96 C-40 217 -40 217 -41 218 C-43.33 218.04 -45.67 218.04 -48 218 C-48 211.06 -47.14 206.69 -43.5 200.75 C-20.29 162.79 -17.7 113.6 -11.07 70.66 C-10.88 69.4 -10.69 68.14 -10.48 66.85 C-9.12 57.94 -7.9 49.25 -7.79 40.22 C-7.76 38.57 -7.73 36.93 -7.7 35.23 C-7.65 31.79 -7.61 28.35 -7.57 24.91 C-7.55 24.08 -7.55 24.08 -7.48 19.91 C-7.46 18.42 -7.44 16.92 -7.42 15.38 C-5.95 0 -5.95 0 0 0 Z"
         fill="currentColor"
