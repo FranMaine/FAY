@@ -56,6 +56,7 @@ import { SessionProvider } from '@/components/providers/session-provider';
 import { BackToTop } from '@/components/layout/back-to-top';
 import { CookieBanner } from '@/components/layout/cookie-banner';
 import { BetaBanner } from '@/components/layout/beta-banner';
+import { IaChat } from '@/components/admin/ia-chat';
 import { AppToaster } from '@/components/providers/app-toaster';
 import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization-jsonld';
 
@@ -116,6 +117,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </footer>
           <BackToTop />
           <CookieBanner />
+          <IaChat />
           <AppToaster />
         </SessionProvider>
       </body>

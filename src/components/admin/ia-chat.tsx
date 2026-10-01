@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { BinocularsIcon, Loader2Icon, SendIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, mensajeDeError } from "@/lib/utils";
@@ -23,7 +25,18 @@ const SUGERENCIAS = [
 // VigIA, el asistente para el admin: botón anclado al borde derecho que abre un panel
 // lateral de chat. Solo consulta datos (el servidor le da herramientas de
 // lectura, ver /api/admin/ia/chat): no puede modificar nada.
+//
+// Vive montado en el layout raíz (no en admin/layout.tsx) a propósito: ese
+// layout vuelve a leer auth() y se remonta en cualquier navegación que
+// apunte de nuevo a la ruta en la que ya estás (ej. clickear "Admin" en la
+// navbar estando en /admin), lo que tiraba abajo el estado de este
+// componente (el panel se cerraba solo, de golpe). Acá el gate de
+// rol+sección es del lado del cliente -mismo patrón que ya usa Navbar con
+// useSession()- así el componente nunca se desmonta por una navegación
+// que Next.js considera "la misma página".
 export function IaChat() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
   const [abierto, setAbierto] = useState(false);
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [texto, setTexto] = useState("");
@@ -70,6 +83,11 @@ export function IaChat() {
       setEnviando(false);
     }
   }
+
+  // Solo ADMIN (no ORGANIZADOR) y solo dentro de /admin -antes este gate
+  // vivía en admin/layout.tsx (server-side); ver el comentario arriba del
+  // export sobre por qué se movió acá.
+  if (session?.user?.role !== "ADMIN" || !pathname.startsWith("/admin")) return null;
 
   const yaPreguntadas = new Set(mensajes.filter((m) => m.rol === "usuario").map((m) => m.texto));
   const sugeridas = SUGERENCIAS.filter((sug) => !yaPreguntadas.has(sug));
