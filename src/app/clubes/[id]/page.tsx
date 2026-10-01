@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, MedalIcon, TrophyIcon, UsersIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowUpRightIcon, MedalIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ClaseIcon } from "@/components/icons/clase-icons";
@@ -10,6 +11,7 @@ import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { SITE_URL } from "@/lib/site";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
 import { jsonLdSeguro } from "@/lib/json-ld";
+import { slugificar } from "@/lib/slug";
 
 // Mismo criterio que /campeonatos/[id] y /regatistas/[id]: sin esto la
 // página queda cacheada estática para siempre, y un resultado nuevo
@@ -173,25 +175,41 @@ export default async function ClubDetailPage({ params }: Props) {
             <section className="space-y-4">
               <h2 className="text-xl font-bold tracking-tight">Por categoría</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categorias.map((cat) => (
-                  <Card key={cat.claseNombre} className="bg-surface border-border rounded-2xl">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <ClaseIcon nombreClase={cat.claseNombre} className="w-6 h-6 shrink-0" />
-                        {cat.claseNombre}
-                      </CardTitle>
-                      <CardDescription>
-                        {cat.regatistas.size} regatista{cat.regatistas.size === 1 ? "" : "s"} · {cat.resultados} resultado{cat.resultados === 1 ? "" : "s"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                        <MedalIcon className="w-4 h-4 text-amber-500" />
-                        Mejor puesto en una regata: <span className="font-semibold text-foreground">{cat.mejorPuesto}º</span>
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
+                {categorias.map((cat) => {
+                  const claseSlug = slugificar(cat.claseNombre);
+                  return (
+                    <Link
+                      key={cat.claseNombre}
+                      href={`/clubes/${club.id}/${claseSlug}`}
+                      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <Card className="h-full bg-surface border-border rounded-2xl transition-[transform,border-color] duration-200 ease-out-strong group-hover:-translate-y-1 group-active:scale-[0.985] group-hover:border-primary/60">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              <ViewTransition name={`club-categoria-${club.id}-${claseSlug}`} share="morph" default="none">
+                                <span className="flex h-6 w-6 shrink-0 items-center justify-center">
+                                  <ClaseIcon nombreClase={cat.claseNombre} className="w-6 h-6 object-contain" />
+                                </span>
+                              </ViewTransition>
+                              {cat.claseNombre}
+                            </CardTitle>
+                            <ArrowUpRightIcon className="h-4 w-4 shrink-0 text-primary opacity-0 transition-[opacity,transform] duration-200 ease-out-strong group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" aria-hidden="true" />
+                          </div>
+                          <CardDescription>
+                            {cat.regatistas.size} regatista{cat.regatistas.size === 1 ? "" : "s"} · {cat.resultados} resultado{cat.resultados === 1 ? "" : "s"}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                            <MedalIcon className="w-4 h-4 text-amber-500" />
+                            Mejor puesto en una regata: <span className="font-semibold text-foreground">{cat.mejorPuesto}º</span>
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
 
