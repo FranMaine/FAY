@@ -111,8 +111,9 @@ export async function DELETE(
   }
 }
 
-// Cambio puntual de estado, descartes y/o nombre, sin tener que reenviar el
-// formulario completo del campeonato.
+// Cambio puntual de uno o varios campos (estado, descartes, nombre,
+// evento, año, sede, fechas), sin tener que reenviar el formulario
+// completo del campeonato.
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -134,7 +135,10 @@ export async function PATCH(
         ...(body.descartes !== undefined ? { descartes: body.descartes } : {}),
         ...(body.nombre !== undefined ? { nombre: body.nombre } : {}),
         ...(body.evento !== undefined ? { evento: body.evento || null } : {}),
+        ...(body.anio !== undefined ? { anio: body.anio } : {}),
         ...(body.sedeId !== undefined ? { sedeId: body.sedeId || null } : {}),
+        ...(body.fechaInicio !== undefined ? { fechaInicio: body.fechaInicio } : {}),
+        ...(body.fechaFin !== undefined ? { fechaFin: body.fechaFin } : {}),
       },
     });
 

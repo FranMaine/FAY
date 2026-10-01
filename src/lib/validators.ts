@@ -78,10 +78,17 @@ export const campeonatoPatchSchema = z.object({
   descartes: z.number().int().min(0).optional(),
   nombre: z.string().min(3, 'Mínimo 3 caracteres').optional(),
   evento: z.string().trim().nullable().optional(),
+  anio: z.number().int().min(2000).max(2100).optional(),
   sedeId: z.string().nullable().optional(),
-}).refine((data) => data.estado !== undefined || data.descartes !== undefined || data.nombre !== undefined || data.evento !== undefined || data.sedeId !== undefined, {
-  message: 'Nada para actualizar',
-});
+  fechaInicio: fechaOpcionalNullable,
+  fechaFin: fechaOpcionalNullable,
+}).refine(
+  (data) =>
+    data.estado !== undefined || data.descartes !== undefined || data.nombre !== undefined ||
+    data.evento !== undefined || data.anio !== undefined || data.sedeId !== undefined ||
+    data.fechaInicio !== undefined || data.fechaFin !== undefined,
+  { message: 'Nada para actualizar' }
+);
 
 export const regataSchema = z.object({
   numero: z.number().int().min(1),

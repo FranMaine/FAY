@@ -83,16 +83,25 @@ export default function AdminCampeonatosPage() {
   // esto había que abrir uno por uno y tocar "Publicar" en cada categoría.
   const [publicandoEventoClave, setPublicandoEventoClave] = useState<string | null>(null);
 
-  // "Personalizar evento": aplica sede y/o descartes a TODOS los
-  // campeonatos del evento en un solo guardado, en vez de repetir la misma
-  // edición en cada categoría -mismo criterio que ya existe para el logo
-  // del grupo (subirLogoDelGrupo). El nombre/clase de cada categoría NO se
-  // toca acá: un evento puede tener categorías con nombres distintos
-  // (ver comentario en agruparPorEvento), así que solo entran los campos
-  // que de verdad suelen ser iguales para todo el evento.
+  // "Personalizar evento": aplica nombre del evento, año, sede, fechas y/o
+  // descartes a TODOS los campeonatos del evento en un solo guardado, en
+  // vez de repetir la misma edición en cada categoría -mismo criterio que
+  // ya existe para el logo del grupo (subirLogoDelGrupo). Ojo: esto es el
+  // campo `evento` (la etiqueta del grupo), no el `nombre` de cada
+  // categoría individual -un evento puede seguir teniendo categorías con
+  // nombres distintos (ver comentario en agruparPorEvento), eso no se
+  // toca acá.
   const [personalizarClave, setPersonalizarClave] = useState<string | null>(null);
+  // Nombre del evento y año son conceptos del GRUPO entero (no de una
+  // categoría puntual) -se precargan con el valor actual y se mandan
+  // siempre, a diferencia de sede/descartes/fechas (que sí pueden variar
+  // categoría por categoría, así que vacío = "no tocar este campo").
+  const [nombreEventoPersonalizar, setNombreEventoPersonalizar] = useState("");
+  const [anioPersonalizar, setAnioPersonalizar] = useState("");
   const [sedeIdPersonalizar, setSedeIdPersonalizar] = useState("");
   const [descartesPersonalizar, setDescartesPersonalizar] = useState("");
+  const [fechaInicioPersonalizar, setFechaInicioPersonalizar] = useState("");
+  const [fechaFinPersonalizar, setFechaFinPersonalizar] = useState("");
   const [guardandoPersonalizar, setGuardandoPersonalizar] = useState(false);
 
   const fetchData = async () => {
@@ -214,17 +223,36 @@ export default function AdminCampeonatosPage() {
     }
   };
 
-  function abrirPersonalizar(clave: string) {
+  function abrirPersonalizar(clave: string, grupo: { nombre: string; anio: number }) {
+    setNombreEventoPersonalizar(grupo.nombre);
+    setAnioPersonalizar(String(grupo.anio));
     setSedeIdPersonalizar("");
     setDescartesPersonalizar("");
+    setFechaInicioPersonalizar("");
+    setFechaFinPersonalizar("");
     setPersonalizarClave(clave);
   }
 
   const handleGuardarPersonalizar = async (items: Campeonato[]) => {
-    // Vacío = "no tocar este campo" -solo se manda al PATCH lo que el
-    // admin efectivamente completó, así no se pisa por accidente la sede o
-    // los descartes de una categoría con un valor que no quiso cambiar.
-    const body: { sedeId?: string | null; descartes?: number } = {};
+    const nombreEvento = nombreEventoPersonalizar.trim();
+    if (nombreEvento.length < 3) {
+      toast.error("El nombre del evento tiene que tener al menos 3 caracteres");
+      return;
+    }
+    const anio = parseInt(anioPersonalizar, 10);
+    if (Number.isNaN(anio) || anio < 2000 || anio > 2100) {
+      toast.error("El año no es válido");
+      return;
+    }
+    // Vacío = "no tocar este campo" para sede/descartes/fechas -son datos
+    // que sí pueden variar categoría por categoría, así que solo se manda
+    // al PATCH lo que el admin efectivamente completó. Nombre y año del
+    // evento, en cambio, se mandan siempre (son del grupo entero, no de
+    // una categoría puntual).
+    const body: { evento: string; anio: number; sedeId?: string | null; descartes?: number; fechaInicio?: string | null; fechaFin?: string | null } = {
+      evento: nombreEvento,
+      anio,
+    };
     if (sedeIdPersonalizar !== "") body.sedeId = sedeIdPersonalizar === "NINGUNA" ? null : sedeIdPersonalizar;
     if (descartesPersonalizar.trim() !== "") {
       const n = parseInt(descartesPersonalizar, 10);
@@ -234,10 +262,8 @@ export default function AdminCampeonatosPage() {
       }
       body.descartes = n;
     }
-    if (Object.keys(body).length === 0) {
-      toast.error("Completá al menos un campo para aplicar");
-      return;
-    }
+    if (fechaInicioPersonalizar !== "") body.fechaInicio = fechaInicioPersonalizar;
+    if (fechaFinPersonalizar !== "") body.fechaFin = fechaFinPersonalizar;
     setGuardandoPersonalizar(true);
     try {
       const resultados = await Promise.allSettled(
@@ -483,9 +509,9 @@ export default function AdminCampeonatosPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-muted-foreground hover:text-primary"
-                              aria-label="Personalizar evento (sede y descartes para todas las categorías)"
+                              aria-label="Personalizar evento (nombre, año, sede, fechas y descartes para todas las categorías)"
                               title="Personalizar evento"
-                              onClick={() => abrirPersonalizar(clave)}
+                              onClick={() => abrirPersonalizar(clave, grupo)}
                             >
                               <SettingsIcon className="w-4 h-4" />
                             </Button>
@@ -552,8 +578,55 @@ export default function AdminCampeonatosPage() {
               <div>
                 <h2 className="text-lg font-bold text-foreground">Personalizar evento</h2>
                 <p className="text-sm text-muted-foreground">
-                  Se aplica a las {grupo.items.length} categorías de &quot;{grupo.nombre}&quot; {grupo.anio}. Dejá un campo vacío para no tocarlo.
+                  Se aplica a las {grupo.items.length} categorías de &quot;{grupo.nombre}&quot; {grupo.anio}. Nombre y
+                  año se aplican siempre; dejá el resto vacío para no tocarlo.
                 </p>
+              </div>
+              <div className="grid grid-cols-[1fr_auto] gap-3">
+                <div className="space-y-1.5">
+                  <label htmlFor="personalizar-nombre" className="text-sm font-medium text-muted-foreground">Nombre del evento</label>
+                  <input
+                    id="personalizar-nombre"
+                    type="text"
+                    className={campoInput}
+                    value={nombreEventoPersonalizar}
+                    onChange={(e) => setNombreEventoPersonalizar(e.target.value)}
+                  />
+                </div>
+                <div className="w-24 space-y-1.5">
+                  <label htmlFor="personalizar-anio" className="text-sm font-medium text-muted-foreground">Año</label>
+                  <input
+                    id="personalizar-anio"
+                    type="number"
+                    className={campoInput}
+                    value={anioPersonalizar}
+                    onChange={(e) => setAnioPersonalizar(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label htmlFor="personalizar-fecha-inicio" className="text-sm font-medium text-muted-foreground">Fecha inicio</label>
+                  <input
+                    id="personalizar-fecha-inicio"
+                    type="date"
+                    placeholder="No cambiar"
+                    className={campoInput}
+                    value={fechaInicioPersonalizar}
+                    onChange={(e) => setFechaInicioPersonalizar(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="personalizar-fecha-fin" className="text-sm font-medium text-muted-foreground">Fecha fin</label>
+                  <input
+                    id="personalizar-fecha-fin"
+                    type="date"
+                    placeholder="No cambiar"
+                    className={campoInput}
+                    value={fechaFinPersonalizar}
+                    onChange={(e) => setFechaFinPersonalizar(e.target.value)}
+                  />
+                </div>
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="personalizar-sede" className="text-sm font-medium text-muted-foreground">Sede</label>
