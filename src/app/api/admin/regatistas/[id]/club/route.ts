@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
+import { eliminarClubesVacios } from '@/lib/club-cleanup';
 
 const bodySchema = z.object({
   clubId: z.string().nullable().optional(),
@@ -28,6 +29,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params;
     const body = bodySchema.parse(await request.json());
 
+    // Clubes de ANTES de tocar nada -después de reasignar, los que ya no
+    // queden con nadie se borran solos (ver eliminarClubesVacios).
+    const antes = await prisma.regatista.findUnique({
+      where: { id },
+      select: { clubId: true, otrosClubes: { select: { id: true } } },
+    });
+    const clubesAntes = [antes?.clubId, ...(antes?.otrosClubes.map((c) => c.id) ?? [])];
+    const actor = { email: session.user.email || session.user.id, name: session.user.name };
+
     if (body.clubIds) {
       const ids = [...new Set(body.clubIds)];
       const existentes = await prisma.club.count({ where: { id: { in: ids } } });
@@ -36,6 +46,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         where: { id },
         data: { clubId: ids[0], otrosClubes: { set: ids.slice(1).map((c) => ({ id: c })) } },
       });
+      await eliminarClubesVacios(clubesAntes, actor);
       return NextResponse.json({ ok: true });
     }
     let clubId = body.clubId ?? null;
@@ -50,6 +61,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     await prisma.regatista.update({ where: { id }, data: { clubId } });
+    await eliminarClubesVacios(clubesAntes, actor);
     return NextResponse.json({ ok: true });
   } catch (error) {
     return handleApiError(error, 'PATCH /api/admin/regatistas/[id]/club');

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { regatistaEditSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
+import { eliminarClubesVacios } from '@/lib/club-cleanup';
 
 export async function PUT(
   request: Request,
@@ -33,6 +34,12 @@ export async function PUT(
       }
     }
 
+    // Club de ANTES de tocar nada -si el cambio lo deja sin nadie, se
+    // borra solo (ver eliminarClubesVacios).
+    const clubAntes = clubId !== undefined
+      ? (await prisma.regatista.findUnique({ where: { id }, select: { clubId: true } }))?.clubId
+      : undefined;
+
     const regatista = await prisma.regatista.update({
       where: { id },
       data: {
@@ -42,6 +49,10 @@ export async function PUT(
       },
       include: { club: true },
     });
+
+    if (clubAntes) {
+      await eliminarClubesVacios([clubAntes], { email: session.user.email || session.user.id, name: session.user.name });
+    }
 
     return NextResponse.json(regatista);
   } catch (error) {

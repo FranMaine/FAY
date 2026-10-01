@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
-interface ActorAuditoria {
+export interface ActorAuditoria {
   email: string;
   name?: string | null;
 }
