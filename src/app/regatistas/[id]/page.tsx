@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon } from "lucide-react";
 import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { jsonLdSeguro } from "@/lib/json-ld";
+import { LOGROS, calcularLogros, type LogroHistorialEntry } from "@/lib/logros";
+import { LogroBadge } from "@/components/ui/logro-badge";
 
 // Mismo caso que /campeonatos/[id]: sin esto, el perfil queda cacheado
 // estático para siempre después de la primera visita -si esa persona
@@ -49,6 +51,7 @@ async function getRegatistaProfile(id: string) {
   const campeonatosIds = new Set(regatista.resultados.map(r => r.regata.campeonatoId));
   const historial = [];
   const chartData = [];
+  const historialLogros: LogroHistorialEntry[] = [];
 
   for (const campId of campeonatosIds) {
     // Para saber su posición final, necesitamos calcular la clasificación de todo el campeonato
@@ -82,11 +85,36 @@ async function getRegatistaProfile(id: string) {
         puntosNetos: miClasificacion.totalNeto,
       });
 
+      const fecha = campeonato.fechaInicio || new Date(campeonato.anio, 0, 1);
       chartData.push({
         campeonato: campeonato.nombre,
         posicion: miClasificacion.posicionFinal,
         anio: campeonato.anio,
-        date: campeonato.fechaInicio || new Date(campeonato.anio, 0, 1),
+        date: fecha,
+      });
+
+      // Diferencia de puntos con el 2° puesto, solo tiene sentido cuando
+      // ganó (ver "margen-amplio" en logros.ts).
+      const diferenciaSegundo =
+        miClasificacion.posicionFinal === 1 && clasificacion[1]
+          ? Math.round((clasificacion[1].totalNeto - miClasificacion.totalNeto) * 100) / 100
+          : null;
+
+      historialLogros.push({
+        campeonatoId: campeonato.id,
+        campeonatoNombre: campeonato.nombre,
+        evento: campeonato.evento,
+        claseId: campeonato.claseId,
+        anio: campeonato.anio,
+        fecha,
+        posicion: miClasificacion.posicionFinal,
+        totalInscriptos: clasificacion.length,
+        diferenciaSegundo,
+        resultados: miClasificacion.resultados.map((r) => ({
+          regataNumero: r.regataNumero,
+          puesto: r.puesto,
+          descartado: r.descartado,
+        })),
       });
     }
   }
@@ -97,7 +125,12 @@ async function getRegatistaProfile(id: string) {
   // Ordenar chartData cronológicamente (más viejo primero para el gráfico)
   chartData.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  return { regatista, historial, chartData };
+  const logros = await calcularLogros(
+    { id: regatista.id, clubId: regatista.clubId, otrosClubesIds: regatista.otrosClubes.map((c) => c.id) },
+    historialLogros
+  );
+
+  return { regatista, historial, chartData, logros };
 }
 
 type Props = { params: Promise<{ id: string }> };
@@ -126,7 +159,8 @@ export default async function RegatistaProfilePage({ params }: Props) {
     notFound();
   }
 
-  const { regatista, historial, chartData } = data;
+  const { regatista, historial, chartData, logros } = data;
+  const logrosDesbloqueados = new Map(logros.map((l) => [l.id, l]));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -209,6 +243,23 @@ export default async function RegatistaProfilePage({ params }: Props) {
               </div>
             ))}
           </div>
+        )}
+        {logrosDesbloqueados.size > 0 && (
+          <Card className="bg-surface border-border">
+            <CardHeader>
+              <CardTitle className="text-xl">Logros</CardTitle>
+              <CardDescription>
+                {logrosDesbloqueados.size} de {LOGROS.length} desbloqueados
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-x-2 gap-y-4 sm:gap-x-4">
+                {LOGROS.map((logro) => (
+                  <LogroBadge key={logro.id} logro={logro} desbloqueado={logrosDesbloqueados.get(logro.id)} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
         {historial.length === 0 ? (
           <Card className="bg-surface border-border text-center py-12">
