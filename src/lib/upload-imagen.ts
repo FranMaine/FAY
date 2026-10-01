@@ -110,13 +110,21 @@ export async function quitarFondoLiso(buffer: Buffer): Promise<Buffer> {
  * 'inside': conserva la proporción original sin recortar, para escudos) y lo sube a Vercel Blob bajo `carpeta/clave.webp`.
  * Devuelve la URL pública. Requiere BLOB_READ_WRITE_TOKEN configurado
  * (automático si el proyecto tiene un Blob Store conectado en Vercel).
+ *
+ * `quitarFondo` (default true, solo aplica en modo 'inside'): el admin
+ * puede desactivarlo a mano para un logo que no es un escudo con fondo
+ * liso de verdad -un banner con su propio color de fondo (ej: "COPA DON
+ * GERARDO"), al que quitarFondoLiso puede arruinarle el diseño o, en el
+ * mejor caso, dejarlo sin fondo propio y dependiendo del fondo de la
+ * tarjeta donde se muestre para tener contraste.
  */
 export async function subirImagen(
   file: File,
   carpeta: string,
   clave: string,
   ladoPx: number,
-  modo: 'cover' | 'inside' = 'cover'
+  modo: 'cover' | 'inside' = 'cover',
+  quitarFondo = true
 ): Promise<string> {
   if (!TIPOS_PERMITIDOS.has(file.type)) {
     throw new ImagenInvalidaError('Formato no soportado -usá JPG, PNG, WEBP o AVIF.');
@@ -138,7 +146,7 @@ export async function subirImagen(
       // perder precisión real (el resultado final es más chico todavía).
       const TAMANIO_TRABAJO = 900;
       buffer = await sharp(buffer).resize(TAMANIO_TRABAJO, TAMANIO_TRABAJO, { fit: 'inside', withoutEnlargement: true }).toBuffer();
-      buffer = await quitarFondoLiso(buffer);
+      if (quitarFondo) buffer = await quitarFondoLiso(buffer);
     }
     webp = await sharp(buffer)
       .resize(ladoPx, ladoPx, modo === 'cover' ? { fit: 'cover' } : { fit: 'inside', withoutEnlargement: true })

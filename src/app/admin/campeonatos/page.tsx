@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { PlusIcon, EditIcon, EyeIcon, Loader2Icon, ChevronRightIcon, SailboatIcon, ImageIcon, SendIcon, UndoIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { NuevoCampeonatoModal } from "@/components/admin/nuevo-campeonato-modal";
+import { SubirLogoModal } from "@/components/admin/subir-logo-modal";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
 import { Modal } from "@/components/ui/modal";
 import { mensajeDeError, cn } from "@/lib/utils";
@@ -73,6 +74,10 @@ export default function AdminCampeonatosPage() {
   const [subiendoLogoGrupo, setSubiendoLogoGrupo] = useState<string | null>(null);
   const [errorLogoGrupo, setErrorLogoGrupo] = useState<{ clave: string; mensaje: string } | null>(null);
   const logoInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  // Qué evento (clave) y qué archivo está esperando confirmación en el
+  // SubirLogoModal -null = modal cerrado. Se guardan juntos porque el
+  // modal es uno solo compartido por todas las filas de la tabla.
+  const [logoGrupoPendiente, setLogoGrupoPendiente] = useState<{ clave: string; ids: string[]; file: File } | null>(null);
 
   // Publicar de un saque todos los campeonatos en borrador de un evento -sin
   // esto había que abrir uno por uno y tocar "Publicar" en cada categoría.
@@ -124,7 +129,7 @@ export default function AdminCampeonatosPage() {
     });
   }
 
-  const subirLogoDelGrupo = async (clave: string, ids: string[], file: File) => {
+  const subirLogoDelGrupo = async (clave: string, ids: string[], file: File, quitarFondo: boolean) => {
     setSubiendoLogoGrupo(clave);
     setErrorLogoGrupo(null);
     try {
@@ -132,6 +137,7 @@ export default function AdminCampeonatosPage() {
         ids.map(async (id) => {
           const formData = new FormData();
           formData.append("file", file);
+          formData.append("quitarFondo", String(quitarFondo));
           const res = await fetch(`/api/admin/campeonatos/${id}/logo`, { method: "PATCH", body: formData });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "No se pudo subir el logo");
@@ -140,6 +146,7 @@ export default function AdminCampeonatosPage() {
       );
       const logoPorId = new Map(resultados.map((r) => [r.id, r.logoUrl]));
       setCampeonatos((prev) => prev.map((c) => (logoPorId.has(c.id) ? { ...c, logoUrl: logoPorId.get(c.id)! } : c)));
+      setLogoGrupoPendiente(null);
     } catch (err) {
       setErrorLogoGrupo({ clave, mensaje: mensajeDeError(err) });
     } finally {
@@ -455,7 +462,7 @@ export default function AdminCampeonatosPage() {
                               className="hidden"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) subirLogoDelGrupo(clave, grupo.items.map((c) => c.id), file);
+                                if (file) setLogoGrupoPendiente({ clave, ids: grupo.items.map((c) => c.id), file });
                                 e.target.value = "";
                               }}
                             />
@@ -523,6 +530,16 @@ export default function AdminCampeonatosPage() {
         clases={clases}
         clubes={clubes}
         eventos={[...new Set(campeonatos.map((c) => c.evento?.trim() || c.nombre))].sort()}
+      />
+
+      <SubirLogoModal
+        key={logoGrupoPendiente ? `${logoGrupoPendiente.clave}-${logoGrupoPendiente.file.name}-${logoGrupoPendiente.file.lastModified}` : "sin-archivo"}
+        file={logoGrupoPendiente?.file ?? null}
+        onClose={() => setLogoGrupoPendiente(null)}
+        onConfirm={(quitarFondo) => {
+          if (logoGrupoPendiente) return subirLogoDelGrupo(logoGrupoPendiente.clave, logoGrupoPendiente.ids, logoGrupoPendiente.file, quitarFondo);
+        }}
+        titulo="Subir logo del evento"
       />
 
       {(() => {

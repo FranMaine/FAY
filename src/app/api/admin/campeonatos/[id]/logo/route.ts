@@ -27,8 +27,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!(file instanceof File)) {
       return NextResponse.json({ error: 'Falta el archivo' }, { status: 400 });
     }
+    // El admin elige esto a mano al subir (ver SubirLogoModal) -default
+    // true si no viene, para no romper nada que llame a este endpoint sin
+    // mandarlo.
+    const quitarFondo = formData.get('quitarFondo') !== 'false';
 
-    const logoUrl = await subirImagen(file, 'campeonatos', id, 400, 'inside');
+    const logoUrl = await subirImagen(file, 'campeonatos', id, 400, 'inside', quitarFondo);
     await prisma.campeonato.update({ where: { id }, data: { logoUrl } });
     if (campeonato.logoUrl) await borrarImagen(campeonato.logoUrl);
 

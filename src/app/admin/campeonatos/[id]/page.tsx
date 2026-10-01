@@ -9,6 +9,7 @@ import Image from "next/image";
 import { PlusIcon, SaveIcon, UploadIcon, CheckCircleIcon, Loader2Icon, TrashIcon, AlertCircleIcon, PencilIcon, XIcon, ImageIcon } from "lucide-react";
 
 import { CsvUploadModal } from "@/components/admin/csv-upload-modal";
+import { SubirLogoModal } from "@/components/admin/subir-logo-modal";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
 import { mensajeDeError } from "@/lib/utils";
 
@@ -92,6 +93,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
   const [sedeIdInput, setSedeIdInput] = useState("");
 
   const [subiendoLogo, setSubiendoLogo] = useState(false);
+  const [archivoLogoElegido, setArchivoLogoElegido] = useState<File | null>(null);
   const [errorLogo, setErrorLogo] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [clubes, setClubes] = useState<{ id: string; nombre: string }[]>([]);
@@ -291,16 +293,18 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
     }
   };
 
-  const subirLogo = async (file: File) => {
+  const subirLogo = async (file: File, quitarFondo: boolean) => {
     setSubiendoLogo(true);
     setErrorLogo(null);
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("quitarFondo", String(quitarFondo));
       const res = await fetch(`/api/admin/campeonatos/${id}/logo`, { method: "PATCH", body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo subir el logo");
       setCampeonato((prev) => (prev ? { ...prev, logoUrl: data.logoUrl } : prev));
+      setArchivoLogoElegido(null);
     } catch (err) {
       setErrorLogo(mensajeDeError(err));
     } finally {
@@ -370,7 +374,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) subirLogo(file);
+                  if (file) setArchivoLogoElegido(file);
                   e.target.value = "";
                 }}
               />
@@ -693,6 +697,14 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
           setIsCsvModalOpen(false);
           fetchCampeonato();
         }}
+      />
+
+      <SubirLogoModal
+        key={archivoLogoElegido ? `${archivoLogoElegido.name}-${archivoLogoElegido.lastModified}` : "sin-archivo"}
+        file={archivoLogoElegido}
+        onClose={() => setArchivoLogoElegido(null)}
+        onConfirm={(quitarFondo) => { if (archivoLogoElegido) return subirLogo(archivoLogoElegido, quitarFondo); }}
+        titulo="Subir logo del campeonato"
       />
     </main>
   );
