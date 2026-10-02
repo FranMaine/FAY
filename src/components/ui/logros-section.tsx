@@ -14,12 +14,9 @@ interface LogrosSectionProps {
 // tocar una. Un solo Modal compartido (no uno por medalla) controlado por
 // cuál está seleccionada -más liviano que montar 21 modales por las dudas.
 //
-// El ícono ya trae su propio color (dorado/azul/bronce según el logro) en
-// vez de currentColor: no hace falta un circulo de fondo con texture propia
-// -el circulo bg-primary/10 de atrás es solo el mismo lenguaje que ya usa
-// el resto del sitio para "ícono dentro de un círculo" (ver el placeholder
-// de foto de perfil en /regatistas/[id] o el badge de la 404), no un color
-// por-logro.
+// Cada ícono ya es un círculo de color completo (no un glifo suelto que
+// necesite un fondo propio) -por eso van sin padding extra, llenando todo
+// el círculo del botón en vez de flotar chicos adentro de uno más grande.
 export function LogrosSection({ logros }: LogrosSectionProps) {
   const desbloqueados = new Map(logros.map((l) => [l.id, l]));
   const [seleccionado, setSeleccionado] = useState<LogroDef | null>(null);
@@ -40,11 +37,11 @@ export function LogrosSection({ logros }: LogrosSectionProps) {
             >
               <div
                 className={cn(
-                  "relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-full bg-primary/10 transition-transform group-hover:scale-105 group-active:scale-95",
+                  "relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-full transition-transform group-hover:scale-105 group-active:scale-95",
                   !d && "opacity-40 grayscale"
                 )}
               >
-                <Image src={`/logros/${logro.icono}`} alt="" fill sizes="64px" className="object-contain p-2.5" />
+                <Image src={`/logros/${logro.icono}`} alt="" fill sizes="64px" className="object-contain" />
               </div>
               <span className={cn("text-[11px] sm:text-xs font-medium leading-tight", d ? "text-foreground" : "text-muted-foreground")}>
                 {logro.nombre}
@@ -58,12 +55,9 @@ export function LogrosSection({ logros }: LogrosSectionProps) {
         {seleccionado && (
           <div className="p-6 text-center space-y-4">
             <div
-              className={cn(
-                "relative h-20 w-20 mx-auto rounded-full bg-primary/10",
-                !detalle && "opacity-40 grayscale"
-              )}
+              className={cn("relative h-20 w-20 mx-auto rounded-full", !detalle && "opacity-40 grayscale")}
             >
-              <Image src={`/logros/${seleccionado.icono}`} alt="" fill sizes="80px" className="object-contain p-3.5" />
+              <Image src={`/logros/${seleccionado.icono}`} alt="" fill sizes="80px" className="object-contain" />
             </div>
             <div>
               <h3 className="text-lg font-bold">{seleccionado.nombre}</h3>
