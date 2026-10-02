@@ -13,7 +13,7 @@ import { ArrowLeftIcon, TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIco
 import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { jsonLdSeguro } from "@/lib/json-ld";
 import { LOGROS, calcularLogros, type LogroHistorialEntry } from "@/lib/logros";
-import { LogroBadge } from "@/components/ui/logro-badge";
+import { LogrosSection } from "@/components/ui/logros-section";
 
 // Mismo caso que /campeonatos/[id]: sin esto, el perfil queda cacheado
 // estático para siempre después de la primera visita -si esa persona
@@ -160,7 +160,6 @@ export default async function RegatistaProfilePage({ params }: Props) {
   }
 
   const { regatista, historial, chartData, logros } = data;
-  const logrosDesbloqueados = new Map(logros.map((l) => [l.id, l]));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -244,20 +243,16 @@ export default async function RegatistaProfilePage({ params }: Props) {
             ))}
           </div>
         )}
-        {logrosDesbloqueados.size > 0 && (
+        {logros.length > 0 && (
           <Card className="bg-surface border-border">
             <CardHeader>
               <CardTitle className="text-xl">Logros</CardTitle>
               <CardDescription>
-                {logrosDesbloqueados.size} de {LOGROS.length} desbloqueados
+                {logros.length} de {LOGROS.length} desbloqueados — tocá una medalla para ver el detalle
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-x-2 gap-y-4 sm:gap-x-4">
-                {LOGROS.map((logro) => (
-                  <LogroBadge key={logro.id} logro={logro} desbloqueado={logrosDesbloqueados.get(logro.id)} />
-                ))}
-              </div>
+              <LogrosSection logros={logros} />
             </CardContent>
           </Card>
         )}
