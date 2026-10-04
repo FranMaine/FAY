@@ -19,7 +19,7 @@ function tabla(filas: Fila[] = []) {
 }
 
 let db: ReturnType<typeof crearDb>;
-function crearDb(seed: { clubes?: Fila[]; regatistas?: Fila[]; regatas?: Fila[] } = {}) {
+function crearDb(seed: { clubes?: Fila[]; regatistas?: Fila[]; regatas?: Fila[]; aliasesRegatista?: Fila[]; aliasesClub?: Fila[] } = {}) {
   const club = {
     ...tabla(seed.clubes),
     upsert: async ({ where, create }: { where: { nombre: string }; create: Record<string, unknown> }) => {
@@ -39,6 +39,8 @@ function crearDb(seed: { clubes?: Fila[]; regatistas?: Fila[]; regatas?: Fila[] 
   return {
     club,
     regatista: tabla(seed.regatistas),
+    aliasRegatista: tabla(seed.aliasesRegatista),
+    aliasClub: tabla(seed.aliasesClub),
     regata: tabla(seed.regatas),
     resultado,
     campeonato: { findUnique: async ({ where }: { where: { id: string } }) => (where.id === 'camp' ? { id: 'camp' } : null) },
@@ -99,6 +101,36 @@ describe('importCampeonatoResults', () => {
     const r = await importCampeonatoResults('camp', [fila('Maine Tomás', 'CNSI', [[1, 1]])]);
     expect(r.stats.regatistasNuevos).toBe(0);
     expect(db.resultado.filas[0].regatistaId).toBe('r1');
+  });
+
+  it('asigna por alias a quien se fusionó antes, en vez de recrear la ficha', async () => {
+    db = crearDb({
+      regatistas: [{ id: 'r1', nombre: 'Juan Pablo Maine' }],
+      aliasesRegatista: [{ id: 'a1', clave: 'juan maine', regatistaId: 'r1' }],
+    });
+    const r = await importCampeonatoResults('camp', [fila('Juan Maine', 'CNSI', [[1, 1]])]);
+    expect(r.stats.regatistasNuevos).toBe(0);
+    expect(db.regatista.filas).toHaveLength(1);
+    expect(db.resultado.filas[0].regatistaId).toBe('r1');
+  });
+
+  it('una ficha viva gana sobre un alias con la misma clave', async () => {
+    db = crearDb({
+      regatistas: [{ id: 'real', nombre: 'Juan Maine' }, { id: 'otra', nombre: 'Juan Pablo Maine' }],
+      aliasesRegatista: [{ id: 'a1', clave: 'juan maine', regatistaId: 'otra' }],
+    });
+    await importCampeonatoResults('camp', [fila('Juan Maine', 'CNSI', [[1, 1]])]);
+    expect(db.resultado.filas[0].regatistaId).toBe('real');
+  });
+
+  it('asigna el club por alias si el club fue fusionado', async () => {
+    db = crearDb({
+      clubes: [{ id: 'c1', nombre: 'YCA' }],
+      aliasesClub: [{ id: 'ac1', clave: 'CLUB VIEJO', clubId: 'c1' }],
+    });
+    await importCampeonatoResults('camp', [fila('Ana Perez', 'club viejo', [[1, 1]])]);
+    expect(db.club.filas).toHaveLength(1);
+    expect(db.regatista.filas[0].clubId).toBe('c1');
   });
 
   it('desdobla una tripulación doble en dos regatistas con el mismo resultado', async () => {

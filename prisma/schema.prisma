@@ -7,21 +7,21 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
+  id               String                 @id @default(cuid())
+  email            String                 @unique
+  name             String?
   // Apodo opcional que el usuario elige para sí mismo (ver
   // /mi-perfil/configuracion) -a diferencia de Regatista.nombre (el
   // nombre "oficial" tal como viene de los resultados importados de una
   // regata), este es de uso puramente personal/de cuenta y no aparece en
   // ningún resultado ni tabla de posiciones.
-  apodo         String?
-  passwordHash  String?
-  image         String?
-  role          Role      @default(REGULAR)
-  regatista     Regatista? @relation(fields: [regatistaId], references: [id])
-  regatistaId   String?   @unique
-  emailVerified DateTime?
+  apodo            String?
+  passwordHash     String?
+  image            String?
+  role             Role                   @default(REGULAR)
+  regatista        Regatista?             @relation(fields: [regatistaId], references: [id])
+  regatistaId      String?                @unique
+  emailVerified    DateTime?
   // Cuándo aceptó el Aviso Legal y la Política de Privacidad al
   // registrarse -null para cuentas creadas antes de que existiera el
   // checkbox (ver src/app/registro/page.tsx). Guardar el momento, no solo
@@ -29,11 +29,11 @@ model User {
   // de un valor que cualquiera pudo haber seteado en true sin haber
   // aceptado nada.
   aceptoTerminosEn DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  solicitudes   SolicitudVinculacion[]
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  accounts         Account[]
+  sessions         Session[]
+  solicitudes      SolicitudVinculacion[]
 }
 
 enum Role {
@@ -83,17 +83,17 @@ model VerificationToken {
 }
 
 model Regatista {
-  id              String      @id @default(cuid())
+  id              String                 @id @default(cuid())
   nombre          String
-  club            Club?       @relation(fields: [clubId], references: [id])
+  club            Club?                  @relation(fields: [clubId], references: [id])
   clubId          String?
   // Regatistas que compiten por dos clubes (ej: "YCA / CNMP"): `club` es el
   // principal y acá van los demás -así cada club reconocido lo cuenta como
   // suyo en vez de quedar en un club "combo" inventado.
-  otrosClubes     Club[]      @relation("OtrosClubes")
-  pais            String?     @default("Argentina")
+  otrosClubes     Club[]                 @relation("OtrosClubes")
+  pais            String?                @default("Argentina")
   fechaNacimiento DateTime?
-  fuenteIds       Json?       // { "sailwave": "PEREZ Juan", "fay": "123" }
+  fuenteIds       Json? // { "sailwave": "PEREZ Juan", "fay": "123" }
   // Foto de perfil opcional que el regatista (una vez vinculado a su
   // cuenta) puede subir desde /mi-perfil/configuracion -se muestra en su
   // ficha pública (/regatistas/[id]) en vez de las iniciales genéricas.
@@ -101,8 +101,9 @@ model Regatista {
   user            User?
   resultados      Resultado[]
   solicitudes     SolicitudVinculacion[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  aliases         AliasRegatista[]
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
 
   @@index([nombre])
   // La ficha de un club (ver /clubes/[id]) filtra "todos los resultados de
@@ -113,18 +114,44 @@ model Regatista {
 }
 
 model Club {
-  id          String       @id @default(cuid())
-  nombre      String       @unique
-  ciudad      String?
+  id                    String       @id @default(cuid())
+  nombre                String       @unique
+  ciudad                String?
   // Nombre completo (el `nombre` suele ser la sigla, ej: "YCA"), editable
   // desde /admin/clubes/escudos.
-  nombreCompleto String?
+  nombreCompleto        String?
   // Escudo del club, cargado a mano por un admin desde /admin/clubes -si es
   // null se sigue mostrando el ClubAvatar genérico (iniciales + color).
-  logoUrl     String?
-  regatistas  Regatista[]
-  regatistasSecundarios Regatista[] @relation("OtrosClubes")
-  campeonatos Campeonato[]
+  logoUrl               String?
+  regatistas            Regatista[]
+  regatistasSecundarios Regatista[]  @relation("OtrosClubes")
+  campeonatos           Campeonato[]
+  aliases               AliasClub[]
+}
+
+// Nombres que ya no existen como ficha propia porque se fusionaron dentro
+// de otra (ver fusionarRegatistas / fusionarClubes). `clave` es el nombre
+// normalizado (normalizarNombre para regatistas, mayúsculas para clubes),
+// así un import futuro que traiga el nombre viejo se asigna directo a la
+// entidad que se conservó en vez de crear una ficha nueva duplicada.
+model AliasRegatista {
+  id          String    @id @default(cuid())
+  clave       String    @unique
+  regatista   Regatista @relation(fields: [regatistaId], references: [id], onDelete: Cascade)
+  regatistaId String
+  createdAt   DateTime  @default(now())
+
+  @@index([regatistaId])
+}
+
+model AliasClub {
+  id        String   @id @default(cuid())
+  clave     String   @unique
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId    String
+  createdAt DateTime @default(now())
+
+  @@index([clubId])
 }
 
 model Clase {
@@ -134,15 +161,15 @@ model Clase {
 }
 
 model Campeonato {
-  id          String             @id @default(cuid())
+  id          String           @id @default(cuid())
   nombre      String
   // Evento al que pertenece (ej: "SIY" para "SIY Medals" y "SIY Masters"):
   // si está, los listados agrupan por este nombre en vez de por `nombre`.
   evento      String?
   anio        Int
-  clase       Clase              @relation(fields: [claseId], references: [id])
+  clase       Clase            @relation(fields: [claseId], references: [id])
   claseId     String
-  sede        Club?              @relation(fields: [sedeId], references: [id])
+  sede        Club?            @relation(fields: [sedeId], references: [id])
   sedeId      String?
   fechaInicio DateTime?
   fechaFin    DateTime?
@@ -151,12 +178,12 @@ model Campeonato {
   // cargado a mano por un admin desde /admin/campeonatos/[id] -si es null
   // se muestra el ícono genérico de la clase.
   logoUrl     String?
-  estado      EstadoCampeonato   @default(BORRADOR)
-  descartes   Int                @default(0)
+  estado      EstadoCampeonato @default(BORRADOR)
+  descartes   Int              @default(0)
   regatas     Regata[]
   staging     StagingImport[]
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@index([anio])
   @@index([claseId])
@@ -168,35 +195,35 @@ enum EstadoCampeonato {
 }
 
 model Regata {
-  id            String      @id @default(cuid())
-  campeonato    Campeonato  @relation(fields: [campeonatoId], references: [id], onDelete: Cascade)
-  campeonatoId  String
-  numero        Int
-  fecha         DateTime?
-  condiciones   String?
-  resultados    Resultado[]
+  id           String      @id @default(cuid())
+  campeonato   Campeonato  @relation(fields: [campeonatoId], references: [id], onDelete: Cascade)
+  campeonatoId String
+  numero       Int
+  fecha        DateTime?
+  condiciones  String?
+  resultados   Resultado[]
 
   @@unique([campeonatoId, numero])
 }
 
 model Resultado {
-  id           String    @id @default(cuid())
-  regata       Regata    @relation(fields: [regataId], references: [id], onDelete: Cascade)
-  regataId     String
-  regatista    Regatista @relation(fields: [regatistaId], references: [id])
-  regatistaId  String
-  puesto       Int
-  puntos       Float
-  descartado   Boolean   @default(false)
-  observacion  String?
+  id            String    @id @default(cuid())
+  regata        Regata    @relation(fields: [regataId], references: [id], onDelete: Cascade)
+  regataId      String
+  regatista     Regatista @relation(fields: [regatistaId], references: [id])
+  regatistaId   String
+  puesto        Int
+  puntos        Float
+  descartado    Boolean   @default(false)
+  observacion   String?
   // Nombre de la flota/split (Gold/Silver/Bronze, etc.) en la que compitió
   // este regatista, cuando el campeonato divide la flota por nivel. En la
   // clasificación combinada, TODA una flota va antes que la siguiente, sin
   // importar el puntaje (se solapan los rangos de puntos entre flotas) -
   // flotaOrden guarda ese orden (0 = la mejor), tomado del orden en que
   // aparece cada flota en el archivo importado.
-  flota        String?
-  flotaOrden   Int?
+  flota         String?
+  flotaOrden    Int?
   // Puesto y puntos totales YA calculados por la fuente (columnas "puesto"
   // y "Total puntos" del Excel), para cuando queremos mostrar exactamente
   // eso -sin que la app recalcule descartes, desempates u orden de flota-
@@ -217,15 +244,15 @@ model Resultado {
 }
 
 model StagingImport {
-  id            String        @id @default(cuid())
-  campeonato    Campeonato?   @relation(fields: [campeonatoId], references: [id])
-  campeonatoId  String?
-  datosCrudos   Json
-  estado        EstadoStaging @default(PENDIENTE)
-  fuente        String?
-  notas         String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id           String        @id @default(cuid())
+  campeonato   Campeonato?   @relation(fields: [campeonatoId], references: [id])
+  campeonatoId String?
+  datosCrudos  Json
+  estado       EstadoStaging @default(PENDIENTE)
+  fuente       String?
+  notas        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 enum EstadoStaging {
@@ -235,14 +262,14 @@ enum EstadoStaging {
 }
 
 model SolicitudVinculacion {
-  id          String   @id @default(cuid())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String          @id @default(cuid())
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
-  regatista   Regatista @relation(fields: [regatistaId], references: [id], onDelete: Cascade)
+  regatista   Regatista       @relation(fields: [regatistaId], references: [id], onDelete: Cascade)
   regatistaId String
   estado      EstadoSolicitud @default(PENDIENTE)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@unique([userId, regatistaId])
 }
@@ -318,4 +345,3 @@ model MensajeContacto {
 
   @@index([createdAt])
 }
-

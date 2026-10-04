@@ -142,4 +142,35 @@ describe('fusionarRegatistas', () => {
 
     expect((await fake.user.findUnique({ where: { id: 'u2' } }))!.regatistaId).toBe('canon');
   });
+
+  it('deja el nombre del duplicado como alias apuntando al canónico', async () => {
+    fake = crearFakePrisma({
+      regatistas: [
+        { id: 'canon', nombre: 'Juan Perez', clubId: null, otrosClubesIds: [] },
+        { id: 'dup', nombre: 'Juan Pablo Perez', clubId: null, otrosClubesIds: [] },
+      ],
+      resultados: [],
+      solicitudes: [],
+      usuarios: [],
+    });
+    await fusionarRegatistas('canon', ['dup']);
+    const alias = await fake.aliasRegatista.findUnique({ where: { clave: 'juan pablo perez' } });
+    expect(alias!.regatistaId).toBe('canon');
+  });
+
+  it('reapunta los aliases que ya apuntaban al duplicado', async () => {
+    fake = crearFakePrisma({
+      regatistas: [
+        { id: 'canon', nombre: 'Juan Perez', clubId: null, otrosClubesIds: [] },
+        { id: 'dup', nombre: 'Juan Pablo Perez', clubId: null, otrosClubesIds: [] },
+      ],
+      resultados: [],
+      solicitudes: [],
+      usuarios: [],
+      aliasesRegatista: [{ id: 'a0', clave: 'j perez', regatistaId: 'dup' }],
+    });
+    await fusionarRegatistas('canon', ['dup']);
+    const viejo = await fake.aliasRegatista.findUnique({ where: { clave: 'j perez' } });
+    expect(viejo!.regatistaId).toBe('canon');
+  });
 });

@@ -80,6 +80,18 @@ export async function fusionarClubes(canonicoId: string, duplicadoIds: string[])
     });
     resumen.campeonatosMovidos += campeonatos.count;
 
+    // Mismo criterio que regatistas: aliases al canónico antes del borrado
+    // (cascade), y el nombre del duplicado queda como alias.
+    await prisma.aliasClub.updateMany({ where: { clubId: duplicadoId }, data: { clubId: canonicoId } });
+    const claveDuplicado = duplicado.nombre.toUpperCase();
+    if (claveDuplicado !== canonico.nombre.toUpperCase()) {
+      await prisma.aliasClub.upsert({
+        where: { clave: claveDuplicado },
+        update: { clubId: canonicoId },
+        create: { clave: claveDuplicado, clubId: canonicoId },
+      });
+    }
+
     await prisma.club.delete({ where: { id: duplicadoId } });
     resumen.duplicadosBorrados++;
   }

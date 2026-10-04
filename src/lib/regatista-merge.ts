@@ -117,6 +117,19 @@ export async function fusionarRegatistas(canonicoId: string, duplicadoIds: strin
       }
     }
 
+    // Antes de borrar: los aliases del duplicado pasan al canónico (si no,
+    // el cascade del borrado se los lleva), y su nombre queda como alias
+    // apuntando al canónico para que un import futuro no recree la ficha.
+    await prisma.aliasRegatista.updateMany({ where: { regatistaId: duplicadoId }, data: { regatistaId: canonicoId } });
+    const claveDuplicado = normalizarNombre(duplicado.nombre);
+    if (claveDuplicado !== normalizarNombre(canonico.nombre)) {
+      await prisma.aliasRegatista.upsert({
+        where: { clave: claveDuplicado },
+        update: { regatistaId: canonicoId },
+        create: { clave: claveDuplicado, regatistaId: canonicoId },
+      });
+    }
+
     await prisma.regatista.delete({ where: { id: duplicadoId } });
     resumen.duplicadosBorrados++;
   }

@@ -48,6 +48,18 @@ class Tabla<T extends Row> {
     return { count: filas.length };
   }
 
+  async upsert({ where, update, create }: { where: Record<string, unknown>; update: Record<string, unknown>; create: Record<string, unknown> }) {
+    const [campo, valor] = Object.entries(where)[0];
+    const existente = this.filas.find((f) => (f as Record<string, unknown>)[campo] === valor);
+    if (existente) {
+      Object.assign(existente, update);
+      return clone(existente);
+    }
+    const nueva = { id: `alias-${this.filas.length + 1}`, ...create } as T;
+    this.filas.push(nueva);
+    return clone(nueva);
+  }
+
   async delete({ where }: { where: Record<string, unknown> }) {
     const [campo, valor] = Object.entries(where)[0];
     const idx = this.filas.findIndex((f) => (f as Record<string, unknown>)[campo] === valor);
@@ -99,6 +111,8 @@ export function crearFakePrisma(seed: {
   solicitudes?: Row[];
   usuarios?: Row[];
   campeonatos?: Row[];
+  aliasesRegatista?: Row[];
+  aliasesClub?: Row[];
 }) {
   const club = new Tabla(seed.clubes ?? []);
   const regatistaBase = new Tabla(seed.regatistas ?? []);
@@ -106,6 +120,8 @@ export function crearFakePrisma(seed: {
   const solicitudVinculacion = new Tabla(seed.solicitudes ?? []);
   const user = new Tabla(seed.usuarios ?? []);
   const campeonato = new Tabla(seed.campeonatos ?? []);
+  const aliasRegatista = new Tabla(seed.aliasesRegatista ?? []);
+  const aliasClub = new Tabla(seed.aliasesClub ?? []);
 
   // regatista.findUnique/findMany devuelven `otrosClubes` como objetos
   // {id} (como haría Prisma con un include/select), no como
@@ -130,5 +146,5 @@ export function crearFakePrisma(seed: {
     delete: (args: Parameters<Tabla<Row>['delete']>[0]) => regatistaBase.delete(args),
   };
 
-  return { club, regatista, resultado, solicitudVinculacion, user, campeonato };
+  return { club, regatista, resultado, solicitudVinculacion, user, campeonato, aliasRegatista, aliasClub };
 }

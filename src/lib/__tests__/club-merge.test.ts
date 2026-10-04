@@ -84,4 +84,10 @@ describe('fusionarClubes', () => {
     expect(canon!.logoUrl).toBe('/escudos/canon.webp');
     expect(canon!.nombreCompleto).toBe('Propio');
   });
+
+  it('deja el nombre del club duplicado como alias apuntando al canónico', async () => {
+    await fusionarClubes('canon', ['dup']);
+    const alias = await fake.aliasClub.findUnique({ where: { clave: 'YACHT CLUB ARGENTINO' } });
+    expect(alias!.clubId).toBe('canon');
+  });
 });
