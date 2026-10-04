@@ -14,6 +14,7 @@ import { Modal } from "@/components/ui/modal";
 import { mensajeDeError, cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ClaseIcon } from "@/components/icons/clase-icons";
+import { SelectorBuscable } from "@/components/ui/selector-buscable";
 
 interface Campeonato {
   id: string;
@@ -647,18 +648,17 @@ export default function AdminCampeonatosPage() {
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="personalizar-sede" className="text-sm font-medium text-muted-foreground">Sede</label>
-                <select
+                <SelectorBuscable
                   id="personalizar-sede"
-                  className={campoInput}
                   value={sedeIdPersonalizar}
-                  onChange={(e) => setSedeIdPersonalizar(e.target.value)}
-                >
-                  <option value="">No cambiar</option>
-                  <option value="NINGUNA">Sin sede</option>
-                  {clubes.map((club) => (
-                    <option key={club.id} value={club.id}>{club.nombre}</option>
-                  ))}
-                </select>
+                  onChange={setSedeIdPersonalizar}
+                  placeholder="Buscar club..."
+                  opciones={[
+                    { id: "", label: "No cambiar" },
+                    { id: "NINGUNA", label: "Sin sede" },
+                    ...clubes.map((club) => ({ id: club.id, label: club.nombre })),
+                  ]}
+                />
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="personalizar-descartes" className="text-sm font-medium text-muted-foreground">Descartes</label>
