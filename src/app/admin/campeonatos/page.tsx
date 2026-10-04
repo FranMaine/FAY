@@ -23,6 +23,10 @@ interface Campeonato {
   estado: "BORRADOR" | "PUBLICADO";
   clase: { id: string; nombre: string };
   logoUrl?: string | null;
+  sedeId?: string | null;
+  descartes?: number;
+  fechaInicio?: string | null;
+  fechaFin?: string | null;
 }
 
 interface Clase {
@@ -223,13 +227,26 @@ export default function AdminCampeonatosPage() {
     }
   };
 
-  function abrirPersonalizar(clave: string, grupo: { nombre: string; anio: number }) {
+  // Precarga sede/descartes/fechas solo si todas las categorías del evento
+  // comparten el mismo valor -si difieren, el campo queda vacío (= no tocar),
+  // así no se pisa ninguna categoría por accidente.
+  function valorComun<T>(items: Campeonato[], obtener: (c: Campeonato) => T): T | null {
+    if (items.length === 0) return null;
+    const primero = obtener(items[0]);
+    return items.every((c) => obtener(c) === primero) ? primero : null;
+  }
+
+  function abrirPersonalizar(clave: string, grupo: { nombre: string; anio: number; items: Campeonato[] }) {
     setNombreEventoPersonalizar(grupo.nombre);
     setAnioPersonalizar(String(grupo.anio));
-    setSedeIdPersonalizar("");
-    setDescartesPersonalizar("");
-    setFechaInicioPersonalizar("");
-    setFechaFinPersonalizar("");
+    const sede = valorComun(grupo.items, (c) => c.sedeId ?? null);
+    setSedeIdPersonalizar(sede === null ? "" : sede ?? "NINGUNA");
+    const descartes = valorComun(grupo.items, (c) => c.descartes ?? null);
+    setDescartesPersonalizar(descartes === null ? "" : String(descartes));
+    const fechaInicio = valorComun(grupo.items, (c) => (c.fechaInicio ? c.fechaInicio.slice(0, 10) : null));
+    setFechaInicioPersonalizar(fechaInicio ?? "");
+    const fechaFin = valorComun(grupo.items, (c) => (c.fechaFin ? c.fechaFin.slice(0, 10) : null));
+    setFechaFinPersonalizar(fechaFin ?? "");
     setPersonalizarClave(clave);
   }
 
