@@ -1,5 +1,6 @@
 "use client";
 
+import { SubirLogoModal } from "@/components/admin/subir-logo-modal";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AlertCircleIcon, CheckIcon, MergeIcon, ExternalLinkIcon, Loader2Icon, PencilIcon, UploadIcon, XIcon } from "lucide-react";
@@ -60,11 +61,14 @@ function FilaClub({ club, onUpdated, onCambio, onEliminado }: { club: ClubItem; 
     }
   }
 
-  async function subir(file: File) {
+  const [archivoElegido, setArchivoElegido] = useState<File | null>(null);
+
+  async function subir(file: File, quitarFondo: boolean) {
     setSubiendo(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("quitarFondo", String(quitarFondo));
       const res = await fetch(`/api/admin/clubes/${club.id}/logo`, { method: "PATCH", body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo subir el escudo");
@@ -91,6 +95,16 @@ function FilaClub({ club, onUpdated, onCambio, onEliminado }: { club: ClubItem; 
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 py-3 px-4 border-b border-border last:border-0">
+      <SubirLogoModal
+        file={archivoElegido}
+        titulo="Subir escudo"
+        onClose={() => setArchivoElegido(null)}
+        onConfirm={async (quitarFondo) => {
+          if (!archivoElegido) return;
+          await subir(archivoElegido, quitarFondo);
+          setArchivoElegido(null);
+        }}
+      />
       <ClubAvatar nombre={club.nombre} logoUrl={club.logoUrl} className="w-12 h-12 text-sm shrink-0" />
       <div className="flex-1 min-w-0">
         {editando ? (
@@ -130,7 +144,7 @@ function FilaClub({ club, onUpdated, onCambio, onEliminado }: { club: ClubItem; 
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) subir(file);
+            if (file) setArchivoElegido(file);
             e.target.value = "";
           }}
         />
