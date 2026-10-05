@@ -11,7 +11,7 @@ export async function GET() {
     }
 
     const clubes = await prisma.club.findMany({
-      include: { _count: { select: { regatistas: true } } },
+      include: { _count: { select: { regatistas: true, regatistasSecundarios: true } } },
       orderBy: { nombre: 'asc' },
     });
 
@@ -21,7 +21,8 @@ export async function GET() {
         nombre: c.nombre,
         logoUrl: c.logoUrl,
         nombreCompleto: c.nombreCompleto,
-        regatistasCount: c._count.regatistas,
+        // Mismo criterio que la ficha pública (/clubes/[id]): principal + doble club.
+        regatistasCount: c._count.regatistas + c._count.regatistasSecundarios,
       }))
     );
   } catch (error) {
