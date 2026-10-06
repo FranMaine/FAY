@@ -13,7 +13,7 @@ export async function GET() {
     url.searchParams.set('latitude', String(LATITUD));
     url.searchParams.set('longitude', String(LONGITUD));
     url.searchParams.set('current', 'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m');
-    url.searchParams.set('wind_speed_unit', 'kmh');
+    url.searchParams.set('wind_speed_unit', 'kn');
     url.searchParams.set('timezone', 'America/Argentina/Buenos_Aires');
 
     const res = await fetch(url, { next: { revalidate: 600 } });
@@ -24,7 +24,7 @@ export async function GET() {
     return NextResponse.json({
       temperatura: Math.round(actual.temperature_2m),
       codigoClima: actual.weather_code,
-      vientoKmh: Math.round(actual.wind_speed_10m),
+      vientoNudos: Math.round(actual.wind_speed_10m),
       vientoGrados: actual.wind_direction_10m,
       actualizado: actual.time,
     });

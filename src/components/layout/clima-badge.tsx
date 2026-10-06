@@ -7,7 +7,7 @@ import { categoriaClima, ETIQUETA_CLIMA, direccionViento, type CategoriaClima } 
 interface DatosClima {
   temperatura: number;
   codigoClima: number;
-  vientoKmh: number;
+  vientoNudos: number;
   vientoGrados: number;
 }
 
@@ -52,7 +52,7 @@ export function ClimaBadge() {
 
   const categoria = categoriaClima(datos.codigoClima);
   const Icono = ICONO_CLIMA[categoria];
-  const descripcion = `San Isidro: ${datos.temperatura}°C, ${ETIQUETA_CLIMA[categoria]}, viento ${datos.vientoKmh} km/h del ${direccionViento(datos.vientoGrados)}`;
+  const descripcion = `San Isidro: ${datos.temperatura}°C, ${ETIQUETA_CLIMA[categoria]}, viento ${datos.vientoNudos} nudos del ${direccionViento(datos.vientoGrados)}`;
 
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums" title={descripcion} aria-label={descripcion}>
@@ -60,7 +60,7 @@ export function ClimaBadge() {
       <span className="font-medium text-foreground">{datos.temperatura}°</span>
       <span className="flex items-center gap-1">
         <Wind className="h-3.5 w-3.5" aria-hidden="true" />
-        {datos.vientoKmh} km/h {direccionViento(datos.vientoGrados)}
+        {datos.vientoNudos} kn {direccionViento(datos.vientoGrados)}
       </span>
     </div>
   );
