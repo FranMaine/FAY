@@ -56,6 +56,7 @@ import { SessionProvider } from '@/components/providers/session-provider';
 import { BackToTop } from '@/components/layout/back-to-top';
 import { CookieBanner } from '@/components/layout/cookie-banner';
 import { BetaBanner } from '@/components/layout/beta-banner';
+import { AgregarApp } from '@/components/layout/agregar-app';
 import { IaChat } from '@/components/admin/ia-chat';
 import { AppToaster } from '@/components/providers/app-toaster';
 import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization-jsonld';
@@ -113,6 +114,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/aviso-legal" className="hover:text-foreground hover:underline">Aviso legal</a>
               <a href="/privacidad" className="hover:text-foreground hover:underline">Privacidad</a>
               <a href="/cookies" className="hover:text-foreground hover:underline">Cookies</a>
+              <AgregarApp />
             </nav>
           </footer>
           <BackToTop />
