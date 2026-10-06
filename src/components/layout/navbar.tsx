@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { NotificationBell } from '@/components/layout/notification-bell';
+import { ClimaBadge } from '@/components/layout/clima-badge';
 
 import { useSession, signOut } from 'next-auth/react';
 import { LogOut, Shield } from 'lucide-react';
@@ -56,6 +57,9 @@ export function Navbar() {
               <SailingBoat className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold text-foreground">Orzando</span>
             </Link>
+            <div className="ml-4 border-l border-border pl-4">
+              <ClimaBadge />
+            </div>
           </div>
 
           {/* Desktop Nav */}
