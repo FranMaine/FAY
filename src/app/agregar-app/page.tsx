@@ -19,7 +19,7 @@ const PASOS_IPHONE: Paso[] = [
     titulo: "Abrí Orzando en Safari",
     detalle: "Tiene que ser Safari. Chrome en iPhone no muestra esta opción.",
     icono: Globe,
-    etiquetaEnPantalla: "orzando.vercel.app",
+    etiquetaEnPantalla: "fay-omega.vercel.app",
   },
   {
     titulo: "Tocá el botón Compartir",
@@ -46,7 +46,7 @@ const PASOS_ANDROID: Paso[] = [
     titulo: "Abrí Orzando en Chrome",
     detalle: "Chrome es el navegador que viene por defecto en la mayoría de los Android.",
     icono: Globe,
-    etiquetaEnPantalla: "orzando.vercel.app",
+    etiquetaEnPantalla: "fay-omega.vercel.app",
   },
   {
     titulo: "Tocá los tres puntos",
