@@ -100,6 +100,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* Next ya no emite esta etiqueta (solo la nueva "mobile-web-app-capable"
+            sin el prefijo apple-), pero Safari todavía la necesita para activar
+            el modo standalone clásico -sin ella, ignora por completo los
+            apple-touch-startup-image de abajo y siempre muestra pantalla negra. */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <OrganizationJsonLd />
         <WebsiteJsonLd />
       </head>
