@@ -1,0 +1,100 @@
+import { ImageResponse } from "next/og";
+
+// Pantalla de carga de iOS al abrir Orzando desde el ícono agregado a la
+// pantalla de inicio (ver src/lib/apple-splash.ts para la lista de tamaños
+// de pantalla que la referencian). Sin esto, iOS muestra una pantalla negra
+// lisa mientras carga la página.
+export const dynamic = "force-static";
+
+const TAMANOS_BASE = [
+  "1320x2868",
+  "1290x2796",
+  "1284x2778",
+  "1206x2622",
+  "1179x2556",
+  "1170x2532",
+  "1125x2436",
+  "1242x2688",
+  "828x1792",
+  "750x1334",
+];
+
+export function generateStaticParams() {
+  return TAMANOS_BASE.flatMap((tamano) => [{ size: tamano }, { size: `${tamano}-dark` }]);
+}
+
+function parsearTamano(size: string) {
+  const oscuro = size.endsWith("-dark");
+  const base = oscuro ? size.slice(0, -"-dark".length) : size;
+  const coincidencia = /^(\d+)x(\d+)$/.exec(base);
+  if (!coincidencia) return null;
+  return { ancho: Number(coincidencia[1]), alto: Number(coincidencia[2]), oscuro };
+}
+
+// Silueta del velero (ver src/components/icons/sailing-boat.tsx) -no se
+// puede reusar ese componente acá porque Satori (el motor de ImageResponse)
+// no renderiza JSX de React normal, así que el SVG se arma a mano con los
+// mismos paths.
+const VELERO_PATHS = [
+  "M0 0 C-0.48 8.31 -1.27 16.44 -2.7 24.65 C-3.37 32.12 -1.31 39.22 0.52 46.41 C1.05 48.5 1.57 50.6 2.1 52.7 C2.38 53.8 2.66 54.91 2.94 56.05 C9.75 83.13 15.75 110.35 21.46 137.68 C23.1 145.48 24.76 153.27 26.42 161.06 C27.26 165.01 28.1 168.96 28.93 172.91 C29.47 175.46 30.02 178 30.56 180.54 C31.31 184.06 32.05 187.59 32.8 191.11 C33.02 192.16 33.25 193.21 33.48 194.29 C34.31 198.27 35 201.92 35 206 C30.71 206.55 30.71 206.55 24.73 206.61 C23.67 206.63 22.6 206.64 21.5 206.66 C18.07 206.71 14.63 206.73 11.19 206.75 C8.94 206.78 6.69 206.81 4.44 206.84 C0.05 206.9 -4.35 206.93 -8.75 206.95 C-12.79 206.97 -16.8 207.06 -20.84 207.19 C-22.57 207.24 -24.3 207.28 -26.07 207.33 C-26.83 207.36 -26.83 207.36 -30.67 207.5 C-31.22 207.42 -31.22 207.42 -34 207 C-35 202 -35 202 -35 199 C-35.17 199.64 -35.17 199.64 -36.06 202.9 C-36.51 204.56 -36.97 206.23 -37.44 207.94 C-37.66 208.77 -37.66 208.77 -38.81 212.96 C-40 217 -40 217 -41 218 C-43.33 218.04 -45.67 218.04 -48 218 C-48 211.06 -47.14 206.69 -43.5 200.75 C-20.29 162.79 -17.7 113.6 -11.07 70.66 C-10.88 69.4 -10.69 68.14 -10.48 66.85 C-9.12 57.94 -7.9 49.25 -7.79 40.22 C-7.76 38.57 -7.73 36.93 -7.7 35.23 C-7.65 31.79 -7.61 28.35 -7.57 24.91 C-7.55 24.08 -7.55 24.08 -7.48 19.91 C-7.46 18.42 -7.44 16.92 -7.42 15.38 C-5.95 0 -5.95 0 0 0 Z",
+  "M0 0 C-0.46 14.86 -2.8 29.45 -5 44.12 C-5.37 46.65 -5.75 49.18 -6.12 51.7 C-7.07 58.14 -8.02 64.57 -9 71 C-9.16 72.1 -9.32 73.21 -9.49 74.34 C-9.66 75.22 -9.83 76.1 -10 77 C-10.33 77 -10.66 77 -11 77 C-10.31 61.94 -8.61 46.98 -7 32 C-8.71 39.96 -9.81 47.88 -10.77 55.96 C-11.1 58.71 -11.44 61.46 -11.78 64.21 C-12.29 68.48 -12.8 72.75 -13.31 77.02 C-23.84 164.84 -23.84 164.84 -46 187 C-49.86 187.63 -53.49 188.03 -57.38 188.27 C-58.5 188.35 -59.62 188.43 -60.78 188.52 C-64.37 188.78 -67.97 189.01 -71.56 189.25 C-73.96 189.42 -76.35 189.6 -78.74 189.77 C-88.84 190.49 -98.87 191.1 -109 191 C-107.47 185.45 -104.75 181.02 -101.75 176.12 C-100.66 174.33 -99.56 172.53 -98.47 170.73 C-98.19 170.26 -98.19 170.26 -96.74 167.89 C-93.84 163.08 -91.01 158.23 -88.19 153.38 C-87.61 152.38 -87.03 151.38 -86.43 150.35 C-84.62 147.23 -82.81 144.12 -81 141 C-80.38 139.93 -79.76 138.87 -79.13 137.77 C-71.92 125.33 -64.76 112.86 -57.7 100.33 C-54.18 94.08 -50.63 87.85 -47.06 81.62 C-42.08 72.93 -37.17 64.19 -32.29 55.44 C-28.34 48.39 -24.37 41.35 -20.38 34.31 C-15.38 25.51 -10.5 16.65 -5.69 7.74 C-1.51 0 -1.51 0 0 0 Z",
+  "M0 0 C-3.53 2.65 -7 4.79 -10.81 7 C-32.44 19.87 -32.44 19.87 -35 25 C-34.04 24.97 -34.04 24.97 -29.19 24.81 C-19.96 24.78 -11.06 26.38 -2 28 C-16.13 35.06 -34.1 29.5 -47.91 24.09 C-63.91 18.46 -83.19 22.23 -99.34 25.25 C-104.59 26.22 -109.86 27.12 -115.12 28.02 C-116.16 28.2 -117.19 28.37 -118.26 28.56 C-138.93 32.06 -159.42 33.25 -180.38 33.44 C-182.06 33.46 -183.74 33.48 -185.47 33.51 C-213.55 33.45 -213.55 33.45 -220 27 C-218.42 27.03 -216.84 27.06 -215.21 27.1 C-213.12 27.09 -211.03 27.08 -208.94 27.06 C-208.42 27.08 -208.42 27.08 -205.79 27.15 C-197.04 27.01 -194.63 24.06 -190 17 C-182 11 -182 11 -178 11 C-178 11.99 -178 12.98 -178 14 C-129.87 13.21 -82.01 7.59 -34.23 2.23 C-22.77 0.95 -11.54 -0.14 0 0 Z",
+  "M0 0 C0 0.33 0 0.66 0 1 C-2.35 1.14 -4.71 1.23 -7.06 1.31 C-23.42 2.18 -39.47 5.79 -55.46 9.17 C-67.91 11.45 -97.33 15.67 -107 6 C-105.48 5.94 -103.96 5.87 -102.39 5.81 C-87.08 5.01 -72.23 3 -57.12 0.38 C-37.52 -2.98 -19.49 -5.41 0 0 Z",
+];
+const VELERO_TRANSFORMS = [
+  "translate(286,102)",
+  "translate(276,125)",
+  "translate(341,314)",
+  "translate(301,344)",
+];
+
+export async function GET(_request: Request, context: { params: Promise<{ size: string }> }) {
+  const { size } = await context.params;
+  const tamano = parsearTamano(size);
+  if (!tamano) return new Response("No encontrado", { status: 404 });
+  const { ancho, alto, oscuro } = tamano;
+
+  const fondo = oscuro ? "#0f172a" : "#f8fafc";
+  const colorVelero = "#2563eb";
+  const colorTexto = oscuro ? "#f8fafc" : "#0f172a";
+  // Referencia: iPhone 15/16 Pro Max a 3x (1290px de ancho real).
+  const escala = ancho / 1290;
+  const anchoIcono = Math.round(170 * escala);
+  const altoIcono = Math.round(anchoIcono * (266 / 232));
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: fondo,
+        }}
+      >
+        <svg width={anchoIcono} height={altoIcono} viewBox="115 96 232 266" fill="none">
+          {VELERO_PATHS.map((d, indice) => (
+            <path key={d.slice(0, 8)} d={d} fill={colorVelero} transform={VELERO_TRANSFORMS[indice]} />
+          ))}
+        </svg>
+        <div
+          style={{
+            display: "flex",
+            marginTop: Math.round(32 * escala),
+            fontSize: Math.round(56 * escala),
+            fontWeight: 700,
+            letterSpacing: -1,
+            fontFamily: "sans-serif",
+            color: colorTexto,
+          }}
+        >
+          Orzando
+        </div>
+      </div>
+    ),
+    { width: ancho, height: alto }
+  );
+}

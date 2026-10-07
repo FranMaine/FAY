@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/navbar';
 import { SITE_URL, SITE_DESCRIPTION } from '@/lib/site';
+import { imagenesDeInicioApple } from '@/lib/apple-splash';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -49,6 +50,14 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'Orzando',
     description: SITE_DESCRIPTION,
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Orzando',
+    statusBarStyle: 'black-translucent',
+    // Pantalla de carga al abrir desde el ícono en la pantalla de inicio
+    // (sin esto, iOS muestra una pantalla negra lisa mientras carga).
+    startupImage: imagenesDeInicioApple(),
   },
 };
 
