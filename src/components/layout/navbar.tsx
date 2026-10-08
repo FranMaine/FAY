@@ -49,7 +49,13 @@ export function Navbar() {
   }, [isOpen]);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border bg-surface shadow-sm">
+    // pt-[env(safe-area-inset-top)]: en standalone (PWA agregada a inicio) no
+    // hay barra de navegador que reserve ese espacio -el contenido pinta
+    // directo debajo del notch/Dynamic Island/cámara perforada. El navbar
+    // quedaba tapado por la hora y los íconos de estado. env() lo resuelve
+    // por dispositivo solo (en Android y en celus sin recorte da 0px, no
+    // hace falta una lista de modelos).
+    <nav className="sticky top-0 z-50 w-full border-b border-border bg-surface shadow-sm pt-[env(safe-area-inset-top,0px)]">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
