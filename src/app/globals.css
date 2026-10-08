@@ -161,6 +161,20 @@ body {
   }
 }
 
+/* Foto del hero de la home (ver src/components/ui/hero-image.tsx): fade-in
+   al terminar de cargar en vez de aparecer de golpe apenas baja. Más larga
+   que una transición de UI típica (tope 300ms) a propósito -es una foto
+   grande de tipo marketing/hero, no un control con el que se interactúa
+   seguido. */
+.hero-image-fade {
+  transition: opacity 500ms var(--ease-out-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-image-fade {
+    transition-duration: 1ms;
+  }
+}
+
 /* Transición entre páginas (ver src/app/template.tsx): antes cada
    navegación reemplazaba el contenido de un frame al otro, sin ninguna
    transición -se sentía brusco. template.tsx se remonta en cada cambio de

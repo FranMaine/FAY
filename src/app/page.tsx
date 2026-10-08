@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { Trophy, ArrowRight, Building2, Medal, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
@@ -14,6 +13,7 @@ import { ClubAvatar } from "@/components/icons/club-avatar";
 import { getRankingGeneral } from "@/lib/ranking-general";
 import { PodioPortada, type PodioDeClase } from "@/components/ranking/podio-portada";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { HeroImage } from "@/components/ui/hero-image";
 
 // Foto de fondo del hero (ver sección HERO más abajo) -mientras no esté,
 // el hero muestra un degradé como placeholder en su lugar. Es una foto
@@ -125,7 +125,7 @@ export default async function LandingPage() {
           texto sigue legible sin apagar la foto entera. */}
       <section className="relative min-h-[600px] md:min-h-[680px] flex items-center overflow-hidden text-white">
         {tieneFotoHero ? (
-          <Image
+          <HeroImage
             src="/hero/velero-hero.jpg"
             alt=""
             fill
