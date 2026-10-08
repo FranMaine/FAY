@@ -123,7 +123,12 @@ export default async function LandingPage() {
           casi no se notaba). El degradé va de izquierda a derecha -oscuro
           donde está el texto, transparente donde está el velero- así el
           texto sigue legible sin apagar la foto entera. */}
-      <section className="relative min-h-[600px] md:min-h-[680px] flex items-center overflow-hidden text-white">
+      {/* Sin overflow-hidden a propósito: la foto y los degradés de abajo son
+          absolute inset-0 (siempre del tamaño exacto de esta sección, nunca
+          más grandes), así que no lo necesitan para no desbordar -pero sí
+          recortaba el panel de resultados del buscador (ver SailorSearch)
+          cada vez que la lista era más alta que el hero. */}
+      <section className="relative min-h-[600px] md:min-h-[680px] flex items-center text-white">
         {tieneFotoHero ? (
           <HeroImage
             src="/hero/velero-hero.jpg"

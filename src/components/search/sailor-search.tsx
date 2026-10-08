@@ -113,8 +113,12 @@ export function SailorSearch() {
           flota al lado -sobre la foto del hero, que a esa altura de pantalla
           sobra espacio a la derecha de la columna de texto- en vez de
           empujar contenido hacia abajo como una lista más. */}
+      {/* Sin max-h/scroll: la API ya limita a 5 resultados (ver
+          /api/search), así que el panel siempre entra entero -antes el
+          límite de alto cortaba el último ítem a la mitad y obligaba a
+          scrollear para una lista que de entrada nunca es larga. */}
       {isOpen && results.length > 0 && (
-        <div className="search-panel-in absolute left-0 right-0 top-full mt-3 lg:left-full lg:right-auto lg:top-0 lg:mt-0 lg:ml-4 lg:w-80 xl:w-96 flex flex-col max-h-[360px] overflow-y-auto overflow-x-hidden rounded-2xl border border-border/60 bg-surface/95 backdrop-blur-md shadow-2xl">
+        <div className="search-panel-in absolute left-0 right-0 top-full mt-3 lg:left-full lg:right-auto lg:top-0 lg:mt-0 lg:ml-4 lg:w-80 xl:w-96 flex flex-col rounded-2xl border border-border/60 bg-surface/95 backdrop-blur-md shadow-2xl">
           {results.map((reg) => (
             <button
               key={reg.id}
