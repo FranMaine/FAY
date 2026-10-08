@@ -68,6 +68,7 @@ import { BetaBanner } from '@/components/layout/beta-banner';
 import { IaChat } from '@/components/admin/ia-chat';
 import { AppToaster } from '@/components/providers/app-toaster';
 import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization-jsonld';
+import { UpdateBanner } from '@/components/layout/update-banner';
 
 // Script bloqueante: corre ANTES de que se pinte la página (va en <head>,
 // no en un componente de React que recién se hidrata después). Sin esto,
@@ -131,7 +132,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </nav>
           </footer>
           <BackToTop />
-          <CookieBanner />
+          {/* Contenedor único para los avisos de abajo de la pantalla: si el
+              aviso de cookies y el de actualización coinciden (visitante
+              nuevo justo cuando sale un deploy), se apilan en vez de
+              superponerse -antes cada uno se posicionaba fijo por su cuenta
+              y quedaban uno encima del otro, ilegibles. */}
+          {/* pointer-events-none: cuando ninguno de los dos está visible, este
+              div queda con solo el padding del safe-area -sin esto, esa
+              franja invisible en el borde inferior igual capturaría los
+              toques (cada banner se pone pointer-events-auto de vuelta). */}
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col pb-[env(safe-area-inset-bottom,0px)]">
+            <CookieBanner />
+            <UpdateBanner version={process.env.VERCEL_GIT_COMMIT_SHA ?? null} />
+          </div>
           <IaChat />
           <AppToaster />
         </SessionProvider>
