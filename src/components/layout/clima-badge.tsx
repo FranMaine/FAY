@@ -9,6 +9,7 @@ interface DatosClima {
   codigoClima: number;
   vientoNudos: number;
   vientoGrados: number;
+  vientoMedido: boolean;
 }
 
 const ICONO_CLIMA: Record<CategoriaClima, LucideIcon> = {
@@ -52,7 +53,8 @@ export function ClimaBadge() {
 
   const categoria = categoriaClima(datos.codigoClima);
   const Icono = ICONO_CLIMA[categoria];
-  const descripcion = `San Isidro: ${datos.temperatura}°C, ${ETIQUETA_CLIMA[categoria]}, viento ${datos.vientoNudos} nudos del ${direccionViento(datos.vientoGrados)}`;
+  const fuenteViento = datos.vientoMedido ? 'medido en San Fernando' : 'estimado';
+  const descripcion = `San Isidro: ${datos.temperatura}°C, ${ETIQUETA_CLIMA[categoria]}, viento ${datos.vientoNudos} nudos del ${direccionViento(datos.vientoGrados)} (${fuenteViento})`;
 
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums" title={descripcion} aria-label={descripcion}>
