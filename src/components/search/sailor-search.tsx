@@ -108,8 +108,13 @@ export function SailorSearch() {
         </button>
       </form>
 
+      {/* En mobile/tablet no hay lugar a los costados, así que cae debajo
+          del buscador como antes. De lg (1024px) para arriba, en cambio,
+          flota al lado -sobre la foto del hero, que a esa altura de pantalla
+          sobra espacio a la derecha de la columna de texto- en vez de
+          empujar contenido hacia abajo como una lista más. */}
       {isOpen && results.length > 0 && (
-        <div className="absolute top-full mt-2 w-full bg-surface border border-border rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[300px] overflow-y-auto">
+        <div className="search-panel-in absolute left-0 right-0 top-full mt-3 lg:left-full lg:right-auto lg:top-0 lg:mt-0 lg:ml-4 lg:w-80 xl:w-96 flex flex-col max-h-[360px] overflow-y-auto overflow-x-hidden rounded-2xl border border-border/60 bg-surface/95 backdrop-blur-md shadow-2xl">
           {results.map((reg) => (
             <button
               key={reg.id}
@@ -132,9 +137,9 @@ export function SailorSearch() {
           ))}
         </div>
       )}
-      
+
       {isOpen && results.length === 0 && !isLoading && query.length >= 2 && (
-        <div className="absolute top-full mt-2 w-full bg-surface border border-border rounded-xl shadow-2xl p-6 text-center text-muted-foreground">
+        <div className="search-panel-in absolute left-0 right-0 top-full mt-3 lg:left-full lg:right-auto lg:top-0 lg:mt-0 lg:ml-4 lg:w-80 xl:w-96 rounded-2xl border border-border/60 bg-surface/95 backdrop-blur-md shadow-2xl p-6 text-center text-muted-foreground">
           No se encontraron regatistas con ese nombre.
         </div>
       )}

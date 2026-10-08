@@ -169,7 +169,7 @@ export function detectarPorEncabezado(header: string[]) {
   // única columna de nombre (ya viene combinada, como en 29er: "Fulano &
   // Mengano" en una sola celda).
   const timonelCol = buscarPorNombre(header, 'skipper', 'helm', 'helmname', 'timonel');
-  const tripulanteCol = buscarPorNombre(header, 'crew', 'crewname', 'tripulante');
+  const tripulanteCol = buscarPorNombre(header, 'crew', 'crewname', 'tripulante', 'tripulantes');
   // "Tripulación" -sin columna de timonel separada- es otra forma de traer
   // el nombre ya combinado en una sola celda ("BLOSSON & BLOSSON"), vista en
   // los archivos de Vela Fest 2025 (29er, 420): no significa "columna de

@@ -216,6 +216,29 @@ body {
   }
 }
 
+/* Panel de resultados del buscador de regatistas del hero (ver
+   SailorSearch): entra con un pop sutil en vez de aparecer de golpe -en
+   mobile cae debajo del buscador (origen arriba), de lg para arriba flota
+   al lado (origen arriba-izquierda, pegado al buscador). */
+@keyframes search-panel-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.search-panel-in {
+  transform-origin: top center;
+  animation: search-panel-in 180ms var(--ease-out-strong);
+}
+@media (min-width: 1024px) {
+  .search-panel-in {
+    transform-origin: top left;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .search-panel-in {
+    animation-duration: 1ms;
+  }
+}
+
 /* Signo de pregunta flotando cerca del bote perdido (ver
    src/app/not-found.tsx): un vaivén vertical lento, el único elemento con
    movimiento en esa pantalla -el velero de marca queda quieto, igual que

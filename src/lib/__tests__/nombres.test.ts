@@ -43,6 +43,18 @@ describe('splitNombreTripulacion', () => {
     ]);
   });
 
+  it('separa por "," -tripulaciones de más de 2 personas (J24)', () => {
+    expect(splitNombreTripulacion('Pablo Despontín, Miguel Bailo, Agustín Nottebohm, Elio Mariano Caputo')).toEqual([
+      'Pablo Despontín', 'Miguel Bailo', 'Agustín Nottebohm', 'Elio Mariano Caputo',
+    ]);
+  });
+
+  it('separa timonel y tripulación ya combinados con "&" seguido de comas', () => {
+    expect(splitNombreTripulacion('Ezequiel despontin & Pablo Despontín, Miguel Bailo')).toEqual([
+      'Ezequiel despontin', 'Pablo Despontín', 'Miguel Bailo',
+    ]);
+  });
+
   it('devuelve un solo elemento para una persona', () => {
     expect(splitNombreTripulacion('Juan Perez')).toEqual(['Juan Perez']);
   });
