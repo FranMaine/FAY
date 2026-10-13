@@ -57,11 +57,13 @@ export function ClimaBadge() {
   const descripcion = `San Isidro: ${datos.temperatura}°C, ${ETIQUETA_CLIMA[categoria]}, viento ${datos.vientoNudos} nudos del ${direccionViento(datos.vientoGrados)} (${fuenteViento})`;
 
   return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums" title={descripcion} aria-label={descripcion}>
+    // role="img": un aria-label suelto sobre un <div> genérico lo ignoran los
+    // lectores de pantalla -con el rol, leen la descripción completa.
+    <div role="img" className="flex items-center gap-2 text-xs text-foreground tabular-nums" title={descripcion} aria-label={descripcion}>
       <Icono className="h-4 w-4 text-primary" aria-hidden="true" />
-      <span className="font-medium text-foreground">{datos.temperatura}°</span>
+      <span className="font-medium">{datos.temperatura}°</span>
       <span className="flex items-center gap-1">
-        <Wind className="h-3.5 w-3.5" aria-hidden="true" />
+        <Wind className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
         {datos.vientoNudos} kn {direccionViento(datos.vientoGrados)}
       </span>
     </div>

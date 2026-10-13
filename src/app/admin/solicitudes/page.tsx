@@ -20,10 +20,12 @@ export default function SolicitudesAdminPage() {
   const fetchSolicitudes = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/solicitudes");
+      if (!res.ok) throw new Error("Respuesta no exitosa");
       const data = await res.json();
       setSolicitudes(data);
     } catch (error) {
       console.error(error);
+      toast.error("No se pudieron cargar las solicitudes. Probá recargar la página.");
     } finally {
       setIsLoading(false);
     }

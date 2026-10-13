@@ -18,8 +18,8 @@ const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 //   ISR de la home, rankings, perfiles, etc.). Igual bloquea cualquier
 //   script cargado desde un origen que no sea el propio.
 // - img-src: escudos y fotos viven en Vercel Blob; blob:/data: para el
-//   preview al subir un logo; cdn.simpleicons.org para los logos de
-//   Apple/Android de /agregar-app.
+//   preview al subir un logo. Los logos de Apple/Android de /agregar-app
+//   son locales (/public/brands), sin depender de una CDN externa.
 // - connect-src 'self': el clima (Open-Meteo/aviationweather) se pide desde
 //   el servidor (/api/clima), no desde el navegador.
 // - Si se suman analítica o publicidad (ver el aviso de cookies), hay que
@@ -30,7 +30,7 @@ const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://cdn.simpleicons.org",
+  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
   "font-src 'self' data:",
   "connect-src 'self'",
   "object-src 'none'",

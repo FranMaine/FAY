@@ -117,11 +117,13 @@ export default function AdminCampeonatosPage() {
         fetch("/api/clases"),
         fetch("/api/clubes"),
       ]);
+      if (!campeonatosRes.ok || !clasesRes.ok || !clubesRes.ok) throw new Error("Respuesta no exitosa");
       setCampeonatos(await campeonatosRes.json());
       setClases(await clasesRes.json());
       setClubes(await clubesRes.json());
     } catch (error) {
       console.error(error);
+      toast.error("No se pudieron cargar los campeonatos. Probá recargar la página.");
     } finally {
       setIsLoading(false);
     }

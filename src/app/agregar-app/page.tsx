@@ -113,7 +113,7 @@ export default function AgregarAppPage() {
         <div className="grid gap-10 md:grid-cols-2 md:gap-8">
           <section aria-labelledby="iphone" className="space-y-5">
             <div className="flex items-center gap-3">
-              <img src="https://cdn.simpleicons.org/apple/ffffff" alt="" width={32} height={32} className="h-8 w-8 dark:invert-0 invert" />
+              <img src="/brands/apple.svg" alt="" width={32} height={32} className="h-8 w-8 dark:invert-0 invert" />
               <div>
                 <h2 id="iphone" className="text-xl font-semibold">iPhone</h2>
                 <p className="text-sm text-muted-foreground">Desde Safari</p>
@@ -124,7 +124,7 @@ export default function AgregarAppPage() {
 
           <section aria-labelledby="android" className="space-y-5">
             <div className="flex items-center gap-3">
-              <img src="https://cdn.simpleicons.org/android/3DDC84" alt="" width={32} height={32} className="h-8 w-8" />
+              <img src="/brands/android.svg" alt="" width={32} height={32} className="h-8 w-8" />
               <div>
                 <h2 id="android" className="text-xl font-semibold">Android</h2>
                 <p className="text-sm text-muted-foreground">Desde Chrome</p>

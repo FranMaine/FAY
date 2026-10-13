@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon, PlusIcon, EditIcon, Loader2Icon, MergeIcon } from "lucide-react";
@@ -48,11 +49,15 @@ export default function AdminRegatistasPage() {
       const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
       if (search.trim()) params.set("q", search.trim());
       const res = await fetch(`/api/regatistas?${params.toString()}`);
+      if (!res.ok) throw new Error("Respuesta no exitosa");
       const data = await res.json();
       setRegatistas(data.regatistas || []);
       setTotal(data.total || 0);
     } catch (error) {
       console.error(error);
+      // id fijo: esta carga se dispara al tipear en el buscador, y sin él
+      // un fallo sostenido apilaría un toast por cada tecla.
+      toast.error("No se pudieron cargar los regatistas. Probá de nuevo.", { id: "cargar-regatistas" });
     } finally {
       setIsLoading(false);
     }
