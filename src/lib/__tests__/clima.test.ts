@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { categoriaClima, direccionViento, vientoDesdeMetar, enlaceViento } from '../clima';
+import { categoriaClima, direccionViento, vientoDesdeMetar, intensidadViento } from '../clima';
 
 describe('categoriaClima', () => {
   it('agrupa los códigos WMO en categorías', () => {
@@ -54,16 +54,19 @@ describe('vientoDesdeMetar', () => {
   });
 });
 
-describe('enlaceViento', () => {
-  it('con viento medido lleva a la página oficial de la estación', () => {
-    const { href, destino } = enlaceViento(true);
-    expect(href).toBe('https://aviationweather.gov/data/metar/?ids=SADF');
-    expect(destino).toBe('AviationWeather.gov');
+describe('intensidadViento', () => {
+  it('clasifica los nudos de calma a muy fuerte', () => {
+    expect(intensidadViento(0).etiqueta).toBe('Calma');
+    expect(intensidadViento(5.9).etiqueta).toBe('Calma');
+    expect(intensidadViento(6).etiqueta).toBe('Suave');
+    expect(intensidadViento(12).etiqueta).toBe('Moderado');
+    expect(intensidadViento(18).etiqueta).toBe('Fuerte');
+    expect(intensidadViento(25).etiqueta).toBe('Muy fuerte');
+    expect(intensidadViento(40).etiqueta).toBe('Muy fuerte');
   });
 
-  it('con viento estimado lleva a un mapa de viento centrado en San Isidro', () => {
-    const { href, destino } = enlaceViento(false);
-    expect(href).toBe('https://www.windy.com/-34.451/-58.453?-34.451,-58.453,10');
-    expect(destino).toBe('Windy');
+  it('devuelve una clase de fondo distinta por nivel', () => {
+    const fondos = [0, 6, 12, 18, 25].map((n) => intensidadViento(n).fondo);
+    expect(new Set(fondos).size).toBe(5);
   });
 });

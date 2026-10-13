@@ -36,6 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/campeonatos`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${SITE_URL}/clubes`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/rankings`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${SITE_URL}/viento`, changeFrequency: 'hourly', priority: 0.5 },
     { url: `${SITE_URL}/aviso-legal`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/privacidad`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/cookies`, changeFrequency: 'yearly', priority: 0.2 },

@@ -20,6 +20,7 @@ const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 // - img-src: escudos y fotos viven en Vercel Blob; blob:/data: para el
 //   preview al subir un logo. Los logos de Apple/Android de /agregar-app
 //   son locales (/public/brands), sin depender de una CDN externa.
+// - frame-src: solo el embed oficial de Windy (mapa de viento de /viento).
 // - connect-src 'self': el clima (Open-Meteo/aviationweather) se pide desde
 //   el servidor (/api/clima), no desde el navegador.
 // - Si se suman analítica o publicidad (ver el aviso de cookies), hay que
@@ -33,6 +34,7 @@ const CSP = [
   "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
   "font-src 'self' data:",
   "connect-src 'self'",
+  "frame-src https://embed.windy.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

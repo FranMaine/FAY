@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, Sun, Wind, type LucideIcon } from 'lucide-react';
-import { categoriaClima, ETIQUETA_CLIMA, direccionViento, enlaceViento, type CategoriaClima } from '@/lib/clima';
+import { categoriaClima, ETIQUETA_CLIMA, direccionViento, type CategoriaClima } from '@/lib/clima';
 
 interface DatosClima {
   temperatura: number;
@@ -56,7 +57,6 @@ export function ClimaBadge() {
   const fuenteViento = datos.vientoMedido ? 'medido en San Fernando' : 'estimado';
   const cielo = `San Isidro: ${datos.temperatura}°C, ${ETIQUETA_CLIMA[categoria]}`;
   const viento = `viento ${datos.vientoNudos} nudos del ${direccionViento(datos.vientoGrados)} (${fuenteViento})`;
-  const enlace = enlaceViento(datos.vientoMedido);
 
   return (
     <div className="flex items-center gap-2 text-xs text-foreground tabular-nums">
@@ -69,21 +69,19 @@ export function ClimaBadge() {
         <Icono className="h-4 w-4 text-primary" aria-hidden="true" />
         <span className="font-medium">{datos.temperatura}°</span>
       </span>
-      {/* El viento lleva a la fuente del dato para ver más (ver
-          enlaceViento). py/-my agrandan la zona táctil sin cambiar el alto
-          del navbar; el subrayado punteado avisa que es tocable (en el
-          celular no hay hover). */}
-      <a
-        href={enlace.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={`${viento}. Ver más datos en ${enlace.destino}`}
-        aria-label={`${viento}. Abre ${enlace.destino} en una pestaña nueva`}
+      {/* El viento lleva a /viento (detalle, últimas 24 h, pronóstico y
+          mapa) dentro de Orzando. py/-my agrandan la zona táctil sin
+          cambiar el alto del navbar; el subrayado punteado avisa que es
+          tocable (en el celular no hay hover). */}
+      <Link
+        href="/viento"
+        title={`${viento}. Ver el detalle del viento`}
+        aria-label={`${viento}. Ver el detalle del viento`}
         className="-my-2 flex items-center gap-1 rounded-sm py-2 underline decoration-dotted decoration-muted-foreground/60 underline-offset-4 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <Wind className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
         {datos.vientoNudos} kn {direccionViento(datos.vientoGrados)}
-      </a>
+      </Link>
     </div>
   );
 }

@@ -29,33 +29,32 @@ export function direccionViento(grados: number): string {
   return PUNTOS_CARDINALES[indice];
 }
 
-// Coordenadas de San Isidro: las usa /api/clima para pedirle a Open-Meteo y
-// el link "ver más datos" del badge, para abrir el mapa en el mismo lugar.
+// Coordenadas de San Isidro: las usan /api/clima y /viento (Open-Meteo y el
+// mapa embebido) para ubicarse en el mismo lugar.
 export const SAN_ISIDRO = { latitud: -34.4508, longitud: -58.4528 } as const;
 
 // San Fernando (SADF): aeródromo a ~12km de San Isidro, sobre la misma
 // costa del Río de la Plata -de ahí sale el viento medido (ver abajo).
 export const ESTACION_METAR = 'SADF';
 
+export interface IntensidadViento {
+  etiqueta: string;
+  /** Clase de Tailwind para el color de relleno (string literal completo, así Tailwind la detecta). */
+  fondo: string;
+}
+
 /**
- * A dónde lleva el viento del badge para ver más datos, según de dónde
- * salió el número que se está mostrando: si es la medición de la estación,
- * a la página oficial de esa estación (el METAR crudo y decodificado, más
- * historial); si es la estimación del modelo, a un mapa de viento con el
- * pronóstico por hora en San Isidro.
+ * Escala de colores/etiquetas del viento en nudos, pensada para quien
+ * navega (no es la escala Beaufort completa): de "calma" a "muy fuerte".
+ * La usan el número grande de /viento y las barras de los gráficos, así el
+ * mismo color significa lo mismo en toda la página.
  */
-export function enlaceViento(medido: boolean): { href: string; destino: string } {
-  if (medido) {
-    return {
-      href: `https://aviationweather.gov/data/metar/?ids=${ESTACION_METAR}`,
-      destino: 'AviationWeather.gov',
-    };
-  }
-  const { latitud, longitud } = SAN_ISIDRO;
-  return {
-    href: `https://www.windy.com/${latitud.toFixed(3)}/${longitud.toFixed(3)}?${latitud.toFixed(3)},${longitud.toFixed(3)},10`,
-    destino: 'Windy',
-  };
+export function intensidadViento(nudos: number): IntensidadViento {
+  if (nudos < 6) return { etiqueta: 'Calma', fondo: 'bg-sky-400' };
+  if (nudos < 12) return { etiqueta: 'Suave', fondo: 'bg-emerald-500' };
+  if (nudos < 18) return { etiqueta: 'Moderado', fondo: 'bg-amber-400' };
+  if (nudos < 25) return { etiqueta: 'Fuerte', fondo: 'bg-orange-500' };
+  return { etiqueta: 'Muy fuerte', fondo: 'bg-red-500' };
 }
 
 export interface ReporteMetar {
