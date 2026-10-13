@@ -29,6 +29,35 @@ export function direccionViento(grados: number): string {
   return PUNTOS_CARDINALES[indice];
 }
 
+// Coordenadas de San Isidro: las usa /api/clima para pedirle a Open-Meteo y
+// el link "ver más datos" del badge, para abrir el mapa en el mismo lugar.
+export const SAN_ISIDRO = { latitud: -34.4508, longitud: -58.4528 } as const;
+
+// San Fernando (SADF): aeródromo a ~12km de San Isidro, sobre la misma
+// costa del Río de la Plata -de ahí sale el viento medido (ver abajo).
+export const ESTACION_METAR = 'SADF';
+
+/**
+ * A dónde lleva el viento del badge para ver más datos, según de dónde
+ * salió el número que se está mostrando: si es la medición de la estación,
+ * a la página oficial de esa estación (el METAR crudo y decodificado, más
+ * historial); si es la estimación del modelo, a un mapa de viento con el
+ * pronóstico por hora en San Isidro.
+ */
+export function enlaceViento(medido: boolean): { href: string; destino: string } {
+  if (medido) {
+    return {
+      href: `https://aviationweather.gov/data/metar/?ids=${ESTACION_METAR}`,
+      destino: 'AviationWeather.gov',
+    };
+  }
+  const { latitud, longitud } = SAN_ISIDRO;
+  return {
+    href: `https://www.windy.com/${latitud.toFixed(3)}/${longitud.toFixed(3)}?${latitud.toFixed(3)},${longitud.toFixed(3)},10`,
+    destino: 'Windy',
+  };
+}
+
 export interface ReporteMetar {
   reportTime: string;
   wspd?: number;

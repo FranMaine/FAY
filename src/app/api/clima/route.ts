@@ -1,19 +1,15 @@
 import { NextResponse } from 'next/server';
-import { vientoDesdeMetar, type ReporteMetar } from '@/lib/clima';
+import { vientoDesdeMetar, SAN_ISIDRO, ESTACION_METAR, type ReporteMetar } from '@/lib/clima';
 
-// Coordenadas de San Isidro (ver el pedido del sitio). Open-Meteo no pide
-// API key y devuelve temperatura/ícono del cielo -pero es un modelo de
-// pronóstico, no una medición real, así que el viento no era preciso.
-const LATITUD = -34.4508;
-const LONGITUD = -58.4528;
-
-// San Fernando (SADF): aeródromo a ~12km de San Isidro, sobre la misma
-// costa del Río de la Plata. Publica METAR/SPECI con el viento REAL
-// medido en la zona -gratis y sin API key (aviationweather.gov, del
-// gobierno de EE.UU., cubre estaciones de todo el mundo). Mismo principio
-// que usan apps como "Qué Viento" (estaciones propias): medición real en
-// vez de un modelo.
-const ESTACION_METAR = 'SADF';
+// Open-Meteo no pide API key y devuelve temperatura/ícono del cielo -pero
+// es un modelo de pronóstico, no una medición real, así que el viento no
+// era preciso. Por eso el viento sale de ESTACION_METAR (San Fernando, ver
+// lib/clima.ts): publica METAR/SPECI con el viento REAL medido en la zona,
+// gratis y sin API key (aviationweather.gov, del gobierno de EE.UU.). Mismo
+// principio que usan apps como "Qué Viento" (estaciones propias): medición
+// real en vez de un modelo.
+const LATITUD = SAN_ISIDRO.latitud;
+const LONGITUD = SAN_ISIDRO.longitud;
 
 export const revalidate = 600;
 

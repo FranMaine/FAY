@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { categoriaClima, direccionViento, vientoDesdeMetar } from '../clima';
+import { categoriaClima, direccionViento, vientoDesdeMetar, enlaceViento } from '../clima';
 
 describe('categoriaClima', () => {
   it('agrupa los códigos WMO en categorías', () => {
@@ -51,5 +51,19 @@ describe('vientoDesdeMetar', () => {
       ahora
     );
     expect(resultado).toBeNull();
+  });
+});
+
+describe('enlaceViento', () => {
+  it('con viento medido lleva a la página oficial de la estación', () => {
+    const { href, destino } = enlaceViento(true);
+    expect(href).toBe('https://aviationweather.gov/data/metar/?ids=SADF');
+    expect(destino).toBe('AviationWeather.gov');
+  });
+
+  it('con viento estimado lleva a un mapa de viento centrado en San Isidro', () => {
+    const { href, destino } = enlaceViento(false);
+    expect(href).toBe('https://www.windy.com/-34.451/-58.453?-34.451,-58.453,10');
+    expect(destino).toBe('Windy');
   });
 });
