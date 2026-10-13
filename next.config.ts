@@ -8,6 +8,37 @@ import type { NextConfig } from "next";
 // segura.
 const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 
+// Content-Security-Policy: limita de dónde puede cargar scripts, imágenes,
+// etc. el navegador -si algún día se cuela un script inyectado, no puede
+// llamar a un servidor ajeno ni cargar código de afuera.
+//
+// - script-src con 'unsafe-inline' (y SIN nonce) a propósito: Next
+//   hidrata con scripts inline, y la alternativa con nonce obliga a que
+//   TODAS las páginas se rendericen dinámicas en cada request (se pierde el
+//   ISR de la home, rankings, perfiles, etc.). Igual bloquea cualquier
+//   script cargado desde un origen que no sea el propio.
+// - img-src: escudos y fotos viven en Vercel Blob; blob:/data: para el
+//   preview al subir un logo; cdn.simpleicons.org para los logos de
+//   Apple/Android de /agregar-app.
+// - connect-src 'self': el clima (Open-Meteo/aviationweather) se pide desde
+//   el servidor (/api/clima), no desde el navegador.
+// - Si se suman analítica o publicidad (ver el aviso de cookies), hay que
+//   sumar acá sus dominios de script-src/connect-src/img-src/frame-src.
+// - Solo en producción: en desarrollo React Refresh/HMR necesitan eval y
+//   websockets que este CSP bloquearía.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://cdn.simpleicons.org",
+  "font-src 'self' data:",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
 const nextConfig: NextConfig = {
   // Sin esto, React <ViewTransition> (usado en el escudo de club, el logo
   // y el título de campeonato -ver ClubAvatar, CampeonatoCard, etc.) NO
@@ -69,6 +100,9 @@ const nextConfig: NextConfig = {
           // superficie si algún día se cuela un script de terceros
           // comprometido.
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          ...(process.env.NODE_ENV === "production"
+            ? [{ key: "Content-Security-Policy", value: CSP }]
+            : []),
         ],
       },
       {
