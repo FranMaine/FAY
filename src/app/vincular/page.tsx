@@ -235,6 +235,7 @@ export default function VincularPage() {
 
       <Modal
         isOpen={mostrarConfirmacion}
+        ariaLabel="Confirmar vinculación"
         onClose={() => !isSubmitting && setMostrarConfirmacion(false)}
         className="w-full max-w-md"
       >

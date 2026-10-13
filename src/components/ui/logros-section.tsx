@@ -51,7 +51,7 @@ export function LogrosSection({ logros }: LogrosSectionProps) {
         })}
       </div>
 
-      <Modal isOpen={!!seleccionado} onClose={() => setSeleccionado(null)} className="w-full max-w-sm">
+      <Modal ariaLabel="Detalle del logro" isOpen={!!seleccionado} onClose={() => setSeleccionado(null)} className="w-full max-w-sm">
         {seleccionado && (
           <div className="p-6 text-center space-y-4">
             <div

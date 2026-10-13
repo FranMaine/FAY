@@ -104,7 +104,7 @@ export function NuevoCampeonatoModal({ isOpen, onClose, onCreated, clases, event
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={resetAndClose} className="w-full max-w-md">
+    <Modal ariaLabel="Nuevo campeonato" isOpen={isOpen} onClose={resetAndClose} className="w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold">Nuevo Campeonato</h2>
           <Button variant="ghost" size="icon" aria-label="Cerrar" onClick={resetAndClose} disabled={isSaving}>

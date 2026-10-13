@@ -67,7 +67,14 @@ export function SelectorBuscable({ id, opciones, value, onChange, placeholder = 
           setAbierto(true);
         }}
         onKeyDown={(e) => {
-          if (e.key === "Escape") setAbierto(false);
+          // preventDefault solo si había una lista abierta: ese primer Esc
+          // es "cerrar la lista" y no debe además cerrar el Modal que la
+          // contiene (el Modal ignora los Esc ya "consumidos"); un segundo
+          // Esc, con la lista ya cerrada, sí llega al Modal.
+          if (e.key === "Escape" && abierto) {
+            e.preventDefault();
+            setAbierto(false);
+          }
           if (e.key === "Enter" && abierto && filtradas.length === 1) {
             e.preventDefault();
             elegir(filtradas[0]);

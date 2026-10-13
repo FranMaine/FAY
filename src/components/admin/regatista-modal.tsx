@@ -126,7 +126,7 @@ export function RegatistaModal({ isOpen, onClose, onSaved, regatista }: Regatist
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="w-full max-w-md">
+    <Modal ariaLabel="Datos del regatista" isOpen={isOpen} onClose={onClose} className="w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold">{regatista ? "Editar Regatista" : "Nuevo Regatista"}</h2>
           <Button variant="ghost" size="icon" aria-label="Cerrar" onClick={onClose} disabled={isSaving}>

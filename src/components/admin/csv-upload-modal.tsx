@@ -265,7 +265,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
   const isBusy = isLoadingPreview || etapa === 'importando';
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} className="w-full max-w-4xl max-h-[90vh]">
+    <Modal ariaLabel="Importar resultados" isOpen={isOpen} onClose={handleClose} className="w-full max-w-4xl max-h-[90vh]">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold">
             {etapa === 'confirmar' ? 'Confirmá las columnas detectadas' : 'Importar Resultados (CSV / Excel / PDF)'}

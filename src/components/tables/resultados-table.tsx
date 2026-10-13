@@ -166,12 +166,17 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-border bg-surface">
+      {/* --pos-w: ancho FIJO de la columna "Pos" y, a la vez, el offset de la
+          columna del nombre (sticky). Antes el offset era un 60px a mano:
+          con una posición de 3 dígitos (flotas grandes) el badge pasaba de
+          ese ancho y el nombre quedaba encimado. 72px = padding + un badge
+          de 3 dígitos. */}
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-border bg-surface [--pos-w:72px]">
         <table className="w-full text-sm text-left">
           <thead className="text-xs text-muted uppercase bg-surface-hover border-b border-border">
             <tr>
-              <th scope="col" className="px-4 py-3 sticky left-0 bg-surface-hover z-10">Pos</th>
-              <th scope="col" className="px-4 py-3 sticky left-[60px] bg-surface-hover z-10">Timonel/Tripulación</th>
+              <th scope="col" className="px-4 py-3 sticky left-0 bg-surface-hover z-10 w-[var(--pos-w)] min-w-[var(--pos-w)] max-w-[var(--pos-w)]">Pos</th>
+              <th scope="col" className="px-4 py-3 sticky left-[var(--pos-w)] bg-surface-hover z-10">Timonel/Tripulación</th>
               <th scope="col" className="px-4 py-3">Club</th>
               {regatas.map((r) => (
                 <th key={r} scope="col" className="px-4 py-3 text-center">R{r}</th>
@@ -194,12 +199,12 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
                     el nombre. group-hover aplica el MISMO tono -50% de
                     surface-hover sobre surface- pero ya mezclado, sin
                     transparencia. */}
-                <td className="px-4 py-3 sticky left-0 bg-surface z-10 transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-surface-hover)_50%,var(--color-surface))]">
+                <td className="px-4 py-3 sticky left-0 bg-surface z-10 w-[var(--pos-w)] min-w-[var(--pos-w)] max-w-[var(--pos-w)] transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-surface-hover)_50%,var(--color-surface))]">
                   <Badge variant={getPositionBadgeVariant(row.posicion)} className="font-mono">
                     {row.posicion}
                   </Badge>
                 </td>
-                <th scope="row" className="px-4 py-3 sticky left-[60px] bg-surface z-10 text-left font-medium text-foreground whitespace-nowrap transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-surface-hover)_50%,var(--color-surface))]">
+                <th scope="row" className="px-4 py-3 sticky left-[var(--pos-w)] bg-surface z-10 text-left font-medium text-foreground whitespace-nowrap transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-surface-hover)_50%,var(--color-surface))]">
                   <NombreRegatista row={row} className="hover:text-primary transition-colors hover:underline" />
                 </th>
                 <td className="px-4 py-3 text-muted whitespace-nowrap">{row.club}</td>

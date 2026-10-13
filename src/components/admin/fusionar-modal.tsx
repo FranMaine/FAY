@@ -121,7 +121,7 @@ export function FusionarModal({ isOpen, onClose, tipo, buscar, onFusionado }: Pr
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={() => !fusionando && onClose()} className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <Modal ariaLabel="Fusionar duplicados" isOpen={isOpen} onClose={() => !fusionando && onClose()} className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
       <div className="p-6 space-y-5">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2"><MergeIcon className="w-5 h-5 text-primary" /> Fusionar {plural}s</h2>

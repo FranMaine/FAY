@@ -50,6 +50,7 @@ export function BetaBanner() {
   return (
     <Modal
       isOpen={visible}
+      ariaLabel="Orzando está en sus primeras etapas"
       onClose={cerrar}
       closeOnBackdropClick={false}
       className="w-full max-w-sm bg-gradient-to-br from-primary/10 via-surface to-surface"

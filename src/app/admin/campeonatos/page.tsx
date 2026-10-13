@@ -591,7 +591,7 @@ export default function AdminCampeonatosPage() {
         if (!grupo) return null;
         const campoInput = "w-full h-11 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground";
         return (
-          <Modal isOpen={!!personalizarClave} onClose={() => !guardandoPersonalizar && setPersonalizarClave(null)} className="w-full max-w-md">
+          <Modal ariaLabel="Personalizar evento" isOpen={!!personalizarClave} onClose={() => !guardandoPersonalizar && setPersonalizarClave(null)} className="w-full max-w-md">
             <div className="p-6 space-y-4">
               <div>
                 <h2 className="text-lg font-bold text-foreground">Personalizar evento</h2>

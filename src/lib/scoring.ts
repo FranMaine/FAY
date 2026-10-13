@@ -54,7 +54,7 @@ export interface RegataConResultados {
  * que espera generarClasificacion. Centraliza esto en un solo lugar porque
  * se repetía (con copy-paste, y algún olvido) en cada página/endpoint que
  * arma una clasificación: /campeonatos/[id], /admin/api/campeonatos/[id],
- * /regatistas/[id], /mi-perfil, /rankings, /api/regatistas/[id]/stats.
+ * /regatistas/[id] y /mi-perfil (vía getRegatistaProfile), /rankings.
  */
 export function agruparPorRegatista(regatas: RegataConResultados[]) {
   const map = new Map<string, {

@@ -15,10 +15,15 @@ import { cn } from "@/lib/utils";
 // cerrar solo quiere que el sistema responda rápido.
 const SALIDA_MS = 150;
 
+const FOCUSABLES =
+  'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  /** Nombre accesible del diálogo (lo lee el lector de pantalla al abrirse). */
+  ariaLabel?: string;
   /** Ancho/alto del panel (ej: "w-full max-w-md", "w-full max-w-4xl max-h-[90vh]") */
   className?: string;
   /** false: clickear el fondo NO cierra el modal (solo queda el botón de
@@ -27,7 +32,18 @@ interface ModalProps {
   closeOnBackdropClick?: boolean;
 }
 
-export function Modal({ isOpen, onClose, children, className, closeOnBackdropClick = true }: ModalProps) {
+export function Modal({ isOpen, onClose, children, ariaLabel, className, closeOnBackdropClick = true }: ModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Los callers pasan onClose como función inline (cambia en cada render):
+  // si el efecto de foco dependiera de ella, se re-correría con cada tecla
+  // tipeada en un input del modal y le robaría el foco. Se lee de un ref.
+  const onCloseRef = useRef(onClose);
+  const cerrarConEscRef = useRef(closeOnBackdropClick);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    cerrarConEscRef.current = closeOnBackdropClick;
+  });
+
   // "closing" mantiene el modal montado el tiempo de la transición de
   // salida después de que isOpen pasa a false -sin esto no hay forma de
   // animar el cierre con solo CSS (el componente ya desapareció del DOM).
@@ -69,6 +85,58 @@ export function Modal({ isOpen, onClose, children, className, closeOnBackdropCli
     };
   }, [isOpen]);
 
+  // Foco y teclado mientras está abierto: el foco entra al diálogo (al
+  // panel, no al primer campo -así en el celular no salta el teclado
+  // solo), Tab/Shift+Tab quedan atrapados adentro en vez de irse a la
+  // página de atrás, Esc cierra (salvo en los avisos que no se pueden
+  // descartar tocando afuera), y al cerrar el foco vuelve a lo que lo
+  // abrió. Un Esc que un hijo ya "consumió" (ej: cerrar la lista de un
+  // selector buscable) no cierra el modal.
+  useEffect(() => {
+    if (!isOpen) return;
+    const previo = document.activeElement as HTMLElement | null;
+
+    const raf = requestAnimationFrame(() => {
+      const panel = panelRef.current;
+      if (panel && !panel.contains(document.activeElement)) panel.focus();
+    });
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        if (!e.defaultPrevented && cerrarConEscRef.current) onCloseRef.current();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const items = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLES)).filter(
+        (el) => el.getClientRects().length > 0
+      );
+      if (items.length === 0) {
+        e.preventDefault();
+        panel.focus();
+        return;
+      }
+      const primero = items[0];
+      const ultimo = items[items.length - 1];
+      const activo = document.activeElement;
+      if (e.shiftKey && (activo === primero || activo === panel)) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && activo === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener('keydown', onKeyDown);
+      if (previo && document.contains(previo)) previo.focus();
+    };
+  }, [isOpen]);
+
   if (!isOpen && !closing) return null;
 
   return (
@@ -80,8 +148,13 @@ export function Modal({ isOpen, onClose, children, className, closeOnBackdropCli
       onClick={closeOnBackdropClick ? onClose : undefined}
     >
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ariaLabel}
+        tabIndex={-1}
         className={cn(
-          "bg-surface border border-border rounded-2xl shadow-xl overflow-hidden flex flex-col transition-[opacity,transform] ease-out-strong motion-reduce:transition-none",
+          "bg-surface border border-border rounded-2xl shadow-xl overflow-hidden flex flex-col outline-none transition-[opacity,transform] ease-out-strong motion-reduce:transition-none",
           entered ? "opacity-100 scale-100 duration-[220ms]" : "opacity-0 scale-[0.96] duration-150",
           className
         )}
