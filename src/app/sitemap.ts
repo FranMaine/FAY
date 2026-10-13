@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/db';
 import { SITE_URL } from '@/lib/site';
+import { LUGARES, urlViento } from '@/lib/lugares';
 
 // Sin esto, "next build" intenta pre-renderizar /sitemap.xml como parte
 // del build (consultando la base en ese momento) -en un pipeline de CI/CD
@@ -36,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/campeonatos`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${SITE_URL}/clubes`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/rankings`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/viento`, changeFrequency: 'hourly', priority: 0.5 },
+    ...LUGARES.map((l) => ({ url: `${SITE_URL}${urlViento(l.slug)}`, changeFrequency: 'hourly' as const, priority: 0.5 })),
     { url: `${SITE_URL}/aviso-legal`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/privacidad`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/cookies`, changeFrequency: 'yearly', priority: 0.2 },

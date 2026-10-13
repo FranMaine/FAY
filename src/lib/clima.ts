@@ -29,14 +29,6 @@ export function direccionViento(grados: number): string {
   return PUNTOS_CARDINALES[indice];
 }
 
-// Coordenadas de San Isidro: las usan /api/clima y /viento (Open-Meteo y el
-// mapa embebido) para ubicarse en el mismo lugar.
-export const SAN_ISIDRO = { latitud: -34.4508, longitud: -58.4528 } as const;
-
-// San Fernando (SADF): aeródromo a ~12km de San Isidro, sobre la misma
-// costa del Río de la Plata -de ahí sale el viento medido (ver abajo).
-export const ESTACION_METAR = 'SADF';
-
 export interface IntensidadViento {
   etiqueta: string;
   /** Clase de Tailwind para el color de relleno (string literal completo, así Tailwind la detecta). */
