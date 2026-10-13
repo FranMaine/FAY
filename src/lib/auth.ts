@@ -1,8 +1,6 @@
 import NextAuth from 'next-auth';
 import { CredentialsSignin } from 'next-auth';
-import { PrismaAdapter } from '@auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { prisma } from './db';
 import { permitir } from './rate-limit';
@@ -28,33 +26,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   // quedó cargado en algunos entornos) sin depender de que la librería
   // decida sola cuál de los dos mirar.
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
-  // @auth/prisma-adapter estaba instalado pero nunca conectado acá -sin
-  // adapter, un login con Google NUNCA crea una fila en la tabla User: solo
-  // arma una sesión JWT con un id que no existe en la base. Cualquier cosa
-  // que después use session.user.id para tocar la base (ej: POST
-  // /api/vincular, que hace solicitudVinculacion.create con userId) rompía
-  // con una violación de foreign key para cualquiera que entrara por
-  // Google. El adapter sigue coexistiendo bien con `strategy: 'jwt'` -es el
-  // modo soportado oficialmente por Auth.js: persiste User/Account en la
-  // base, pero la sesión en sí sigue viajando como JWT, no se usa la tabla
-  // Session. El login por CredentialsProvider no se ve afectado -ese ya
-  // resuelve el User a mano en authorize().
-  adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
-    // Sin "newUser": ahora que el adapter persiste usuarios de Google de
-    // verdad, Auth.js redirige ahí la PRIMERA vez que ve a alguien nuevo
-    // -pero /registro es el formulario de alta con email/contraseña, no
-    // tiene sentido para quien ya se logueó con Google. Sin esta opción, un
-    // usuario nuevo sigue el mismo callbackUrl que cualquier login
-    // (login/page.tsx ya manda a Google con callbackUrl: "/").
   },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
     CredentialsProvider({
       name: 'credentials',
       credentials: {

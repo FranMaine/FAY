@@ -151,23 +151,6 @@ function LoginForm() {
               {isLoading ? "Iniciando sesión…" : "Iniciar Sesión"}
             </Button>
           </form>
-
-          <div className="mt-6 flex items-center justify-center">
-            <div className="border-t border-border w-full"></div>
-            <span className="bg-surface px-3 text-sm text-muted-foreground">o</span>
-            <div className="border-t border-border w-full"></div>
-          </div>
-
-          <div className="mt-6">
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full bg-background border border-border"
-              onClick={() => signIn("google", { callbackUrl: "/" })}
-            >
-              Continuar con Google
-            </Button>
-          </div>
         </CardContent>
         <CardFooter className="justify-center">
           <p className="text-sm text-muted-foreground">

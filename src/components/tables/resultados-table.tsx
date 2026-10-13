@@ -1,8 +1,17 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { SearchIcon } from 'lucide-react';
 import Link from 'next/link';
+
+// Quita acentos y pasa a minúsculas -mismo criterio que SelectorBuscable,
+// así "jose" encuentra "José".
+function normalizar(texto: string): string {
+  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
 
 export interface ClasificacionRegatista {
   id: string;
@@ -58,6 +67,8 @@ function NombreRegatista({ row, className }: { row: ClasificacionRegatista; clas
 }
 
 export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: ResultadosTableProps) {
+  const [busqueda, setBusqueda] = useState('');
+
   const getPositionBadgeVariant = (pos: number) => {
     if (pos === 1) return 'accent'; // Gold
     if (pos === 2) return 'default'; // Silver/Blue
@@ -65,11 +76,41 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
     return 'muted';
   };
 
+  // Filtra por el nombre de la fila O el de cualquier integrante (en una
+  // tripulación de más de una persona, "Fulano & Mengano" tiene que
+  // encontrarse buscando "Mengano" también, no solo por el primer nombre).
+  const clasificacionFiltrada = useMemo(() => {
+    const q = normalizar(busqueda);
+    if (!q) return clasificacion;
+    return clasificacion.filter((row) => {
+      const nombres = row.integrantes?.length ? row.integrantes.map((i) => i.nombre) : [row.nombre];
+      return nombres.some((n) => normalizar(n).includes(q)) || normalizar(row.club).includes(q);
+    });
+  }, [clasificacion, busqueda]);
+
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
+      <div className="relative max-w-sm">
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <Input
+          type="text"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Buscar regatista en esta tabla…"
+          className="pl-9"
+          aria-label="Buscar regatista en la clasificación"
+        />
+      </div>
+
+      {busqueda.trim() && clasificacionFiltrada.length === 0 && (
+        <div className="rounded-xl border border-dashed border-border bg-surface p-6 text-center text-sm text-muted-foreground">
+          Nadie en esta clasificación coincide con &quot;{busqueda}&quot;.
+        </div>
+      )}
+
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
-        {clasificacion.map((row) => (
+        {clasificacionFiltrada.map((row) => (
           <div key={row.id} className="bg-surface rounded-xl border border-border p-4 shadow-sm">
             <div className="flex justify-between items-start mb-3">
               <div className="flex items-center gap-3">
@@ -138,10 +179,10 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
             </tr>
           </thead>
           <tbody>
-            {clasificacion.map((row, idx) => (
+            {clasificacionFiltrada.map((row, idx) => (
               <tr key={row.id} className={cn(
                 "border-b border-border hover:bg-surface-hover/50 transition-colors",
-                idx === clasificacion.length - 1 && "border-0"
+                idx === clasificacionFiltrada.length - 1 && "border-0"
               )}>
                 <td className="px-4 py-3 sticky left-0 bg-surface z-10">
                   <Badge variant={getPositionBadgeVariant(row.posicion)} className="font-mono">
