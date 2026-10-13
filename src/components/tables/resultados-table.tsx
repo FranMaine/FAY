@@ -43,10 +43,14 @@ interface ResultadosTableProps {
   columnasExtra?: string[];
 }
 
+// Anillo de foco visible para quien navega con teclado: en una tabla de 90
+// filas, sin esto no hay forma de saber en cuál link está parado el Tab.
+const FOCO_LINK = 'rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+
 function NombreRegatista({ row, className }: { row: ClasificacionRegatista; className?: string }) {
   if (!row.integrantes || row.integrantes.length < 2) {
     return (
-      <Link href={`/regatistas/${row.id}`} className={className}>
+      <Link href={`/regatistas/${row.id}`} className={cn(FOCO_LINK, className)}>
         {row.nombre}
       </Link>
     );
@@ -57,7 +61,7 @@ function NombreRegatista({ row, className }: { row: ClasificacionRegatista; clas
       {row.integrantes.map((persona, i) => (
         <span key={persona.regatistaId}>
           {i > 0 && ' & '}
-          <Link href={`/regatistas/${persona.regatistaId}`} className={className}>
+          <Link href={`/regatistas/${persona.regatistaId}`} className={cn(FOCO_LINK, className)}>
             {persona.nombre}
           </Link>
         </span>
@@ -181,17 +185,23 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
           <tbody>
             {clasificacionFiltrada.map((row, idx) => (
               <tr key={row.id} className={cn(
-                "border-b border-border hover:bg-surface-hover/50 transition-colors",
+                "group border-b border-border hover:bg-surface-hover/50 transition-colors",
                 idx === clasificacionFiltrada.length - 1 && "border-0"
               )}>
-                <td className="px-4 py-3 sticky left-0 bg-surface z-10">
+                {/* Las celdas sticky tienen fondo sólido (para tapar lo que
+                    scrollea por detrás), así que el hover/50 de la fila no
+                    las alcanzaba y quedaba una franja de otro color sobre
+                    el nombre. group-hover aplica el MISMO tono -50% de
+                    surface-hover sobre surface- pero ya mezclado, sin
+                    transparencia. */}
+                <td className="px-4 py-3 sticky left-0 bg-surface z-10 transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-surface-hover)_50%,var(--color-surface))]">
                   <Badge variant={getPositionBadgeVariant(row.posicion)} className="font-mono">
                     {row.posicion}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 sticky left-[60px] bg-surface z-10 font-medium text-foreground whitespace-nowrap">
+                <th scope="row" className="px-4 py-3 sticky left-[60px] bg-surface z-10 text-left font-medium text-foreground whitespace-nowrap transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-surface-hover)_50%,var(--color-surface))]">
                   <NombreRegatista row={row} className="hover:text-primary transition-colors hover:underline" />
-                </td>
+                </th>
                 <td className="px-4 py-3 text-muted whitespace-nowrap">{row.club}</td>
                 {regatas.map((r) => {
                   const p = row.puntajes.find(score => score.regata === r);

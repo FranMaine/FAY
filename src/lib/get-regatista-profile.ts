@@ -37,27 +37,28 @@ export async function getRegatistaProfile(id: string) {
   const chartData = [];
   const historialLogros: LogroHistorialEntry[] = [];
 
-  for (const campId of campeonatosIds) {
-    // Para saber su posición final, necesitamos calcular la clasificación de todo el campeonato
-    const campeonato = await prisma.campeonato.findUnique({
-      where: { id: campId },
-      include: {
-        clase: true,
-        sede: true,
-        regatas: {
-          include: {
-            resultados: {
-              include: {
-                regatista: { include: { club: true } },
-              },
+  // Para saber su posición final, necesitamos calcular la clasificación de
+  // todo cada campeonato. Una sola consulta con "in" en vez de un
+  // findUnique por campeonato (antes, un regatista con 50 campeonatos
+  // hacía 50 viajes seguidos a la base -más lento cuanto más historial).
+  const campeonatos = await prisma.campeonato.findMany({
+    where: { id: { in: [...campeonatosIds] }, estado: "PUBLICADO" },
+    include: {
+      clase: true,
+      sede: true,
+      regatas: {
+        include: {
+          resultados: {
+            include: {
+              regatista: { include: { club: true } },
             },
           },
         },
       },
-    });
+    },
+  });
 
-    if (!campeonato || campeonato.estado !== "PUBLICADO") continue;
-
+  for (const campeonato of campeonatos) {
     const clasificacion = generarClasificacion(agruparPorRegatista(campeonato.regatas), campeonato.descartes);
     const miClasificacion = clasificacion.find((c) => c.regatistaId === id);
 
