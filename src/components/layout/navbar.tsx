@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Menu, X, Trophy, BarChart3, User, LogIn, Home, Building2 } from 'lucide-react';
+import { Menu, X, Trophy, BarChart3, User, LogIn, Home, Building2, CloudSun } from 'lucide-react';
 import { SailingBoat } from '@/components/icons/sailing-boat';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { NotificationBell } from '@/components/layout/notification-bell';
 import { ClimaBadge } from '@/components/layout/clima-badge';
+import { useMiLugar } from '@/hooks/use-mi-lugar';
+import { urlViento } from '@/lib/lugares';
 
 import { useSession, signOut } from 'next-auth/react';
 import { LogOut, Shield } from 'lucide-react';
@@ -18,15 +20,22 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
+  // Un solo fetch del lugar para el badge y para el link "Clima".
+  const lugar = useMiLugar();
 
   // "Inicio" lleva a la home, que también es donde está el buscador de
   // regatistas (SailorSearch, en el hero) -un atajo directo desde
   // cualquier página en vez de tener que volver haciendo click en el logo.
+  //
+  // "Clima" lleva a lo mismo que el viento del badge: la página del lugar de
+  // la persona (el de su club, o San Isidro). `match` es el prefijo que lo
+  // marca activo, porque el href cambia según el lugar.
   const navLinks = [
-    { href: '/', label: 'Inicio', icon: Home },
-    { href: '/campeonatos', label: 'Campeonatos', icon: Trophy },
-    { href: '/clubes', label: 'Clubes', icon: Building2 },
-    { href: '/rankings', label: 'Rankings', icon: BarChart3 },
+    { href: '/', label: 'Inicio', icon: Home, match: '/' },
+    { href: '/campeonatos', label: 'Campeonatos', icon: Trophy, match: '/campeonatos' },
+    { href: '/clubes', label: 'Clubes', icon: Building2, match: '/clubes' },
+    { href: '/rankings', label: 'Rankings', icon: BarChart3, match: '/rankings' },
+    { href: urlViento(lugar), label: 'Clima', icon: CloudSun, match: '/viento' },
   ];
 
   const isAdmin = session?.user?.role === 'ADMIN';
@@ -64,7 +73,7 @@ export function Navbar() {
               <span className="text-xl font-bold text-foreground">Orzando</span>
             </Link>
             <div className="ml-4 border-l border-border pl-4">
-              <ClimaBadge />
+              <ClimaBadge slug={lugar} />
             </div>
           </div>
 
@@ -73,10 +82,10 @@ export function Navbar() {
             <div className="flex items-center gap-4">
               {navLinks.map((link) => {
                 const Icon = link.icon;
-                const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
+                const isActive = link.match === '/' ? pathname === '/' : pathname.startsWith(link.match);
                 return (
                   <Link
-                    key={link.href}
+                    key={link.match}
                     href={link.href}
                     className={cn(
                       'flex items-center gap-2 rounded-md text-sm font-medium transition-colors hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
@@ -177,10 +186,10 @@ export function Navbar() {
           <div className="space-y-1 px-4 pb-3 pt-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
+              const isActive = link.match === '/' ? pathname === '/' : pathname.startsWith(link.match);
               return (
                 <Link
-                  key={link.href}
+                  key={link.match}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, Sun, Wind, type LucideIcon } from 'lucide-react';
 import { categoriaClima, ETIQUETA_CLIMA, direccionViento, type CategoriaClima } from '@/lib/clima';
 import { LUGAR_PREDETERMINADO, urlViento } from '@/lib/lugares';
@@ -34,26 +33,8 @@ const REFRESCO_MS = 10 * 60 * 1000;
 // nadie ve el badge más tarde) y, si hay sesión, cambia al lugar del club en
 // cuanto /api/mi-lugar responde. Si la API no responde, no muestra nada (no
 // rompe la barra).
-export function ClimaBadge() {
-  const { status } = useSession();
-  const [slug, setSlug] = useState(LUGAR_PREDETERMINADO.slug);
+export function ClimaBadge({ slug }: { slug: string }) {
   const [datos, setDatos] = useState<DatosClima | null>(null);
-
-  useEffect(() => {
-    if (status !== 'authenticated') return;
-    let cancelado = false;
-    fetch('/api/mi-lugar')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json: { slug?: string } | null) => {
-        if (!cancelado && json?.slug) setSlug(json.slug);
-      })
-      .catch(() => {
-        // Sin red: queda en el lugar predeterminado.
-      });
-    return () => {
-      cancelado = true;
-    };
-  }, [status]);
 
   useEffect(() => {
     let cancelado = false;
