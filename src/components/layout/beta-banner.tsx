@@ -75,7 +75,7 @@ export function BetaBanner() {
             Orzando está en sus primeras etapas
           </h2>
           <p className="fade-in-up text-sm text-muted-foreground" style={{ animationDelay: "140ms" }}>
-            Si ves un error o tu nombre está duplicado, avisanos desde la{" "}
+            Si ves un error, tu nombre está duplicado o querés ver un campeonato que todavía no está, avisanos desde la{" "}
             <Link href="/contacto" onClick={cerrar} className="text-primary hover:underline font-medium">
               página de contacto
             </Link>
