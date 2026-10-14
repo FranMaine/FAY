@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { ArrowLeftIcon, ArrowUpIcon, WindIcon, MapPinIcon } from 'lucide-react';
+import { ArrowUpIcon, WindIcon, MapPinIcon } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { GraficoViento, horaLocal } from '@/components/viento/grafico-viento';
 import { SelectorLugar } from '@/components/viento/selector-lugar';
@@ -76,10 +75,7 @@ export async function PaginaViento({ lugar }: { lugar: Lugar }) {
   return (
     <main className="min-h-dvh bg-background p-6 text-foreground md:p-10">
       <div className="mx-auto max-w-5xl space-y-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary">
-            <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" /> Volver al inicio
-          </Link>
+        <div className="flex justify-end">
           <SelectorLugar actual={lugar.slug} lugares={LUGARES.map(({ slug, nombre }) => ({ slug, nombre }))} />
         </div>
 

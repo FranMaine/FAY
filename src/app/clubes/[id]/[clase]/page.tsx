@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, MedalIcon } from "lucide-react";
+import { MedalIcon } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card, CardContent } from "@/components/ui/card";
 import { ClaseIcon } from "@/components/icons/clase-icons";
@@ -87,14 +87,6 @@ export default async function ClubCategoriaPage({ params }: Props) {
   return (
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-5xl mx-auto space-y-8">
-        <div>
-          <Link href={`/clubes/${club.id}`}>
-            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors -ml-1">
-              <ArrowLeftIcon className="w-4 h-4" /> Volver a {club.nombre}
-            </span>
-          </Link>
-        </div>
-
         <header className="flex flex-col gap-4 rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 sm:flex-row sm:items-center md:p-10">
           <ViewTransition name={`club-categoria-${club.id}-${clase}`} share="morph" default="none">
             <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/15">

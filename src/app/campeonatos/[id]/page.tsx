@@ -6,7 +6,7 @@ import { Podio } from "@/components/ranking/podio";
 import { ClaseIcon } from "@/components/icons/clase-icons";
 import { ResultadosTable } from "@/components/tables/resultados-table";
 import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
-import { ArrowLeftIcon, CalendarIcon, FlagIcon, MapPinIcon, ScissorsIcon, UsersIcon } from "lucide-react";
+import { CalendarIcon, FlagIcon, MapPinIcon, ScissorsIcon, UsersIcon } from "lucide-react";
 import prisma from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
 import { notFound } from "next/navigation";
@@ -131,10 +131,6 @@ export default async function CampeonatoDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <div className="max-w-7xl mx-auto space-y-8">
-        <Link href="/campeonatos" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors -mb-2">
-          <ArrowLeftIcon className="w-4 h-4" aria-hidden="true" /> Volver a campeonatos
-        </Link>
-
         <header className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-10">
           <ClaseIcon nombreClase={campeonato.clase.nombre} className="absolute -right-6 -top-6 h-48 w-48 object-contain opacity-[0.07]" />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start">

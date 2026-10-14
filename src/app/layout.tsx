@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Link from 'next/link';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/navbar';
@@ -69,6 +70,7 @@ import { IaChat } from '@/components/admin/ia-chat';
 import { AppToaster } from '@/components/providers/app-toaster';
 import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization-jsonld';
 import { UpdateBanner } from '@/components/layout/update-banner';
+import { BotonVolver } from '@/components/layout/boton-volver';
 
 // Script bloqueante: corre ANTES de que se pinte la página (va en <head>,
 // no en un componente de React que recién se hidrata después). Sin esto,
@@ -119,16 +121,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </a>
           <BetaBanner />
           <Navbar />
+          <BotonVolver />
           <main id="contenido" className="flex-1">{children}</main>
           <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
             <p>Orzando © {new Date().getFullYear()} - Estadísticas de Vela Argentina</p>
             <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">
-              <a href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</a>
-              <a href="/contacto" className="hover:text-foreground hover:underline">Contacto</a>
-              <a href="/aviso-legal" className="hover:text-foreground hover:underline">Aviso legal</a>
-              <a href="/privacidad" className="hover:text-foreground hover:underline">Privacidad</a>
-              <a href="/cookies" className="hover:text-foreground hover:underline">Cookies</a>
-              <a href="/agregar-app" className="hover:text-foreground hover:underline">Agregar app</a>
+              <Link href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</Link>
+              <Link href="/contacto" className="hover:text-foreground hover:underline">Contacto</Link>
+              <Link href="/aviso-legal" className="hover:text-foreground hover:underline">Aviso legal</Link>
+              <Link href="/privacidad" className="hover:text-foreground hover:underline">Privacidad</Link>
+              <Link href="/cookies" className="hover:text-foreground hover:underline">Cookies</Link>
+              <Link href="/agregar-app" className="hover:text-foreground hover:underline">Agregar app</Link>
             </nav>
           </footer>
           <BackToTop />

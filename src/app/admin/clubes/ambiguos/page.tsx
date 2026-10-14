@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircleIcon, ArrowLeftIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { mensajeDeError } from "@/lib/utils";
@@ -100,11 +100,6 @@ export default function AdminClubesPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/admin/clubes">
-              <Button variant="outline" size="sm" className="gap-2">
-                <ArrowLeftIcon className="w-4 h-4" /> Volver al listado
-              </Button>
-            </Link>
             <Button variant="outline" size="sm" onClick={cargar} className="gap-2">
               <RefreshCwIcon className="w-4 h-4" /> Actualizar
             </Button>

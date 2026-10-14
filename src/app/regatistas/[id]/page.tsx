@@ -55,7 +55,7 @@ export default async function RegatistaProfilePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
-      <PerfilRegatista {...data} volverHref="/" />
+      <PerfilRegatista {...data} />
     </main>
   );
 }

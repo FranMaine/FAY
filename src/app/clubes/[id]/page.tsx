@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, ArrowUpRightIcon, MedalIcon, TrophyIcon, UsersIcon } from "lucide-react";
+import { ArrowUpRightIcon, MedalIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ClaseIcon } from "@/components/icons/clase-icons";
@@ -136,14 +136,6 @@ export default async function ClubDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <div className="max-w-5xl mx-auto space-y-8">
-        <div>
-          <Link href="/clubes">
-            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors -ml-1">
-              <ArrowLeftIcon className="w-4 h-4" /> Volver a clubes
-            </span>
-          </Link>
-        </div>
-
         <header
           className="relative flex flex-col sm:flex-row sm:items-center gap-6 overflow-hidden rounded-3xl border border-border bg-surface p-6 md:p-10"
           style={{ backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${colorDeClub(club.nombre)} 22%, transparent), transparent 65%)` }}

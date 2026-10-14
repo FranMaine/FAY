@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowLeftIcon, CheckCircle2Icon, Loader2Icon, MailIcon, SendIcon } from "lucide-react";
+import { CheckCircle2Icon, Loader2Icon, MailIcon, SendIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -43,12 +42,6 @@ export default function ContactoPage() {
   return (
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10 flex items-start justify-center">
       <div className="w-full max-w-lg mt-6 space-y-6">
-        <Link href="/">
-          <Button variant="ghost" size="sm" className="-ml-3 text-muted-foreground">
-            <ArrowLeftIcon className="w-4 h-4 mr-2" /> Volver al inicio
-          </Button>
-        </Link>
-
         <Card className="bg-surface border-border rounded-2xl shadow-xl">
           <CardHeader>
             <CardTitle className="text-3xl font-extrabold tracking-tight flex items-center gap-2">

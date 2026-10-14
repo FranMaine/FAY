@@ -2,8 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon } from "lucide-react";
+import { TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon } from "lucide-react";
 import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { PosicionHistorica } from "@/components/charts/posicion-historica";
 import { LOGROS } from "@/lib/logros";
@@ -16,26 +15,15 @@ import type { RegatistaProfileData } from "@/lib/get-regatista-profile";
 // dashboard tenía su propia versión recortada, sin logros, que se iba a
 // desincronizar de la pública cada vez que se agregara algo acá).
 type Props = RegatistaProfileData & {
-  /** El perfil público muestra "Volver al inicio"; el dashboard no lo necesita. */
-  volverHref?: string;
   /** El dashboard propio agrega acá la insignia de "Perfil Vinculado" y el botón de Configuración. */
   headerActions?: React.ReactNode;
 };
 
-export function PerfilRegatista({ regatista, historial, chartData, logros, volverHref, headerActions }: Props) {
+export function PerfilRegatista({ regatista, historial, chartData, logros, headerActions }: Props) {
   return (
     <>
       <div className="bg-surface border-b border-border">
         <div className="max-w-5xl mx-auto px-6 py-8">
-          {volverHref && (
-            <Link href={volverHref}>
-              <Button variant="ghost" size="sm" className="mb-6 -ml-3 text-muted-foreground">
-                <ArrowLeftIcon className="w-4 h-4 mr-2" />
-                Volver al inicio
-              </Button>
-            </Link>
-          )}
-
           <div className="flex flex-col md:flex-row md:items-end gap-6 justify-between">
             <div className="flex items-center gap-6">
               {regatista.fotoUrl ? (

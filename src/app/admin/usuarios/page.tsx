@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowLeftIcon, Loader2Icon, SearchIcon, ShieldIcon, ShieldCheckIcon, UserIcon } from "lucide-react";
+import { Loader2Icon, SearchIcon, ShieldIcon, ShieldCheckIcon, UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -77,12 +76,6 @@ export default function AdminUsuariosPage() {
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-3xl mx-auto space-y-8">
         <div>
-          <Link href="/admin">
-            <Button variant="ghost" size="sm" className="mb-4 -ml-3 text-muted-foreground">
-              <ArrowLeftIcon className="w-4 h-4 mr-2" />
-              Volver al panel
-            </Button>
-          </Link>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Usuarios y roles</h1>
           <p className="text-muted-foreground">
             Buscá una cuenta por email o nombre para asignarle rol de <strong>Organizador</strong> (crear y editar

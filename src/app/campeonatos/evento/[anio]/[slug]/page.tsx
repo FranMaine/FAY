@@ -1,9 +1,8 @@
 import { ViewTransition } from "react";
 import { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, SailboatIcon } from "lucide-react";
+import { SailboatIcon } from "lucide-react";
 import prisma from "@/lib/db";
 import { slugificar } from "@/lib/slug";
 import { CampeonatoCard, type Campeonato } from "@/components/ui/campeonato-card";
@@ -80,14 +79,6 @@ export default async function EventoPage({ params }: Props) {
   return (
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div>
-          <Link href="/campeonatos">
-            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors -ml-1">
-              <ArrowLeftIcon className="w-4 h-4" /> Volver a campeonatos
-            </span>
-          </Link>
-        </div>
-
         <header className="flex flex-col sm:flex-row sm:items-center gap-6 rounded-3xl border border-border bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-10">
           {evento.logoUrl ? (
             <ViewTransition name={`evento-logo-${anio}-${slug}`} share="morph" default="none">

@@ -66,7 +66,7 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
                 key={c.id}
                 type="button"
                 aria-pressed={activa}
-                onClick={() => startTransition(() => router.push("?" + createQueryString("clase", c.id)))}
+                onClick={() => startTransition(() => router.replace("?" + createQueryString("clase", c.id)))}
                 className={cn(
                   "flex shrink-0 flex-col items-center gap-1 rounded-xl border px-3 py-2 transition-[background-color,border-color,opacity] duration-150",
                   activa
@@ -102,7 +102,7 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
           className="w-full h-11 bg-background border border-border rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
           value={currentAnio.toString()}
           onChange={(e) => {
-            startTransition(() => router.push("?" + createQueryString("anio", e.target.value)));
+            startTransition(() => router.replace("?" + createQueryString("anio", e.target.value)));
           }}
         >
           {anios.map((a) => (
