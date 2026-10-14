@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { actualizarPila, destinoVolver } from '@/lib/navegacion';
@@ -10,16 +10,32 @@ import { actualizarPila, destinoVolver } from '@/lib/navegacion';
 // acordarse de ponerlo en las nuevas, y porque en la app instalada en el
 // celular no hay botón "atrás" del navegador. Ver lib/navegacion.ts para a
 // dónde lleva en cada caso.
+//
+// IMPORTANTE: este componente renderiza LO MISMO en todas las rutas -nunca
+// decide con usePathname() si se dibuja o no-. La primera versión hacía
+// `if (pathname === '/') return null`, pero en el HTML que el servidor
+// genera el pathname no llegaba a ser "/" en el inicio: el botón salía en
+// la home y, al hidratar, quedaba un nodo huérfano que nadie gestionaba (no
+// se iba al navegar y se sumaba al botón real: dos "Volver"). Ahora la
+// visibilidad es CSS (ver .boton-volver en globals.css) según el atributo
+// data-ruta de <html>: lo fija un script en el <head> antes del primer
+// pintado (RUTA_INIT_SCRIPT en lib/navegacion.ts, usado en layout.tsx), y
+// acá se mantiene al día en cada navegación.
 export function BotonVolver() {
   const pathname = usePathname();
   const router = useRouter();
   const pila = useRef<string[]>([pathname]);
 
+  // useLayoutEffect: corre antes de que el navegador pinte, así al cambiar
+  // de página la fila aparece/desaparece junto con el contenido nuevo, sin
+  // un cuadro intermedio con la página corrida.
+  useLayoutEffect(() => {
+    document.documentElement.dataset.ruta = pathname === '/' ? 'inicio' : 'interna';
+  }, [pathname]);
+
   useEffect(() => {
     pila.current = actualizarPila(pila.current, pathname);
   }, [pathname]);
-
-  if (pathname === '/') return null;
 
   function volver() {
     const destino = destinoVolver(pila.current, pathname);
@@ -28,7 +44,7 @@ export function BotonVolver() {
   }
 
   return (
-    <div className="container mx-auto px-4 pt-3">
+    <div className="boton-volver container mx-auto px-4 pt-3">
       <button
         type="button"
         onClick={volver}

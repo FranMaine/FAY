@@ -67,3 +67,13 @@ export function destinoVolver(pila: readonly string[], pathname: string): Destin
   if (anterior !== null && !vieneDeAcceso) return { tipo: 'historial' };
   return { tipo: 'ruta', href: rutaPadre(pathname) };
 }
+
+/**
+ * Script (va en el <head>, igual que el del tema oscuro) que marca en <html>
+ * si se está en el inicio o en una página interna ANTES del primer pintado.
+ * CSS usa ese atributo para mostrar u ocultar la fila de "Volver" (ver
+ * .boton-volver en globals.css). Vive acá y no en boton-volver.tsx porque
+ * una constante exportada desde un módulo "use client" llega al servidor
+ * como una referencia, no como el texto.
+ */
+export const RUTA_INIT_SCRIPT = `document.documentElement.dataset.ruta = location.pathname === '/' ? 'inicio' : 'interna';`;

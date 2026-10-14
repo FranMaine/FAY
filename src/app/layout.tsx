@@ -71,6 +71,7 @@ import { AppToaster } from '@/components/providers/app-toaster';
 import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization-jsonld';
 import { UpdateBanner } from '@/components/layout/update-banner';
 import { BotonVolver } from '@/components/layout/boton-volver';
+import { RUTA_INIT_SCRIPT } from '@/lib/navegacion';
 
 // Script bloqueante: corre ANTES de que se pinte la página (va en <head>,
 // no en un componente de React que recién se hidrata después). Sin esto,
@@ -103,6 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: RUTA_INIT_SCRIPT }} />
         {/* Next ya no emite esta etiqueta (solo la nueva "mobile-web-app-capable"
             sin el prefijo apple-), pero Safari todavía la necesita para activar
             el modo standalone clásico -sin ella, ignora por completo los

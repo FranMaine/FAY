@@ -317,3 +317,14 @@ button,
     font-size: 16px;
   }
 }
+
+/* Fila de "Volver" (ver BotonVolver): se dibuja SIEMPRE en el HTML y la
+   visibilidad la decide este atributo de <html> (lo fija un script del
+   <head> antes del primer pintado, y BotonVolver al navegar) -oculta por
+   defecto: en el inicio no hay a dónde volver. */
+.boton-volver {
+  display: none;
+}
+html[data-ruta="interna"] .boton-volver {
+  display: block;
+}
