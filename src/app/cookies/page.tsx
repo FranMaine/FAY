@@ -60,11 +60,13 @@ export default function CookiesPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">Analítica (opcional)</h2>
           <p>
-            Todavía no cargamos ninguna herramienta de analítica en el
-            sitio. Cuando lo hagamos (para saber qué páginas se visitan más
-            y mejorar el sitio), va a ser Google Analytics, y solo se va a
-            activar si elegís aceptar esta categoría -mientras no la
-            aceptes, no se carga ni deja ninguna cookie.
+            Para saber qué páginas se visitan más y mejorar el sitio usamos
+            Vercel Web Analytics, que mide visitas de forma agregada y
+            anónima, sin usar cookies ni guardar datos que te identifiquen
+            -por eso no depende de que aceptes esta categoría. Si más
+            adelante sumamos otra herramienta que sí use cookies (por
+            ejemplo, Google Analytics), solo se va a activar si elegís
+            aceptarla.
           </p>
         </section>
 

@@ -72,6 +72,7 @@ import { OrganizationJsonLd, WebsiteJsonLd } from '@/components/seo/organization
 import { UpdateBanner } from '@/components/layout/update-banner';
 import { BotonVolver } from '@/components/layout/boton-volver';
 import { RUTA_INIT_SCRIPT } from '@/lib/navegacion';
+import { Analytics } from '@vercel/analytics/next';
 
 // Script bloqueante: corre ANTES de que se pinte la página (va en <head>,
 // no en un componente de React que recién se hidrata después). Sin esto,
@@ -152,6 +153,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <IaChat />
           <AppToaster />
+          {/* Mide visitas sin cookies (ver /privacidad): por eso va sin pasar por el consentimiento. */}
+          <Analytics />
         </SessionProvider>
       </body>
     </html>

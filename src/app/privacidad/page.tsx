@@ -25,11 +25,12 @@ export default function PrivacidadPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">1. Qué datos recolectamos</h2>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong>Cuenta de usuario:</strong> nombre, email y contraseña (guardada encriptada, nunca en texto plano) cuando te registrás, o nombre/email/foto de perfil que provee Google si iniciás sesión con esa opción.</li>
+            <li><strong>Cuenta de usuario:</strong> nombre, email y contraseña (guardada encriptada, nunca en texto plano) cuando te registrás.</li>
             <li><strong>Vinculación con tu perfil de regatista:</strong> si pedís vincular tu cuenta a una ficha de regatista, guardamos esa solicitud y, si se aprueba, la relación entre tu cuenta y esa ficha.</li>
             <li><strong>Resultados deportivos:</strong> nombre, club y resultados de regata de cada regatista, provenientes de los resultados oficiales de cada campeonato -no de un formulario que vos completás.</li>
             <li><strong>Datos técnicos básicos:</strong> dirección IP en las solicitudes al servidor, usada únicamente para seguridad (por ejemplo, limitar intentos de inicio de sesión o de registro) y no para rastrear tu actividad de navegación.</li>
-            <li><strong>Analítica y publicidad (solo si las aceptás):</strong> a la fecha de este aviso, el sitio todavía no carga ningún script de analítica ni de publicidad. Cuando se sumen, van a ser de Google (Google Analytics y Google AdSense) y solo se van a activar si aceptás esas categorías en el aviso de cookies -ver el punto 7.</li>
+            <li><strong>Analítica de visitas:</strong> usamos Vercel Web Analytics para medir qué páginas se visitan, de forma agregada y sin cookies ni datos que te identifiquen.</li>
+            <li><strong>Publicidad y otras herramientas con cookies (solo si las aceptás):</strong> a la fecha de este aviso, el sitio no carga publicidad. Si se suman, por ejemplo Google Analytics o Google AdSense, solo se van a activar si aceptás esas categorías en el aviso de cookies -ver el punto 7.</li>
           </ul>
         </section>
 
