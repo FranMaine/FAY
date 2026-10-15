@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { avisarResultadosPublicados } from '@/lib/avisos-resultados';
 import { auth } from '@/lib/auth';
 import { campeonatoSchema, campeonatoPatchSchema } from '@/lib/validators';
 import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
@@ -128,6 +129,13 @@ export async function PATCH(
     const json = await request.json();
     const body = campeonatoPatchSchema.parse(json);
 
+    // Estado de antes: el aviso a los regatistas solo corresponde al pasar
+    // de borrador a publicado (no cada vez que se edita un campeonato ya
+    // publicado).
+    const estadoAnterior = body.estado === 'PUBLICADO'
+      ? (await prisma.campeonato.findUnique({ where: { id }, select: { estado: true } }))?.estado
+      : undefined;
+
     const campeonato = await prisma.campeonato.update({
       where: { id },
       data: {
@@ -150,6 +158,13 @@ export async function PATCH(
         id,
         { nombre: campeonato.nombre, estadoNuevo: body.estado }
       );
+    }
+
+    // Mail a las personas con cuenta vinculada que figuran en este
+    // campeonato -después de responder, y una sola vez por campeonato (ver
+    // avisarResultadosPublicados).
+    if (body.estado === 'PUBLICADO' && estadoAnterior && estadoAnterior !== 'PUBLICADO') {
+      after(() => avisarResultadosPublicados(id));
     }
 
     revalidateTag('rankings', { expire: 0 });

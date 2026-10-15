@@ -1,4 +1,5 @@
 import { after, NextResponse } from 'next/server';
+import { SITE_URL } from '@/lib/site';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-error';
@@ -60,7 +61,7 @@ export async function PATCH(
         after(() =>
           sendEmail({
           to: usuarioActualizado.email,
-          ...emailVinculacionAprobada(regatista.nombre),
+          ...emailVinculacionAprobada(regatista.nombre, `${SITE_URL}/mi-perfil`),
           })
         );
       }

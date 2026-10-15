@@ -112,15 +112,49 @@ export function emailNuevoMensajeContacto(datos: { nombre: string; email: string
   };
 }
 
-export function emailVinculacionAprobada(nombreRegatista: string) {
+export function emailVinculacionAprobada(nombreRegatista: string, urlPerfil: string) {
   return {
     subject: 'Tu perfil de regatista fue vinculado',
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #1e293b;">¡Cuenta verificada!</h2>
         <p>Tu cuenta de Orzando fue vinculada correctamente al perfil de regatista de <strong>${escapeHtml(nombreRegatista)}</strong>.</p>
-        <p>A partir de ahora vas a ver tu historial de resultados en tu perfil.</p>
+        <p>A partir de ahora vas a ver tu historial de resultados y tus logros en tu perfil, y te vamos a avisar por mail cuando se publique un campeonato en el que figures.</p>
+        <p style="margin: 24px 0;"><a href="${urlPerfil}" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Ver mi perfil</a></p>
         <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Orzando</p>
+      </div>
+    `,
+  };
+}
+
+/**
+ * Aviso a una persona con la cuenta vinculada a un regatista: se publicaron
+ * los resultados de un campeonato en el que figura. `posicion`/`total` pueden
+ * ser null si no se pudo calcular (el mail igual sirve para avisar).
+ */
+export function emailResultadoPublicado(datos: {
+  nombreRegatista: string;
+  campeonato: string;
+  clase: string;
+  anio: number;
+  posicion: number | null;
+  totalParticipantes: number;
+  urlCampeonato: string;
+}) {
+  const campeonato = `${datos.campeonato} ${datos.anio}`;
+  const lugar =
+    datos.posicion !== null
+      ? `<p style="font-size: 18px; margin: 16px 0;">Terminaste en el puesto <strong>${datos.posicion}</strong> de ${datos.totalParticipantes}.</p>`
+      : '';
+  return {
+    subject: `Se publicaron los resultados de ${datos.campeonato} ${datos.anio}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1e293b;">Hay un resultado nuevo con tu nombre</h2>
+        <p>Se publicaron los resultados de <strong>${escapeHtml(campeonato)}</strong> (${escapeHtml(datos.clase)}), y figurás como <strong>${escapeHtml(datos.nombreRegatista)}</strong>.</p>
+        ${lugar}
+        <p style="margin: 24px 0;"><a href="${datos.urlCampeonato}" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Ver la tabla completa</a></p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Recibís este aviso porque tu cuenta de Orzando está vinculada a tu perfil de regatista. Si no querés recibirlos, escribinos a contacto@orzando.com.ar.</p>
       </div>
     `,
   };
