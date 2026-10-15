@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { mensajeDeError } from "@/lib/utils";
+import { EMAIL_PUBLICO } from "@/lib/site";
 
 export default function ContactoPage() {
   const [nombre, setNombre] = useState("");
@@ -123,6 +124,13 @@ export default function ContactoPage() {
             )}
           </CardContent>
         </Card>
+        <p className="text-center text-sm text-muted-foreground">
+          También podés escribirnos a{" "}
+          <a href={`mailto:${EMAIL_PUBLICO}`} className="font-medium text-primary hover:underline">
+            {EMAIL_PUBLICO}
+          </a>
+          .
+        </p>
       </div>
     </main>
   );

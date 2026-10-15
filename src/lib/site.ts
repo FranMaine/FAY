@@ -11,6 +11,9 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3
 export const SITE_NAME = 'Orzando';
 
 // Casilla de la web: a donde llegan los avisos de mensajes de /contacto.
+// Dirección pública de contacto: reenvía a la casilla de la web (ver más abajo).
+export const EMAIL_PUBLICO = 'contacto@orzando.com.ar';
+
 export const EMAIL_AVISOS = 'orzandovela@gmail.com';
 export const SITE_DESCRIPTION =
   'Resultados, rankings y estadísticas de regatas de vela de Argentina.';

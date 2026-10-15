@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/navbar';
-import { SITE_URL, SITE_DESCRIPTION } from '@/lib/site';
+import { SITE_URL, SITE_DESCRIPTION, EMAIL_PUBLICO } from '@/lib/site';
 import { imagenesDeInicioApple } from '@/lib/apple-splash';
 
 const geistSans = Geist({
@@ -130,6 +130,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main id="contenido" className="flex-1">{children}</main>
           <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
             <p>Orzando © {new Date().getFullYear()} - Estadísticas de Vela Argentina · orzando.com.ar</p>
+            <p className="text-xs">
+              <a href={`mailto:${EMAIL_PUBLICO}`} className="hover:text-foreground hover:underline">{EMAIL_PUBLICO}</a>
+            </p>
             <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">
               <Link href="/ayuda" className="hover:text-foreground hover:underline">Ayuda y tutorial</Link>
               <Link href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</Link>
