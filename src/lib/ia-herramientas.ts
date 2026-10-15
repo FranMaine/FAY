@@ -1,5 +1,6 @@
 import { Type, type FunctionDeclaration } from '@google/genai';
 import { prisma } from '@/lib/db';
+import { idsDeRegatistasPorNombre } from '@/lib/busqueda';
 import { getRankingGeneral } from '@/lib/ranking-general';
 import { clubesConMasPodios } from '@/lib/podios-clubes';
 import { buscarCandidatosApellidoSuelto } from '@/lib/regatista-merge';
@@ -83,7 +84,7 @@ export async function ejecutarHerramienta(nombre: string, args: Record<string, u
       const q = soloTexto(args.nombre, 60).trim();
       if (q.length < 2) return { error: 'Buscá con al menos 2 letras' };
       const rs = await prisma.regatista.findMany({
-        where: { nombre: { contains: q, mode: 'insensitive' } },
+        where: { id: { in: await idsDeRegatistasPorNombre(q) } },
         take: 10,
         select: { id: true, nombre: true, fuenteIds: true, club: { select: { nombre: true } }, _count: { select: { resultados: true } } },
       });

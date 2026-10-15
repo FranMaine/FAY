@@ -5,13 +5,8 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { SearchIcon } from 'lucide-react';
+import { coincidePorPalabras } from '@/lib/busqueda-texto';
 import Link from 'next/link';
-
-// Quita acentos y pasa a minúsculas -mismo criterio que SelectorBuscable,
-// así "jose" encuentra "José".
-function normalizar(texto: string): string {
-  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
-}
 
 export interface ClasificacionRegatista {
   id: string;
@@ -84,11 +79,10 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
   // tripulación de más de una persona, "Fulano & Mengano" tiene que
   // encontrarse buscando "Mengano" también, no solo por el primer nombre).
   const clasificacionFiltrada = useMemo(() => {
-    const q = normalizar(busqueda);
-    if (!q) return clasificacion;
+    if (!busqueda.trim()) return clasificacion;
     return clasificacion.filter((row) => {
       const nombres = row.integrantes?.length ? row.integrantes.map((i) => i.nombre) : [row.nombre];
-      return nombres.some((n) => normalizar(n).includes(q)) || normalizar(row.club).includes(q);
+      return nombres.some((n) => coincidePorPalabras(n, busqueda)) || coincidePorPalabras(row.club, busqueda);
     });
   }, [clasificacion, busqueda]);
 

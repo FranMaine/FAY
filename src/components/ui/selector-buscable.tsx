@@ -2,6 +2,7 @@
 
 import { useId, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { coincidePorPalabras } from "@/lib/busqueda-texto";
 
 export interface OpcionBuscable {
   id: string;
@@ -18,10 +19,6 @@ interface SelectorBuscableProps {
 }
 
 // Quita acentos y pasa a minúsculas para que "náutico" encuentre "Nautico".
-function normalizar(texto: string): string {
-  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-}
-
 // Selector con buscador inline para listas largas (ej: clubes). Escribís y
 // se filtra; click (o Enter con una sola coincidencia) para elegir. Mismo
 // alto/estilo que los <select> del resto del admin para que no se note el
@@ -34,9 +31,8 @@ export function SelectorBuscable({ id, opciones, value, onChange, placeholder = 
   const etiquetaActual = opciones.find((o) => o.id === value)?.label ?? "";
 
   const filtradas = useMemo(() => {
-    const q = normalizar(texto);
-    if (!q) return opciones;
-    return opciones.filter((o) => normalizar(o.label).includes(q));
+    if (!texto.trim()) return opciones;
+    return opciones.filter((o) => coincidePorPalabras(o.label, texto));
   }, [opciones, texto]);
 
   function elegir(opcion: OpcionBuscable) {

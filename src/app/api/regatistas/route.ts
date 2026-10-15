@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { regatistaEditSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
+import { idsDeRegatistasPorNombre } from '@/lib/busqueda';
 
 export async function GET(request: Request) {
   try {
@@ -14,11 +15,9 @@ export async function GET(request: Request) {
     const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50', 10) || 50));
 
     const where: Prisma.RegatistaWhereInput = {};
-    if (q) {
-      where.nombre = {
-        contains: q,
-        mode: 'insensitive',
-      };
+    // Sin importar mayúsculas, tildes ni el orden de las palabras (ver lib/busqueda.ts).
+    if (q?.trim()) {
+      where.id = { in: await idsDeRegatistasPorNombre(q) };
     }
     if (clubId) where.OR = [{ clubId }, { otrosClubes: { some: { id: clubId } } }];
 
