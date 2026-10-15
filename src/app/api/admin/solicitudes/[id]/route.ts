@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-error';
@@ -57,10 +57,12 @@ export async function PATCH(
       // bloqueamos la respuesta si el envío falla, la vinculación ya
       // quedó confirmada en la base.
       if (usuarioActualizado.email && regatista) {
-        void sendEmail({
+        after(() =>
+          sendEmail({
           to: usuarioActualizado.email,
           ...emailVinculacionAprobada(regatista.nombre),
-        });
+          })
+        );
       }
     } else {
       await prisma.solicitudVinculacion.update({

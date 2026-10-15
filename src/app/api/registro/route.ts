@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     });
     const origin = new URL(request.url).origin;
     const link = `${origin}/verificar-email?token=${token}&email=${encodeURIComponent(email)}`;
-    void sendEmail({ to: email, ...emailVerificacion(link) });
+    after(() => sendEmail({ to: email, ...emailVerificacion(link) }));
 
     return NextResponse.json(user, { status: 201 });
   } catch (error) {

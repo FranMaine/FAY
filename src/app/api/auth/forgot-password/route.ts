@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { forgotPasswordSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       const origin = new URL(request.url).origin;
       const link = `${origin}/reset-password?token=${token}&email=${encodeURIComponent(emailNormalizado)}`;
 
-      void sendEmail({ to: emailNormalizado, ...emailResetPassword(link) });
+      after(() => sendEmail({ to: emailNormalizado, ...emailResetPassword(link) }));
     }
 
     return NextResponse.json({
