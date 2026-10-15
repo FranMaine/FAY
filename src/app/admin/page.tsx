@@ -8,7 +8,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard",
+  title: "Panel de administración",
   robots: { index: false, follow: false },
 };
 

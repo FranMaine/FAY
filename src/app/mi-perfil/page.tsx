@@ -66,7 +66,7 @@ export default async function MiPerfilPage() {
                 <UserIcon className="w-7 h-7" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold tracking-tight mb-1">Mi Dashboard</h1>
+                <h1 className="text-4xl font-bold tracking-tight mb-1">Mi perfil</h1>
                 <p className="text-muted-foreground">{nombreMostrado}</p>
               </div>
             </div>
