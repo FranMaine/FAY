@@ -19,13 +19,14 @@ export default function PrivacidadPage() {
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-8">
         <header className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Política de privacidad</h1>
-          <p className="text-sm text-muted-foreground">Última actualización: septiembre de 2026</p>
+          <p className="text-sm text-muted-foreground">Última actualización: octubre de 2026</p>
         </header>
 
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">1. Qué datos recolectamos</h2>
           <ul className="list-disc pl-6 space-y-1">
             <li><strong>Cuenta de usuario:</strong> nombre, email y contraseña (guardada encriptada, nunca en texto plano) cuando te registrás.</li>
+            <li><strong>Mensajes de contacto:</strong> si nos escribís desde el formulario de contacto o por mail, guardamos tu nombre, tu email y el mensaje para poder responderte.</li>
             <li><strong>Vinculación con tu perfil de regatista:</strong> si pedís vincular tu cuenta a una ficha de regatista, guardamos esa solicitud y, si se aprueba, la relación entre tu cuenta y esa ficha.</li>
             <li><strong>Resultados deportivos:</strong> nombre, club y resultados de regata de cada regatista, provenientes de los resultados oficiales de cada campeonato -no de un formulario que vos completás.</li>
             <li><strong>Datos técnicos básicos:</strong> dirección IP en las solicitudes al servidor, usada únicamente para seguridad (por ejemplo, limitar intentos de inicio de sesión o de registro) y no para rastrear tu actividad de navegación.</li>
@@ -55,8 +56,11 @@ export default function PrivacidadPage() {
             públicamente. Usamos proveedores externos como infraestructura
             del servicio: hosting de la aplicación, base de datos, envío de
             emails transaccionales (verificación, recuperación de
-            contraseña) e inicio de sesión con Google -estos proveedores
-            procesan los datos por nuestra cuenta, no para uso propio. Si
+            contraseña y avisos de contacto) y medición de visitas -estos
+            proveedores procesan los datos por nuestra cuenta, no para uso
+            propio. Algunos de ellos tienen sus servidores fuera de la
+            Argentina, por lo que tus datos pueden almacenarse o procesarse
+            en otros países. Si
             aceptás las cookies de analítica o publicidad (ver punto 7),
             Google también procesa datos de tu visita (por ejemplo, qué
             páginas ves) como responsable independiente, según su propia
@@ -67,7 +71,9 @@ export default function PrivacidadPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">4. Cuánto tiempo conservamos los datos</h2>
           <p>
-            Los datos de cuenta se conservan mientras la cuenta esté activa.
+            Los datos de cuenta se conservan mientras la cuenta esté activa;
+            podés eliminarla en cualquier momento desde la configuración de tu
+            cuenta (Mi perfil).
             Los resultados deportivos se conservan como parte del historial
             de resultados de Orzando, sin plazo de baja automática, dado
             su valor como registro histórico.
@@ -82,8 +88,8 @@ export default function PrivacidadPage() {
             y supresión de tus datos personales de cuenta. Si tu ficha de
             regatista tiene un dato incorrecto (nombre mal cargado, club
             equivocado), también podés pedir su corrección. Para ejercer
-            cualquiera de estos derechos, contactate a través de la página de
-            contacto del sitio.
+            cualquiera de estos derechos, escribinos desde la página de contacto
+            del sitio o a contacto@orzando.com.ar.
           </p>
           <p className="text-sm text-muted-foreground">
             La Agencia de Acceso a la Información Pública, en su carácter de

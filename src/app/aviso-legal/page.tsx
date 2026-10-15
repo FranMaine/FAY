@@ -16,7 +16,7 @@ export default function AvisoLegalPage() {
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-8">
         <header className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Aviso legal</h1>
-          <p className="text-sm text-muted-foreground">Última actualización: septiembre de 2026</p>
+          <p className="text-sm text-muted-foreground">Última actualización: octubre de 2026</p>
         </header>
 
         <section className="space-y-3 text-foreground/90">
@@ -90,8 +90,8 @@ export default function AvisoLegalPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">7. Contacto</h2>
           <p>
-            Para consultas relacionadas con este aviso legal, comunicate a
-            través de la página de contacto del sitio.
+            Para consultas relacionadas con este aviso legal, escribinos desde
+            la página de contacto del sitio o a contacto@orzando.com.ar.
           </p>
         </section>
       </div>
