@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Cómo usar Orzando",
+  title: "Ayuda y tutorial",
   description:
-    "Guía paso a paso de Orzando: buscar regatistas, ver campeonatos y rankings, consultar el viento y armar tu perfil.",
+    "Tutorial y ayuda de Orzando, paso a paso: buscar regatistas, ver campeonatos y rankings, consultar el viento y armar tu perfil.",
 };
 
 interface Seccion {
@@ -131,17 +131,17 @@ const SECCIONES: Seccion[] = [
   },
 ];
 
-export default function GuiaPage() {
+export default function AyudaPage() {
   return (
     <main className="min-h-dvh bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16 space-y-12">
         <header className="space-y-4">
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">Cómo usar Orzando</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">Ayuda y tutorial</h1>
           <p className="max-w-2xl text-muted-foreground">
             Orzando reúne los resultados, rankings y perfiles de la vela argentina: cada regata, cada regatista. Acá
             tenés lo que se puede hacer y cómo hacerlo, en pocos pasos.
           </p>
-          <nav aria-label="Secciones de la guía" className="flex flex-wrap gap-2 pt-1">
+          <nav aria-label="Secciones de la ayuda" className="flex flex-wrap gap-2 pt-1">
             {SECCIONES.map((s) => (
               <a
                 key={s.id}

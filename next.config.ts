@@ -74,6 +74,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],
   },
+  // La página de ayuda se publicó un rato como /guia: se redirige para no
+  // dejar un link roto (ya estuvo en el pie y en el sitemap).
+  async redirects() {
+    return [{ source: "/guia", destination: "/ayuda", permanent: true }];
+  },
   async headers() {
     return [
       {

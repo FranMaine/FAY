@@ -81,6 +81,13 @@ export function BetaBanner() {
             </Link>
             .
           </p>
+          <p className="fade-in-up text-sm text-muted-foreground" style={{ animationDelay: "170ms" }}>
+            ¿Primera vez por acá?{" "}
+            <Link href="/ayuda" onClick={cerrar} className="text-primary hover:underline font-medium">
+              Mirá el tutorial
+            </Link>{" "}
+            para ver todo lo que podés hacer.
+          </p>
         </div>
         <Button onClick={cerrar} className="fade-in-up w-full rounded-full" style={{ animationDelay: "200ms" }}>
           Entendido
