@@ -5,11 +5,6 @@ export const metadata: Metadata = {
   description: "Aviso legal de Orzando: titularidad, condiciones de uso y propiedad intelectual del sitio.",
 };
 
-// Contenido genérico de referencia -las partes marcadas [entre corchetes]
-// son datos institucionales concretos del titular (razón social/CUIT
-// exactos, domicilio legal, canal de contacto oficial) que hay que
-// completar con el dato real antes de considerar esta página definitiva;
-// no se puede inventar un CUIT o domicilio.
 export default function AvisoLegalPage() {
   return (
     <main className="min-h-dvh bg-background">
@@ -22,9 +17,9 @@ export default function AvisoLegalPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">1. Titularidad del sitio</h2>
           <p>
-            Orzando es un sitio operado por [completar: razón social y CUIT
-            exactos], con domicilio en
-            [completar domicilio legal], República Argentina.
+            Orzando es un sitio de acceso gratuito, operado desde la República
+            Argentina por su titular. Podés comunicarte con él desde la página
+            de contacto o escribiendo a contacto@orzando.com.ar.
           </p>
         </section>
 
