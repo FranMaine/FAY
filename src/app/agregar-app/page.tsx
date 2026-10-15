@@ -12,6 +12,9 @@ interface Paso {
   icono: LucideIcon;
   // Texto del elemento que hay que tocar, tal como aparece en el celular.
   etiquetaEnPantalla: string;
+  // Captura real del celular (solo iPhone por ahora; en Android quedan los
+  // recuadros hasta tener capturas propias).
+  captura?: string;
 }
 
 const PASOS_IPHONE: Paso[] = [
@@ -19,7 +22,8 @@ const PASOS_IPHONE: Paso[] = [
     titulo: "Abrí Orzando en Safari",
     detalle: "Tiene que ser Safari. Chrome en iPhone no muestra esta opción.",
     icono: Globe,
-    etiquetaEnPantalla: "fay-omega.vercel.app",
+    etiquetaEnPantalla: "orzando.com.ar",
+    captura: "/agregar-app/iphone-1-safari.webp",
   },
   {
     titulo: "Tocá el botón Compartir",
@@ -31,13 +35,15 @@ const PASOS_IPHONE: Paso[] = [
     titulo: "Elegí Agregar a inicio",
     detalle: "Bajá en la lista de opciones hasta encontrarla.",
     icono: Plus,
-    etiquetaEnPantalla: "Agregar a pantalla de inicio",
+    etiquetaEnPantalla: "Agregar a Inicio",
+    captura: "/agregar-app/iphone-2-compartir.webp",
   },
   {
     titulo: "Confirmá con Agregar",
     detalle: "Arriba a la derecha. El ícono de Orzando queda en tu pantalla de inicio.",
     icono: Check,
     etiquetaEnPantalla: "Agregar",
+    captura: "/agregar-app/iphone-3-agregar.webp",
   },
 ];
 
@@ -46,7 +52,7 @@ const PASOS_ANDROID: Paso[] = [
     titulo: "Abrí Orzando en Chrome",
     detalle: "Chrome es el navegador que viene por defecto en la mayoría de los Android.",
     icono: Globe,
-    etiquetaEnPantalla: "fay-omega.vercel.app",
+    etiquetaEnPantalla: "orzando.com.ar",
   },
   {
     titulo: "Tocá los tres puntos",
@@ -87,6 +93,17 @@ function Pasos({ pasos }: { pasos: Paso[] }) {
                 <Icono className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                 <span className="truncate text-sm font-medium text-foreground">{paso.etiquetaEnPantalla}</span>
               </div>
+              {paso.captura && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={paso.captura}
+                  alt={`Captura de pantalla del paso ${indice + 1}: ${paso.titulo}`}
+                  width={924}
+                  height={2000}
+                  loading="lazy"
+                  className="max-h-96 w-auto rounded-xl border border-border"
+                />
+              )}
             </div>
           </li>
         );
