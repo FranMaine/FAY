@@ -14,6 +14,11 @@ export async function GET(request: Request) {
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
     const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50', 10) || 50));
 
+    // La cuenta vinculada (con su email) solo se devuelve a un administrador:
+    // este endpoint también lo usan buscadores públicos.
+    const session = await auth();
+    const esAdmin = session?.user?.role === 'ADMIN';
+
     const where: Prisma.RegatistaWhereInput = {};
     // Sin importar mayúsculas, tildes ni el orden de las palabras (ver lib/busqueda.ts).
     if (q?.trim()) {
@@ -24,7 +29,11 @@ export async function GET(request: Request) {
     const [regatistas, total] = await Promise.all([
       prisma.regatista.findMany({
         where,
-        include: { club: true, otrosClubes: true },
+        include: {
+          club: true,
+          otrosClubes: true,
+          ...(esAdmin ? { user: { select: { id: true, name: true, email: true } } } : {}),
+        },
         orderBy: { nombre: 'asc' },
         skip: (page - 1) * pageSize,
         take: pageSize,

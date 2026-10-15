@@ -5,7 +5,9 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SearchIcon, PlusIcon, EditIcon, Loader2Icon, MergeIcon } from "lucide-react";
+import { SearchIcon, PlusIcon, EditIcon, Loader2Icon, MergeIcon, LinkIcon } from "lucide-react";
+import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
+import { mensajeDeError } from "@/lib/utils";
 import { RegatistaModal } from "@/components/admin/regatista-modal";
 import { FusionarModal, type ItemFusion } from "@/components/admin/fusionar-modal";
 
@@ -15,6 +17,8 @@ interface Regatista {
   pais: string | null;
   club: { id: string; nombre: string } | null;
   otrosClubes: { id: string; nombre: string }[];
+  /** Cuenta vinculada a esta ficha (solo la ve un administrador). */
+  user?: { id: string; name: string | null; email: string } | null;
 }
 
 const PAGE_SIZE = 20;
@@ -74,6 +78,21 @@ export default function AdminRegatistasPage() {
     setPage(1);
   }, [search]);
 
+  // Corta el vínculo entre la cuenta y la ficha (la ficha y sus resultados no
+  // se tocan; la cuenta recibe un mail). Ver DELETE /api/admin/vinculaciones/[userId].
+  const desvincular = async (r: Regatista) => {
+    if (!r.user) return;
+    try {
+      const res = await fetch(`/api/admin/vinculaciones/${r.user.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo desvincular");
+      toast.success(`Se desvinculó la cuenta de ${r.nombre}`);
+      await fetchRegatistas();
+    } catch (err) {
+      toast.error(mensajeDeError(err));
+    }
+  };
+
   const abrirNuevo = () => {
     setEditing(null);
     setIsModalOpen(true);
@@ -129,19 +148,20 @@ export default function AdminRegatistasPage() {
                   <th scope="col" className="px-6 py-4 font-medium">Nombre</th>
                   <th scope="col" className="px-6 py-4 font-medium">Club</th>
                   <th scope="col" className="px-6 py-4 font-medium">País</th>
+                  <th scope="col" className="px-6 py-4 font-medium">Cuenta vinculada</th>
                   <th scope="col" className="px-6 py-4 font-medium text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-10 text-center">
+                    <td colSpan={5} className="px-6 py-10 text-center">
                       <Loader2Icon className="w-6 h-6 animate-spin text-primary mx-auto" />
                     </td>
                   </tr>
                 ) : regatistas.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-10 text-center text-muted-foreground">
+                    <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
                       No se encontraron regatistas.
                     </td>
                   </tr>
@@ -151,6 +171,24 @@ export default function AdminRegatistasPage() {
                       <td className="px-6 py-4 font-medium">{r.nombre}</td>
                       <td className="px-6 py-4">{r.club?.nombre || "-"}</td>
                       <td className="px-6 py-4">{r.pais || "-"}</td>
+                      <td className="px-6 py-4">
+                        {r.user ? (
+                          <div className="flex items-center gap-2">
+                            <LinkIcon className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{r.user.name || r.user.email}</p>
+                              {r.user.name && <p className="text-xs text-muted-foreground truncate">{r.user.email}</p>}
+                            </div>
+                            <ConfirmDeleteButton
+                              label={`Quitar la vinculación de ${r.nombre}`}
+                              confirmLabel="¿Desvincular?"
+                              onConfirm={() => desvincular(r)}
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">Sin vincular</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-right space-x-2">
                         <Button
                           variant="ghost"
