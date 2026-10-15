@@ -129,6 +129,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
             <p>Orzando © {new Date().getFullYear()} - Estadísticas de Vela Argentina · orzando.com.ar</p>
             <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">
+              <Link href="/guia" className="hover:text-foreground hover:underline">Cómo usar Orzando</Link>
               <Link href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</Link>
               <Link href="/contacto" className="hover:text-foreground hover:underline">Contacto</Link>
               <Link href="/aviso-legal" className="hover:text-foreground hover:underline">Aviso legal</Link>

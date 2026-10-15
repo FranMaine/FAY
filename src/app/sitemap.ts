@@ -38,6 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/clubes`, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/rankings`, changeFrequency: 'weekly', priority: 0.8 },
     ...LUGARES.map((l) => ({ url: `${SITE_URL}${urlViento(l.slug)}`, changeFrequency: 'hourly' as const, priority: 0.5 })),
+    { url: `${SITE_URL}/guia`, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE_URL}/aviso-legal`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/privacidad`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/cookies`, changeFrequency: 'yearly', priority: 0.2 },
