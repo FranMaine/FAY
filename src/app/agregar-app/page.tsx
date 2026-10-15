@@ -1,5 +1,6 @@
 import { Metadata } from "next";
-import { Globe, Share, Plus, Check, EllipsisVertical, Download, Smartphone, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Compass, Globe, Share, SquarePlus, EllipsisVertical, Download, Smartphone, type LucideIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Agregar Orzando a tu celular",
@@ -9,21 +10,21 @@ export const metadata: Metadata = {
 interface Paso {
   titulo: string;
   detalle: string;
-  icono: LucideIcon;
+  // Ícono tal como se ve en el celular (el de Safari, el de Compartir, etc.).
+  // Sin ícono, la etiqueta se muestra como texto azul de botón de iOS.
+  icono?: LucideIcon;
+  // En los menús de iOS el ícono va a la derecha del texto.
+  iconoAlFinal?: boolean;
   // Texto del elemento que hay que tocar, tal como aparece en el celular.
   etiquetaEnPantalla: string;
-  // Captura real del celular (solo iPhone por ahora; en Android quedan los
-  // recuadros hasta tener capturas propias).
-  captura?: string;
 }
 
 const PASOS_IPHONE: Paso[] = [
   {
     titulo: "Abrí Orzando en Safari",
     detalle: "Tiene que ser Safari. Chrome en iPhone no muestra esta opción.",
-    icono: Globe,
+    icono: Compass,
     etiquetaEnPantalla: "orzando.com.ar",
-    captura: "/agregar-app/iphone-1-safari.webp",
   },
   {
     titulo: "Tocá el botón Compartir",
@@ -34,16 +35,14 @@ const PASOS_IPHONE: Paso[] = [
   {
     titulo: "Elegí Agregar a inicio",
     detalle: "Bajá en la lista de opciones hasta encontrarla.",
-    icono: Plus,
+    icono: SquarePlus,
+    iconoAlFinal: true,
     etiquetaEnPantalla: "Agregar a Inicio",
-    captura: "/agregar-app/iphone-2-compartir.webp",
   },
   {
     titulo: "Confirmá con Agregar",
     detalle: "Arriba a la derecha. El ícono de Orzando queda en tu pantalla de inicio.",
-    icono: Check,
     etiquetaEnPantalla: "Agregar",
-    captura: "/agregar-app/iphone-3-agregar.webp",
   },
 ];
 
@@ -69,7 +68,6 @@ const PASOS_ANDROID: Paso[] = [
   {
     titulo: "Confirmá con Instalar",
     detalle: "Orzando queda en tu cajón de apps y en la pantalla principal.",
-    icono: Check,
     etiquetaEnPantalla: "Instalar",
   },
 ];
@@ -90,20 +88,10 @@ function Pasos({ pasos }: { pasos: Paso[] }) {
                 <p className="text-sm text-muted-foreground">{paso.detalle}</p>
               </div>
               <div className="flex items-center gap-3 rounded-xl border border-dashed border-primary/50 bg-primary/5 px-3 py-2.5">
-                <Icono className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                <span className="truncate text-sm font-medium text-foreground">{paso.etiquetaEnPantalla}</span>
+                {Icono && !paso.iconoAlFinal && <Icono className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
+                <span className={cn("truncate text-sm font-medium", Icono ? "text-foreground" : "text-primary")}>{paso.etiquetaEnPantalla}</span>
+                {Icono && paso.iconoAlFinal && <Icono className="ml-auto h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
               </div>
-              {paso.captura && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={paso.captura}
-                  alt={`Captura de pantalla del paso ${indice + 1}: ${paso.titulo}`}
-                  width={924}
-                  height={2000}
-                  loading="lazy"
-                  className="max-h-96 w-auto rounded-xl border border-border"
-                />
-              )}
             </div>
           </li>
         );
