@@ -5,6 +5,7 @@ import { handleApiError } from '@/lib/api-error';
 import { permitir, ipDeRequest } from '@/lib/rate-limit';
 import { pareceSpam } from '@/lib/spam-guard';
 import { sendEmail, emailNuevoMensajeContacto } from '@/lib/email';
+import { EMAIL_AVISOS } from '@/lib/site';
 
 export async function POST(request: Request) {
   try {
@@ -27,14 +28,13 @@ export async function POST(request: Request) {
 
     await prisma.mensajeContacto.create({ data: { nombre, email, asunto, mensaje } });
 
-    // Notificación por mail a los ADMIN -mejor esfuerzo, ver sendEmail: si
-    // RESEND_API_KEY no está configurada o el envío falla, el mensaje ya
-    // quedó guardado en /admin/mensajes de todas formas.
-    const admins = await prisma.user.findMany({ where: { role: 'ADMIN' }, select: { email: true } });
+    // Aviso por mail a la casilla de la web -mejor esfuerzo, ver sendEmail:
+    // si RESEND_API_KEY no está configurada o el envío falla, el mensaje ya
+    // quedó guardado en /admin/mensajes de todas formas. replyTo: "Responder"
+    // en el mail le contesta directo a quien escribió (el remitente es
+    // no-responder@, que nadie lee).
     const { subject, html } = emailNuevoMensajeContacto({ nombre, email, asunto, mensaje });
-    for (const admin of admins) {
-      void sendEmail({ to: admin.email, subject, html });
-    }
+    void sendEmail({ to: EMAIL_AVISOS, subject, html, replyTo: email });
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {

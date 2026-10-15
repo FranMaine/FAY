@@ -30,10 +30,13 @@ export async function sendEmail({
   to,
   subject,
   html,
+  replyTo,
 }: {
   to: string;
   subject: string;
   html: string;
+  /** A quién le llega la respuesta (por defecto, al remitente: no-responder@). */
+  replyTo?: string;
 }) {
   if (!resend) {
     console.warn(
@@ -44,7 +47,7 @@ export async function sendEmail({
   }
 
   try {
-    await resend.emails.send({ from: FROM, to, subject, html });
+    await resend.emails.send({ from: FROM, to, subject, html, ...(replyTo ? { replyTo } : {}) });
   } catch (error) {
     // Un fallo de envío no debe deshacer la acción que lo disparó (ej. la
     // aprobación de una vinculación ya se confirmó en la base).

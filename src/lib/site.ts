@@ -9,5 +9,8 @@
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
 
 export const SITE_NAME = 'Orzando';
+
+// Casilla de la web: a donde llegan los avisos de mensajes de /contacto.
+export const EMAIL_AVISOS = 'orzandovela@gmail.com';
 export const SITE_DESCRIPTION =
   'Resultados, rankings y estadísticas de regatas de vela de Argentina.';

@@ -335,7 +335,7 @@ model AuditLog {
 // "oficial" de FAY configurada como variable de entorno, así que en vez de
 // depender de un envío de mail que podría fallar silenciosamente, el
 // mensaje queda guardado acá (y /admin/mensajes lo lista) además de
-// intentar notificar por mail a los ADMIN si RESEND_API_KEY está
+// intentar notificar por mail a la casilla de la web (EMAIL_AVISOS) si RESEND_API_KEY está
 // configurada.
 model MensajeContacto {
   id        String   @id @default(cuid())
