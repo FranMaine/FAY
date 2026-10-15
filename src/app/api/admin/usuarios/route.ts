@@ -3,11 +3,14 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 
-// Busca usuarios por email/nombre -pensado para que un admin encuentre a
-// la persona que va a organizar una regata (encargada de club) y la
-// promueva a administrador. Sin query, no devuelve nada: no tiene
-// sentido listar TODOS los usuarios de entrada en un sitio con
-// potencialmente miles de cuentas.
+// Lista las cuentas (con rol) para la pantalla "Usuarios y roles". Sin
+// query devuelve todas hasta LIMITE_LISTA -la pantalla las muestra siempre,
+// completas, y filtra en el cliente al escribir-; con query busca por
+// email/nombre (se usa cuando hay más cuentas que el límite y la lista
+// completa no entra). Admin y Organizador salen primero: son los que
+// importa tener a la vista.
+const LIMITE_LISTA = 500;
+
 export async function GET(request: Request) {
   try {
     const session = await auth();
@@ -16,18 +19,19 @@ export async function GET(request: Request) {
     }
 
     const q = new URL(request.url).searchParams.get('q')?.trim();
-    if (!q || q.length < 2) return NextResponse.json([]);
 
     const usuarios = await prisma.user.findMany({
-      where: {
-        OR: [
-          { email: { contains: q, mode: 'insensitive' } },
-          { name: { contains: q, mode: 'insensitive' } },
-        ],
-      },
+      where: q
+        ? {
+            OR: [
+              { email: { contains: q, mode: 'insensitive' } },
+              { name: { contains: q, mode: 'insensitive' } },
+            ],
+          }
+        : undefined,
       select: { id: true, email: true, name: true, role: true },
-      take: 10,
-      orderBy: { email: 'asc' },
+      take: LIMITE_LISTA,
+      orderBy: [{ role: 'asc' }, { email: 'asc' }],
     });
     return NextResponse.json(usuarios);
   } catch (error) {
