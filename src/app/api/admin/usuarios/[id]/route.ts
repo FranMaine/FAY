@@ -58,3 +58,51 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return handleApiError(error, 'PATCH /api/admin/usuarios/[id]');
   }
 }
+
+// Elimina una cuenta. Las sesiones, cuentas externas y solicitudes de
+// vinculación se borran en cascada (ver schema); la ficha de regatista a la
+// que estuviera vinculada NO se toca -es un dato deportivo que existe con o
+// sin cuenta-, solo queda libre para vincularse de nuevo.
+//
+// Mismas salvaguardas que el cambio de rol: no te podés borrar a vos mismo
+// ni al último administrador.
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await auth();
+    if (!session || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    const { id } = await params;
+    if (id === session.user.id) {
+      return NextResponse.json({ error: 'No podés eliminar tu propia cuenta desde acá' }, { status: 400 });
+    }
+
+    const usuario = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, email: true, name: true, role: true, regatistaId: true },
+    });
+    if (!usuario) return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+
+    if (usuario.role === 'ADMIN') {
+      const totalAdmins = await prisma.user.count({ where: { role: 'ADMIN' } });
+      if (totalAdmins <= 1) {
+        return NextResponse.json({ error: 'No se puede eliminar al único administrador que queda' }, { status: 400 });
+      }
+    }
+
+    await prisma.user.delete({ where: { id } });
+
+    void registrarAuditoria(
+      { email: session.user.email || session.user.id, name: session.user.name },
+      'usuario.eliminar',
+      'User',
+      usuario.id,
+      { email: usuario.email, rol: usuario.role, teniaRegatista: !!usuario.regatistaId }
+    );
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return handleApiError(error, 'DELETE /api/admin/usuarios/[id]');
+  }
+}

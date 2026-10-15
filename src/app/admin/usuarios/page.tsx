@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { mensajeDeError } from "@/lib/utils";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
 
 type Rol = "ADMIN" | "ORGANIZADOR" | "REGULAR";
 
@@ -33,6 +35,7 @@ const ETIQUETA_ROL: Record<Rol, string> = {
 const LIMITE_LISTA = 500;
 
 export default function AdminUsuariosPage() {
+  const { data: sesion } = useSession();
   const [query, setQuery] = useState("");
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   // Resultado de buscar en el servidor -solo cuando la lista completa no
@@ -114,6 +117,19 @@ export default function AdminUsuariosPage() {
     }
   }
 
+  async function eliminar(usuario: Usuario) {
+    try {
+      const res = await fetch(`/api/admin/usuarios/${usuario.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo eliminar");
+      setUsuarios((prev) => prev.filter((u) => u.id !== usuario.id));
+      setRemotos((prev) => (prev ? prev.filter((u) => u.id !== usuario.id) : prev));
+      toast.success(`Se eliminó la cuenta de ${usuario.name || usuario.email}`);
+    } catch (err) {
+      toast.error(mensajeDeError(err));
+    }
+  }
+
   return (
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-3xl mx-auto space-y-8">
@@ -181,6 +197,14 @@ export default function AdminUsuariosPage() {
                         {guardando === u.id ? <Loader2Icon className="w-3.5 h-3.5 animate-spin" /> : ETIQUETA_ROL[rol]}
                       </Button>
                     ))}
+                    {/* Tu propia cuenta no se puede borrar desde acá (el
+                        servidor también lo rechaza). */}
+                    <ConfirmDeleteButton
+                      label={`Eliminar la cuenta de ${u.name || u.email}`}
+                      confirmLabel="¿Eliminar cuenta?"
+                      disabled={guardando === u.id || u.id === sesion?.user?.id}
+                      onConfirm={() => eliminar(u)}
+                    />
                   </div>
                 </CardContent>
               </Card>
