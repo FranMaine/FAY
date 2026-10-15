@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     // en el mail le contesta directo a quien escribió (el remitente es
     // no-responder@, que nadie lee).
     const { subject, html } = emailNuevoMensajeContacto({ nombre, email, asunto, mensaje });
-    void sendEmail({ to: EMAIL_AVISOS, subject, html, replyTo: email });
+    await sendEmail({ to: EMAIL_AVISOS, subject, html, replyTo: email });
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
