@@ -22,6 +22,10 @@ model User {
   regatista        Regatista?             @relation(fields: [regatistaId], references: [id])
   regatistaId      String?                @unique
   emailVerified    DateTime?
+  // Si quiere recibir por mail el aviso de que se publicó un campeonato en
+  // el que figura (ver lib/avisos-resultados.ts). Se cambia en
+  // /mi-perfil/configuracion.
+  notificarResultados Boolean            @default(true)
   // Cuándo aceptó el Aviso Legal y la Política de Privacidad al
   // registrarse -null para cuentas creadas antes de que existiera el
   // checkbox (ver src/app/registro/page.tsx). Guardar el momento, no solo

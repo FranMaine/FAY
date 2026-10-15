@@ -23,6 +23,7 @@ export default async function ConfiguracionPage() {
     select: {
       email: true,
       apodo: true,
+      notificarResultados: true,
       passwordHash: true,
       regatista: { select: { id: true, nombre: true, fotoUrl: true } },
     },
@@ -39,6 +40,7 @@ export default async function ConfiguracionPage() {
 
         <ConfiguracionForm
           apodoInicial={user.apodo}
+          notificarInicial={user.notificarResultados}
           email={user.email}
           regatista={user.regatista}
           tienePassword={!!user.passwordHash}

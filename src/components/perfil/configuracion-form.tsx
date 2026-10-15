@@ -15,18 +15,43 @@ import { mensajeDeError } from "@/lib/utils";
 
 interface ConfiguracionFormProps {
   apodoInicial: string | null;
+  notificarInicial: boolean;
   email: string;
   regatista: { id: string; nombre: string; fotoUrl: string | null } | null;
   tienePassword: boolean;
 }
 
-export function ConfiguracionForm({ apodoInicial, email, regatista, tienePassword }: ConfiguracionFormProps) {
+export function ConfiguracionForm({ apodoInicial, notificarInicial, email, regatista, tienePassword }: ConfiguracionFormProps) {
   const router = useRouter();
 
   const [apodo, setApodo] = useState(apodoInicial || "");
   const [guardandoApodo, setGuardandoApodo] = useState(false);
   const [apodoGuardado, setApodoGuardado] = useState(false);
   const [errorApodo, setErrorApodo] = useState<string | null>(null);
+
+  const [notificar, setNotificar] = useState(notificarInicial);
+  const [guardandoAvisos, setGuardandoAvisos] = useState(false);
+
+  // Se guarda al tocar el interruptor (no hay botón "Guardar"); si falla, vuelve atrás.
+  async function cambiarAvisos(valor: boolean) {
+    setNotificar(valor);
+    setGuardandoAvisos(true);
+    try {
+      const res = await fetch("/api/mi-perfil", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificarResultados: valor }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo guardar la preferencia");
+      toast.success(valor ? "Vas a recibir los avisos por mail" : "Dejaste de recibir los avisos por mail");
+    } catch (err) {
+      setNotificar(!valor);
+      toast.error(mensajeDeError(err));
+    } finally {
+      setGuardandoAvisos(false);
+    }
+  }
 
   const [passwordActual, setPasswordActual] = useState("");
   const [passwordNueva, setPasswordNueva] = useState("");
@@ -180,6 +205,30 @@ export function ConfiguracionForm({ apodoInicial, email, regatista, tienePasswor
           {errorApodo && <p className="text-sm text-red-500 mt-2">{errorApodo}</p>}
         </CardContent>
       </Card>
+
+      {regatista && (
+        <Card className="bg-surface border-border">
+          <CardHeader>
+            <CardTitle>Avisos por mail</CardTitle>
+            <CardDescription>
+              Te avisamos cuando se publica un campeonato en el que figurás, con la posición en la que terminaste.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <label className="flex items-center gap-3 cursor-pointer text-sm">
+              <input
+                type="checkbox"
+                checked={notificar}
+                disabled={guardandoAvisos}
+                onChange={(e) => cambiarAvisos(e.target.checked)}
+                className="h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+              />
+              <span>Quiero recibir estos avisos</span>
+              {guardandoAvisos && <Loader2Icon className="w-4 h-4 animate-spin text-muted-foreground" />}
+            </label>
+          </CardContent>
+        </Card>
+      )}
 
       {regatista && (
         <Card className="bg-surface border-border">

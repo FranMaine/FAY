@@ -4,12 +4,16 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 
-const bodySchema = z.object({
-  // Vacío/null borra el apodo (vuelve a mostrarse el nombre de siempre).
-  apodo: z.string().trim().max(40, 'Máximo 40 caracteres').nullable(),
-});
+const bodySchema = z
+  .object({
+    // Vacío/null borra el apodo (vuelve a mostrarse el nombre de siempre).
+    apodo: z.string().trim().max(40, 'Máximo 40 caracteres').nullable().optional(),
+    // Recibir por mail el aviso de campeonatos publicados en los que figura.
+    notificarResultados: z.boolean().optional(),
+  })
+  .refine((v) => v.apodo !== undefined || v.notificarResultados !== undefined, { message: 'Nada para actualizar' });
 
-// Actualiza el apodo de la cuenta propia -a diferencia de Regatista.nombre
+// Actualiza el apodo (y la preferencia de avisos por mail) de la cuenta propia -a diferencia de Regatista.nombre
 // (el nombre "oficial" que viene de los resultados importados), esto es
 // puramente personal y solo lo puede tocar el propio usuario sobre sí
 // mismo, nunca sobre otra cuenta.
@@ -20,12 +24,15 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    const { apodo } = bodySchema.parse(await request.json());
+    const { apodo, notificarResultados } = bodySchema.parse(await request.json());
 
     const usuario = await prisma.user.update({
       where: { id: session.user.id },
-      data: { apodo: apodo || null },
-      select: { id: true, apodo: true },
+      data: {
+        ...(apodo !== undefined ? { apodo: apodo || null } : {}),
+        ...(notificarResultados !== undefined ? { notificarResultados } : {}),
+      },
+      select: { id: true, apodo: true, notificarResultados: true },
     });
     return NextResponse.json(usuario);
   } catch (error) {

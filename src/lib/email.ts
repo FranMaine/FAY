@@ -154,6 +154,7 @@ export function emailResultadoPublicado(datos: {
   posicion: number | null;
   totalParticipantes: number;
   urlCampeonato: string;
+  urlConfiguracion: string;
 }) {
   const campeonato = `${datos.campeonato} ${datos.anio}`;
   const lugar =
@@ -168,7 +169,7 @@ export function emailResultadoPublicado(datos: {
         <p>Se publicaron los resultados de <strong>${escapeHtml(campeonato)}</strong> (${escapeHtml(datos.clase)}), y figurás como <strong>${escapeHtml(datos.nombreRegatista)}</strong>.</p>
         ${lugar}
         <p style="margin: 24px 0;"><a href="${datos.urlCampeonato}" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Ver la tabla completa</a></p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Recibís este aviso porque tu cuenta de Orzando está vinculada a tu perfil de regatista. Si no querés recibirlos, escribinos a contacto@orzando.com.ar.</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Recibís este aviso porque tu cuenta de Orzando está vinculada a tu perfil de regatista. Podés dejar de recibirlos cuando quieras desde <a href="${datos.urlConfiguracion}" style="color: #94a3b8;">la configuración de tu cuenta</a>.</p>
       </div>
     `,
   };

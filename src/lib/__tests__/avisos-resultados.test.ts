@@ -78,6 +78,7 @@ describe('avisarResultadosPublicados', () => {
     await avisarResultadosPublicados('c1');
     const where = prismaFalso.user.findMany.mock.calls[0][0].where;
     expect(where.emailVerified).toEqual({ not: null });
+    expect(where.notificarResultados).toBe(true);
     expect(where.regatistaId.in.sort()).toEqual(['r-ana', 'r-beto', 'r-cami']);
   });
 
@@ -117,6 +118,7 @@ describe('plantillas de mail', () => {
       posicion: 1,
       totalParticipantes: 10,
       urlCampeonato: 'https://orzando.com.ar/campeonatos/c1',
+      urlConfiguracion: 'https://orzando.com.ar/mi-perfil/configuracion',
     });
     expect(html).not.toContain('<img');
     expect(html).not.toContain('<b>X</b>');
@@ -131,6 +133,7 @@ describe('plantillas de mail', () => {
       posicion: null,
       totalParticipantes: 10,
       urlCampeonato: 'https://orzando.com.ar/campeonatos/c1',
+      urlConfiguracion: 'https://orzando.com.ar/mi-perfil/configuracion',
     });
     expect(html).not.toContain('Terminaste');
   });

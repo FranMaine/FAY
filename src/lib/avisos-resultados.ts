@@ -13,7 +13,7 @@ const MAXIMO_AVISOS = 200;
 
 /**
  * Cuando se publica un campeonato, avisa por mail a cada persona con la
- * cuenta vinculada (y el mail verificado) a un regatista que figura en él,
+ * cuenta vinculada (y el mail verificado, y que no se dio de baja) a un regatista que figura en él,
  * con la posición final que le tocó.
  *
  * Se manda UNA sola vez por campeonato: antes de mandar, deja un registro en
@@ -53,7 +53,7 @@ export async function avisarResultadosPublicados(campeonatoId: string): Promise<
     }
 
     const usuarios = await prisma.user.findMany({
-      where: { regatistaId: { in: [...posicionDe.keys()] }, emailVerified: { not: null } },
+      where: { regatistaId: { in: [...posicionDe.keys()] }, emailVerified: { not: null }, notificarResultados: true },
       select: { email: true, regatistaId: true, regatista: { select: { nombre: true } } },
       take: MAXIMO_AVISOS,
     });
@@ -76,6 +76,7 @@ export async function avisarResultadosPublicados(campeonatoId: string): Promise<
           posicion: posicionDe.get(u.regatistaId) ?? null,
           totalParticipantes: clasificacion.length,
           urlCampeonato: `${SITE_URL}/campeonatos/${campeonato.id}`,
+          urlConfiguracion: `${SITE_URL}/mi-perfil/configuracion`,
         }),
       });
     }
