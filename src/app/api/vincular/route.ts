@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-error';
+import { registrarAuditoria } from '@/lib/auditoria';
+import { verificacionSchema, ACCION_SOLICITUD } from '@/lib/vinculacion';
 
 export async function POST(request: Request) {
   try {
@@ -10,9 +12,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    const { regatistaId } = await request.json();
+    const json = await request.json();
+    const regatistaId = json?.regatistaId;
     if (!regatistaId) {
       return NextResponse.json({ error: 'Falta regatistaId' }, { status: 400 });
+    }
+
+    // Para pedir la vinculación hay que aportar algo que solo la persona real
+    // sabe (número de vela, club o último campeonato) y declarar que el
+    // perfil es suyo: el administrador lo compara con la ficha antes de
+    // aprobar (ver /admin/solicitudes).
+    const verificacion = verificacionSchema.safeParse(json?.verificacion ?? {});
+    if (!verificacion.success) {
+      return NextResponse.json({ error: verificacion.error.issues[0]?.message ?? 'Datos de verificación inválidos' }, { status: 400 });
     }
 
     // Check if the regatista is already linked to someone
@@ -44,6 +56,16 @@ export async function POST(request: Request) {
         estado: 'PENDIENTE'
       }
     });
+
+    // Lo declarado se guarda en la auditoría, atado a la solicitud (no hay
+    // columnas propias para esto todavía).
+    await registrarAuditoria(
+      { email: session.user.email || session.user.id, name: session.user.name },
+      ACCION_SOLICITUD,
+      'SolicitudVinculacion',
+      solicitud.id,
+      { ...verificacion.data, regatistaId }
+    );
 
     return NextResponse.json(solicitud);
   } catch (error) {

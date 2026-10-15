@@ -127,6 +127,20 @@ export function emailVinculacionAprobada(nombreRegatista: string, urlPerfil: str
   };
 }
 
+export function emailVinculacionRevocada(nombreRegatista: string) {
+  return {
+    subject: 'Tu cuenta fue desvinculada de un perfil de regatista',
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1e293b;">Se desvinculó tu cuenta</h2>
+        <p>Un administrador de Orzando desvinculó tu cuenta del perfil de regatista de <strong>${escapeHtml(nombreRegatista)}</strong>, porque no pudimos confirmar que ese perfil te corresponda.</p>
+        <p>Tu cuenta sigue activa. Si creés que fue un error o querés pedir la vinculación de nuevo, escribinos a contacto@orzando.com.ar contando quién sos y cuál es tu perfil.</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Orzando</p>
+      </div>
+    `,
+  };
+}
+
 /**
  * Aviso a una persona con la cuenta vinculada a un regatista: se publicaron
  * los resultados de un campeonato en el que figura. `posicion`/`total` pueden

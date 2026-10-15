@@ -101,8 +101,8 @@ const SECCIONES: Seccion[] = [
     pasos: [
       "Tocá Registro, completá tus datos y aceptá los términos.",
       "Te llega un mail para verificar tu cuenta: abrí el link que trae. Si no lo ves, revisá la carpeta de correo no deseado.",
-      "Ingresá y buscá tu nombre para pedir la vinculación con tu ficha. Un administrador la revisa antes de aprobarla.",
-      "Cuando esté aprobada, en Mi perfil ves tus resultados y tus logros, y podés elegir un apodo.",
+      "Ingresá y buscá tu nombre para pedir la vinculación con tu ficha. Te pedimos algún dato que solo vos sepas (número de vela, club o último campeonato) y un administrador lo revisa antes de aprobarla.",
+      "Cuando esté aprobada, te llega un mail. En Mi perfil ves tus resultados y tus logros, y podés elegir un apodo; además te avisamos por mail cada vez que se publica un campeonato en el que figurás.",
     ],
     enlace: { href: "/registro", texto: "Crear mi cuenta" },
   },

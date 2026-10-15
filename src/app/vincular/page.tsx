@@ -39,6 +39,13 @@ export default function VincularPage() {
   // confirmación era el diálogo feo del propio browser en vez de algo con
   // la estética del sitio.
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+  // Lo que la persona declara para que el administrador pueda comprobar que
+  // el perfil es realmente suyo (ver lib/vinculacion.ts).
+  const [numeroVela, setNumeroVela] = useState("");
+  const [clubDeclarado, setClubDeclarado] = useState("");
+  const [ultimoCampeonato, setUltimoCampeonato] = useState("");
+  const [declaro, setDeclaro] = useState(false);
+  const verificacionCompleta = declaro && !!(numeroVela.trim() || clubDeclarado.trim() || ultimoCampeonato.trim());
 
   useEffect(() => {
     async function checkStatus() {
@@ -95,7 +102,10 @@ export default function VincularPage() {
       const res = await fetch('/api/vincular', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ regatistaId: selectedProfile })
+        body: JSON.stringify({
+          regatistaId: selectedProfile,
+          verificacion: { numeroVela, club: clubDeclarado, ultimoCampeonato, declaro },
+        })
       });
       const data = await res.json();
 
@@ -243,15 +253,51 @@ export default function VincularPage() {
           <div>
             <h2 className="text-xl font-bold">Confirmar vinculación</h2>
             <p className="text-muted-foreground mt-2">
-              ¿Confirmás que <strong className="text-foreground">{perfilSeleccionado?.nombre}</strong> es tu perfil
-              oficial? La solicitud va a ser revisada por un administrador antes de vincularse a tu cuenta.
+              Vas a pedir vincular tu cuenta al perfil de{" "}
+              <strong className="text-foreground">{perfilSeleccionado?.nombre}</strong>. Para comprobar que es tuyo,
+              completá al menos un dato que solo vos sepas; un administrador lo revisa antes de aprobar.
             </p>
+          </div>
+          <div className="space-y-3">
+            <Input
+              id="verif-vela"
+              label="Número de vela"
+              placeholder="Ej: ARG 123"
+              value={numeroVela}
+              onChange={(e) => setNumeroVela(e.target.value)}
+              maxLength={30}
+            />
+            <Input
+              id="verif-club"
+              label="Club al que representás"
+              placeholder="Ej: YCA"
+              value={clubDeclarado}
+              onChange={(e) => setClubDeclarado(e.target.value)}
+              maxLength={80}
+            />
+            <Input
+              id="verif-campeonato"
+              label="Último campeonato en el que corriste"
+              placeholder="Ej: Semana Nacional 2026"
+              value={ultimoCampeonato}
+              onChange={(e) => setUltimoCampeonato(e.target.value)}
+              maxLength={120}
+            />
+            <label className="flex items-start gap-2.5 text-sm text-foreground/90 cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={declaro}
+                onChange={(e) => setDeclaro(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+              />
+              <span>Declaro que este perfil es mío y que los datos que completé son verdaderos.</span>
+            </label>
           </div>
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setMostrarConfirmacion(false)} disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button onClick={confirmarVinculacion} disabled={isSubmitting}>
+            <Button onClick={confirmarVinculacion} disabled={isSubmitting || !verificacionCompleta}>
               {isSubmitting ? <Loader2Icon className="w-4 h-4 animate-spin mr-2" /> : null}
               Confirmar
             </Button>

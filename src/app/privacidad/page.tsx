@@ -27,7 +27,7 @@ export default function PrivacidadPage() {
           <ul className="list-disc pl-6 space-y-1">
             <li><strong>Cuenta de usuario:</strong> nombre, email y contraseña (guardada encriptada, nunca en texto plano) cuando te registrás.</li>
             <li><strong>Mensajes de contacto:</strong> si nos escribís desde el formulario de contacto o por mail, guardamos tu nombre, tu email y el mensaje para poder responderte.</li>
-            <li><strong>Vinculación con tu perfil de regatista:</strong> si pedís vincular tu cuenta a una ficha de regatista, guardamos esa solicitud y, si se aprueba, la relación entre tu cuenta y esa ficha.</li>
+            <li><strong>Vinculación con tu perfil de regatista:</strong> si pedís vincular tu cuenta a una ficha de regatista, guardamos esa solicitud, los datos que declarás para comprobar que el perfil es tuyo (número de vela, club, último campeonato) y, si se aprueba, la relación entre tu cuenta y esa ficha. Te avisamos por mail cuando se aprueba y cuando se publica un campeonato en el que figurás.</li>
             <li><strong>Resultados deportivos:</strong> nombre, club y resultados de regata de cada regatista, provenientes de los resultados oficiales de cada campeonato -no de un formulario que vos completás.</li>
             <li><strong>Datos técnicos básicos:</strong> dirección IP en las solicitudes al servidor, usada únicamente para seguridad (por ejemplo, limitar intentos de inicio de sesión o de registro) y no para rastrear tu actividad de navegación.</li>
             <li><strong>Analítica de visitas:</strong> usamos Vercel Web Analytics para medir qué páginas se visitan, de forma agregada y sin cookies ni datos que te identifiquen.</li>

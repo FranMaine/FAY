@@ -5,6 +5,7 @@ import { SITE_URL } from "@/lib/site";
 import { jsonLdSeguro } from "@/lib/json-ld";
 import { getRegatistaProfile } from "@/lib/get-regatista-profile";
 import { PerfilRegatista } from "@/components/regatista/perfil-regatista";
+import { ReportarVinculacion } from "@/components/regatista/reportar-vinculacion";
 
 // Sin esto, el perfil queda cacheado estático para siempre después de la
 // primera visita -si esa persona corre una nueva regata, nadie ve el
@@ -40,6 +41,10 @@ export default async function RegatistaProfilePage({ params }: Props) {
 
   const { regatista } = data;
 
+  // El aviso de "vinculación incorrecta" solo tiene sentido si la ficha ya
+  // está vinculada a una cuenta.
+  const estaVinculado = (await prisma.user.count({ where: { regatistaId: id } })) > 0;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -56,6 +61,7 @@ export default async function RegatistaProfilePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <PerfilRegatista {...data} />
+      {estaVinculado && <ReportarVinculacion regatistaId={regatista.id} nombre={regatista.nombre} />}
     </main>
   );
 }
