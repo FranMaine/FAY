@@ -37,7 +37,9 @@ export const metadata: Metadata = {
   // por default para cualquier página que no declare la suya.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Orzando',
+    // Es el título que Google muestra para la home: con solo el nombre no dice
+    // de qué se trata el sitio.
+    default: 'Orzando: resultados, rankings y estadísticas de vela argentina',
     template: '%s | Orzando',
   },
   description: SITE_DESCRIPTION,
