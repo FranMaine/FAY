@@ -1,8 +1,7 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Trophy, ArrowRight, Building2, Medal, CalendarDays } from "lucide-react";
+import { SailingBoat } from "@/components/icons/sailing-boat";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { SailorSearch } from "@/components/search/sailor-search";
@@ -13,16 +12,6 @@ import { ClubAvatar } from "@/components/icons/club-avatar";
 import { getRankingGeneral } from "@/lib/ranking-general";
 import { PodioPortada, type PodioDeClase } from "@/components/ranking/podio-portada";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { HeroImage } from "@/components/ui/hero-image";
-
-// Foto de fondo del hero (ver sección HERO más abajo) -mientras no esté,
-// el hero muestra un degradé como placeholder en su lugar. Es una foto
-// real de la 51ª Semana Nacional del Yachting (crédito visible: Capizzano
-// Photography), escalada a 1920px de ancho con
-// scripts/upscale-hero-photo.ts. Si en algún momento aparece un archivo
-// en mejor calidad, conviene reemplazar public/hero/velero-hero.jpg por
-// ese (mismo nombre, mismo lugar, no hace falta tocar este archivo).
-const FOTO_HERO_PATH = path.join(process.cwd(), "public", "hero", "velero-hero.jpg");
 
 export const metadata: Metadata = {
   // Sin "title" acá, el template del layout raíz ("%s | Orzando") lo
@@ -105,7 +94,6 @@ async function getPodiosPortada(anio: number | null): Promise<PodioDeClase[]> {
 export default async function LandingPage() {
   const [campeonatos, stats, topClubes] = await Promise.all([getUltimosCampeonatos(), getStats(), clubesConMasPodios(5)]);
   const podios = await getPodiosPortada(stats.hasta);
-  const tieneFotoHero = fs.existsSync(FOTO_HERO_PATH);
   const [destacado, ...otros] = campeonatos;
 
   const numeros = [
@@ -120,31 +108,28 @@ export default async function LandingPage() {
 
   return (
     <main className="min-h-dvh bg-background text-foreground flex flex-col">
-      {/* Hero: alineado a la izquierda con la foto visible a la derecha
-          (antes: todo centrado sobre un fondo oscuro parejo, donde la foto
-          casi no se notaba). El degradé va de izquierda a derecha -oscuro
-          donde está el texto, transparente donde está el velero- así el
-          texto sigue legible sin apagar la foto entera. */}
-      {/* Sin overflow-hidden a propósito: la foto y los degradés de abajo son
+      {/* Hero: alineado a la izquierda, con el velero de la marca de fondo a
+          la derecha. El degradé va de izquierda a derecha -más oscuro donde
+          está el texto- para que se lea bien. */}
+      {/* Sin overflow-hidden a propósito: los fondos de abajo son
           absolute inset-0 (siempre del tamaño exacto de esta sección, nunca
           más grandes), así que no lo necesitan para no desbordar -pero sí
           recortaba el panel de resultados del buscador (ver SailorSearch)
           cada vez que la lista era más alta que el hero. */}
       <section className="relative min-h-[600px] md:min-h-[680px] flex items-center text-white">
-        {tieneFotoHero ? (
-          <HeroImage
-            src="/hero/velero-hero.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[70%_center] z-0"
-            aria-hidden="true"
-          />
-        ) : (
-          <div className="absolute inset-0 z-0 bg-gradient-to-br from-sky-700 via-blue-800 to-slate-900" aria-hidden="true" />
-        )}
-        <div className="absolute inset-0 z-0 bg-gradient-to-r from-black/85 via-black/55 to-black/10" aria-hidden="true" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-sky-700 via-blue-800 to-slate-900" aria-hidden="true" />
+        <div
+          className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_75%_45%,rgba(96,165,250,0.35),transparent_55%)]"
+          aria-hidden="true"
+        />
+        {/* El velero de la marca, grande y apenas visible, ocupa el lugar que
+            tenía la foto: da el "cuerpo" de la portada sin depender de una
+            imagen de terceros. */}
+        <SailingBoat
+          className="absolute right-[-12%] top-1/2 z-0 h-[115%] w-auto -translate-y-1/2 text-white/[0.09] md:right-[4%] md:h-[88%]"
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-black/45 via-black/15 to-transparent" aria-hidden="true" />
         <div className="absolute inset-x-0 bottom-0 h-40 z-0 bg-gradient-to-t from-background to-transparent" aria-hidden="true" />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-24">
