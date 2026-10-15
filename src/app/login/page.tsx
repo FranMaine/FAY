@@ -102,7 +102,7 @@ function LoginForm() {
           )}
           {emailNoVerificado && (
             <div className="bg-amber-500/10 border border-amber-500/50 text-amber-500 text-sm p-3 rounded-md mb-4 text-center space-y-2 fade-in-up">
-              <p>Todavía no confirmaste tu email. Revisá tu casilla, o pedimos un nuevo enlace.</p>
+              <p>Todavía no confirmaste tu email. Revisá tu casilla, o solicitá un nuevo enlace.</p>
               {reenviado ? (
                 <p className="font-medium">Listo, te mandamos un nuevo enlace.</p>
               ) : (

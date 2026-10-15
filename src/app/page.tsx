@@ -125,10 +125,14 @@ export default async function LandingPage() {
         {/* El velero de la marca, grande y apenas visible, ocupa el lugar que
             tenía la foto: da el "cuerpo" de la portada sin depender de una
             imagen de terceros. */}
-        <SailingBoat
-          className="absolute right-[-12%] top-1/2 z-0 h-[115%] w-auto -translate-y-1/2 text-white/[0.09] md:right-[4%] md:h-[88%]"
-          aria-hidden="true"
-        />
+        {/* Dentro de un contenedor que recorta: el velero es más alto que el
+            hero en celular y, sin recorte, se salía por arriba y quedaba por
+            encima del banner del tutorial, tapándole los toques. Va en su
+            propio contenedor (y no con overflow-hidden en el hero) para no
+            recortar el panel de resultados del buscador. */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+          <SailingBoat className="absolute right-[-12%] top-1/2 h-[115%] w-auto -translate-y-1/2 text-white/[0.09] md:right-[4%] md:h-[88%]" />
+        </div>
         <div className="absolute inset-0 z-0 bg-gradient-to-r from-black/45 via-black/15 to-transparent" aria-hidden="true" />
         <div className="absolute inset-x-0 bottom-0 h-40 z-0 bg-gradient-to-t from-background to-transparent" aria-hidden="true" />
 

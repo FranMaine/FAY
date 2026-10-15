@@ -47,7 +47,7 @@ export function AyudaBanner() {
   if (!visible || pathname === "/ayuda") return null;
 
   return (
-    <div role="region" aria-label="Tutorial de Orzando" className="border-b border-border bg-primary/10 fade-in-up">
+    <div role="region" aria-label="Tutorial de Orzando" className="relative z-10 border-b border-border bg-primary/10 fade-in-up">
       <div className="container mx-auto px-4 py-2.5 flex items-center gap-3">
         <BookOpenIcon className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
         <p className="flex-1 min-w-0 text-sm text-foreground/90">
