@@ -63,11 +63,13 @@ const CLUBES_POR_LUGAR: Record<string, string[]> = {
   'cordoba': ['CNC', '400YCC'],
   'corrientes': ['YCC'],
   'la-plata': ['CRLP'],
-  'mar-del-plata': ['CNMP'],
+  'mar-del-plata': ['CNMP', 'CLUB NÁUTICO ATLÁNTICO SUD'],
   'montevideo': ['YCU'],
   'parana': ['CNP'],
   'punta-del-este': ['YCPE'],
-  'rosario': ['YCR', 'CVR', 'RRC', 'CRR'],
+  // Puerto del Águila (así figura en los resultados, de tres formas) queda
+  // en el área de Rosario.
+  'rosario': ['YCR', 'CVR', 'RRC', 'CRR', 'AGUILA', 'EL AGUILA', 'PTO. DEL AGUILA'],
   'san-nicolas': ['CRSN'],
   'san-pedro': ['CNSP'],
   'villa-la-angostura': ['CAVLA'],

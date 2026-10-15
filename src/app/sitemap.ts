@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // tiene ninguna página con contenido real que valga indexar.
     prisma.club.findMany({
       where: { regatistas: { some: {} } },
-      select: { id: true },
+      select: { id: true, updatedAt: true },
     }),
   ]);
 
@@ -57,10 +57,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  // Club no tiene createdAt/updatedAt en el schema -sin lastModified acá,
-  // a diferencia de campeonatos/regatistas.
   const deClubes: MetadataRoute.Sitemap = clubes.map((c) => ({
     url: `${SITE_URL}/clubes/${c.id}`,
+    lastModified: c.updatedAt,
     changeFrequency: 'monthly',
     priority: 0.4,
   }));

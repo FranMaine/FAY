@@ -123,6 +123,9 @@ model Club {
   // Escudo del club, cargado a mano por un admin desde /admin/clubes -si es
   // null se sigue mostrando el ClubAvatar genérico (iniciales + color).
   logoUrl               String?
+  // Para el lastModified del sitemap. El default cubre las filas que ya
+  // existían cuando se agregó la columna.
+  updatedAt             DateTime     @default(now()) @updatedAt
   regatistas            Regatista[]
   regatistasSecundarios Regatista[]  @relation("OtrosClubes")
   campeonatos           Campeonato[]
