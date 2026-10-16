@@ -23,13 +23,13 @@ export const PasswordInput = forwardRef<HTMLInputElement, Omit<InputProps, "type
           aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
           aria-pressed={visible}
           // h-10 = alto del input; ancho de 44px para que sea cómodo de tocar.
-          // Color: casi el del texto (el gris "muted" se perdía sobre el campo
-          // oscuro) y, al pasar el mouse o con la contraseña visible, el azul
-          // de marca -antes pasaba a casi blanco, que se confundía con que el
-          // botón había desaparecido.
+          // Siempre bien visible: color de texto pleno en reposo y azul de
+          // marca al pasar el mouse o con la contraseña visible. Lo que lo
+          // hacía desaparecer era el relleno que los navegadores le ponen a
+          // los campos autocompletados (celeste claro, ver globals.css).
           className={cn(
             "absolute right-0 top-0 flex h-10 w-11 items-center justify-center rounded-r-lg transition-colors hover:text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
-            visible ? "text-primary" : "text-foreground/75"
+            visible ? "text-primary" : "text-foreground"
           )}
         >
           {visible ? <EyeOffIcon className="h-[18px] w-[18px]" aria-hidden="true" /> : <EyeIcon className="h-[18px] w-[18px]" aria-hidden="true" />}

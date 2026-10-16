@@ -161,6 +161,20 @@ body {
   }
 }
 
+/* Campos autocompletados por el navegador: Chrome/Safari los pintan de celeste
+   claro con texto oscuro, lo que en el tema oscuro rompe el diseño y hacía
+   desaparecer el ojo del campo de contraseña (ícono claro sobre fondo claro).
+   El truco de la transición larguísima deja el fondo propio del campo en vez
+   del del navegador (no hay forma de pisarlo directamente), y el color del
+   texto se fija aparte porque el autocompletado lo ignora. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-foreground);
+  caret-color: var(--color-foreground);
+  transition: background-color 600000s 0s, color 600000s 0s;
+}
+
 /* Transición entre páginas (ver src/app/template.tsx): antes cada
    navegación reemplazaba el contenido de un frame al otro, sin ninguna
    transición -se sentía brusco. template.tsx se remonta en cada cambio de
