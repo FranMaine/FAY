@@ -51,8 +51,10 @@ export async function sendEmail({
     // verificar, destinatario inválido, límite...): devuelve { data, error }.
     // Sin mirar `error`, un mail rechazado pasaba como enviado y no quedaba
     // ningún rastro en los logs.
-    const { error } = await resend.emails.send({ from: FROM, to, subject, html, ...(replyTo ? { replyTo } : {}) });
+    const { data, error } = await resend.emails.send({ from: FROM, to, subject, html, ...(replyTo ? { replyTo } : {}) });
     if (error) console.error(`[email] Resend rechazó "${subject}" a ${to}:`, error);
+    // Rastro de los envíos aceptados (con el id que muestra el panel de Resend), para poder comprobar después qué pasó con un mail puntual.
+    else console.log(`[email] aceptado por Resend: "${subject}" -> ${to} (id ${data?.id})`);
   } catch (error) {
     // Un fallo de envío no debe deshacer la acción que lo disparó (ej. la
     // aprobación de una vinculación ya se confirmó en la base).
