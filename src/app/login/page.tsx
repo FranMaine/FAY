@@ -8,6 +8,7 @@ import * as z from "zod";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { SailingBoat } from "@/components/icons/sailing-boat";
 
@@ -135,12 +136,11 @@ function LoginForm() {
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
-              <Input
+              <PasswordInput
                 {...form.register("password")}
                 id="login-password"
                 autoComplete="current-password"
                 placeholder="••••••••"
-                type="password"
                 className="bg-background border-border"
               />
               {form.formState.errors.password && (

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchIcon, Loader2Icon, UserIcon, CheckIcon } from "lucide-react";
 import { SailingBoat } from "@/components/icons/sailing-boat";
@@ -211,12 +212,12 @@ export default function RegistroPage() {
               </div>
               <div className="space-y-2">
                 <label htmlFor="reg-password" className="text-sm font-medium">Contraseña</label>
-                <Input {...form.register("password")} id="reg-password" autoComplete="new-password" type="password" placeholder="••••••••" className="bg-background border-border" />
+                <PasswordInput {...form.register("password")} id="reg-password" autoComplete="new-password" placeholder="••••••••" className="bg-background border-border" />
                 {form.formState.errors.password && <p role="alert" className="text-xs text-red-500">{form.formState.errors.password.message}</p>}
               </div>
               <div className="space-y-2">
                 <label htmlFor="reg-confirm" className="text-sm font-medium">Confirmar contraseña</label>
-                <Input {...form.register("confirmPassword")} id="reg-confirm" autoComplete="new-password" type="password" placeholder="••••••••" className="bg-background border-border" />
+                <PasswordInput {...form.register("confirmPassword")} id="reg-confirm" autoComplete="new-password" placeholder="••••••••" className="bg-background border-border" />
                 {form.formState.errors.confirmPassword && <p role="alert" className="text-xs text-red-500">{form.formState.errors.confirmPassword.message}</p>}
               </div>
               <div className="space-y-1.5">

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Loader2Icon, SaveIcon, CheckCircle2Icon, UploadIcon, UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ConfirmDeleteButton } from "@/components/ui/confirm-delete-button";
 import { toast } from "sonner";
@@ -277,8 +278,7 @@ export function ConfiguracionForm({ apodoInicial, notificarInicial, email, regat
           </CardHeader>
           <CardContent>
             <form onSubmit={cambiarPassword} className="space-y-3">
-              <Input
-                type="password"
+              <PasswordInput
                 value={passwordActual}
                 onChange={(e) => { setPasswordActual(e.target.value); setPasswordGuardada(false); }}
                 placeholder="Contraseña actual"
@@ -286,16 +286,14 @@ export function ConfiguracionForm({ apodoInicial, notificarInicial, email, regat
                 autoComplete="current-password"
               />
               <div className="flex flex-col sm:flex-row gap-3">
-                <Input
-                  type="password"
+                <PasswordInput
                   value={passwordNueva}
                   onChange={(e) => { setPasswordNueva(e.target.value); setPasswordGuardada(false); }}
                   placeholder="Contraseña nueva"
                   className="bg-background border-border flex-1"
                   autoComplete="new-password"
                 />
-                <Input
-                  type="password"
+                <PasswordInput
                   value={confirmPassword}
                   onChange={(e) => { setConfirmPassword(e.target.value); setPasswordGuardada(false); }}
                   placeholder="Confirmar contraseña nueva"
