@@ -332,7 +332,7 @@ export default function DuplicadosPage() {
                             {grupo.regatistas.map((r) => (
                               <label
                                 key={r.id}
-                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-background/50 cursor-pointer text-sm"
+                                className="flex flex-wrap items-center gap-x-3 gap-y-0.5 p-2 rounded-lg hover:bg-background/50 cursor-pointer text-sm"
                               >
                                 <input
                                   type="radio"
@@ -341,7 +341,7 @@ export default function DuplicadosPage() {
                                   onChange={() => setCanonicoPorGrupo((prev) => ({ ...prev, [grupo.nombreNormalizado]: r.id }))}
                                   className="accent-primary"
                                 />
-                                <span className="font-medium">{r.nombre}</span>
+                                <span className="font-medium max-sm:min-w-0 max-sm:flex-1 max-sm:basis-[70%]">{r.nombre}</span>
                                 <span className="text-muted-foreground">club: {r.club || "-"}</span>
                                 <span className="text-muted-foreground">{r.resultadosCount} resultado(s)</span>
                                 <span className="text-xs text-muted-foreground">
@@ -393,7 +393,7 @@ export default function DuplicadosPage() {
                             {item.candidatos.map((c) => (
                               <label
                                 key={c.id}
-                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-background/50 cursor-pointer text-sm"
+                                className="flex flex-wrap items-center gap-x-3 gap-y-0.5 p-2 rounded-lg hover:bg-background/50 cursor-pointer text-sm"
                               >
                                 <input
                                   type="radio"
@@ -402,7 +402,7 @@ export default function DuplicadosPage() {
                                   onChange={() => setCandidatoPorSuelto((prev) => ({ ...prev, [item.suelto.id]: c.id }))}
                                   className="accent-primary"
                                 />
-                                <span className="font-medium">{c.nombre}</span>
+                                <span className="font-medium max-sm:min-w-0 max-sm:flex-1 max-sm:basis-[70%]">{c.nombre}</span>
                                 <span className="text-muted-foreground">club: {c.club || "-"}</span>
                                 <span className="text-muted-foreground">{c.resultadosCount} resultado(s)</span>
                               </label>
@@ -534,7 +534,7 @@ export default function DuplicadosPage() {
                               onChange={() => setCanonicoPorSimilar((prev) => ({ ...prev, [par.clave]: r.id }))}
                               className="accent-primary"
                             />
-                            <span className="font-medium">{r.nombre}</span>
+                            <span className="font-medium max-sm:min-w-0 max-sm:flex-1 max-sm:basis-[70%]">{r.nombre}</span>
                             <span className="text-muted-foreground">club: {r.club || "-"}</span>
                             <span className="text-muted-foreground">{r.resultadosCount} resultado(s)</span>
                             <span className="text-xs text-muted-foreground">
