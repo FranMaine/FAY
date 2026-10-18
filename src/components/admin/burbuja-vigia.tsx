@@ -13,6 +13,40 @@ const TOPE_INFERIOR = 16;
 const CLAVE_STORAGE = "fay-vigia-pos";
 const UMBRAL_ARRASTRE_PX = 6;
 
+// Mientras se arrastra la burbuja, la página NO tiene que moverse (en ninguna
+// dirección). touch-action en el botón no alcanza: globals.css fija
+// "touch-action: manipulation" a todos los <button> y, al no estar en una capa,
+// le gana a la clase touch-none de Tailwind -el navegador seguía scrolleando y
+// cancelaba el gesto. Se bloquea acá de forma explícita: se frena el movimiento
+// táctil y se congela el scroll del documento hasta soltar.
+function bloquearScroll(): () => void {
+  const html = document.documentElement;
+  const body = document.body;
+  const antes = {
+    htmlOverflow: html.style.overflow,
+    htmlOverscroll: html.style.overscrollBehavior,
+    bodyOverflow: body.style.overflow,
+    bodyTouch: body.style.touchAction,
+  };
+  const frenar = (e: Event) => e.preventDefault();
+
+  html.style.overflow = "hidden";
+  html.style.overscrollBehavior = "none";
+  body.style.overflow = "hidden";
+  body.style.touchAction = "none";
+  window.addEventListener("touchmove", frenar, { passive: false });
+  window.addEventListener("wheel", frenar, { passive: false });
+
+  return () => {
+    html.style.overflow = antes.htmlOverflow;
+    html.style.overscrollBehavior = antes.htmlOverscroll;
+    body.style.overflow = antes.bodyOverflow;
+    body.style.touchAction = antes.bodyTouch;
+    window.removeEventListener("touchmove", frenar);
+    window.removeEventListener("wheel", frenar);
+  };
+}
+
 type Lado = "izquierda" | "derecha";
 interface Posicion {
   lado: Lado;
@@ -51,6 +85,10 @@ export function BurbujaVigia({ onAbrir, oculta }: { onAbrir: () => void; oculta:
   const botonRef = useRef<HTMLButtonElement>(null);
   const gesto = useRef<{ px: number; py: number; ox: number; oy: number; movio: boolean } | null>(null);
   const acabaDeArrastrar = useRef(false);
+  const desbloquear = useRef<(() => void) | null>(null);
+
+  // Si el componente se desmonta a mitad de un gesto, no puede quedar la página trabada.
+  useEffect(() => () => desbloquear.current?.(), []);
 
   // Si cambia el tamaño de la pantalla (girar el celular), no puede quedar fuera.
   useEffect(() => {
@@ -63,6 +101,10 @@ export function BurbujaVigia({ onAbrir, oculta }: { onAbrir: () => void; oculta:
     const r = e.currentTarget.getBoundingClientRect();
     gesto.current = { px: e.clientX, py: e.clientY, ox: r.left, oy: r.top, movio: false };
     e.currentTarget.setPointerCapture(e.pointerId);
+    // Se bloquea desde que se apoya el dedo (no recién al superar el umbral):
+    // si no, el primer tramo del movimiento ya empezaba a scrollear la página.
+    desbloquear.current?.();
+    desbloquear.current = bloquearScroll();
   }
 
   function alMover(e: React.PointerEvent<HTMLButtonElement>) {
@@ -79,6 +121,8 @@ export function BurbujaVigia({ onAbrir, oculta }: { onAbrir: () => void; oculta:
   function alSoltar(e: React.PointerEvent<HTMLButtonElement>) {
     const g = gesto.current;
     gesto.current = null;
+    desbloquear.current?.();
+    desbloquear.current = null;
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
     if (!g?.movio) return;
 
@@ -132,7 +176,7 @@ export function BurbujaVigia({ onAbrir, oculta }: { onAbrir: () => void; oculta:
       onPointerCancel={alSoltar}
       aria-label="Abrir a VigIA, el asistente de IA. Se puede arrastrar para cambiarlo de lugar"
       title="VigIA (arrastrá para moverla)"
-      style={estilo}
+      style={{ ...estilo, touchAction: "none" }}
       className={cn(
         // Antes de conocer la posición guardada: abajo a la izquierda.
         "fixed z-40 flex touch-none select-none items-center justify-center rounded-full border border-border bg-primary-solid text-white shadow-lg active:scale-95",
