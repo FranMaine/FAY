@@ -313,15 +313,57 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
             <>
               <p className="text-sm text-muted-foreground">
                 Detectamos {totalFilas} filas de datos. Revisá que cada columna tenga asignado lo correcto -marcamos nuestra
-                mejor sugerencia, pero nada se guarda hasta que confirmes. Las columnas que no reconocimos quedaron como
+                mejor sugerencia, pero nada se guarda hasta que confirmes.
+              </p>
+              <details className="group text-sm text-muted-foreground">
+                <summary className="cursor-pointer select-none py-1 font-medium text-primary hover:underline">
+                  Cómo funcionan las columnas
+                </summary>
+                <p className="mt-2">
+                Las columnas que no reconocimos quedaron como
                 &quot;Personalizada&quot; con el nombre del archivo -se guardan igual y aparecen como columnas extra en la tabla de
                 posiciones; podés renombrarlas o pasarlas a &quot;Ignorar&quot; si no hacen falta. Si el archivo trae columnas
                 separadas para cada tripulante -ej: &quot;Skipper&quot;/&quot;Helm&quot; y &quot;Crew&quot;, o Club por cada uno- en vez de una sola
                 celda &quot;Fulano & Mengano&quot;, marcá &quot;Navegante&quot; y/o &quot;Club&quot; en cada una: a diferencia de las demás columnas,
                 estas dos sí se pueden repetir, y se asignan en el orden en que aparecen (1ra columna = 1er tripulante).
-              </p>
+                </p>
+              </details>
 
-              <div className="overflow-x-auto border border-border rounded-lg">
+              {/* Celular: una tarjeta por columna (nombre, muestra y selector) en
+                  vez de una tabla de 878px que obligaba a deslizar de costado
+                  para ver cada columna. Desde md, la tabla de siempre. */}
+              <ul className="space-y-3 md:hidden" aria-label="Columnas detectadas">
+                {columnas.map((c) => (
+                  <li key={c.index} className="rounded-lg border border-border bg-background p-3 space-y-2">
+                    <p className="text-sm font-medium break-words">{c.header || `Columna ${c.index + 1}`}</p>
+                    <p className="text-xs text-muted-foreground break-words">
+                      {[0, 1, 2].map((fila) => c.muestra[fila]).filter(Boolean).join(' · ') || 'Sin datos de muestra'}
+                    </p>
+                    <select
+                      aria-label={`Qué es la columna ${c.header || c.index + 1}`}
+                      value={roles[c.index] || 'ignorar'}
+                      onChange={(e) => cambiarRol(c.index, e.target.value as RolColumna)}
+                      className="w-full text-sm bg-surface border border-border rounded px-2 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      {ROLES.map((r) => (
+                        <option key={r.value} value={r.value}>{r.label}</option>
+                      ))}
+                    </select>
+                    {roles[c.index] === 'personalizada' && (
+                      <input
+                        type="text"
+                        aria-label="Nombre de la columna"
+                        value={nombresPersonalizados[c.index] ?? ''}
+                        onChange={(e) => cambiarNombrePersonalizada(c.index, e.target.value)}
+                        placeholder="Nombre de la columna"
+                        className="w-full text-sm bg-surface border border-border rounded px-2 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="hidden overflow-x-auto border border-border rounded-lg md:block">
                 <table className="text-xs text-left border-collapse w-full">
                   <thead>
                     <tr className="bg-background">
@@ -396,7 +438,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
           )}
         </div>
 
-        <div className="p-4 border-t border-border flex justify-between gap-3 bg-muted/20">
+        <div className="p-4 border-t border-border flex flex-wrap justify-between gap-3 bg-muted/20">
           <div>
             {etapa === 'confirmar' && (
               <Button variant="ghost" onClick={() => setEtapa('seleccionar')} disabled={isBusy} className="gap-2">
@@ -404,7 +446,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
               </Button>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap justify-end gap-3">
             <Button variant="secondary" onClick={handleClose} disabled={isBusy}>
               {etapa === 'exito' ? "Cerrar" : "Cancelar"}
             </Button>
@@ -419,7 +461,7 @@ export function CsvUploadModal({ campeonatoId, isOpen, onClose }: CsvUploadModal
               </Button>
             )}
             {etapa === 'confirmar' && (
-              <Button onClick={handleConfirmarImportacion} disabled={isBusy}>
+              <Button onClick={handleConfirmarImportacion} disabled={isBusy} className="whitespace-nowrap">
                 Confirmar e Importar
               </Button>
             )}
