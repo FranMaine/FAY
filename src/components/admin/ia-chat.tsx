@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { BinocularsIcon, Loader2Icon, SendIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn, mensajeDeError } from "@/lib/utils";
+import { BurbujaVigia } from "@/components/admin/burbuja-vigia";
 
 interface Mensaje {
   rol: "usuario" | "ia";
@@ -22,7 +23,7 @@ const SUGERENCIAS = [
   "Mostrame el ranking de 420 de 2026",
 ];
 
-// VigIA, el asistente para el admin: botón anclado al borde derecho que abre un panel
+// VigIA, el asistente para el admin: burbuja arrastrable (pegada a un borde) que abre un panel
 // lateral de chat. Solo consulta datos (el servidor le da herramientas de
 // lectura, ver /api/admin/ia/chat): no puede modificar nada.
 //
@@ -111,24 +112,8 @@ export function IaChat() {
 
   return (
     <>
-      {/* Pestaña anclada al borde derecho, siempre a la vista. */}
-      <button
-        type="button"
-        onClick={() => setAbierto(true)}
-        aria-label="Abrir a VigIA, el asistente de IA"
-        aria-expanded={abierto}
-        className={cn(
-          // En celular una pestaña pegada al borde derecho tapaba botones y
-          // datos de la pantalla: pasa a ser un botón redondo abajo a la izquierda
-          // (el de "volver arriba" ya ocupa la esquina derecha).
-          "fixed right-0 top-1/2 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-2xl border border-r-0 border-border bg-primary-solid px-3 py-4 text-white shadow-lg transition-[transform,opacity] duration-200 ease-out-strong hover:pr-4 active:scale-95",
-          "max-sm:bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] max-sm:left-[calc(1rem+env(safe-area-inset-left,0px))] max-sm:right-auto max-sm:top-auto max-sm:h-12 max-sm:w-12 max-sm:translate-y-0 max-sm:justify-center max-sm:rounded-full max-sm:border max-sm:p-0 max-sm:hover:pr-0",
-          abierto && "pointer-events-none opacity-0"
-        )}
-      >
-        <BinocularsIcon className="h-5 w-5" aria-hidden="true" />
-        <span className="text-sm font-semibold [writing-mode:vertical-rl] max-sm:sr-only">VigIA</span>
-      </button>
+      {/* Burbuja arrastrable, siempre pegada a un borde (ver BurbujaVigia). */}
+      <BurbujaVigia onAbrir={() => setAbierto(true)} oculta={abierto} />
 
       <div
         className={cn(

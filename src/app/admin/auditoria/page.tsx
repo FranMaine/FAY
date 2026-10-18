@@ -92,11 +92,11 @@ export default function AdminAuditoriaPage() {
                         <td data-label="Fecha" className="fila-completa px-3 py-3 sm:px-6 text-muted-foreground whitespace-nowrap">
                           {new Date(r.createdAt).toLocaleString("es-AR")}
                         </td>
-                        <td data-label="Quién" className="px-3 py-3 sm:px-6">
-                          <div className="font-medium [overflow-wrap:anywhere]">{r.actorNombre || r.actorEmail}</div>
-                          {r.actorNombre && <div className="text-xs text-muted-foreground">{r.actorEmail}</div>}
+                        <td data-label="Quién" className="fila-completa px-3 py-3 sm:px-6">
+                          <div className="font-medium break-words">{r.actorNombre || r.actorEmail}</div>
+                          {r.actorNombre && <div className="text-xs text-muted-foreground break-all">{r.actorEmail}</div>}
                         </td>
-                        <td data-label="Acción" className="px-3 py-3 sm:px-6 font-mono text-xs [overflow-wrap:anywhere]">{r.accion}</td>
+                        <td data-label="Acción" className="fila-completa px-3 py-3 sm:px-6 font-mono text-xs [overflow-wrap:anywhere]">{r.accion}</td>
                         <td data-label="Entidad" className="fila-completa px-3 py-3 sm:px-6 text-muted-foreground">
                           {r.entidad}{r.entidadId ? ` #${r.entidadId.slice(0, 8)}` : ""}
                         </td>

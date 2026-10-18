@@ -400,12 +400,13 @@ button,
   .tabla-apilada td {
     display: block;
     min-width: 0;
+    padding-block: 0.25rem;
   }
-  .tabla-apilada td:first-child {
-    flex: 1 1 100%;
-  }
+  /* El nombre ocupa su propia línea (antes compartía fila con los botones y se
+     partía en 4 renglones, con el contador de categorías pisando un ícono). */
+  .tabla-apilada td:first-child,
   .tabla-apilada td[colspan] {
-    flex: 1 1 12rem;
+    flex: 1 1 100%;
   }
   .tabla-apilada td:last-child {
     margin-left: auto;
