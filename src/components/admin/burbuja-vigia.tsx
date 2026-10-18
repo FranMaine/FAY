@@ -41,21 +41,16 @@ function posicionInicial(): Posicion {
 // cercano). Recuerda dónde la dejaste. Un toque simple la abre; arrastrar más de
 // unos pocos píxeles NO cuenta como toque (si no, cada movimiento abriría el chat).
 export function BurbujaVigia({ onAbrir, oculta }: { onAbrir: () => void; oculta: boolean }) {
-  const [pos, setPos] = useState<Posicion | null>(null);
+  // Se lee la posición guardada al montar (este componente solo existe en el
+  // cliente: IaChat no dibuja nada hasta conocer la sesión), sin esperar a un
+  // efecto -así la burbuja nace ya en su lugar, sin saltar.
+  const [pos, setPos] = useState<Posicion | null>(() => (typeof window === "undefined" ? null : posicionInicial()));
   // Posición en píxeles mientras se arrastra (o se desliza hacia el borde al soltar).
   const [viva, setViva] = useState<{ x: number; y: number } | null>(null);
   const [pegando, setPegando] = useState(false);
   const botonRef = useRef<HTMLButtonElement>(null);
   const gesto = useRef<{ px: number; py: number; ox: number; oy: number; movio: boolean } | null>(null);
   const acabaDeArrastrar = useRef(false);
-
-  // La posición guardada solo se conoce en el cliente: arranca sin definir (la
-  // burbuja se ve igual, abajo a la izquierda, con las clases de abajo) y se
-  // corrige dentro de un requestAnimationFrame.
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setPos(posicionInicial()));
-    return () => cancelAnimationFrame(raf);
-  }, []);
 
   // Si cambia el tamaño de la pantalla (girar el celular), no puede quedar fuera.
   useEffect(() => {
