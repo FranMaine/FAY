@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 import { AlertCircleIcon } from "lucide-react";
+import { coincidePorPalabras } from "@/lib/busqueda-texto";
 
 // Sin "| Orzando" acá: el layout raíz ya lo agrega vía title.template
 // -ponerlo también acá duplicaba el sufijo en el <title> real.
@@ -35,7 +36,12 @@ export default async function CampeonatosPage({
   const allYears = [0, ...anios]; // 0 significará "Todos los años"
 
   const activeClaseId = typeof resolvedParams.clase === 'string' ? resolvedParams.clase : 'ALL';
-  const activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
+  const busqueda = typeof resolvedParams.q === 'string' ? resolvedParams.q.trim().slice(0, 80) : '';
+  // Al buscar por texto sin haber elegido año, se busca en TODOS los años: si
+  // no, "Vela Fest" solo encontraría la edición de este año.
+  const activeAnio = typeof resolvedParams.anio === 'string'
+    ? parseInt(resolvedParams.anio)
+    : busqueda ? 0 : currentYear;
 
   // Construir clausula WHERE
   const whereClause: Prisma.CampeonatoWhereInput = { estado: 'PUBLICADO' };
@@ -46,7 +52,7 @@ export default async function CampeonatosPage({
     whereClause.anio = activeAnio;
   }
 
-  const campeonatosDb = await prisma.campeonato.findMany({
+  const campeonatosTodos = await prisma.campeonato.findMany({
     where: whereClause,
     include: {
       clase: true,
@@ -60,6 +66,17 @@ export default async function CampeonatosPage({
       { nombre: 'asc' },
     ],
   });
+
+  // Búsqueda por texto (sin importar tildes, mayúsculas ni orden de las
+  // palabras): contra el nombre, el evento, la clase, el club sede y el año.
+  const campeonatosDb = busqueda
+    ? campeonatosTodos.filter((c) =>
+        coincidePorPalabras(
+          [c.nombre, c.evento, c.clase.nombre, c.sede?.nombre, c.sede?.nombreCompleto, c.anio].filter(Boolean).join(' '),
+          busqueda
+        )
+      )
+    : campeonatosTodos;
 
   // Cantidad de regatistas ÚNICOS por campeonato -antes esto quedaba
   // siempre en 0 ("Ideally we would count..."), así que toda tarjeta
@@ -105,6 +122,7 @@ export default async function CampeonatosPage({
           anios={allYears as unknown as number[]} 
           currentClaseId={activeClaseId} 
           currentAnio={activeAnio} 
+          currentBusqueda={busqueda}
         />
 
         {/* key con los filtros activos: fuerza a React a tratar esto como
@@ -113,13 +131,17 @@ export default async function CampeonatosPage({
             de que el contenido nuevo aparezca de un salto -mismo criterio
             que cuando se filtra cualquier otra lista del sitio. */}
         {campeonatos.length === 0 ? (
-          <div key={`${activeClaseId}-${activeAnio}`} className="fade-in-up flex flex-col items-center justify-center p-12 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
+          <div key={`${activeClaseId}-${activeAnio}-${busqueda}`} className="fade-in-up flex flex-col items-center justify-center p-12 border-2 border-dashed border-border rounded-xl bg-surface/50 text-muted-foreground">
             <AlertCircleIcon className="w-8 h-8 mb-3 opacity-50" />
             <p className="text-lg font-medium">Sin torneos</p>
-            <p className="text-sm">No se encontraron campeonatos publicados con esos filtros.</p>
+            <p className="text-sm">
+              {busqueda
+                ? `No encontramos campeonatos para "${busqueda}" con esos filtros. Probá con otra palabra o cambiá la clase y el año.`
+                : 'No se encontraron campeonatos publicados con esos filtros.'}
+            </p>
           </div>
         ) : (
-          <div key={`${activeClaseId}-${activeAnio}`} className="fade-in-up">
+          <div key={`${activeClaseId}-${activeAnio}-${busqueda}`} className="fade-in-up">
             <CampeonatosAgrupados campeonatos={campeonatos} />
           </div>
         )}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useTransition } from "react";
-import { LayoutGridIcon } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { LayoutGridIcon, SearchIcon, XIcon } from "lucide-react";
 import { ClaseIcon, slugDeClase } from "@/components/icons/clase-icons";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,9 @@ interface RankingFiltersProps {
   anios: number[];
   currentClaseId: string;
   currentAnio: number;
+  // Si viene, se dibuja arriba un buscador de texto (parámetro "q" de la URL).
+  // Solo lo usa el explorador de campeonatos.
+  currentBusqueda?: string;
 }
 
 // Iniciales de una clase que no tiene logo entre los 10 procesados (ver
@@ -24,7 +27,7 @@ function inicialesDeClase(nombre: string): string {
   return (partes[0][0] + partes[1][0]).toUpperCase();
 }
 
-export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: RankingFiltersProps) {
+export function RankingFilters({ clases, anios, currentClaseId, currentAnio, currentBusqueda }: RankingFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // startTransition mantiene el chip recién clickeado marcado como activo
@@ -46,6 +49,23 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
     fila.scrollTo({ left: activo.offsetLeft - (fila.clientWidth - activo.offsetWidth) / 2, behavior: "auto" });
   }, [currentClaseId]);
 
+  // Buscador de texto: se escribe en un estado local (para que el cursor no
+  // salte mientras la URL se actualiza) y recién a los 300 ms sin teclear se
+  // pasa al parámetro "q", que filtra del lado del servidor.
+  const [texto, setTexto] = useState(currentBusqueda ?? "");
+  const ultimoEnviado = useRef(currentBusqueda ?? "");
+  useEffect(() => {
+    if (currentBusqueda === undefined || texto.trim() === ultimoEnviado.current.trim()) return;
+    const t = setTimeout(() => {
+      ultimoEnviado.current = texto;
+      const params = new URLSearchParams(searchParams.toString());
+      if (texto.trim()) params.set("q", texto.trim());
+      else params.delete("q");
+      startTransition(() => router.replace("?" + params.toString()));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [texto, currentBusqueda, router, searchParams]);
+
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -57,6 +77,34 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
 
   return (
     <div className="flex flex-col gap-4 p-4 bg-surface border border-border rounded-2xl mb-8">
+      {currentBusqueda !== undefined && (
+        <div className="space-y-1.5">
+          <label htmlFor="buscar-campeonato" className="text-sm font-medium text-muted-foreground">Buscar</label>
+          <div className="relative">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <input
+              id="buscar-campeonato"
+              type="search"
+              inputMode="search"
+              autoComplete="off"
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+              placeholder="Nombre del campeonato, club sede, clase o año…"
+              className="h-11 w-full rounded-xl border border-border bg-background pl-9 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary [&::-webkit-search-cancel-button]:hidden"
+            />
+            {texto && (
+              <button
+                type="button"
+                aria-label="Borrar búsqueda"
+                onClick={() => setTexto("")}
+                className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-foreground"
+              >
+                <XIcon className="h-4 w-4" aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       <div className="space-y-1.5 min-w-0">
         <span id="filtro-clase-label" className="text-sm font-medium text-muted-foreground">Clase</span>
         {/* Antes era un <select> nativo -acá el logo de cada clase importa
