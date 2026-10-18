@@ -100,11 +100,15 @@ export function BurbujaVigia({ onAbrir, oculta }: { onAbrir: () => void; oculta:
   function alPresionar(e: React.PointerEvent<HTMLButtonElement>) {
     const r = e.currentTarget.getBoundingClientRect();
     gesto.current = { px: e.clientX, py: e.clientY, ox: r.left, oy: r.top, movio: false };
-    e.currentTarget.setPointerCapture(e.pointerId);
     // Se bloquea desde que se apoya el dedo (no recién al superar el umbral):
     // si no, el primer tramo del movimiento ya empezaba a scrollear la página.
     desbloquear.current?.();
     desbloquear.current = bloquearScroll();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Algunos navegadores no dejan capturar este puntero: el gesto sigue igual.
+    }
   }
 
   function alMover(e: React.PointerEvent<HTMLButtonElement>) {
