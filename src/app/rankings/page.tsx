@@ -129,7 +129,7 @@ export default async function RankingsPage({
                             </td>
                             <td className="w-full max-w-0 px-3 sm:px-6 py-3 font-medium">
                               <Link href={`/regatistas/${r.id}`} className="hover:text-primary transition-colors flex items-center gap-2 group min-w-0">
-                                <span className="truncate">{r.nombre}</span>
+                                <span className="line-clamp-2 break-words">{r.nombre}</span>
                                 <ArrowRightIcon className="w-4 h-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                               </Link>
                               <span className="md:hidden block text-xs text-muted-foreground truncate">{r.club}</span>
