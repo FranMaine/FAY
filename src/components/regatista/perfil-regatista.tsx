@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon } from "lucide-react";
+import { TrophyIcon, MapPinIcon, CalendarIcon, MedalIcon, UserIcon, SparklesIcon } from "lucide-react";
 import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { PosicionHistorica } from "@/components/charts/posicion-historica";
 import { LOGROS } from "@/lib/logros";
@@ -41,6 +41,16 @@ export function PerfilRegatista({ regatista, historial, chartData, logros, heade
               )}
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{regatista.nombre}</h1>
+                {/* Apodo que eligió la persona (Configuración de cuenta): solo un
+                    detalle divertido. No es el nombre del perfil ni se usa en el
+                    buscador, las tablas ni el título de la página. */}
+                {regatista.user?.apodo && (
+                  <p className="mb-2 inline-flex max-w-full items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium italic text-primary">
+                    <SparklesIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span className="sr-only">Apodo: </span>
+                    <span className="truncate">&ldquo;{regatista.user.apodo}&rdquo;</span>
+                  </p>
+                )}
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground font-medium">
                   {regatista.club && (
                     <span className="flex items-center">

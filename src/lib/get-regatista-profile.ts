@@ -12,6 +12,8 @@ export async function getRegatistaProfile(id: string) {
     include: {
       club: true,
       otrosClubes: true,
+      // Solo el apodo (decorativo) de la cuenta vinculada: nunca el email ni nada más.
+      user: { select: { apodo: true } },
       resultados: {
         include: {
           regata: {

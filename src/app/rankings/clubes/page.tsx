@@ -207,7 +207,7 @@ export default async function RankingClubesPage({
                                 <span className="font-medium text-muted-foreground">{pos}</span>
                               )}
                             </td>
-                            <td className="px-3 sm:px-6 py-3 font-medium">
+                            <td className="w-full max-w-0 px-3 sm:px-6 py-3 font-medium">
                               <Link href={`/clubes/${r.id}`} className="hover:text-primary transition-colors flex items-center gap-3 group min-w-0">
                                 <ClubAvatar nombre={r.nombre} logoUrl={r.logoUrl} className="w-8 h-8 text-xs" pixeles={32} />
                                 <span className="min-w-0">
@@ -220,7 +220,7 @@ export default async function RankingClubesPage({
                             <td className="hidden sm:table-cell px-6 py-3 text-center text-muted-foreground">
                               <span className="inline-flex items-center gap-1"><UsersIcon className="w-3.5 h-3.5" aria-hidden="true" /> {r.regatistas}</span>
                             </td>
-                            <td className="px-3 sm:px-6 py-3 text-right">
+                            <td className="whitespace-nowrap px-3 sm:px-6 py-3 text-right">
                               <span className="font-bold text-primary">{r.puntosRanking.toLocaleString("es-AR")} pts</span>
                               <span className="mt-1 ml-auto block h-1 w-16 sm:w-24 rounded-full bg-border overflow-hidden" aria-hidden="true">
                                 <span className="block h-full rounded-full bg-primary/70" style={{ width: `${Math.max(4, Math.round((r.puntosRanking / lider) * 100))}%` }} />

@@ -25,7 +25,7 @@ export default function PrivacidadPage() {
         <section className="space-y-3 text-foreground/90">
           <h2 className="text-xl font-semibold">1. Qué datos recolectamos</h2>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong>Cuenta de usuario:</strong> nombre, email y contraseña (guardada encriptada, nunca en texto plano) cuando te registrás.</li>
+            <li><strong>Cuenta de usuario:</strong> nombre, email y contraseña (guardada encriptada, nunca en texto plano) cuando te registrás, y el apodo opcional que elijas, que se muestra en tu perfil público.</li>
             <li><strong>Mensajes de contacto:</strong> si nos escribís desde el formulario de contacto o por mail, guardamos tu nombre, tu email y el mensaje para poder responderte.</li>
             <li><strong>Vinculación con tu perfil de regatista:</strong> si pedís vincular tu cuenta a una ficha de regatista, guardamos esa solicitud, los datos que declarás para comprobar que el perfil es tuyo (número de vela, club, último campeonato) y, si se aprueba, la relación entre tu cuenta y esa ficha. Te avisamos por mail cuando se aprueba y cuando se publica un campeonato en el que figurás.</li>
             <li><strong>Resultados deportivos:</strong> nombre, club y resultados de regata de cada regatista, provenientes de los resultados oficiales de cada campeonato -no de un formulario que vos completás.</li>

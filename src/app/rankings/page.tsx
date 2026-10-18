@@ -127,7 +127,7 @@ export default async function RankingsPage({
                                 <span className="font-medium text-muted-foreground">{pos}</span>
                               )}
                             </td>
-                            <td className="px-3 sm:px-6 py-3 font-medium">
+                            <td className="w-full max-w-0 px-3 sm:px-6 py-3 font-medium">
                               <Link href={`/regatistas/${r.id}`} className="hover:text-primary transition-colors flex items-center gap-2 group min-w-0">
                                 <span className="truncate">{r.nombre}</span>
                                 <ArrowRightIcon className="w-4 h-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
@@ -136,7 +136,7 @@ export default async function RankingsPage({
                             </td>
                             <td className="hidden md:table-cell px-6 py-3 text-muted-foreground">{r.club}</td>
                             <td className="hidden sm:table-cell px-6 py-3 text-center">{r.campeonatos}</td>
-                            <td className="px-3 sm:px-6 py-3 text-right">
+                            <td className="whitespace-nowrap px-3 sm:px-6 py-3 text-right">
                               <span className="font-bold text-primary">{r.puntosRanking.toLocaleString("es-AR")} pts</span>
                               <span className="mt-1 ml-auto block h-1 w-16 sm:w-24 rounded-full bg-border overflow-hidden" aria-hidden="true">
                                 <span className="block h-full rounded-full bg-primary/70" style={{ width: `${Math.max(4, Math.round((r.puntosRanking / lider) * 100))}%` }} />

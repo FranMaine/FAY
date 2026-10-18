@@ -183,7 +183,7 @@ export function ConfiguracionForm({ apodoInicial, notificarInicial, email, regat
         <CardHeader>
           <CardTitle>Apodo</CardTitle>
           <CardDescription>
-            Solo para vos -no aparece en resultados ni tablas de posiciones, esas siguen mostrando tu nombre oficial.
+            Un nombre divertido que se muestra en tu perfil público, como detalle decorativo. Los resultados, las tablas y el buscador siguen usando tu nombre oficial.
           </CardDescription>
         </CardHeader>
         <CardContent>
