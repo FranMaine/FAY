@@ -93,14 +93,14 @@ export default function AdminAuditoriaPage() {
                           {new Date(r.createdAt).toLocaleString("es-AR")}
                         </td>
                         <td data-label="Quién" className="px-3 py-3 sm:px-6">
-                          <div className="font-medium break-all">{r.actorNombre || r.actorEmail}</div>
+                          <div className="font-medium [overflow-wrap:anywhere]">{r.actorNombre || r.actorEmail}</div>
                           {r.actorNombre && <div className="text-xs text-muted-foreground">{r.actorEmail}</div>}
                         </td>
-                        <td data-label="Acción" className="px-3 py-3 sm:px-6 font-mono text-xs break-all">{r.accion}</td>
+                        <td data-label="Acción" className="px-3 py-3 sm:px-6 font-mono text-xs [overflow-wrap:anywhere]">{r.accion}</td>
                         <td data-label="Entidad" className="fila-completa px-3 py-3 sm:px-6 text-muted-foreground">
                           {r.entidad}{r.entidadId ? ` #${r.entidadId.slice(0, 8)}` : ""}
                         </td>
-                        <td data-label="Detalle" className="fila-completa px-3 py-3 sm:px-6 text-xs text-muted-foreground font-mono break-all md:max-w-xs md:truncate" title={r.detalle ? JSON.stringify(r.detalle) : ""}>
+                        <td data-label="Detalle" className="fila-completa px-3 py-3 sm:px-6 text-xs text-muted-foreground font-mono [overflow-wrap:anywhere] md:max-w-xs md:truncate" title={r.detalle ? JSON.stringify(r.detalle) : ""}>
                           {r.detalle ? JSON.stringify(r.detalle) : "-"}
                         </td>
                       </tr>
