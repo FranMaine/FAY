@@ -1,5 +1,5 @@
 import Image from 'next/image';
-// Logos de categoría para Orzando -los 10 archivos que subió el usuario
+// Logos de categoría para Orzando -los archivos que subió el usuario
 // (public/logos-categorias/*.png), ya procesados a fondo transparente y
 // recoloreados a #3B82F6 por scripts/process-real-logos.ts a partir de los
 // originales en logos/. No son dibujos nuestros: son los logos reales de
@@ -9,13 +9,15 @@ import Image from 'next/image';
 import { ImgHTMLAttributes } from 'react';
 
 export type ClaseIconSlug =
-  | '29er' | '420' | 'f18' | 'ilca' | 'j24' | 'j70'
+  | '29er' | '420' | 'f18' | 'finn' | 'grumete' | 'ilca' | 'j24' | 'j70'
   | 'optimist' | 'raptor' | 'snipe' | 'star';
 
 export const CLASE_ICONOS: Record<ClaseIconSlug, { label: string }> = {
   '29er': { label: '29er' },
   '420': { label: '420' },
   f18: { label: 'F18' },
+  finn: { label: 'Finn' },
+  grumete: { label: 'Grumete' },
   ilca: { label: 'ILCA' },
   j24: { label: 'J24' },
   j70: { label: 'J70' },
@@ -27,7 +29,7 @@ export const CLASE_ICONOS: Record<ClaseIconSlug, { label: string }> = {
 
 /**
  * Slugs que se muestran como categoría propia en la marquesina
- * (ClaseMarquee). No son los mismos 10 que tienen ícono: "optimist" sigue
+ * (ClaseMarquee). No son todos los que tienen ícono: "optimist" sigue
  * en CLASE_ICONOS/slugDeClase porque las clases reales de la base
  * ("Optimist Principiantes", "Optimist Timoneles") necesitan ese ícono en
  * sus badges y cards -pero no existe ninguna clase que se llame solo
@@ -50,6 +52,8 @@ export function slugDeClase(nombreClase: string): ClaseIconSlug | null {
   if (n.includes('29er')) return '29er';
   if (n.includes('420')) return '420';
   if (n.includes('f18')) return 'f18';
+  if (n.includes('finn')) return 'finn';
+  if (n.includes('grumete')) return 'grumete';
   if (n.includes('ilca') || n.includes('laser')) return 'ilca';
   if (n.includes('j24') || n.includes('j 24')) return 'j24';
   if (n.includes('j70') || n.includes('j 70')) return 'j70';

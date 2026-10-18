@@ -17,6 +17,8 @@ const ARCHIVOS: Record<string, string> = {
   '29er': 'logos/29er.png',
   '420': 'logos/420.png',
   f18: 'logos/F18.png',
+  finn: 'logos/Finn.png',
+  grumete: 'logos/grumete.png',
   ilca: 'logos/ILCA.png',
   j24: 'logos/J24.png',
   j70: 'logos/J70.png',
@@ -79,7 +81,7 @@ async function main() {
     const recoloreado = await recolorear(path.resolve(archivo), slug);
 
     // Recortar el margen transparente sobrante y centrar en un lienzo
-    // cuadrado de SIZE x SIZE, así los 10 quedan del mismo tamaño relativo
+    // cuadrado de SIZE x SIZE, así todos quedan del mismo tamaño relativo
     // sin importar cuánto margen traía cada imagen original.
     const recortado = await sharp(recoloreado).trim().toBuffer();
     const meta = await sharp(recortado).metadata();
