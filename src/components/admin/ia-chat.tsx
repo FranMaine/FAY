@@ -23,7 +23,7 @@ const SUGERENCIAS = [
   "Mostrame el ranking de 420 de 2026",
 ];
 
-// VigIA, el asistente para el admin: burbuja arrastrable (pegada a un borde) que abre un panel
+// VigIA, el asistente para el admin: pestaña lateral en computadora y burbuja arrastrable (pegada a un borde) en celular, que abre un panel
 // lateral de chat. Solo consulta datos (el servidor le da herramientas de
 // lectura, ver /api/admin/ia/chat): no puede modificar nada.
 //
@@ -112,8 +112,25 @@ export function IaChat() {
 
   return (
     <>
-      {/* Burbuja arrastrable, siempre pegada a un borde (ver BurbujaVigia). */}
-      <BurbujaVigia onAbrir={() => setAbierto(true)} oculta={abierto} />
+      {/* Computadora: pestaña anclada al borde derecho, siempre a la vista. */}
+      <button
+        type="button"
+        onClick={() => setAbierto(true)}
+        aria-label="Abrir a VigIA, el asistente de IA"
+        aria-expanded={abierto}
+        className={cn(
+          "fixed right-0 top-1/2 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-2xl border border-r-0 border-border bg-primary-solid px-3 py-4 text-white shadow-lg transition-[transform,opacity] duration-200 ease-out-strong hover:pr-4 active:scale-95 max-sm:hidden",
+          abierto && "pointer-events-none opacity-0"
+        )}
+      >
+        <BinocularsIcon className="h-5 w-5" aria-hidden="true" />
+        <span className="text-sm font-semibold [writing-mode:vertical-rl]">VigIA</span>
+      </button>
+
+      {/* Celular: burbuja arrastrable, siempre pegada a un borde (ver BurbujaVigia). */}
+      <div className="sm:hidden">
+        <BurbujaVigia onAbrir={() => setAbierto(true)} oculta={abierto} />
+      </div>
 
       <div
         className={cn(
