@@ -107,25 +107,25 @@ export default async function ClubCategoriaPage({ params }: Props) {
               <table className="w-full text-sm text-left">
                 <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                   <tr>
-                    <th scope="col" className="px-2 sm:px-6 py-3 sm:py-4 font-medium">Regatista</th>
+                    <th scope="col" className="px-1.5 sm:px-6 py-3 sm:py-4 font-medium">Regatista</th>
                     <th scope="col" className="hidden sm:table-cell px-6 py-4 font-medium text-center">Resultados</th>
-                    <th scope="col" className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-center">Vic.</th>
-                    <th scope="col" className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-center">Podios</th>
-                    <th scope="col" className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-right"><span className="sm:hidden">Mejor</span><span className="hidden sm:inline">Mejor puesto</span></th>
+                    <th scope="col" className="px-1.5 sm:px-6 py-3 sm:py-4 font-medium text-center">Vic.</th>
+                    <th scope="col" className="px-1.5 sm:px-6 py-3 sm:py-4 font-medium text-center">Podios</th>
+                    <th scope="col" className="px-1.5 sm:px-6 py-3 sm:py-4 font-medium text-right"><span className="sm:hidden">Mejor</span><span className="hidden sm:inline">Mejor puesto</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {regatistas.map((r) => (
                     <tr key={r.regatistaId} className="hover:bg-background/50 transition-colors">
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium">
+                      <td className="px-1.5 sm:px-6 py-3 sm:py-4 font-medium">
                         <Link href={`/regatistas/${r.regatistaId}`} className="hover:text-primary transition-colors">
                           {r.nombre}
                         </Link>
                       </td>
                       <td className="hidden sm:table-cell px-6 py-4 text-center">{r.resultados}</td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-center">{r.victorias}</td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-center">{r.podios}</td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-right font-bold text-primary"><div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                      <td className="px-1.5 sm:px-6 py-3 sm:py-4 text-center">{r.victorias}</td>
+                      <td className="px-1.5 sm:px-6 py-3 sm:py-4 text-center">{r.podios}</td>
+                      <td className="px-1.5 sm:px-6 py-3 sm:py-4 text-right font-bold text-primary"><div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                         <MedalIcon className="w-4 h-4 text-amber-500" aria-hidden="true" />
                         {r.mejorPuesto}º
                       </div></td>

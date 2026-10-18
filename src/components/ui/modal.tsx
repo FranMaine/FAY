@@ -154,7 +154,11 @@ export function Modal({ isOpen, onClose, children, ariaLabel, className, closeOn
         aria-label={ariaLabel}
         tabIndex={-1}
         className={cn(
-          "bg-surface border border-border rounded-2xl shadow-xl overflow-hidden flex flex-col outline-none transition-[opacity,transform] ease-out-strong motion-reduce:transition-none",
+          // max-h + scroll propio: en un celular chico (o con el teclado abierto) un
+          // modal alto -el de vinculación, con sus campos- quedaba cortado arriba y
+          // abajo, sin forma de llegar a los botones. dvh descuenta la barra del
+          // navegador móvil; un max-h de la pantalla que lo usa gana sobre este.
+          "bg-surface border border-border rounded-2xl shadow-xl overflow-y-auto overscroll-contain max-h-[calc(100dvh-2rem)] flex flex-col outline-none transition-[opacity,transform] ease-out-strong motion-reduce:transition-none",
           entered ? "opacity-100 scale-100 duration-[220ms]" : "opacity-0 scale-[0.96] duration-150",
           className
         )}

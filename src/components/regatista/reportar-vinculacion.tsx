@@ -61,7 +61,7 @@ export function ReportarVinculacion({ regatistaId, nombre }: Props) {
         <button
           type="button"
           onClick={() => setAbierto(true)}
-          className="inline-flex min-h-11 items-center gap-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg text-left text-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <FlagIcon className="w-4 h-4" aria-hidden="true" />
           ¿Este perfil está vinculado a la persona equivocada?
