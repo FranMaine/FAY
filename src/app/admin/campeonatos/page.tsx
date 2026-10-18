@@ -411,7 +411,7 @@ export default function AdminCampeonatosPage() {
 
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+            <table className="tabla-apilada w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                 <tr>
                   <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium">Evento / Clase</th>
@@ -443,7 +443,7 @@ export default function AdminCampeonatosPage() {
                       return (
                         <tr key={clave} className="hover:bg-background/50 transition-colors">
                           <td className="px-3 py-3 sm:px-6 sm:py-4 font-medium">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                               {c.nombre} <span className="text-muted-foreground font-normal">{grupo.anio}</span>
                               <span className="text-muted-foreground mx-1">·</span>
                               {c.clase && <ClaseIcon nombreClase={c.clase.nombre} className="w-5 h-5 shrink-0 object-contain" />}

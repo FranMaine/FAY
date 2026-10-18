@@ -365,7 +365,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-start gap-4">
+          <div className="flex w-full min-w-0 items-start gap-4">
             <div className="shrink-0">
               <input
                 ref={logoInputRef}
@@ -410,9 +410,9 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
               )}
               {errorLogo && <p role="alert" className="mt-1 max-w-[9rem] text-xs text-red-500">{errorLogo}</p>}
             </div>
-            <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Carga de Resultados</h1>
+            <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">Carga de Resultados</h1>
               <Badge
                 variant="muted"
                 className={campeonato.estado === "PUBLICADO" ? "bg-green-500/20 text-green-500" : "bg-amber-500/20 text-amber-500"}
@@ -421,11 +421,11 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
               </Badge>
             </div>
             {isEditingNombre ? (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Input
                   value={nombreInput}
                   onChange={(e) => setNombreInput(e.target.value)}
-                  className="h-8 max-w-xs bg-background border-border"
+                  className="h-10 w-full bg-background border-border sm:h-8 sm:max-w-xs"
                   disabled={isSavingNombre}
                   autoFocus
                   onKeyDown={(e) => {
@@ -437,13 +437,13 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                   value={eventoInput}
                   onChange={(e) => setEventoInput(e.target.value)}
                   placeholder="Evento (opcional)"
-                  className="h-8 max-w-[200px] bg-background border-border"
+                  className="h-10 w-full bg-background border-border sm:h-8 sm:max-w-[200px]"
                   disabled={isSavingNombre}
                 />
                 <select
                   value={sedeIdInput}
                   onChange={(e) => setSedeIdInput(e.target.value)}
-                  className="h-8 max-w-[180px] text-sm bg-background border border-border rounded-md px-2"
+                  className="h-10 w-full text-sm bg-background border border-border rounded-md px-2 sm:h-8 sm:max-w-[180px]"
                   disabled={isSavingNombre}
                 >
                   <option value="">Sin sede</option>
@@ -459,7 +459,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                 </Button>
               </div>
             ) : (
-              <p className="text-muted-foreground flex items-center gap-2 group">
+              <p className="text-muted-foreground flex flex-wrap items-center gap-x-2 group break-words">
                 {campeonato.evento ? `${campeonato.evento} › ` : ""}{campeonato.nombre} • {campeonato.clase.nombre}{campeonato.sede ? ` • ${campeonato.sede.nombre}` : ""}
                 <button
                   onClick={() => { setNombreInput(campeonato.nombre); setEventoInput(campeonato.evento || ""); setSedeIdInput(campeonato.sede?.id || ""); setIsEditingNombre(true); }}
@@ -494,8 +494,8 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
           </div>
         </header>
 
-        <div className="flex items-center gap-3 bg-surface border border-border rounded-lg px-4 py-3 w-fit">
-          <label className="text-sm text-muted-foreground whitespace-nowrap">
+        <div className="flex flex-wrap items-center gap-3 bg-surface border border-border rounded-lg px-4 py-3 w-full sm:w-fit">
+          <label className="text-sm text-muted-foreground">
             Descartes (peores regatas que no cuentan en el total)
           </label>
           <Input
@@ -596,7 +596,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                   </div>
 
                   <div className="border border-border rounded-lg overflow-hidden">
-                    <table className="w-full text-sm text-left">
+                    <table className="tabla-tarjetas w-full text-sm text-left">
                       <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                         <tr>
                           <th scope="col" className="px-4 py-3 font-medium">Regatista</th>
@@ -610,54 +610,54 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
                       <tbody className="divide-y divide-border">
                         {rows.map((row) => (
                           <tr key={row.key} className="bg-background">
-                            <td className="px-4 py-2">
+                            <td data-label="Regatista" className="fila-completa con-esquina px-4 py-2">
                               {row.regatistaId ? (
                                 // El nombre de un regatista ya vinculado se
                                 // edita desde "Gestión de Regatistas", no
                                 // desde acá -escribir algo distinto acá se
                                 // interpretaría como "buscar/crear otro
                                 // regatista", no como corregir este.
-                                <span className="h-8 flex items-center px-3 text-foreground">{row.nombre}</span>
+                                <span className="min-h-8 flex items-center px-3 text-foreground max-md:px-0 break-words">{row.nombre}</span>
                               ) : (
                                 <Input
                                   value={row.nombre}
                                   onChange={(e) => editarFila(row.key, "nombre", e.target.value)}
                                   placeholder="Nombre del regatista"
-                                  className="h-8 border-transparent focus:border-primary bg-transparent"
+                                  className="h-10 md:h-8 border-transparent focus:border-primary bg-transparent max-md:border-border"
                                 />
                               )}
                             </td>
-                            <td className="px-4 py-2">
+                            <td data-label="Vela" className="px-4 py-2">
                               <Input
                                 value={row.vela}
                                 onChange={(e) => editarFila(row.key, "vela", e.target.value)}
-                                className="h-8 border-transparent focus:border-primary bg-transparent"
+                                className="h-10 md:h-8 border-transparent focus:border-primary bg-transparent max-md:border-border"
                               />
                             </td>
-                            <td className="px-4 py-2">
+                            <td data-label="Puesto" className="px-4 py-2">
                               <Input
                                 type="number"
                                 value={row.puesto}
                                 onChange={(e) => editarFila(row.key, "puesto", e.target.value)}
-                                className="h-8 border-transparent focus:border-primary bg-transparent"
+                                className="h-10 md:h-8 border-transparent focus:border-primary bg-transparent max-md:border-border"
                               />
                             </td>
-                            <td className="px-4 py-2">
+                            <td data-label="Puntos" className="px-4 py-2">
                               <Input
                                 type="number"
                                 value={row.puntos}
                                 onChange={(e) => editarFila(row.key, "puntos", e.target.value)}
-                                className="h-8 border-transparent focus:border-primary bg-transparent"
+                                className="h-10 md:h-8 border-transparent focus:border-primary bg-transparent max-md:border-border"
                               />
                             </td>
-                            <td className="px-4 py-2">
+                            <td data-label="Obs (UFD, etc)" className="px-4 py-2">
                               <Input
                                 value={row.observacion}
                                 onChange={(e) => editarFila(row.key, "observacion", e.target.value)}
-                                className="h-8 border-transparent focus:border-primary bg-transparent text-red-500 font-medium"
+                                className="h-10 md:h-8 border-transparent focus:border-primary bg-transparent text-red-500 font-medium max-md:border-border"
                               />
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="fila-esquina px-2 py-2">
                               <Button
                                 variant="ghost"
                                 size="icon"

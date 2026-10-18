@@ -16,6 +16,7 @@ interface Usuario {
   id: string;
   email: string;
   name: string | null;
+  apodo: string | null;
   role: Rol;
 }
 
@@ -117,6 +118,24 @@ export default function AdminUsuariosPage() {
     }
   }
 
+  async function quitarApodo(usuario: Usuario) {
+    try {
+      const res = await fetch(`/api/admin/usuarios/${usuario.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ borrarApodo: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo quitar el apodo");
+      const aplicar = (prev: Usuario[]) => prev.map((u) => (u.id === usuario.id ? { ...u, apodo: null } : u));
+      setUsuarios(aplicar);
+      setRemotos((prev) => (prev ? aplicar(prev) : prev));
+      toast.success(`Se quitó el apodo de ${usuario.name || usuario.email}`);
+    } catch (err) {
+      toast.error(mensajeDeError(err));
+    }
+  }
+
   async function eliminar(usuario: Usuario) {
     try {
       const res = await fetch(`/api/admin/usuarios/${usuario.id}`, { method: "DELETE" });
@@ -180,12 +199,26 @@ export default function AdminUsuariosPage() {
                   <div className="min-w-0">
                     <p className="font-medium truncate">{u.name || u.email}</p>
                     <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                    {u.apodo && (
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="inline-flex max-w-full items-center rounded-full bg-primary/10 px-2.5 py-0.5 italic text-primary">
+                          <span className="truncate">Apodo: &ldquo;{u.apodo}&rdquo;</span>
+                        </span>
+                        <ConfirmDeleteButton
+                          mostrarTexto
+                          label="Quitar apodo"
+                          confirmLabel="¿Quitar apodo?"
+                          className="h-8 px-2 text-xs"
+                          onConfirm={() => quitarApodo(u)}
+                        />
+                      </div>
+                    )}
                     <p className="text-xs mt-1 inline-flex items-center gap-1 text-primary">
                       {u.role === "ADMIN" ? <ShieldCheckIcon className="w-3.5 h-3.5" /> : u.role === "ORGANIZADOR" ? <ShieldIcon className="w-3.5 h-3.5" /> : <UserIcon className="w-3.5 h-3.5" />}
                       {ETIQUETA_ROL[u.role]}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                     {(["REGULAR", "ORGANIZADOR", "ADMIN"] as Rol[]).map((rol) => (
                       <Button
                         key={rol}

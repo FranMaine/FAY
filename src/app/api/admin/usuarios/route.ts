@@ -29,7 +29,7 @@ export async function GET(request: Request) {
             ],
           }
         : undefined,
-      select: { id: true, email: true, name: true, role: true },
+      select: { id: true, email: true, name: true, apodo: true, role: true },
       take: LIMITE_LISTA,
       orderBy: [{ role: 'asc' }, { email: 'asc' }],
     });

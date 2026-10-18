@@ -246,7 +246,7 @@ export default function AdminEscudosClubesPage() {
               Editá la abreviación y el nombre completo, subí el escudo (&quot;Buscar&quot; abre Google Imágenes) o eliminá un club. Al eliminarlo, sus regatistas quedan sin club.
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => setFusionando(true)}>
               <MergeIcon className="w-4 h-4" /> Fusionar clubes
             </Button>

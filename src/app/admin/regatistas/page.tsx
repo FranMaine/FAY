@@ -113,7 +113,7 @@ export default function AdminRegatistasPage() {
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Gestión de Regatistas</h1>
             <p className="text-muted-foreground text-lg">Administración de la base de datos central de regatistas</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="secondary" className="flex items-center gap-2" onClick={() => setFusionando(true)}>
               <MergeIcon className="w-4 h-4" /> Fusionar regatistas
             </Button>
@@ -142,7 +142,7 @@ export default function AdminRegatistasPage() {
 
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+            <table className="tabla-tarjetas w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                 <tr>
                   <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium">Nombre</th>
@@ -155,23 +155,23 @@ export default function AdminRegatistasPage() {
               <tbody className="divide-y divide-border">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center">
+                    <td colSpan={5} className="fila-completa px-6 py-10 text-center">
                       <Loader2Icon className="w-6 h-6 animate-spin text-primary mx-auto" />
                     </td>
                   </tr>
                 ) : regatistas.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
+                    <td colSpan={5} className="fila-completa px-6 py-10 text-center text-muted-foreground">
                       No se encontraron regatistas.
                     </td>
                   </tr>
                 ) : (
                   regatistas.map((r) => (
                     <tr key={r.id} className="hover:bg-background/50 transition-colors">
-                      <td className="px-3 py-3 sm:px-6 sm:py-4 font-medium">{r.nombre}</td>
-                      <td className="px-3 py-3 sm:px-6 sm:py-4">{r.club?.nombre || "-"}</td>
-                      <td className="px-3 py-3 sm:px-6 sm:py-4">{r.pais || "-"}</td>
-                      <td className="px-3 py-3 sm:px-6 sm:py-4">
+                      <td className="fila-completa px-3 py-3 sm:px-6 sm:py-4 font-medium">{r.nombre}</td>
+                      <td data-label="Club" className="px-3 py-3 sm:px-6 sm:py-4">{r.club?.nombre || "-"}</td>
+                      <td data-label="País" className="px-3 py-3 sm:px-6 sm:py-4">{r.pais || "-"}</td>
+                      <td data-label="Cuenta vinculada" className="fila-completa px-3 py-3 sm:px-6 sm:py-4">
                         {r.user ? (
                           <div className="flex items-center gap-2">
                             <LinkIcon className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
@@ -189,7 +189,7 @@ export default function AdminRegatistasPage() {
                           <span className="text-muted-foreground">Sin vincular</span>
                         )}
                       </td>
-                      <td className="px-3 py-3 sm:px-6 sm:py-4 text-right space-x-2">
+                      <td className="fila-acciones px-3 py-3 sm:px-6 sm:py-4 text-right space-x-2">
                         <Button
                           variant="ghost"
                           size="icon"

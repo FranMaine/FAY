@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, Sun, Wind, type LucideIcon } from 'lucide-react';
 import { categoriaClima, ETIQUETA_CLIMA, direccionViento, type CategoriaClima } from '@/lib/clima';
 import { LUGAR_PREDETERMINADO, urlViento } from '@/lib/lugares';
+import { cn } from '@/lib/utils';
 
 interface DatosClima {
   lugar: { slug: string; nombre: string };
@@ -33,7 +34,7 @@ const REFRESCO_MS = 10 * 60 * 1000;
 // nadie ve el badge más tarde) y, si hay sesión, cambia al lugar del club en
 // cuanto /api/mi-lugar responde. Si la API no responde, no muestra nada (no
 // rompe la barra).
-export function ClimaBadge({ slug }: { slug: string }) {
+export function ClimaBadge({ slug, compacto = false }: { slug: string; compacto?: boolean }) {
   const [datos, setDatos] = useState<DatosClima | null>(null);
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export function ClimaBadge({ slug }: { slug: string }) {
           (un link adentro de role="img" quedaría fuera del árbol de
           accesibilidad). */}
       <span role="img" title={cielo} aria-label={cielo} className="flex items-center gap-1.5 sm:gap-2">
-        <Icono className="h-4 w-4 text-primary max-[359px]:hidden" aria-hidden="true" />
+        <Icono className={cn("h-4 w-4 text-primary max-[359px]:hidden", compacto && "max-[429px]:hidden")} aria-hidden="true" />
         <span className="font-medium">{datos.temperatura}°</span>
       </span>
       {/* El viento lleva a la página de viento del lugar (detalle, últimas 24 h, pronóstico y
@@ -85,7 +86,7 @@ export function ClimaBadge({ slug }: { slug: string }) {
         aria-label={`${viento}. Ver el detalle del viento en ${datos.lugar.nombre}`}
         className="-my-3 flex items-center gap-1 whitespace-nowrap rounded-sm py-3 underline decoration-dotted decoration-muted-foreground/60 underline-offset-4 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <Wind className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+        <Wind className={cn("h-3.5 w-3.5 text-muted-foreground", compacto && "max-[429px]:hidden")} aria-hidden="true" />
         {datos.vientoNudos} kn {direccionViento(datos.vientoGrados)}
       </Link>
     </div>

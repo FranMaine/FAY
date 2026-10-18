@@ -318,6 +318,100 @@ button,
   }
 }
 
+/* Tablas de administración en celular. Una tabla de 5 columnas no entra en
+   375px (había que deslizar de costado y los botones de la fila quedaban
+   fuera de pantalla), así que por debajo de md cada fila pasa a ser una
+   tarjeta. Se usan con <table className="tabla-tarjetas"> y, en cada <td>:
+   data-label (la etiqueta que antes ponía el encabezado), y las clases
+   fila-completa (ocupa las 2 columnas), fila-acciones (botones, a la derecha)
+   y fila-esquina / con-esquina (un botón fijo arriba a la derecha y el
+   campo que le deja lugar). */
+@media (max-width: 767px) {
+  .tabla-tarjetas,
+  .tabla-tarjetas tbody {
+    display: block;
+    width: 100%;
+  }
+  .tabla-tarjetas thead {
+    display: none;
+  }
+  .tabla-tarjetas tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.5rem 1rem;
+    padding: 0.875rem 1rem;
+    position: relative;
+  }
+  .tabla-tarjetas td {
+    display: block;
+    min-width: 0;
+    max-width: none;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+  .tabla-tarjetas td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.125rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .tabla-tarjetas td.fila-completa {
+    grid-column: 1 / -1;
+  }
+  .tabla-tarjetas td.fila-acciones {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.25rem;
+  }
+  .tabla-tarjetas td.fila-esquina {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  .tabla-tarjetas td.con-esquina {
+    margin-right: 2.5rem;
+  }
+}
+
+/* Variante para listas con acciones (ej: campeonatos): cada fila es una
+   línea que se parte en dos si hace falta, con el nombre primero y el estado
+   y los botones juntos a la derecha. */
+@media (max-width: 767px) {
+  .tabla-apilada,
+  .tabla-apilada tbody {
+    display: block;
+    width: 100%;
+  }
+  .tabla-apilada thead {
+    display: none;
+  }
+  .tabla-apilada tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.125rem 0.5rem;
+    padding: 0.375rem 0.25rem;
+  }
+  .tabla-apilada td {
+    display: block;
+    min-width: 0;
+  }
+  .tabla-apilada td:first-child {
+    flex: 1 1 100%;
+  }
+  .tabla-apilada td[colspan] {
+    flex: 1 1 12rem;
+  }
+  .tabla-apilada td:last-child {
+    margin-left: auto;
+  }
+}
+
 /* Fila de "Volver" (ver BotonVolver): se dibuja SIEMPRE en el HTML y la
    visibilidad la decide este atributo de <html> (lo fija un script del
    <head> antes del primer pintado, y BotonVolver al navegar) -oculta por

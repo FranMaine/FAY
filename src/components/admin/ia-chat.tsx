@@ -118,12 +118,16 @@ export function IaChat() {
         aria-label="Abrir a VigIA, el asistente de IA"
         aria-expanded={abierto}
         className={cn(
+          // En celular una pestaña pegada al borde derecho tapaba botones y
+          // datos de la pantalla: pasa a ser un botón redondo abajo a la izquierda
+          // (el de "volver arriba" ya ocupa la esquina derecha).
           "fixed right-0 top-1/2 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-2xl border border-r-0 border-border bg-primary-solid px-3 py-4 text-white shadow-lg transition-[transform,opacity] duration-200 ease-out-strong hover:pr-4 active:scale-95",
+          "max-sm:bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] max-sm:left-[calc(1rem+env(safe-area-inset-left,0px))] max-sm:right-auto max-sm:top-auto max-sm:h-12 max-sm:w-12 max-sm:translate-y-0 max-sm:justify-center max-sm:rounded-full max-sm:border max-sm:p-0 max-sm:hover:pr-0",
           abierto && "pointer-events-none opacity-0"
         )}
       >
         <BinocularsIcon className="h-5 w-5" aria-hidden="true" />
-        <span className="text-sm font-semibold [writing-mode:vertical-rl]">VigIA</span>
+        <span className="text-sm font-semibold [writing-mode:vertical-rl] max-sm:sr-only">VigIA</span>
       </button>
 
       <div

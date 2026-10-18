@@ -73,7 +73,7 @@ export function Navbar() {
               <span className="text-lg font-bold text-foreground sm:text-xl">Orzando</span>
             </Link>
             <div className="ml-3 border-l border-border pl-3 sm:ml-4 sm:pl-4">
-              <ClimaBadge slug={lugar} />
+              <ClimaBadge slug={lugar} compacto={isAdmin} />
             </div>
           </div>
 

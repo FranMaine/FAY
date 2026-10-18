@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 import { registrarAuditoria } from '@/lib/auditoria';
 
-const bodySchema = z.object({ role: z.enum(['ADMIN', 'ORGANIZADOR', 'REGULAR']) });
+const bodySchema = z
+  .object({
+    role: z.enum(['ADMIN', 'ORGANIZADOR', 'REGULAR']).optional(),
+    // Borra el apodo de la cuenta (se muestra en su perfil público, así que
+    // un admin tiene que poder sacarlo si es ofensivo o no corresponde).
+    borrarApodo: z.literal(true).optional(),
+  })
+  .refine((v) => v.role !== undefined || v.borrarApodo === true, { message: 'Nada para actualizar' });
 
 // Cambia el rol de un usuario -pensado para que un admin le dé a alguien
 // acceso de ORGANIZADOR (crear/editar campeonatos, cargar resultados,
@@ -24,7 +32,29 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const { id } = await params;
-    const { role } = bodySchema.parse(await request.json());
+    const { role, borrarApodo } = bodySchema.parse(await request.json());
+
+    if (borrarApodo) {
+      const antes = await prisma.user.findUnique({ where: { id }, select: { email: true, apodo: true } });
+      if (!antes) return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+
+      const actualizado = await prisma.user.update({
+        where: { id },
+        data: { apodo: null },
+        select: { id: true, email: true, name: true, apodo: true, role: true },
+      });
+      void registrarAuditoria(
+        { email: session.user.email || session.user.id, name: session.user.name },
+        'usuario.quitar_apodo',
+        'User',
+        id,
+        { email: antes.email, apodoAnterior: antes.apodo }
+      );
+      revalidatePath('/regatistas/[id]', 'page');
+      return NextResponse.json(actualizado);
+    }
+
+    if (!role) return NextResponse.json({ error: 'Nada para actualizar' }, { status: 400 });
 
     if (role !== 'ADMIN') {
       if (id === session.user.id) {
@@ -42,7 +72,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const actualizado = await prisma.user.update({
       where: { id },
       data: { role },
-      select: { id: true, email: true, name: true, role: true },
+      select: { id: true, email: true, name: true, apodo: true, role: true },
     });
 
     void registrarAuditoria(
