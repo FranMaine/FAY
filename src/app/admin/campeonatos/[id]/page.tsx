@@ -550,7 +550,7 @@ export default function AdminCampeonatoDetailPage({ params }: { params: Promise<
               </div>
             ) : (
               <Card className="bg-surface border-border">
-                <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-border">
+                <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 pb-4 border-b border-border">
                   <div>
                     <CardTitle>Editar Regata {campeonato.regatas.find((r) => r.id === selectedRegataId)?.numero}</CardTitle>
                     <CardDescription>Carga de resultados manuales</CardDescription>

@@ -145,11 +145,11 @@ export default function AdminRegatistasPage() {
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                 <tr>
-                  <th scope="col" className="px-6 py-4 font-medium">Nombre</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Club</th>
-                  <th scope="col" className="px-6 py-4 font-medium">País</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Cuenta vinculada</th>
-                  <th scope="col" className="px-6 py-4 font-medium text-right">Acciones</th>
+                  <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium">Nombre</th>
+                  <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium">Club</th>
+                  <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium">País</th>
+                  <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium">Cuenta vinculada</th>
+                  <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -168,10 +168,10 @@ export default function AdminRegatistasPage() {
                 ) : (
                   regatistas.map((r) => (
                     <tr key={r.id} className="hover:bg-background/50 transition-colors">
-                      <td className="px-6 py-4 font-medium">{r.nombre}</td>
-                      <td className="px-6 py-4">{r.club?.nombre || "-"}</td>
-                      <td className="px-6 py-4">{r.pais || "-"}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 py-3 sm:px-6 sm:py-4 font-medium">{r.nombre}</td>
+                      <td className="px-3 py-3 sm:px-6 sm:py-4">{r.club?.nombre || "-"}</td>
+                      <td className="px-3 py-3 sm:px-6 sm:py-4">{r.pais || "-"}</td>
+                      <td className="px-3 py-3 sm:px-6 sm:py-4">
                         {r.user ? (
                           <div className="flex items-center gap-2">
                             <LinkIcon className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
@@ -189,7 +189,7 @@ export default function AdminRegatistasPage() {
                           <span className="text-muted-foreground">Sin vincular</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right space-x-2">
+                      <td className="px-3 py-3 sm:px-6 sm:py-4 text-right space-x-2">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -213,7 +213,7 @@ export default function AdminRegatistasPage() {
               </tbody>
             </table>
           </div>
-          <div className="p-4 border-t border-border bg-background/50 flex justify-between items-center text-sm text-muted-foreground">
+          <div className="p-4 border-t border-border bg-background/50 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center text-sm text-muted-foreground">
             <span>
               {total === 0
                 ? "0 regatistas"

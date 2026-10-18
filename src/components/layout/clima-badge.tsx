@@ -65,14 +65,14 @@ export function ClimaBadge({ slug }: { slug: string }) {
   const viento = `viento ${datos.vientoNudos} nudos del ${direccionViento(datos.vientoGrados)} (${fuenteViento})`;
 
   return (
-    <div className="flex items-center gap-2 text-xs text-foreground tabular-nums">
+    <div className="flex items-center gap-1.5 whitespace-nowrap text-xs text-foreground tabular-nums sm:gap-2">
       {/* role="img": un aria-label suelto sobre un <span> genérico lo
           ignoran los lectores de pantalla -con el rol, leen la descripción
           completa. Solo envuelve cielo+temperatura: el viento es un link
           (un link adentro de role="img" quedaría fuera del árbol de
           accesibilidad). */}
-      <span role="img" title={cielo} aria-label={cielo} className="flex items-center gap-2">
-        <Icono className="h-4 w-4 text-primary" aria-hidden="true" />
+      <span role="img" title={cielo} aria-label={cielo} className="flex items-center gap-1.5 sm:gap-2">
+        <Icono className="h-4 w-4 text-primary max-[359px]:hidden" aria-hidden="true" />
         <span className="font-medium">{datos.temperatura}°</span>
       </span>
       {/* El viento lleva a la página de viento del lugar (detalle, últimas 24 h, pronóstico y
@@ -83,7 +83,7 @@ export function ClimaBadge({ slug }: { slug: string }) {
         href={urlViento(datos.lugar.slug)}
         title={`${viento}. Ver el detalle del viento en ${datos.lugar.nombre}`}
         aria-label={`${viento}. Ver el detalle del viento en ${datos.lugar.nombre}`}
-        className="-my-2 flex items-center gap-1 rounded-sm py-2 underline decoration-dotted decoration-muted-foreground/60 underline-offset-4 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="-my-2 flex items-center gap-1 whitespace-nowrap rounded-sm py-2 underline decoration-dotted decoration-muted-foreground/60 underline-offset-4 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <Wind className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
         {datos.vientoNudos} kn {direccionViento(datos.vientoGrados)}

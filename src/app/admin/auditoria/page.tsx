@@ -79,28 +79,28 @@ export default function AdminAuditoriaPage() {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                     <tr>
-                      <th scope="col" className="px-6 py-3 font-medium">Fecha</th>
-                      <th scope="col" className="px-6 py-3 font-medium">Quién</th>
-                      <th scope="col" className="px-6 py-3 font-medium">Acción</th>
-                      <th scope="col" className="px-6 py-3 font-medium">Entidad</th>
-                      <th scope="col" className="px-6 py-3 font-medium">Detalle</th>
+                      <th scope="col" className="px-3 py-3 sm:px-6 font-medium">Fecha</th>
+                      <th scope="col" className="px-3 py-3 sm:px-6 font-medium">Quién</th>
+                      <th scope="col" className="px-3 py-3 sm:px-6 font-medium">Acción</th>
+                      <th scope="col" className="px-3 py-3 sm:px-6 font-medium">Entidad</th>
+                      <th scope="col" className="px-3 py-3 sm:px-6 font-medium">Detalle</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {registros.map((r) => (
                       <tr key={r.id} className="hover:bg-background/50 transition-colors align-top">
-                        <td className="px-6 py-3 text-muted-foreground whitespace-nowrap">
+                        <td className="px-3 py-3 sm:px-6 text-muted-foreground whitespace-nowrap">
                           {new Date(r.createdAt).toLocaleString("es-AR")}
                         </td>
-                        <td className="px-6 py-3">
+                        <td className="px-3 py-3 sm:px-6">
                           <div className="font-medium">{r.actorNombre || r.actorEmail}</div>
                           {r.actorNombre && <div className="text-xs text-muted-foreground">{r.actorEmail}</div>}
                         </td>
-                        <td className="px-6 py-3 font-mono text-xs">{r.accion}</td>
-                        <td className="px-6 py-3 text-muted-foreground">
+                        <td className="px-3 py-3 sm:px-6 font-mono text-xs">{r.accion}</td>
+                        <td className="px-3 py-3 sm:px-6 text-muted-foreground">
                           {r.entidad}{r.entidadId ? ` #${r.entidadId.slice(0, 8)}` : ""}
                         </td>
-                        <td className="px-6 py-3 text-xs text-muted-foreground font-mono max-w-xs truncate" title={r.detalle ? JSON.stringify(r.detalle) : ""}>
+                        <td className="px-3 py-3 sm:px-6 text-xs text-muted-foreground font-mono max-w-xs truncate" title={r.detalle ? JSON.stringify(r.detalle) : ""}>
                           {r.detalle ? JSON.stringify(r.detalle) : "-"}
                         </td>
                       </tr>

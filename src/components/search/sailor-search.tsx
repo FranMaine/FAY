@@ -88,7 +88,7 @@ export function SailorSearch() {
           // Placeholder corto -el largo ("...por nombre o club...") se
           // recortaba a la mitad en pantallas angostas, con el padding y el
           // tamaño de fuente grandes de este input no entraba entero.
-          placeholder="Buscar regatista por nombre…"
+          placeholder="Buscar regatista…"
           className="flex-1 min-w-0 bg-transparent border-0 outline-none text-foreground placeholder:text-muted-foreground text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-1"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

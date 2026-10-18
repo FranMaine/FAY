@@ -139,15 +139,15 @@ export function PerfilRegatista({ regatista, historial, chartData, logros, heade
                     <Link key={h.campeonato.id} href={`/campeonatos/${h.campeonato.id}`} className="block">
                       <Card className="bg-surface border-border hover:border-primary/50 transition-colors group">
                         <CardContent className="p-0">
-                          <div className="flex items-center justify-between p-4 sm:p-6">
+                          <div className="flex items-center justify-between gap-3 p-4 sm:p-6">
 
-                            <div className="flex items-center gap-4 sm:gap-6">
+                            <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-6">
                               <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${isPodium ? 'bg-amber-500/10 text-amber-500' : 'bg-muted/15 text-muted-foreground'}`}>
                                 {isPodium ? <MedalIcon className="w-6 h-6" /> : <span className="text-lg font-bold">#{h.posicion}</span>}
                               </div>
-                              <div>
-                                <h3 className="text-lg font-bold group-hover:text-primary transition-colors">{h.campeonato.nombre}</h3>
-                                <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                              <div className="min-w-0">
+                                <h3 className="text-base sm:text-lg font-bold leading-snug group-hover:text-primary transition-colors">{h.campeonato.nombre}</h3>
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground mt-1">
                                   <Badge variant="outline" className="font-normal">{h.campeonato.clase.nombre}</Badge>
                                   <span className="flex items-center"><CalendarIcon className="w-3 h-3 mr-1"/> {h.campeonato.anio}</span>
                                 </div>
@@ -155,8 +155,8 @@ export function PerfilRegatista({ regatista, historial, chartData, logros, heade
                             </div>
 
                             <div className="text-right shrink-0">
-                              <div className="text-2xl font-black">{h.posicion}<span className="text-sm text-muted-foreground font-normal ml-1">/ {h.totalInscriptos}</span></div>
-                              <div className="text-xs text-muted-foreground mt-1">{h.puntosNetos} pts netos</div>
+                              <div className="text-xl sm:text-2xl font-black whitespace-nowrap">{h.posicion}<span className="text-sm text-muted-foreground font-normal ml-1">/ {h.totalInscriptos}</span></div>
+                              <div className="text-xs text-muted-foreground mt-1 whitespace-nowrap">{h.puntosNetos} pts netos</div>
                             </div>
 
                           </div>

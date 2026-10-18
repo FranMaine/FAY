@@ -68,11 +68,11 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <SailingBoat className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold text-foreground">Orzando</span>
+            <Link href="/" className="flex min-h-11 items-center gap-2">
+              <SailingBoat className="h-6 w-6 shrink-0 text-primary" />
+              <span className="text-lg font-bold text-foreground sm:text-xl">Orzando</span>
             </Link>
-            <div className="ml-4 border-l border-border pl-4">
+            <div className="ml-3 border-l border-border pl-3 sm:ml-4 sm:pl-4">
               <ClimaBadge slug={lugar} />
             </div>
           </div>

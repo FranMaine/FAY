@@ -171,7 +171,7 @@ export default async function LandingPage() {
           <dl className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-border bg-border shadow-xl">
             {numeros.map((n) => (
               <div key={n.etiqueta} className="bg-surface px-6 py-6 text-center md:text-left">
-                <dd className="text-3xl md:text-4xl font-bold tracking-tight tabular-nums">{n.valor}</dd>
+                <dd className="whitespace-nowrap text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight tabular-nums">{n.valor}</dd>
                 <dt className="mt-1 text-xs uppercase tracking-wider text-muted-foreground font-medium">{n.etiqueta}</dt>
               </div>
             ))}
@@ -226,9 +226,9 @@ export default async function LandingPage() {
       {/* Últimos resultados: el más reciente destacado y el resto al costado. */}
       <section className="pb-20 px-6 max-w-7xl mx-auto w-full">
         <ScrollReveal>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold tracking-tight">Últimos resultados</h2>
-            <Link href="/campeonatos" className="group text-primary hover:underline font-medium flex items-center">
+          <div className="flex items-center justify-between gap-4 mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Últimos resultados</h2>
+            <Link href="/campeonatos" className="group flex min-h-11 shrink-0 items-center whitespace-nowrap text-primary hover:underline font-medium">
               Ver todos <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-200 ease-out group-hover:translate-x-1" aria-hidden="true" />
             </Link>
           </div>

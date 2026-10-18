@@ -17,6 +17,14 @@ function yaLoCerro(): boolean {
   }
 }
 
+function avisoInicialVisto(): boolean {
+  try {
+    return !!localStorage.getItem("fay-beta-aviso-visto");
+  } catch {
+    return true;
+  }
+}
+
 // Franja debajo de la barra de navegación que invita a mirar el tutorial.
 // Se queda hasta que la persona la cierra (o entra al tutorial) y después no
 // vuelve: la decisión se guarda en localStorage. Va debajo del navbar y no
@@ -28,9 +36,16 @@ export function AyudaBanner() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
+  // En la primera visita convive con el aviso inicial (modal) y el de cookies:
+  // si el aviso inicial todavía no se vio, este espera a que se cierre.
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setVisible(!yaLoCerro()));
-    return () => cancelAnimationFrame(raf);
+    const raf = requestAnimationFrame(() => setVisible(!yaLoCerro() && avisoInicialVisto()));
+    const alCerrarAviso = () => setVisible(!yaLoCerro());
+    window.addEventListener("fay-beta-cerrado", alCerrarAviso);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("fay-beta-cerrado", alCerrarAviso);
+    };
   }, []);
 
   function cerrar() {

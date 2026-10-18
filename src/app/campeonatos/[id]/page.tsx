@@ -172,19 +172,19 @@ export default async function CampeonatoDetailPage({ params }: Props) {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[
             { icono: UsersIcon, etiqueta: "Regatistas", valor: regatistasList.length },
             { icono: FlagIcon, etiqueta: "Regatas disputadas", valor: campeonato.regatas.length },
             { icono: ScissorsIcon, etiqueta: "Descartes aplicados", valor: campeonato.descartes },
           ].map(({ icono: Icono, etiqueta, valor }) => (
-            <div key={etiqueta} className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-5">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Icono className="h-5 w-5" aria-hidden="true" />
+            <div key={etiqueta} className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-surface p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:h-11 sm:w-11">
+                <Icono className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
               </span>
               <div>
-                <p className="text-3xl font-bold leading-none tabular-nums">{valor}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{etiqueta}</p>
+                <p className="text-2xl font-bold leading-none tabular-nums sm:text-3xl">{valor}</p>
+                <p className="mt-1 text-xs leading-tight text-muted-foreground sm:text-sm">{etiqueta}</p>
               </div>
             </div>
           ))}

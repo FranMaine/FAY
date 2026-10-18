@@ -43,7 +43,7 @@ export function Podio({ items, unidad = "pts" }: { items: ItemPodio[]; unidad?: 
               <div className="flex items-center gap-3 min-w-0">
                 {item.avatar && <span className="shrink-0 [&_img]:rounded-lg [&_img]:bg-white/90 [&_img]:p-1">{item.avatar}</span>}
                 <div className="min-w-0">
-                  <p className="truncate text-lg font-bold group-hover:text-primary transition-colors">{item.titulo}</p>
+                  <p className="line-clamp-2 break-words text-lg font-bold leading-snug group-hover:text-primary transition-colors">{item.titulo}</p>
                   {item.subtitulo && <p className="truncate text-sm text-muted-foreground">{item.subtitulo}</p>}
                 </div>
               </div>

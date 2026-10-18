@@ -43,32 +43,32 @@ export function CookieBanner() {
       aria-label="Aviso de cookies"
       className="pointer-events-auto border-t border-border bg-surface/95 backdrop-blur-sm shadow-[0_-4px_16px_rgba(0,0,0,0.08)] fade-in-up"
     >
-      <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
+      <div className="max-w-5xl mx-auto px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-          <p className="text-sm text-foreground/90 flex-1 text-center sm:text-left">
+          <p className="text-xs sm:text-sm text-foreground/90 flex-1 text-center sm:text-left">
             Usamos cookies necesarias para el login, y -si lo aceptás- de
             analítica y publicidad para mantener el sitio gratis.{" "}
             <Link href="/cookies" className="text-primary hover:underline font-medium">
               Más información
             </Link>
           </p>
-          <div className="flex items-center gap-2 shrink-0 flex-wrap justify-center">
+          <div className="grid w-full grid-cols-2 items-center gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:justify-center">
             <button
               onClick={() => setPersonalizando((v) => !v)}
-              className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 px-1"
+              className="order-3 col-span-2 min-h-11 text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 px-1 sm:order-none sm:col-span-1 sm:min-h-0"
             >
               Personalizar
             </button>
-            <Button size="sm" variant="outline" onClick={() => elegir({ analitica: false, publicidad: false })} className="rounded-full">
+            <Button size="sm" variant="outline" onClick={() => elegir({ analitica: false, publicidad: false })} className="min-h-11 rounded-full sm:min-h-0">
               Rechazar opcionales
             </Button>
-            <Button size="sm" onClick={() => elegir({ analitica: true, publicidad: true })} className="rounded-full">
+            <Button size="sm" onClick={() => elegir({ analitica: true, publicidad: true })} className="min-h-11 rounded-full sm:min-h-0">
               Aceptar todo
             </Button>
             <button
               onClick={() => elegir({ analitica: false, publicidad: false })}
               aria-label="Cerrar aviso de cookies (equivale a rechazar las opcionales)"
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
+              className="hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors sm:block"
             >
               <XIcon className="w-4 h-4" />
             </button>

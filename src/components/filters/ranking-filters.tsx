@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useTransition } from "react";
+import { useCallback, useEffect, useRef, useTransition } from "react";
 import { LayoutGridIcon } from "lucide-react";
 import { ClaseIcon, slugDeClase } from "@/components/icons/clase-icons";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,17 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
   // sin ninguna señal de que se había registrado el click.
   const [isPending, startTransition] = useTransition();
 
+  // En celular la fila de clases se desliza: al entrar (o al cambiar de clase)
+  // se centra la activa, para no tener que buscarla deslizando. scrollTo en la
+  // propia fila (no scrollIntoView) para que la página no salte de lugar.
+  const filaRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const fila = filaRef.current;
+    const activo = fila?.querySelector<HTMLElement>("[data-activa]");
+    if (!fila || !activo || fila.scrollWidth <= fila.clientWidth) return;
+    fila.scrollTo({ left: activo.offsetLeft - (fila.clientWidth - activo.offsetWidth) / 2, behavior: "auto" });
+  }, [currentClaseId]);
+
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -57,7 +68,16 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
             los clubes sin escudo. Con la fila ocupando todo el ancho, ya
             entran varias por fila -mejor que envuelvan (se ven todas de
             entrada) a que haya que scrollear para encontrar una. */}
-        <div role="group" aria-labelledby="filtro-clase-label" className="flex flex-wrap items-start gap-2">
+        {/* En celular: UNA fila que se desliza hacia los costados (con la clase
+            activa centrada al entrar) en vez de 6 filas de chips que se comían
+            más de una pantalla antes de llegar a la lista. Desde sm vuelven a
+            envolver todas a la vista. */}
+        <div
+          ref={filaRef}
+          role="group"
+          aria-labelledby="filtro-clase-label"
+          className="-mx-4 flex snap-x items-start gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden"
+        >
           {clases.map((c) => {
             const activa = currentClaseId === c.id;
             const tieneLogo = c.id !== "ALL" && slugDeClase(c.nombre) !== null;
@@ -66,9 +86,10 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
                 key={c.id}
                 type="button"
                 aria-pressed={activa}
+                data-activa={activa || undefined}
                 onClick={() => startTransition(() => router.replace("?" + createQueryString("clase", c.id)))}
                 className={cn(
-                  "flex shrink-0 flex-col items-center gap-1 rounded-xl border px-3 py-2 transition-[background-color,border-color,opacity] duration-150",
+                  "flex shrink-0 snap-start flex-col items-center gap-1 rounded-xl border px-3 py-2 transition-[background-color,border-color,opacity] duration-150",
                   activa
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
@@ -89,7 +110,7 @@ export function RankingFilters({ clases, anios, currentClaseId, currentAnio }: R
                     envuelve en hasta 2 líneas (w-20 = 80px, suficiente para
                     "Principiantes"/"(Laser Radial)" en la segunda línea de
                     los nombres reales más largos) en vez de cortar texto. */}
-                <span className="w-20 text-center text-[11px] font-medium leading-tight">{c.nombre}</span>
+                <span className="w-20 text-center text-xs font-medium leading-tight">{c.nombre}</span>
               </button>
             );
           })}

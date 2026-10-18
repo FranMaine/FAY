@@ -361,20 +361,20 @@ export default function AdminCampeonatosPage() {
   function filaClase(c: Campeonato) {
     return (
       <tr key={c.id} className="hover:bg-background/50 transition-colors">
-        <td className="px-6 py-3 pl-14">
+        <td className="px-3 py-3 sm:px-6 pl-14">
           <span className="flex items-center gap-2">
             {c.clase && <ClaseIcon nombreClase={c.clase.nombre} className="w-6 h-6 shrink-0 object-contain" />}
             {c.clase?.nombre}
           </span>
         </td>
-        <td className="px-6 py-3">
+        <td className="px-3 py-3 sm:px-6">
           <Badge variant={c.estado === "PUBLICADO" ? "default" : "muted"} className={
             c.estado === "PUBLICADO" ? "bg-green-500/20 text-green-500 hover:bg-green-500/30" : "bg-amber-500/20 text-amber-500 hover:bg-amber-500/30"
           }>
             {c.estado}
           </Badge>
         </td>
-        <td className="px-6 py-3 text-right space-x-2">
+        <td className="px-3 py-3 sm:px-6 text-right space-x-2">
           {botonPublicar(c)}
           <Link href={`/admin/campeonatos/${c.id}`}>
             <Button variant="ghost" size="icon" aria-label="Ver campeonato" className="h-8 w-8 text-muted-foreground hover:text-primary">
@@ -414,9 +414,9 @@ export default function AdminCampeonatosPage() {
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                 <tr>
-                  <th scope="col" className="px-6 py-4 font-medium">Evento / Clase</th>
-                  <th scope="col" className="px-6 py-4 font-medium">Estado</th>
-                  <th scope="col" className="px-6 py-4 font-medium text-right">Acciones</th>
+                  <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium">Evento / Clase</th>
+                  <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium">Estado</th>
+                  <th scope="col" className="px-3 py-3 sm:px-6 sm:py-4 font-medium text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -442,7 +442,7 @@ export default function AdminCampeonatosPage() {
                       const c = grupo.items[0];
                       return (
                         <tr key={clave} className="hover:bg-background/50 transition-colors">
-                          <td className="px-6 py-4 font-medium">
+                          <td className="px-3 py-3 sm:px-6 sm:py-4 font-medium">
                             <div className="flex items-center gap-2">
                               {c.nombre} <span className="text-muted-foreground font-normal">{grupo.anio}</span>
                               <span className="text-muted-foreground mx-1">·</span>
@@ -450,14 +450,14 @@ export default function AdminCampeonatosPage() {
                               <span className="text-muted-foreground font-normal">{c.clase?.nombre}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-3 py-3 sm:px-6 sm:py-4">
                             <Badge variant={c.estado === "PUBLICADO" ? "default" : "muted"} className={
                               c.estado === "PUBLICADO" ? "bg-green-500/20 text-green-500 hover:bg-green-500/30" : "bg-amber-500/20 text-amber-500 hover:bg-amber-500/30"
                             }>
                               {c.estado}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4 text-right space-x-2">
+                          <td className="px-3 py-3 sm:px-6 sm:py-4 text-right space-x-2">
                             {botonPublicar(c)}
                             <Link href={`/admin/campeonatos/${c.id}`}>
                               <Button variant="ghost" size="icon" aria-label="Ver campeonato" className="h-8 w-8 text-muted-foreground hover:text-primary">
@@ -486,7 +486,7 @@ export default function AdminCampeonatosPage() {
                           className="hover:bg-background/50 transition-colors cursor-pointer"
                           onClick={() => toggle(clave)}
                         >
-                          <td className="px-6 py-4 font-semibold" colSpan={2}>
+                          <td className="px-3 py-3 sm:px-6 sm:py-4 font-semibold" colSpan={2}>
                             <div className="flex items-center gap-2">
                               <ChevronRightIcon className={cn("w-4 h-4 text-muted-foreground transition-transform", abierta && "rotate-90")} />
                               {grupo.logoUrl ? (
@@ -500,7 +500,7 @@ export default function AdminCampeonatosPage() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-3 py-3 sm:px-6 sm:py-4 text-right" onClick={(e) => e.stopPropagation()}>
                             <input
                               ref={(el) => { logoInputRefs.current[clave] = el; }}
                               type="file"

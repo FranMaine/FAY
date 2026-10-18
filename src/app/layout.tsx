@@ -130,19 +130,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AyudaBanner />
           <BotonVolver />
           <main id="contenido" className="flex-1">{children}</main>
-          <footer className="border-t border-border py-6 text-center text-sm text-muted space-y-2">
+          {/* pb-24 en celular: el botón flotante de "volver arriba" (esquina
+              inferior derecha) tapaba los últimos links del pie. En celular
+              los links van en dos columnas con zona táctil de 44px (antes
+              eran una fila de texto de 12px apretada, difícil de tocar). */}
+          <footer className="border-t border-border px-4 pt-8 pb-24 text-center text-sm text-muted space-y-3 sm:pb-8">
             <p>Orzando © {new Date().getFullYear()} - Estadísticas de Vela Argentina · orzando.com.ar</p>
-            <p className="text-xs">
-              <a href={`mailto:${EMAIL_PUBLICO}`} className="hover:text-foreground hover:underline">{EMAIL_PUBLICO}</a>
+            <p>
+              <a href={`mailto:${EMAIL_PUBLICO}`} className="inline-flex min-h-11 items-center px-2 text-xs hover:text-foreground hover:underline">{EMAIL_PUBLICO}</a>
             </p>
-            <nav className="flex items-center justify-center gap-4 text-xs flex-wrap">
-              <Link href="/ayuda" className="hover:text-foreground hover:underline">Ayuda y tutorial</Link>
-              <Link href="/reglas" className="hover:text-foreground hover:underline">Cómo se calculan los puntajes</Link>
-              <Link href="/contacto" className="hover:text-foreground hover:underline">Contacto</Link>
-              <Link href="/aviso-legal" className="hover:text-foreground hover:underline">Aviso legal</Link>
-              <Link href="/privacidad" className="hover:text-foreground hover:underline">Privacidad</Link>
-              <Link href="/cookies" className="hover:text-foreground hover:underline">Cookies</Link>
-              <Link href="/agregar-app" className="hover:text-foreground hover:underline">Agregar app</Link>
+            <nav className="mx-auto grid max-w-sm grid-cols-2 gap-x-2 text-sm sm:flex sm:max-w-none sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-3 sm:text-xs">
+              <Link href="/ayuda" className="flex min-h-11 items-center justify-center px-2 hover:text-foreground hover:underline sm:min-h-9">Ayuda y tutorial</Link>
+              <Link href="/reglas" className="flex min-h-11 items-center justify-center px-2 hover:text-foreground hover:underline sm:min-h-9">Cómo se calculan los puntajes</Link>
+              <Link href="/contacto" className="flex min-h-11 items-center justify-center px-2 hover:text-foreground hover:underline sm:min-h-9">Contacto</Link>
+              <Link href="/agregar-app" className="flex min-h-11 items-center justify-center px-2 hover:text-foreground hover:underline sm:min-h-9">Agregar app</Link>
+              <Link href="/aviso-legal" className="flex min-h-11 items-center justify-center px-2 hover:text-foreground hover:underline sm:min-h-9">Aviso legal</Link>
+              <Link href="/privacidad" className="flex min-h-11 items-center justify-center px-2 hover:text-foreground hover:underline sm:min-h-9">Privacidad</Link>
+              <Link href="/cookies" className="flex min-h-11 items-center justify-center px-2 hover:text-foreground hover:underline sm:min-h-9">Cookies</Link>
             </nav>
           </footer>
           <BackToTop />

@@ -39,6 +39,9 @@ export function BetaBanner() {
 
   function cerrar() {
     setVisible(false);
+    // Avisa al banner del tutorial (AyudaBanner), que espera a este cierre
+    // para no apilarse con el modal y el aviso de cookies a la vez.
+    window.dispatchEvent(new Event("fay-beta-cerrado"));
     try {
       localStorage.setItem(CLAVE_STORAGE, "1");
     } catch {
