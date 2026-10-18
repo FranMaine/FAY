@@ -135,12 +135,12 @@ export default function AdminClubesPage() {
                     </p>
                   )}
                   {combo.regatistas.map((r) => (
-                    <div key={r.id} className="border-t border-border first:border-t-0"><div className="flex items-center justify-between gap-3 py-2">
-                      <Link href={`/regatistas/${r.id}`} className="text-sm font-medium hover:text-primary truncate">
+                    <div key={r.id} className="border-t border-border first:border-t-0"><div className="flex flex-col gap-1.5 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                      <Link href={`/regatistas/${r.id}`} className="text-sm font-medium hover:text-primary sm:truncate">
                         {r.nombre}
                       </Link>
                       <select
-                        className="text-xs bg-background border border-border rounded-md px-2 py-1.5 max-w-[220px]"
+                        className="w-full text-sm sm:text-xs bg-background border border-border rounded-md px-2 py-2 sm:py-1.5 sm:w-auto sm:max-w-[220px]"
                         defaultValue=""
                         disabled={guardando === r.id}
                         onChange={(e) => {
