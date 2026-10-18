@@ -83,7 +83,7 @@ export function ClimaBadge({ slug }: { slug: string }) {
         href={urlViento(datos.lugar.slug)}
         title={`${viento}. Ver el detalle del viento en ${datos.lugar.nombre}`}
         aria-label={`${viento}. Ver el detalle del viento en ${datos.lugar.nombre}`}
-        className="-my-2 flex items-center gap-1 whitespace-nowrap rounded-sm py-2 underline decoration-dotted decoration-muted-foreground/60 underline-offset-4 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="-my-3 flex items-center gap-1 whitespace-nowrap rounded-sm py-3 underline decoration-dotted decoration-muted-foreground/60 underline-offset-4 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <Wind className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
         {datos.vientoNudos} kn {direccionViento(datos.vientoGrados)}

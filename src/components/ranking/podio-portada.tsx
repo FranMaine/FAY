@@ -35,7 +35,7 @@ export function PodioPortada({ podios, anio }: { podios: PodioDeClase[]; anio: n
               onClick={() => setActiva(p.claseId)}
               aria-pressed={p.claseId === actual.claseId}
               className={cn(
-                "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                "inline-flex min-h-10 items-center rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 p.claseId === actual.claseId
                   ? "border-primary/60 bg-primary/15 text-primary"
                   : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
