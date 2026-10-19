@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { CampeonatosAgrupados } from "@/components/ui/campeonatos-agrupados";
-import prisma from "@/lib/db";
-import { Prisma } from "@prisma/client";
+import { getFiltrosBase, getListaCampeonatos } from "@/lib/campeonatos-lista";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 import { AlertCircleIcon } from "lucide-react";
 import { coincidePorPalabras } from "@/lib/busqueda-texto";
@@ -20,15 +19,10 @@ export default async function CampeonatosPage({
 }) {
   const resolvedParams = await searchParams;
 
-  const clases = await prisma.clase.findMany({ orderBy: { nombre: 'asc' } });
-  
+  const { clases, anios: aniosDb } = await getFiltrosBase();
+
   const currentYear = new Date().getFullYear();
-  const campeonatosAnios = await prisma.campeonato.findMany({
-    select: { anio: true },
-    distinct: ['anio'],
-    orderBy: { anio: 'desc' }
-  });
-  const anios = campeonatosAnios.map(c => c.anio);
+  const anios = [...aniosDb];
   if (!anios.includes(currentYear)) anios.unshift(currentYear);
 
   // Agregar una clase artificial para "Todas"
@@ -39,74 +33,32 @@ export default async function CampeonatosPage({
   const busqueda = typeof resolvedParams.q === 'string' ? resolvedParams.q.trim().slice(0, 80) : '';
   // Al buscar por texto sin haber elegido año, se busca en TODOS los años: si
   // no, "Vela Fest" solo encontraría la edición de este año.
-  const activeAnio = typeof resolvedParams.anio === 'string'
-    ? parseInt(resolvedParams.anio)
-    : busqueda ? 0 : currentYear;
+  const anioPedido = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : NaN;
+  const activeAnio = Number.isNaN(anioPedido) ? (busqueda ? 0 : currentYear) : anioPedido;
 
-  // Construir clausula WHERE
-  const whereClause: Prisma.CampeonatoWhereInput = { estado: 'PUBLICADO' };
-  if (activeClaseId !== 'ALL') {
-    whereClause.claseId = activeClaseId;
-  }
-  if (activeAnio !== 0) {
-    whereClause.anio = activeAnio;
-  }
-
-  const campeonatosTodos = await prisma.campeonato.findMany({
-    where: whereClause,
-    include: {
-      clase: true,
-      sede: true,
-      _count: {
-        select: { regatas: true },
-      },
-    },
-    orderBy: [
-      { anio: 'desc' },
-      { nombre: 'asc' },
-    ],
-  });
+  // Solo se consulta la base (cacheada) con una clase y un año que existen:
+  // un valor inventado en la URL daría una lista vacía igual, pero sin esto
+  // cada valor distinto sería una consulta y una entrada de caché nuevas.
+  const filtroValido = allClasses.some((c) => c.id === activeClaseId) && allYears.includes(activeAnio);
+  const campeonatosTodos = filtroValido ? await getListaCampeonatos(activeClaseId, activeAnio) : [];
 
   // Búsqueda por texto (sin importar tildes, mayúsculas ni orden de las
   // palabras): contra el nombre, el evento, la clase, el club sede y el año.
-  const campeonatosDb = busqueda
-    ? campeonatosTodos.filter((c) =>
-        coincidePorPalabras(
-          [c.nombre, c.evento, c.clase.nombre, c.sede?.nombre, c.sede?.nombreCompleto, c.anio].filter(Boolean).join(' '),
-          busqueda
-        )
-      )
-    : campeonatosTodos;
-
-  // Cantidad de regatistas ÚNICOS por campeonato -antes esto quedaba
-  // siempre en 0 ("Ideally we would count..."), así que toda tarjeta
-  // mostraba "0 inscriptos" sin importar cuántos hubiera. Una sola consulta
-  // trayendo (regatistaId, campeonatoId) de todos los resultados y
-  // deduplicando en memoria evita hacer N consultas, una por campeonato.
-  const resultadosPorCampeonato = await prisma.resultado.findMany({
-    where: { regata: { campeonatoId: { in: campeonatosDb.map((c) => c.id) } } },
-    select: { regatistaId: true, regata: { select: { campeonatoId: true } } },
-  });
-  const inscriptosPorCampeonato = new Map<string, Set<string>>();
-  for (const r of resultadosPorCampeonato) {
-    const campId = r.regata.campeonatoId;
-    if (!inscriptosPorCampeonato.has(campId)) inscriptosPorCampeonato.set(campId, new Set());
-    inscriptosPorCampeonato.get(campId)!.add(r.regatistaId);
-  }
-
-  const campeonatos = campeonatosDb.map((c) => ({
+  const campeonatos = (busqueda
+    ? campeonatosTodos.filter((c) => coincidePorPalabras(c.textoBusqueda, busqueda))
+    : campeonatosTodos
+  ).map((c) => ({
     id: c.id,
     nombre: c.nombre,
     evento: c.evento,
     anio: c.anio,
-    clase: c.clase.nombre,
-    sede: c.sede?.nombre || 'Sin sede',
-    totalRegatistas: inscriptosPorCampeonato.get(c.id)?.size || 0,
+    clase: c.clase,
+    sede: c.sede,
+    totalRegatistas: c.totalRegatistas,
     estado: c.estado,
-    fechaInicio: c.fechaInicio ? c.fechaInicio.toISOString().split('T')[0] : `${c.anio}-01-01`,
+    fechaInicio: c.fechaInicio,
     logoUrl: c.logoUrl,
   }));
-
 
   return (
     <main className="min-h-dvh bg-background text-foreground p-6 md:p-10">

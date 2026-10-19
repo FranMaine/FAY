@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/db';
 import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
+import { REGATAS_CLASIFICACION_CON_OTROS_CLUBES } from '@/lib/regatas-clasificacion';
 
 export interface ClubConPodios {
   id: string;
@@ -18,12 +19,9 @@ async function calcularClubesConMasPodios(limite: number): Promise<ClubConPodios
   const [campeonatos, clubes] = await Promise.all([
     prisma.campeonato.findMany({
       where: { estado: 'PUBLICADO' },
-      include: {
-        regatas: {
-          include: {
-            resultados: { include: { regatista: { include: { club: true, otrosClubes: true } } } },
-          },
-        },
+      select: {
+        descartes: true,
+        regatas: REGATAS_CLASIFICACION_CON_OTROS_CLUBES,
       },
     }),
     prisma.club.findMany({ select: { id: true, nombre: true, logoUrl: true } }),

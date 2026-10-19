@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { MedalIcon, ArrowRightIcon, AlertCircleIcon } from "lucide-react";
-import { prisma } from "@/lib/db";
 import { getRankingGeneral } from "@/lib/ranking-general";
+import { getFiltrosBase } from "@/lib/campeonatos-lista";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 import { Podio } from "@/components/ranking/podio";
 
@@ -21,17 +21,11 @@ export default async function RankingsPage({
 }) {
   const resolvedParams = await searchParams;
 
-  // Obtener datos base para los filtros
-  const clases = await prisma.clase.findMany({ orderBy: { nombre: 'asc' } });
-  
+  // Datos base para los filtros (cacheados, ver campeonatos-lista.ts)
+  const { clases, anios: aniosDb } = await getFiltrosBase();
+
   const currentYear = new Date().getFullYear();
-  // Obtener años únicos de los campeonatos
-  const campeonatosAnios = await prisma.campeonato.findMany({
-    select: { anio: true },
-    distinct: ['anio'],
-    orderBy: { anio: 'desc' }
-  });
-  const anios = campeonatosAnios.map(c => c.anio);
+  const anios = [...aniosDb];
   if (!anios.includes(currentYear)) anios.unshift(currentYear);
   anios.push(0); // 0 = todos los años
 
@@ -56,7 +50,11 @@ export default async function RankingsPage({
   const activeClaseId = typeof resolvedParams.clase === 'string' ? resolvedParams.clase : clases[0].id;
   const activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
 
-  const ranking = await getRankingGeneral(activeClaseId, activeAnio);
+  // Solo se consulta (cacheado) con una clase y un año que existen: un valor
+  // inventado en la URL daría un ranking vacío igual, pero sin esto cada valor
+  // distinto sería una consulta pesada y una entrada de caché nuevas.
+  const filtroValido = clases.some(c => c.id === activeClaseId) && anios.includes(activeAnio);
+  const ranking = filtroValido ? await getRankingGeneral(activeClaseId, activeAnio) : [];
   const selectedClaseNombre = clases.find(c => c.id === activeClaseId)?.nombre || '';
 
   return (

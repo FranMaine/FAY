@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { ClubSearch } from "@/components/search/club-search";
 
@@ -12,12 +13,10 @@ export const metadata: Metadata = {
 // esta página no tiene ningún parámetro -sin forzar esto, "next build"
 // intenta pre-renderizarla UNA vez con la base disponible en ese momento
 // y la deja estática para siempre. force-dynamic la recalcula en cada
-// request en su lugar, así un club recién fusionado/creado desde el admin
-// aparece al toque; es una sola consulta liviana (180 clubes), no hace
-// falta el cacheo de un revalidate acá.
+// request en su lugar (el dato se cachea aparte, abajo, por 2 minutos).
 export const dynamic = 'force-dynamic';
 
-async function getClubes() {
+async function leerClubes() {
   const clubes = await prisma.club.findMany({
     include: { _count: { select: { regatistas: true, regatistasSecundarios: true } } },
   });
@@ -29,6 +28,11 @@ async function getClubes() {
     .map((c) => ({ id: c.id, nombre: c.nombre, ciudad: c.ciudad, logoUrl: c.logoUrl, nombreCompleto: c.nombreCompleto, regatistasCount: c._count.regatistas + c._count.regatistasSecundarios }))
     .sort((a, b) => b.regatistasCount - a.regatistasCount || a.nombre.localeCompare(b.nombre));
 }
+
+// Cacheado 2 minutos (y se limpia al toque con revalidateTag('rankings')): la
+// página es force-dynamic, así que sin esto cada visita recorría la tabla de
+// clubes con sus conteos.
+const getClubes = unstable_cache(leerClubes, ['clubes-lista'], { revalidate: 120, tags: ['rankings'] });
 
 export default async function ClubesPage() {
   const clubes = await getClubes();

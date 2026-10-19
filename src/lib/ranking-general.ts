@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
+import { REGATAS_CLASIFICACION } from "@/lib/regatas-clasificacion";
 
 export async function calcularRankingGeneral(claseId: string, anio: number) {
   const campeonatos = await prisma.campeonato.findMany({
@@ -10,16 +11,9 @@ export async function calcularRankingGeneral(claseId: string, anio: number) {
       // anio 0 = "Todos los años": el ranking suma todos los campeonatos cargados
       ...(anio !== 0 ? { anio } : {})
     },
-    include: {
-      regatas: {
-        include: {
-          resultados: {
-            include: {
-              regatista: { include: { club: true } }
-            }
-          }
-        }
-      }
+    select: {
+      descartes: true,
+      regatas: REGATAS_CLASIFICACION,
     }
   });
 

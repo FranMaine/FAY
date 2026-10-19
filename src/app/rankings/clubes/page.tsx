@@ -9,6 +9,8 @@ import { generarClasificacion, agruparPorRegatista } from "@/lib/scoring";
 import { RankingFilters } from "@/components/filters/ranking-filters";
 import { Podio } from "@/components/ranking/podio";
 import { CLUB_ALIASES } from "@/lib/club-aliases";
+import { getFiltrosBase } from "@/lib/campeonatos-lista";
+import { REGATAS_CLASIFICACION_CON_OTROS_CLUBES } from "@/lib/regatas-clasificacion";
 
 export const metadata: Metadata = {
   title: "Ranking de Clubes",
@@ -21,12 +23,9 @@ async function calcularRankingDeClubes(claseId: string, anio: number) {
   const [campeonatos, clubes] = await Promise.all([
     prisma.campeonato.findMany({
       where: { estado: 'PUBLICADO', claseId, ...(anio !== 0 ? { anio } : {}) },
-      include: {
-        regatas: {
-          include: {
-            resultados: { include: { regatista: { include: { club: true, otrosClubes: true } } } }
-          }
-        }
+      select: {
+        descartes: true,
+        regatas: REGATAS_CLASIFICACION_CON_OTROS_CLUBES,
       }
     }),
     prisma.club.findMany({ select: { id: true, nombre: true, logoUrl: true, nombreCompleto: true } }),
@@ -103,15 +102,10 @@ export default async function RankingClubesPage({
 }) {
   const resolvedParams = await searchParams;
 
-  const clases = await prisma.clase.findMany({ orderBy: { nombre: 'asc' } });
+  const { clases, anios: aniosDb } = await getFiltrosBase();
 
   const currentYear = new Date().getFullYear();
-  const campeonatosAnios = await prisma.campeonato.findMany({
-    select: { anio: true },
-    distinct: ['anio'],
-    orderBy: { anio: 'desc' },
-  });
-  const anios = campeonatosAnios.map((c) => c.anio);
+  const anios = [...aniosDb];
   if (!anios.includes(currentYear)) anios.unshift(currentYear);
   anios.push(0); // 0 = todos los años
 
@@ -135,7 +129,9 @@ export default async function RankingClubesPage({
   const activeClaseId = typeof resolvedParams.clase === 'string' ? resolvedParams.clase : clases[0].id;
   const activeAnio = typeof resolvedParams.anio === 'string' ? parseInt(resolvedParams.anio) : currentYear;
 
-  const ranking = await getRankingDeClubes(activeClaseId, activeAnio);
+  // Solo se consulta (cacheado) con una clase y un año que existen -ver /rankings.
+  const filtroValido = clases.some((c) => c.id === activeClaseId) && anios.includes(activeAnio);
+  const ranking = filtroValido ? await getRankingDeClubes(activeClaseId, activeAnio) : [];
   const selectedClaseNombre = clases.find((c) => c.id === activeClaseId)?.nombre || '';
 
   return (
