@@ -227,7 +227,10 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
                     {row.posicion}
                   </Badge>
                 </td>
-                <th scope="row" className="px-4 py-3 sticky left-[var(--pos-w)] bg-surface z-10 text-left font-medium text-foreground whitespace-nowrap transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-surface-hover)_50%,var(--color-surface))]">
+                {/* Un equipo de 4-5 personas (J24, J70) en una sola línea medía ~750px y
+                    empujaba las regatas y el neto fuera de la pantalla: el nombre
+                    se parte en varias líneas con un ancho máximo (20rem). */}
+                <th scope="row" className="px-4 py-3 sticky left-[var(--pos-w)] bg-surface z-10 text-left font-medium text-foreground min-w-[11rem] max-w-[20rem] whitespace-normal transition-colors group-hover:bg-[color-mix(in_srgb,var(--color-surface-hover)_50%,var(--color-surface))]">
                   <NombreRegatista row={row} className="hover:text-primary transition-colors hover:underline" />
                 </th>
                 <td className="px-4 py-3 text-muted whitespace-nowrap">{row.club}</td>
