@@ -9,6 +9,14 @@
 //   bash:        DATABASE_URL="postgresql://..." pnpm exec tsx scripts/fusionar-duplicados.ts --aplicar
 //
 // (si tenés un .env o .env.local con DATABASE_URL, no hace falta pasarla.)
+//
+// OJO: DATABASE_URL tiene que ser la de la base ACTUAL (proyecto Neon FAY-2, desde el
+// 21/10/2026). La base vieja (FAY) quedó solo de respaldo y ya no recibe datos: si el
+// script corriera contra ella, el sitio no mostraría ningún cambio.
+//
+// Al terminar con --aplicar, el script le pide al sitio que limpie su caché de rankings
+// (POST /api/revalidar). Eso usa REVALIDAR_TOKEN (y opcionalmente SITE_URL), que ya
+// están en .env.local; sin el token, los rankings se actualizan solos en hasta 1 hora.
 // Opciones:  --solo=alta|tipeo|j24|media|clubes   corre un solo bloque
 //
 // Reglas de seguridad (un grupo se SALTEA, con el motivo en pantalla, si no las cumple):
