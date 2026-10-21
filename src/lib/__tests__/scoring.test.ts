@@ -11,6 +11,7 @@ import {
   type ResultadoRegata,
   type ClasificacionRegatista,
 } from '../scoring';
+import { maxTripulantesPorBote } from '../clases-tripulacion';
 
 describe('esPenalidad', () => {
   it('detects valid penalty codes', () => {
@@ -290,5 +291,49 @@ describe('agruparTripulaciones', () => {
     const result = agruparTripulaciones([a, b]);
     expect(result).toHaveLength(2);
     expect(result.every((r) => !r.integrantes)).toBe(true);
+  });
+
+  // Bug real (Gran Prix del Litoral, Optimist): 12 regatistas empatados con el
+  // mismo puntaje en todas las regatas se juntaban en UNA fila de 12 nombres,
+  // que ensanchaba la tabla y escondía las regatas y el neto.
+  function igualesConPuntaje(n: number, puntos: number[]) {
+    return Array.from({ length: n }, (_, i) =>
+      fila({
+        regatistaId: `r${i}`,
+        posicionFinal: 5,
+        resultados: puntos.map((p, k) => ({ regataNumero: k + 1, puesto: p, puntos: p, descartado: false, observacion: null })),
+      })
+    );
+  }
+
+  it('does NOT group tied sailors in a single-handed class (max 1 per boat)', () => {
+    const result = agruparTripulaciones(igualesConPuntaje(12, [7, 9, 4]), 1);
+    expect(result).toHaveLength(12);
+    expect(result.every((r) => !r.integrantes)).toBe(true);
+  });
+
+  it('keeps a crew of two when the class allows two per boat', () => {
+    const result = agruparTripulaciones(igualesConPuntaje(2, [1, 2]), 2);
+    expect(result).toHaveLength(1);
+    expect(result[0].integrantes).toHaveLength(2);
+  });
+
+  it('does not merge a tie bigger than the boat size, not even partially', () => {
+    // 7 empatados en una clase de hasta 5 por bote: ninguna tripulación válida.
+    const result = agruparTripulaciones(igualesConPuntaje(7, [3, 3]), 5);
+    expect(result).toHaveLength(7);
+    expect(result.every((r) => !r.integrantes)).toBe(true);
+  });
+});
+
+describe('maxTripulantesPorBote', () => {
+  it('knows how many sail each class', () => {
+    expect(maxTripulantesPorBote('Optimist Timoneles')).toBe(1);
+    expect(maxTripulantesPorBote('ILCA 6 (Laser Radial)')).toBe(1);
+    expect(maxTripulantesPorBote('Finn')).toBe(1);
+    expect(maxTripulantesPorBote('29er')).toBe(2);
+    expect(maxTripulantesPorBote('Snipe')).toBe(2);
+    expect(maxTripulantesPorBote('J70')).toBe(5);
+    expect(maxTripulantesPorBote('Clase desconocida')).toBe(5);
   });
 });

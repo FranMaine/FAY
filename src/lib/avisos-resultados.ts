@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db';
 import { registrarAuditoria } from '@/lib/auditoria';
 import { sendEmail, emailResultadoPublicado } from '@/lib/email';
 import { agruparPorRegatista, generarClasificacion, agruparTripulaciones } from '@/lib/scoring';
+import { maxTripulantesPorBote } from '@/lib/clases-tripulacion';
 import { SITE_URL } from '@/lib/site';
 
 const ACCION_AVISO = 'campeonato.avisar_regatistas';
@@ -44,7 +45,8 @@ export async function avisarResultadosPublicados(campeonatoId: string): Promise<
 
     // Misma clasificación que muestra la página del campeonato.
     const clasificacion = agruparTripulaciones(
-      generarClasificacion(agruparPorRegatista(campeonato.regatas), campeonato.descartes)
+      generarClasificacion(agruparPorRegatista(campeonato.regatas), campeonato.descartes),
+      maxTripulantesPorBote(campeonato.clase.nombre)
     );
     const posicionDe = new Map<string, number>();
     for (const fila of clasificacion) {

@@ -9,6 +9,7 @@ import { ExcelDownloadButton } from "@/components/ui/excel-download-button";
 import { CalendarIcon, FlagIcon, MapPinIcon, ScissorsIcon, UsersIcon } from "lucide-react";
 import prisma from "@/lib/db";
 import { generarClasificacion, agruparPorRegatista, agruparTripulaciones } from "@/lib/scoring";
+import { maxTripulantesPorBote } from "@/lib/clases-tripulacion";
 import { notFound } from "next/navigation";
 import { SITE_URL } from "@/lib/site";
 import { jsonLdSeguro } from "@/lib/json-ld";
@@ -81,7 +82,9 @@ export default async function CampeonatoDetailPage({ params }: Props) {
   // Mapear al formato de la tabla, agrupando tripulaciones de más de una
   // persona (ej: 29er) en una sola fila -"Fulano & Mengano"- en vez de
   // mostrar dos botes idénticos con el mismo puntaje.
-  const clasificacionAgrupada = agruparTripulaciones(clasificacion);
+  // El tope por bote sale de la clase: en Optimist/ILCA/Finn nadie comparte bote,
+  // así que un empate de puntajes nunca se junta en una sola fila.
+  const clasificacionAgrupada = agruparTripulaciones(clasificacion, maxTripulantesPorBote(campeonato.clase.nombre));
 
   const clasificacionTabla = clasificacionAgrupada.map((c) => ({
     id: c.regatistaId,

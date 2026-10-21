@@ -341,7 +341,10 @@ export function generarClasificacion(
  * (todo penalidades) nunca se agrupa con nadie: no hay forma de
  * distinguir "es la misma tripulación" de "la fórmula da lo mismo".
  */
-export function agruparTripulaciones(clasificacion: ClasificacionRegatista[]): ClasificacionRegatista[] {
+export function agruparTripulaciones(
+  clasificacion: ClasificacionRegatista[],
+  maxPorBote = Infinity
+): ClasificacionRegatista[] {
   const firma = (c: ClasificacionRegatista) =>
     c.resultados
       .map((r) => `${r.regataNumero}:${r.puntos}`)
@@ -363,6 +366,14 @@ export function agruparTripulaciones(clasificacion: ClasificacionRegatista[]): C
       : [c];
 
     companeros.forEach((g) => procesados.add(g.regatistaId));
+
+    // Un grupo más grande de lo que cabe en un bote de esa clase no es una
+    // tripulación sino una coincidencia de puntajes (ver maxTripulantesPorBote
+    // en clases-tripulacion.ts): cada uno queda como fila propia.
+    if (companeros.length > maxPorBote) {
+      agrupado.push(...companeros);
+      continue;
+    }
 
     agrupado.push(
       companeros.length > 1
