@@ -105,9 +105,21 @@ export default async function CampeonatoDetailPage({ params }: Props) {
   // Unión de los nombres de columnas personalizadas presentes en cualquier
   // fila -no todos los regatistas tienen las mismas (ej: solo algunos
   // traían "Categoría" en el archivo importado).
-  const columnasExtra = Array.from(
+  // Las columnas con un día en el nombre ("Flota sáb.", "Flota dom.") van en
+  // orden de calendario: la base devuelve las claves de un JSON en su propio
+  // orden (por largo y alfabético), que dejaba el domingo antes del sábado.
+  const DIAS = ['lun', 'mar', 'mie', 'jue', 'vie', 'sab', 'dom'];
+  const diaDe = (nombre: string) => {
+    const m = nombre.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().match(/(lun|mar|mie|jue|vie|sab|dom)/);
+    return m ? DIAS.indexOf(m[1]) : -1;
+  };
+  const columnasExtraSinOrden = Array.from(
     new Set(clasificacionAgrupada.flatMap((c) => Object.keys(c.datosExtra || {})))
   );
+  const columnasExtra = [
+    ...columnasExtraSinOrden.filter((c) => diaDe(c) < 0),
+    ...columnasExtraSinOrden.filter((c) => diaDe(c) >= 0).sort((x, y) => diaDe(x) - diaDe(y)),
+  ];
 
   // Datos estructurados (schema.org SportsEvent): ayuda a que un buscador
   // entienda que esto es un evento deportivo puntual, con su deporte,
