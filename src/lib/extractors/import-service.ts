@@ -43,7 +43,10 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
   // 1. Precargar clubes y regatistas existentes en una sola consulta cada
   // uno, en vez de un findFirst por fila (que con 200+ regatistas eran
   // cientos de round-trips solo para esto).
-  const clubesExistentes = await prisma.club.findMany();
+  // Solo id y nombre: es lo único que se usa de cada uno, y traer las filas
+  // completas (con fotos, JSON de fuentes, etc.) en cada importación gastaba
+  // transferencia de la base para nada.
+  const clubesExistentes = await prisma.club.findMany({ select: { id: true, nombre: true } });
   const aliasesClub = await prisma.aliasClub.findMany();
   const clubPorNombre = mapaConAliases(
     clubesExistentes,
@@ -51,7 +54,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
     c => c.nombre.toUpperCase()
   );
 
-  const regatistasExistentes = await prisma.regatista.findMany();
+  const regatistasExistentes = await prisma.regatista.findMany({ select: { id: true, nombre: true } });
   const aliasesRegatista = await prisma.aliasRegatista.findMany();
   // Normalizado (sin mayúsc/acentos, palabras ordenadas) en vez de un
   // simple toLowerCase() -así "Tomas Maine" y "Maine Tomas" (u otra fuente
@@ -108,6 +111,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
             where: { nombre: clubStr },
             update: {},
             create: { nombre: clubStr },
+            select: { id: true, nombre: true },
           });
           clubPorNombre.set(clubStr, club);
         }
@@ -124,6 +128,7 @@ export async function importCampeonatoResults(campeonatoId: string, parsedData: 
             clubId,
             fuenteIds: { vela: row.vela },
           },
+          select: { id: true, nombre: true },
         });
         regatistaPorNombre.set(nombreKey, regatista);
         regatistasNuevos++;

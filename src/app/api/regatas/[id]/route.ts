@@ -37,7 +37,7 @@ export async function PUT(
     // matchear por nombre normalizado -Prisma no puede ordenar palabras
     // dentro de una consulta, así que la comparación se hace en JS.
     const regatistaPorNombre = new Map(
-      (await prisma.regatista.findMany()).map((r) => [normalizarNombre(r.nombre), r])
+      (await prisma.regatista.findMany({ select: { id: true, nombre: true } })).map((r) => [normalizarNombre(r.nombre), r])
     );
 
     const regatistaIdsUsados: string[] = [];
@@ -88,6 +88,7 @@ export async function PUT(
               clubId,
               fuenteIds: r.vela ? { vela: r.vela } : undefined,
             },
+            select: { id: true, nombre: true },
           });
           regatistaPorNombre.set(nombreKey, nuevo);
           regatistaIds.push(nuevo.id);
