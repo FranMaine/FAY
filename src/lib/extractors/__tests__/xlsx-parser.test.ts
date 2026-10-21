@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { numeroDeCelda, detectarPorEncabezado, armarParseResult, repararFilasDivididas, ColumnMapping } from '../xlsx-parser';
+import { numeroDeCelda, codigoDeCelda, detectarPorEncabezado, armarParseResult, repararFilasDivididas, ColumnMapping } from '../xlsx-parser';
 
 describe('numeroDeCelda', () => {
   it('extrae un número entero simple', () => {
@@ -21,6 +21,21 @@ describe('numeroDeCelda', () => {
     expect(numeroDeCelda(undefined)).toBeNull();
     expect(numeroDeCelda('')).toBeNull();
     expect(numeroDeCelda('DNF')).toBeNull();
+  });
+});
+
+describe('codigoDeCelda', () => {
+  it('extrae el código de penalidad que acompaña al puntaje', () => {
+    expect(codigoDeCelda('106 DNF')).toBe('DNF');
+    expect(codigoDeCelda('(16 BFD)')).toBe('BFD');
+    expect(codigoDeCelda('106 dne')).toBe('DNE');
+  });
+
+  it('devuelve null si no hay código o no es uno conocido', () => {
+    expect(codigoDeCelda('12')).toBeNull();
+    expect(codigoDeCelda(12)).toBeNull();
+    expect(codigoDeCelda(null)).toBeNull();
+    expect(codigoDeCelda('3 Gold')).toBeNull();
   });
 });
 
@@ -166,6 +181,15 @@ describe('armarParseResult', () => {
     });
     expect(resultado[0].regatas).toEqual([
       { numero: 1, puntajeBruto: 2, observacion: null },
+      { numero: 2, puntajeBruto: 3, observacion: null },
+    ]);
+  });
+
+  it('guarda el código de penalidad de la celda sin cambiar el puntaje', () => {
+    const rows = [[1, 101, 'Juan Perez', 'CUBA', 5, '106 DNF', 3]];
+    const resultado = armarParseResult(header, rows, baseMapping);
+    expect(resultado[0].regatas).toEqual([
+      { numero: 1, puntajeBruto: 106, observacion: 'DNF' },
       { numero: 2, puntajeBruto: 3, observacion: null },
     ]);
   });

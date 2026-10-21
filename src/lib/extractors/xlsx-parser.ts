@@ -65,6 +65,18 @@ export function numeroDeCelda(v: CeldaValor): number | null {
   return match ? parseFloat(match[0]) : null;
 }
 
+// Códigos de penalidad que una celda de regata puede traer junto al puntaje
+// ("106 DNF", "(16 BFD)"). Solo se LEEN para mostrarlos en la tabla -el
+// puntaje sigue siendo el número que trae la fuente, no se recalcula nada.
+const CODIGOS_EN_CELDA = new Set(['DNF', 'DNS', 'DNC', 'DSQ', 'OCS', 'BFD', 'UFD', 'RET', 'DNE', 'TLE', 'SCP', 'ZFP']);
+
+/** Código de penalidad de una celda ("106 DNF" -> "DNF"), o null si no trae ninguno. */
+export function codigoDeCelda(v: CeldaValor): string | null {
+  if (typeof v !== 'string') return null;
+  const match = v.toUpperCase().match(/[A-Z]{2,4}/);
+  return match && CODIGOS_EN_CELDA.has(match[0]) ? match[0] : null;
+}
+
 const filaVacia = (r: FilaCruda) => r.every((v) => v === null || v === undefined || v === '');
 const celdasLlenas = (r: FilaCruda) => r.filter((v) => v !== null && v !== undefined && v !== '').length;
 
@@ -249,7 +261,7 @@ export function armarParseResult(header: string[], rows: FilaCruda[], mapping: C
     for (const { numero, colIndex } of regataCols) {
       const valor = numeroDeCelda(row[colIndex]);
       if (valor === null) continue; // celda vacía: no navegó esta regata
-      regatas.push({ numero, puntajeBruto: Math.abs(valor), observacion: null });
+      regatas.push({ numero, puntajeBruto: Math.abs(valor), observacion: codigoDeCelda(row[colIndex]) });
     }
 
     let datosExtra: Record<string, string> | undefined;

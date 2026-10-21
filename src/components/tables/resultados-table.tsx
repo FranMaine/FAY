@@ -42,6 +42,35 @@ interface ResultadosTableProps {
 // filas, sin esto no hay forma de saber en cuál link está parado el Tab.
 const FOCO_LINK = 'rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 
+// Colores de las flotas por día (ej: Gran Prix del Litoral con Optimist:
+// Amarilla, Roja y Azul). Una columna extra cuyo nombre empieza con "Flota"
+// muestra su valor con un punto de ese color delante, así se distinguen de un
+// vistazo; si el nombre no es uno conocido, se muestra solo el texto.
+const COLOR_FLOTA: Record<string, string> = {
+  amarilla: 'bg-yellow-400',
+  roja: 'bg-red-500',
+  azul: 'bg-blue-500',
+  verde: 'bg-green-500',
+  naranja: 'bg-orange-500',
+};
+
+function ValorExtra({ campo, valor }: { campo: string; valor: string }) {
+  const color = /^flota/i.test(campo) ? COLOR_FLOTA[valor.trim().toLowerCase()] : undefined;
+  if (!color) return <>{valor}</>;
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', color)} aria-hidden="true" />
+      {valor}
+    </span>
+  );
+}
+
+// Un resultado con código de penalidad (DNF, DNC, BFD...) se muestra con el
+// código en rojo; el puntaje que le tocó queda en el tooltip.
+function textoPenalidad(p: { puntos: number; observacion?: string }) {
+  return p.observacion ? `${p.observacion}: ${p.puntos} pts` : undefined;
+}
+
 function NombreRegatista({ row, className }: { row: ClasificacionRegatista; className?: string }) {
   if (!row.integrantes || row.integrantes.length < 2) {
     return (
@@ -132,7 +161,7 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
               {row.puntajes.map((p) => (
                 <div key={p.regata} className="text-center">
                   <div className="text-[10px] text-muted mb-1">R{p.regata}</div>
-                  <div className={cn(
+                  <div title={textoPenalidad(p)} className={cn(
                     "font-mono text-sm",
                     p.descartado && "line-through text-muted",
                     p.observacion && "text-error"
@@ -149,7 +178,7 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
                   row.datosExtra?.[campo] ? (
                     <div key={campo}>
                       <span className="text-muted">{campo}: </span>
-                      <span className="text-foreground">{row.datosExtra[campo]}</span>
+                      <span className="text-foreground"><ValorExtra campo={campo} valor={row.datosExtra[campo]} /></span>
                     </div>
                   ) : null
                 ))}
@@ -207,7 +236,7 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
                   return (
                     <td key={r} className="px-4 py-3 text-center font-mono">
                       {p ? (
-                        <span className={cn(
+                        <span title={textoPenalidad(p)} className={cn(
                           p.descartado && "line-through text-muted",
                           p.observacion && "text-error font-medium"
                         )}>
@@ -224,7 +253,7 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
                 </td>
                 {columnasExtra.map((campo) => (
                   <td key={campo} className="px-4 py-3 text-muted whitespace-nowrap">
-                    {row.datosExtra?.[campo] ?? '-'}
+                    {row.datosExtra?.[campo] ? <ValorExtra campo={campo} valor={row.datosExtra[campo]} /> : '-'}
                   </td>
                 ))}
               </tr>

@@ -110,7 +110,7 @@ export function agruparPorRegatista(regatas: RegataConResultados[]) {
 }
 
 // Constants for penalty codes
-export const PENALTY_CODES = ['DNF', 'DNS', 'DNC', 'DSQ', 'OCS', 'BFD', 'UFD', 'RET'] as const;
+export const PENALTY_CODES = ['DNF', 'DNS', 'DNC', 'DSQ', 'OCS', 'BFD', 'UFD', 'RET', 'DNE', 'TLE', 'SCP', 'ZFP'] as const;
 export type PenaltyCode = typeof PENALTY_CODES[number];
 
 /**
