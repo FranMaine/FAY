@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
+import { refrescarRankings } from '@/lib/refrescar-cache';
 import { eliminarClubesVacios } from '@/lib/club-cleanup';
 
 const bodySchema = z.object({
@@ -47,6 +48,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         data: { clubId: ids[0], otrosClubes: { set: ids.slice(1).map((c) => ({ id: c })) } },
       });
       await eliminarClubesVacios(clubesAntes, actor);
+      refrescarRankings();
       return NextResponse.json({ ok: true });
     }
     let clubId = body.clubId ?? null;
@@ -62,6 +64,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     await prisma.regatista.update({ where: { id }, data: { clubId } });
     await eliminarClubesVacios(clubesAntes, actor);
+    refrescarRankings();
     return NextResponse.json({ ok: true });
   } catch (error) {
     return handleApiError(error, 'PATCH /api/admin/regatistas/[id]/club');

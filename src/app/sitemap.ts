@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/db';
 import { SITE_URL } from '@/lib/site';
 import { LUGARES, urlViento } from '@/lib/lugares';
@@ -12,7 +13,12 @@ import { LUGARES, urlViento } from '@/lib/lugares';
 // como para que valga la pena cachearlo.
 export const dynamic = 'force-dynamic';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+// Las tres consultas viven en caché (1 hora, y se limpian al toque con el tag
+// "rankings" cuando cambia un campeonato o se fusiona algo): los buscadores
+// piden el sitemap seguido y sin esto cada pedido recorría la lista entera de
+// regatistas, campeonatos y clubes en la base. El caché guarda JSON, así que
+// las fechas viajan como texto y se vuelven a convertir abajo.
+async function leerIdsParaSitemap() {
   const [campeonatos, regatistas, clubes] = await Promise.all([
     // Solo lo publicado: un campeonato en BORRADOR no es visible ni
     // debería quedar linkeado desde ningún lado, sitemap incluido.
@@ -31,6 +37,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { id: true, updatedAt: true },
     }),
   ]);
+  return { campeonatos, regatistas, clubes };
+}
+
+const getIdsParaSitemap = unstable_cache(leerIdsParaSitemap, ['sitemap-ids'], {
+  revalidate: 3600,
+  tags: ['rankings'],
+});
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const { campeonatos, regatistas, clubes } = await getIdsParaSitemap();
 
   const estaticas: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: 'daily', priority: 1 },
@@ -46,21 +62,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const deCampeonatos: MetadataRoute.Sitemap = campeonatos.map((c) => ({
     url: `${SITE_URL}/campeonatos/${c.id}`,
-    lastModified: c.updatedAt,
+    lastModified: new Date(c.updatedAt),
     changeFrequency: 'monthly',
     priority: 0.7,
   }));
 
   const deRegatistas: MetadataRoute.Sitemap = regatistas.map((r) => ({
     url: `${SITE_URL}/regatistas/${r.id}`,
-    lastModified: r.updatedAt,
+    lastModified: new Date(r.updatedAt),
     changeFrequency: 'monthly',
     priority: 0.5,
   }));
 
   const deClubes: MetadataRoute.Sitemap = clubes.map((c) => ({
     url: `${SITE_URL}/clubes/${c.id}`,
-    lastModified: c.updatedAt,
+    lastModified: new Date(c.updatedAt),
     changeFrequency: 'monthly',
     priority: 0.4,
   }));

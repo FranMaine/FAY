@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
+import { refrescarRankings } from '@/lib/refrescar-cache';
 import { borrarImagen } from '@/lib/upload-imagen';
 import { registrarAuditoria } from '@/lib/auditoria';
 
@@ -26,6 +27,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         ...(body.nombreCompleto !== undefined ? { nombreCompleto: body.nombreCompleto || null } : {}),
       },
     });
+    refrescarRankings();
     return NextResponse.json({ id: club.id, nombre: club.nombre, nombreCompleto: club.nombreCompleto });
   } catch (error) {
     return handleApiError(error, 'PATCH /api/admin/clubes/[id]');
@@ -50,6 +52,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
       prisma.club.delete({ where: { id } }),
     ]);
 
+    refrescarRankings();
     if (club.logoUrl?.startsWith('http')) await borrarImagen(club.logoUrl);
     void registrarAuditoria(
       { email: session.user.email || session.user.id, name: session.user.name },

@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { regatistaMergeSchema } from '@/lib/validators';
 import { fusionarRegatistas } from '@/lib/regatista-merge';
 import { handleApiError } from '@/lib/api-error';
+import { refrescarRankings } from '@/lib/refrescar-cache';
 
 // Fusiona uno o más regatistas duplicados dentro de un regatista canónico
 // (ver fusionarRegatistas en lib/regatista-merge.ts para las reglas de qué
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
     const body = regatistaMergeSchema.parse(json);
 
     const resumen = await fusionarRegatistas(body.canonicoId, body.duplicadoIds);
+    refrescarRankings();
     return NextResponse.json({ success: true, resumen });
   } catch (error) {
     return handleApiError(error, 'POST /api/admin/regatistas/merge');

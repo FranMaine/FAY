@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { fusionarClubes } from '@/lib/club-merge';
 import { handleApiError } from '@/lib/api-error';
+import { refrescarRankings } from '@/lib/refrescar-cache';
 import { registrarAuditoria } from '@/lib/auditoria';
 
 const bodySchema = z.object({
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
     }
 
     const resumen = await fusionarClubes(body.canonicoId, body.duplicadoIds);
+    refrescarRankings();
 
     void registrarAuditoria(
       { email: session.user.email || session.user.id, name: session.user.name },

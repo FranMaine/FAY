@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
+import { refrescarRankings } from '@/lib/refrescar-cache';
 import { subirImagen, borrarImagen, ImagenInvalidaError } from '@/lib/upload-imagen';
 
 // El recorte de fondo del escudo (quitarFondoLiso) puede tardar unos
@@ -32,6 +33,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const logoUrl = await subirImagen(file, 'clubes', id, 400, 'inside', quitarFondo);
     await prisma.club.update({ where: { id }, data: { logoUrl } });
     if (club.logoUrl) await borrarImagen(club.logoUrl);
+    refrescarRankings();
 
     return NextResponse.json({ logoUrl });
   } catch (error) {
@@ -57,6 +59,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     if (club.logoUrl) await borrarImagen(club.logoUrl);
     await prisma.club.update({ where: { id }, data: { logoUrl: null } });
+    refrescarRankings();
 
     return NextResponse.json({ success: true });
   } catch (error) {
