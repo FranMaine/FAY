@@ -110,7 +110,7 @@ export default async function CampeonatoDetailPage({ params }: Props) {
   // orden (por largo y alfabético), que dejaba el domingo antes del sábado.
   const DIAS = ['lun', 'mar', 'mie', 'jue', 'vie', 'sab', 'dom'];
   const diaDe = (nombre: string) => {
-    const m = nombre.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().match(/(lun|mar|mie|jue|vie|sab|dom)/);
+    const m = nombre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().match(/\b(lun|mar|mie|jue|vie|sab|dom)\b/);
     return m ? DIAS.indexOf(m[1]) : -1;
   };
   const columnasExtraSinOrden = Array.from(
