@@ -196,6 +196,7 @@ export function ResultadosTable({ clasificacion, regatas, columnasExtra = [] }: 
           de 3 dígitos. */}
       <div className="hidden md:block overflow-x-auto rounded-xl border border-border bg-surface [--pos-w:72px]">
         <table className="w-full text-sm text-left">
+          <caption className="sr-only">Tabla de posiciones del campeonato, con el puntaje de cada regata</caption>
           <thead className="text-xs text-muted uppercase bg-surface-hover border-b border-border">
             <tr>
               <th scope="col" className="px-4 py-3 sticky left-0 bg-surface-hover z-10 w-[var(--pos-w)] min-w-[var(--pos-w)] max-w-[var(--pos-w)]">Pos</th>

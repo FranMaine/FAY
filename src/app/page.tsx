@@ -141,7 +141,9 @@ export default async function LandingPage() {
             <p className="fade-in-up inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-widest backdrop-blur-sm" style={{ animationDelay: '40ms' }}>
               <Medal className="w-3.5 h-3.5" aria-hidden="true" /> Estadísticas de vela argentina
             </p>
-            <h1 className="fade-in-up text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.02] [text-shadow:0_2px_24px_rgba(0,0,0,0.6)]" style={{ animationDelay: '100ms' }}>
+            {/* Sin fade-in: el h1 es el LCP de la portada y la animación (opacity 0
+                al arrancar + delay) lo hacía pintarse recién a los ~420 ms. */}
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.02] [text-shadow:0_2px_24px_rgba(0,0,0,0.6)]">
               Cada regata,<br />
               <span className="text-sky-300">cada regatista.</span>
             </h1>

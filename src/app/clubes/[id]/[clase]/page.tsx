@@ -105,6 +105,7 @@ export default async function ClubCategoriaPage({ params }: Props) {
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
+                <caption className="sr-only">Regatistas de {club.nombre} en {claseNombre}</caption>
                 <thead className="text-xs text-muted-foreground uppercase bg-background/50 border-b border-border">
                   <tr>
                     <th scope="col" className="px-1.5 sm:px-6 py-3 sm:py-4 font-medium">Regatista</th>

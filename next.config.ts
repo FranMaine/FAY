@@ -77,7 +77,12 @@ const nextConfig: NextConfig = {
   // La página de ayuda se publicó un rato como /guia: se redirige para no
   // dejar un link roto (ya estuvo en el pie y en el sitemap).
   async redirects() {
-    return [{ source: "/guia", destination: "/ayuda", permanent: true }];
+    return [
+      { source: "/guia", destination: "/ayuda", permanent: true },
+      // Solo existe /regatistas/[id]: quien recorta la URL de un perfil o la
+      // tipea a mano caía en un 404. El listado de regatistas es el ranking.
+      { source: "/regatistas", destination: "/rankings", permanent: true },
+    ];
   },
   async headers() {
     return [

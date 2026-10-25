@@ -63,6 +63,7 @@ export function ClimaBadge({ slug, compacto = false }: { slug: string; compacto?
   const Icono = ICONO_CLIMA[categoria];
   const fuenteViento = datos.vientoMedido ? 'medido en la estación más cercana' : 'estimado';
   const cielo = `${datos.lugar.nombre}: ${datos.temperatura}°C, ${ETIQUETA_CLIMA[categoria]}`;
+  const textoViento = `${datos.vientoNudos} kn ${direccionViento(datos.vientoGrados)}`;
   const viento = `viento ${datos.vientoNudos} nudos del ${direccionViento(datos.vientoGrados)} (${fuenteViento})`;
 
   return (
@@ -83,11 +84,11 @@ export function ClimaBadge({ slug, compacto = false }: { slug: string; compacto?
       <Link
         href={urlViento(datos.lugar.slug)}
         title={`${viento}. Ver el detalle del viento en ${datos.lugar.nombre}`}
-        aria-label={`${viento}. Ver el detalle del viento en ${datos.lugar.nombre}`}
+        aria-label={`${textoViento}: ${viento}. Ver el detalle del viento en ${datos.lugar.nombre}`}
         className="-my-3 flex items-center gap-1 whitespace-nowrap rounded-sm py-3 underline decoration-dotted decoration-muted-foreground/60 underline-offset-4 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <Wind className={cn("h-3.5 w-3.5 text-muted-foreground", compacto && "max-[429px]:hidden")} aria-hidden="true" />
-        {datos.vientoNudos} kn {direccionViento(datos.vientoGrados)}
+        {textoViento}
       </Link>
     </div>
   );

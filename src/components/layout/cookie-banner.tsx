@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { leerConsentimiento, guardarConsentimiento } from "@/lib/consentimiento";
 
+function avisoInicialVisto(): boolean {
+  try {
+    return !!localStorage.getItem("fay-beta-aviso-visto");
+  } catch {
+    return true; // sin storage el modal no se muestra, así que no hay nada que esperar
+  }
+}
+
 // Orzando está sumando analítica y publicidad (Google): mientras el
 // visitante no elija, esas categorías quedan apagadas -solo las cookies
 // necesarias para el login funcionan sin pedir nada, porque están exentas
@@ -22,11 +30,19 @@ export function CookieBanner() {
   // -el setState dentro de un requestAnimationFrame (no síncrono dentro
   // del cuerpo del efecto) es lo que evita el warning de "cascading
   // renders" de la regla react-hooks/set-state-in-effect.
+  // En la primera visita convive con el modal de "primeras etapas": en el
+  // celular se pisaban (el aviso tapaba la mitad del modal y de la portada),
+  // así que si ese aviso todavía no se vio, este espera a que se cierre.
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
-      setVisible(leerConsentimiento() === null);
+      setVisible(leerConsentimiento() === null && avisoInicialVisto());
     });
-    return () => cancelAnimationFrame(raf);
+    const alCerrarAviso = () => setVisible(leerConsentimiento() === null);
+    window.addEventListener("fay-beta-cerrado", alCerrarAviso);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("fay-beta-cerrado", alCerrarAviso);
+    };
   }, []);
 
   function elegir(eleccion: { analitica: boolean; publicidad: boolean }) {
