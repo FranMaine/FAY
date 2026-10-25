@@ -65,7 +65,7 @@ export function CookieBanner() {
             Usamos cookies necesarias para el login, y -si lo aceptás- de
             analítica y publicidad para mantener el sitio gratis.{" "}
             <Link href="/cookies" className="text-primary hover:underline font-medium">
-              Más información
+              Más información sobre cookies
             </Link>
           </p>
           <div className="grid w-full grid-cols-2 items-center gap-2 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap sm:justify-center">
