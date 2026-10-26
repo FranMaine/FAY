@@ -9,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { SettingsIcon, UserIcon } from "lucide-react";
 import { getRegatistaProfile } from "@/lib/get-regatista-profile";
 import { PerfilRegatista } from "@/components/regatista/perfil-regatista";
+import { SeccionFavoritos } from "@/components/favoritos/seccion-favoritos";
 
 // Página privada (requiere sesión, ver redirect() más abajo): sin sentido
 // indexarla, y menos con noindex no listado la evita en robots.txt igual
@@ -47,15 +48,18 @@ export default async function MiPerfilPage() {
     }
     if (solicitud) {
       return (
-        <main className="min-h-dvh bg-background p-6 md:p-10 flex items-start justify-center">
-          <Card className="w-full max-w-lg bg-surface border-border mt-10 text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl">Solicitud en proceso</CardTitle>
-              <CardDescription className="text-base mt-2">
-                Tu solicitud de vinculación está siendo revisada por un administrador. Por favor, tené paciencia.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+        <main className="min-h-dvh bg-background p-6 md:p-10">
+          <div className="mx-auto max-w-4xl space-y-10">
+            <Card className="w-full max-w-lg bg-surface border-border mt-10 mx-auto text-center">
+              <CardHeader>
+                <CardTitle className="text-2xl">Solicitud en proceso</CardTitle>
+                <CardDescription className="text-base mt-2">
+                  Tu solicitud de vinculación está siendo revisada por un administrador. Por favor, tené paciencia.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <SeccionFavoritos />
+          </div>
         </main>
       );
     }
@@ -97,6 +101,8 @@ export default async function MiPerfilPage() {
               </Link>
             </CardFooter>
           </Card>
+
+          <SeccionFavoritos />
         </div>
       </main>
     );

@@ -96,7 +96,9 @@ export function Navbar() {
                     )}
                   >
                     <Icon className="h-4 w-4" />
-                    {link.label}
+                    {/* Favoritos es el link más nuevo: en pantallas medianas queda solo la estrella. */}
+                    <span className={link.match === '/favoritos' ? 'hidden xl:inline' : undefined}>{link.label}</span>
+                    {link.match === '/favoritos' && <span className="sr-only xl:hidden">{link.label}</span>}
                   </Link>
                 );
               })}
