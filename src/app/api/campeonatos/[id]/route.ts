@@ -80,6 +80,9 @@ export async function PUT(
       campos: Object.keys(body),
     });
 
+    // Si cambió algo que mueve posiciones (descartes...), avisa a quienes les afecte.
+    if (campeonato.estado === 'PUBLICADO') after(() => avisarResultadosPublicados(id));
+
     revalidateTag('rankings', { expire: 0 });
     return NextResponse.json(campeonato);
   } catch (error) {
@@ -173,10 +176,11 @@ export async function PATCH(
       });
     }
 
-    // Mail a las personas con cuenta vinculada que figuran en este
-    // campeonato -después de responder, y una sola vez por campeonato (ver
-    // avisarResultadosPublicados).
-    if (body.estado === 'PUBLICADO' && estadoAnterior && estadoAnterior !== 'PUBLICADO') {
+    // Mail a quienes figuran en este campeonato (o los tienen en favoritos),
+    // después de responder: al publicarlo les manda su posición y, si ya
+    // estaba publicado y se cambió algo, solo a quienes les afecte el cambio
+    // (ver avisarResultadosPublicados).
+    if (campeonato.estado === 'PUBLICADO') {
       after(() => avisarResultadosPublicados(id));
     }
 

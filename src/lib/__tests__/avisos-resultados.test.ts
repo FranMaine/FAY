@@ -120,6 +120,64 @@ describe('avisarResultadosPublicados', () => {
     expect(auditar.mock.invocationCallOrder[0]).toBeLessThan(enviar.mock.invocationCallOrder[0]);
   });
 
+  describe('cuando el campeonato ya estaba publicado', () => {
+    // Deja el aviso inicial y devuelve cómo quedó cada uno (lo que se guarda en la auditoría).
+    async function fotoDelAvisoInicial() {
+      await avisarResultadosPublicados('c1');
+      const foto = auditar.mock.calls[0][4].posiciones;
+      vi.clearAllMocks();
+      prismaFalso.campeonato.findUnique.mockResolvedValue(campeonatoDePrueba());
+      prismaFalso.user.findMany.mockResolvedValue([
+        { email: 'beto@mail.com', regatistaId: 'r-beto', regatista: { nombre: 'Beto Pérez' } },
+      ]);
+      prismaFalso.favorito.findMany.mockResolvedValue([]);
+      return foto;
+    }
+
+    it('no manda nada si a nadie le cambió el resultado', async () => {
+      const foto = await fotoDelAvisoInicial();
+      prismaFalso.auditLog.findFirst.mockResolvedValue({ id: 'a1', detalle: { posiciones: foto } });
+      const r = await avisarResultadosPublicados('c1');
+      expect(r.enviados).toBe(0);
+      expect(enviar).not.toHaveBeenCalled();
+      expect(auditar).not.toHaveBeenCalled();
+    });
+
+    it('reenvía solo a quien le cambió la posición o algún resultado, diciendo cómo estaba', async () => {
+      const foto = await fotoDelAvisoInicial();
+      foto['r-beto'] = [1, foto['r-beto'][1]]; // antes figuraba 1°, ahora es 2°
+      prismaFalso.auditLog.findFirst.mockResolvedValue({ id: 'a1', detalle: { posiciones: foto } });
+
+      const r = await avisarResultadosPublicados('c1');
+
+      expect(r.enviados).toBe(1);
+      const where = prismaFalso.user.findMany.mock.calls[0][0].where;
+      expect(where.regatistaId.in).toEqual(['r-beto']);
+      const mail = enviar.mock.calls[0][0];
+      expect(mail.to).toBe('beto@mail.com');
+      expect(mail.subject).toContain('Se actualizó tu resultado');
+      expect(mail.html).toContain('puesto <strong>2</strong> de 3');
+      expect(mail.html).toContain('antes figuraba en el 1');
+      expect(auditar.mock.calls[0][4].tipo).toBe('actualizacion');
+    });
+
+    it('detecta el cambio aunque la posición final sea la misma (cambió una regata)', async () => {
+      const foto = await fotoDelAvisoInicial();
+      foto['r-beto'] = [foto['r-beto'][0], 'otra-huella'];
+      prismaFalso.auditLog.findFirst.mockResolvedValue({ id: 'a1', detalle: { posiciones: foto } });
+      const r = await avisarResultadosPublicados('c1');
+      expect(r.enviados).toBe(1);
+    });
+
+    it('si el aviso anterior no guardó cómo quedó cada uno, solo deja el punto de partida', async () => {
+      prismaFalso.auditLog.findFirst.mockResolvedValue({ id: 'viejo', detalle: { nombre: 'x', destinatarios: 3 } });
+      const r = await avisarResultadosPublicados('c1');
+      expect(r.enviados).toBe(0);
+      expect(enviar).not.toHaveBeenCalled();
+      expect(auditar.mock.calls[0][4].tipo).toBe('punto_de_partida');
+    });
+  });
+
   it('no avisa si el campeonato no está publicado', async () => {
     prismaFalso.campeonato.findUnique.mockResolvedValue(campeonatoDePrueba('BORRADOR'));
     const r = await avisarResultadosPublicados('c1');

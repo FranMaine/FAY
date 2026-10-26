@@ -148,6 +148,52 @@ export function emailVinculacionRevocada(nombreRegatista: string) {
  * los resultados de un campeonato en el que figura. `posicion`/`total` pueden
  * ser null si no se pudo calcular (el mail igual sirve para avisar).
  */
+// Aviso de que cambió el resultado o la posición de alguien en un campeonato
+// que ya estaba publicado (se corrigió una regata, cambiaron los descartes...).
+export function emailResultadoActualizado(datos: {
+  nombreRegatista: string;
+  campeonato: string;
+  clase: string;
+  anio: number;
+  posicion: number | null;
+  /** Posición del último aviso, si se sabe. */
+  posicionAnterior: number | null;
+  totalParticipantes: number;
+  urlCampeonato: string;
+  urlConfiguracion: string;
+  /** true: es por un regatista que la persona tiene en favoritos (no por su propio perfil). */
+  favorito?: boolean;
+}) {
+  const campeonato = `${datos.campeonato} ${datos.anio}`;
+  const nombre = escapeHtml(datos.nombreRegatista);
+  const ahora = datos.favorito ? 'Ahora terminó' : 'Ahora terminaste';
+  const antes =
+    datos.posicionAnterior !== null && datos.posicionAnterior !== datos.posicion
+      ? ` (antes figuraba en el ${datos.posicionAnterior})`
+      : '';
+  const lugar =
+    datos.posicion !== null
+      ? `<p style="font-size: 18px; margin: 16px 0;">${ahora} en el puesto <strong>${datos.posicion}</strong> de ${datos.totalParticipantes}${antes}.</p>`
+      : '';
+  const motivo = datos.favorito
+    ? `Recibís este aviso porque agregaste a ${nombre} a tus favoritos de Orzando.`
+    : 'Recibís este aviso porque tu cuenta de Orzando está vinculada a tu perfil de regatista.';
+  return {
+    subject: datos.favorito
+      ? `Se actualizó el resultado de ${datos.nombreRegatista} en ${campeonato}`
+      : `Se actualizó tu resultado en ${campeonato}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1e293b;">Se actualizó ${datos.favorito ? `el resultado de ${nombre}` : 'tu resultado'}</h2>
+        <p>Se corrigieron los resultados de <strong>${escapeHtml(campeonato)}</strong> (${escapeHtml(datos.clase)}) y cambió ${datos.favorito ? `el de <strong>${nombre}</strong>` : 'el tuyo'}.</p>
+        ${lugar}
+        <p style="margin: 24px 0;"><a href="${datos.urlCampeonato}" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Ver la tabla completa</a></p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">${motivo} Podés dejar de recibirlos cuando quieras desde <a href="${datos.urlConfiguracion}" style="color: #94a3b8;">la configuración de tu cuenta</a>.</p>
+      </div>
+    `,
+  };
+}
+
 export function emailResultadoPublicado(datos: {
   nombreRegatista: string;
   campeonato: string;

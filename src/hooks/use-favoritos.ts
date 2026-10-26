@@ -10,9 +10,11 @@ interface Estado {
   ids: ReadonlySet<string>;
   cargado: boolean;
   perfilUso: 'NAVEGANTE' | 'FAMILIAR' | 'ESPECTADOR' | null;
+  /** Regatista vinculado a la propia cuenta (no se puede agregar a favoritos). */
+  propio: string | null;
 }
 
-let estado: Estado = { ids: new Set(), cargado: false, perfilUso: null };
+let estado: Estado = { ids: new Set(), cargado: false, perfilUso: null, propio: null };
 let pidiendo: Promise<void> | null = null;
 const oyentes = new Set<() => void>();
 
@@ -32,8 +34,8 @@ function cargar(): Promise<void> {
   if (pidiendo) return pidiendo;
   pidiendo = fetch('/api/favoritos?solo=ids')
     .then((res) => (res.ok ? res.json() : null))
-    .then((json: { ids?: string[]; perfilUso?: Estado['perfilUso'] } | null) => {
-      emitir({ ids: new Set(json?.ids ?? []), cargado: true, perfilUso: json?.perfilUso ?? null });
+    .then((json: { ids?: string[]; perfilUso?: Estado['perfilUso']; propio?: string | null } | null) => {
+      emitir({ ids: new Set(json?.ids ?? []), cargado: true, perfilUso: json?.perfilUso ?? null, propio: json?.propio ?? null });
     })
     .catch(() => {
       // Sin red: la estrella queda como "no marcada" y se reintenta en la próxima visita.
@@ -47,7 +49,7 @@ function cargar(): Promise<void> {
 
 /** Vuelve a pedir la lista (ej: al cerrar sesión y entrar con otra cuenta). */
 export function reiniciarFavoritos() {
-  emitir({ ids: new Set(), cargado: false, perfilUso: null });
+  emitir({ ids: new Set(), cargado: false, perfilUso: null, propio: null });
 }
 
 export function useFavoritos() {
@@ -95,6 +97,7 @@ export function useFavoritos() {
     cargando: status === 'loading' || (status === 'authenticated' && !actual.cargado),
     ids: actual.ids,
     perfilUso: actual.perfilUso,
+    propio: actual.propio,
     esFavorito,
     alternar,
   };

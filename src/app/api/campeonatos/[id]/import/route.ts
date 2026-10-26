@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { avisarResultadosPublicados } from "@/lib/avisos-resultados";
 import { auth } from "@/lib/auth";
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { puedeGestionarCampeonatos } from "@/lib/permisos";
@@ -83,6 +84,8 @@ export async function POST(
     void registrarAuditoria(actorDe(session), 'campeonato.importar_resultados', 'Campeonato', campeonatoId, {
       archivo: file.name,
     });
+    // Reimportar resultados de un campeonato ya publicado puede mover posiciones.
+    after(() => avisarResultadosPublicados(campeonatoId));
 
     return NextResponse.json(result);
   } catch (error) {

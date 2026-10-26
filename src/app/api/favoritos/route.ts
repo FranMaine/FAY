@@ -28,11 +28,15 @@ export async function GET(request: Request) {
 
     const usuario = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { perfilUso: true },
+      select: { perfilUso: true, regatistaId: true },
     });
 
     if (new URL(request.url).searchParams.get('solo') === 'ids') {
-      return NextResponse.json({ ids: favoritos.map((f) => f.regatista.id), perfilUso: usuario?.perfilUso ?? null });
+      return NextResponse.json({
+        ids: favoritos.map((f) => f.regatista.id),
+        perfilUso: usuario?.perfilUso ?? null,
+        propio: usuario?.regatistaId ?? null,
+      });
     }
 
     const ultimos = await ultimoResultadoDe(favoritos.map((f) => f.regatista.id));

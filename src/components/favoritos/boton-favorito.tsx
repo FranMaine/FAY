@@ -19,8 +19,11 @@ interface Props {
 // lleva a ingresar. No se muestra para el propio perfil vinculado (el
 // servidor igual lo rechaza), eso lo decide quien lo usa.
 export function BotonFavorito({ regatistaId, nombre, compacto = false, className }: Props) {
-  const { autenticado, cargando, esFavorito, alternar } = useFavoritos();
+  const { autenticado, cargando, esFavorito, alternar, propio } = useFavoritos();
   const marcado = esFavorito(regatistaId);
+
+  // Es el perfil vinculado a la propia cuenta: ya lo tiene en Mi perfil.
+  if (propio === regatistaId) return null;
 
   if (!autenticado && !cargando) {
     return (

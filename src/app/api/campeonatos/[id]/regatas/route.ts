@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
+import { avisarResultadosPublicados } from '@/lib/avisos-resultados';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
@@ -59,6 +60,9 @@ export async function POST(
       numero: body.regataNumero,
       resultados: body.resultados.length,
     });
+
+    // Una regata nueva en un campeonato ya publicado cambia las posiciones.
+    after(() => avisarResultadosPublicados(id));
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {

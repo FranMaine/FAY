@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
+import { avisarResultadosPublicados } from '@/lib/avisos-resultados';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
@@ -144,6 +145,9 @@ export async function PUT(
       numero: regataExistente.numero,
       resultados: regata.resultados.length,
     });
+
+    // Corregir una regata de un campeonato ya publicado puede mover posiciones.
+    after(() => avisarResultadosPublicados(regataExistente.campeonatoId));
 
     revalidateTag('rankings', { expire: 0 });
     return NextResponse.json(regata);
