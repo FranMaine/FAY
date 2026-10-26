@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { regataResultadosSchema } from '@/lib/validators';
 import { splitNombreTripulacion, splitClubPorTripulante, normalizarNombre } from '@/lib/nombres';
 import { handleApiError } from '@/lib/api-error';
@@ -136,6 +137,12 @@ export async function PUT(
       include: {
         resultados: { include: { regatista: true } },
       },
+    });
+
+    void registrarAuditoria(actorDe(session!), 'regata.editar_resultados', 'Regata', id, {
+      campeonatoId: regataExistente.campeonatoId,
+      numero: regataExistente.numero,
+      resultados: regata.resultados.length,
     });
 
     revalidateTag('rankings', { expire: 0 });

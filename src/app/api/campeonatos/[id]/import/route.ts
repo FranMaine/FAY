@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { puedeGestionarCampeonatos } from "@/lib/permisos";
 import { prisma } from "@/lib/db";
 import { parseSailwaveCSV } from "@/lib/extractors/csv-parser";
@@ -78,6 +79,10 @@ export async function POST(
     }
 
     const result = await importCampeonatoResults(campeonatoId, parseResult);
+
+    void registrarAuditoria(actorDe(session), 'campeonato.importar_resultados', 'Campeonato', campeonatoId, {
+      archivo: file.name,
+    });
 
     return NextResponse.json(result);
   } catch (error) {

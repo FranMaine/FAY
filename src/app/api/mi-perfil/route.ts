@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 
@@ -26,6 +27,10 @@ export async function PATCH(request: Request) {
 
     const { apodo, notificarResultados } = bodySchema.parse(await request.json());
 
+    const antes = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { apodo: true, notificarResultados: true },
+    });
     const usuario = await prisma.user.update({
       where: { id: session.user.id },
       data: {
@@ -34,6 +39,17 @@ export async function PATCH(request: Request) {
       },
       select: { id: true, apodo: true, notificarResultados: true },
     });
+    if (apodo !== undefined && (antes?.apodo ?? null) !== usuario.apodo) {
+      void registrarAuditoria(actorDe(session), 'perfil.cambiar_apodo', 'User', session.user.id, {
+        apodoAnterior: antes?.apodo ?? null,
+        apodoNuevo: usuario.apodo,
+      });
+    }
+    if (notificarResultados !== undefined && antes?.notificarResultados !== usuario.notificarResultados) {
+      void registrarAuditoria(actorDe(session), 'perfil.cambiar_avisos', 'User', session.user.id, {
+        notificarResultados: usuario.notificarResultados,
+      });
+    }
     return NextResponse.json(usuario);
   } catch (error) {
     return handleApiError(error, 'PATCH /api/mi-perfil');
@@ -53,7 +69,16 @@ export async function DELETE() {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
+    const cuenta = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { email: true, role: true, regatistaId: true },
+    });
     await prisma.user.delete({ where: { id: session.user.id } });
+    void registrarAuditoria(actorDe(session), 'usuario.eliminar_propia', 'User', session.user.id, {
+      email: cuenta?.email,
+      rol: cuenta?.role,
+      teniaRegatista: !!cuenta?.regatistaId,
+    });
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'DELETE /api/mi-perfil');

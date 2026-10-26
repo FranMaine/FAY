@@ -6,6 +6,12 @@ export interface ActorAuditoria {
   name?: string | null;
 }
 
+export function actorDe(session: {
+  user: { id: string; email?: string | null; name?: string | null };
+}): ActorAuditoria {
+  return { email: session.user.email || session.user.id, name: session.user.name };
+}
+
 /**
  * Registro de auditoría de acciones administrativas sensibles (ver
  * AuditLog en el schema). Al igual que registrarError() en api-error.ts,

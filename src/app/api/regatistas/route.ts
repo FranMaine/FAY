@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { regatistaEditSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
 import { idsDeRegatistasPorNombre } from '@/lib/busqueda';
@@ -72,6 +73,8 @@ export async function POST(request: Request) {
       data: { nombre: body.nombre, pais: body.pais, clubId },
       include: { club: true },
     });
+
+    void registrarAuditoria(actorDe(session), 'regatista.crear', 'Regatista', regatista.id, { nombre: regatista.nombre });
 
     return NextResponse.json(regatista, { status: 201 });
   } catch (error) {

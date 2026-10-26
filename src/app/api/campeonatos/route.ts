@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Prisma, EstadoCampeonato } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { campeonatoSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
 import { puedeGestionarCampeonatos } from '@/lib/permisos';
@@ -59,6 +60,11 @@ export async function POST(request: Request) {
 
     const campeonato = await prisma.campeonato.create({
       data: { ...body, evento: body.evento || null },
+    });
+
+    void registrarAuditoria(actorDe(session!), 'campeonato.crear', 'Campeonato', campeonato.id, {
+      nombre: campeonato.nombre,
+      anio: campeonato.anio,
     });
 
     return NextResponse.json(campeonato, { status: 201 });

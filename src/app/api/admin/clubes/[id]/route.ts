@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 import { refrescarRankings } from '@/lib/refrescar-cache';
 import { borrarImagen } from '@/lib/upload-imagen';
-import { registrarAuditoria } from '@/lib/auditoria';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 
 const bodySchema = z.object({
   nombre: z.string().trim().min(1, 'La abreviación no puede estar vacía').optional(),
@@ -20,12 +20,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
     const { id } = await params;
     const body = bodySchema.parse(await request.json());
+    const antes = await prisma.club.findUnique({ where: { id }, select: { nombre: true, nombreCompleto: true } });
     const club = await prisma.club.update({
       where: { id },
       data: {
         ...(body.nombre !== undefined ? { nombre: body.nombre } : {}),
         ...(body.nombreCompleto !== undefined ? { nombreCompleto: body.nombreCompleto || null } : {}),
       },
+    });
+    void registrarAuditoria(actorDe(session), 'club.editar', 'Club', id, {
+      antes: antes ? { nombre: antes.nombre, nombreCompleto: antes.nombreCompleto } : null,
+      despues: { nombre: club.nombre, nombreCompleto: club.nombreCompleto },
     });
     refrescarRankings();
     return NextResponse.json({ id: club.id, nombre: club.nombre, nombreCompleto: club.nombreCompleto });

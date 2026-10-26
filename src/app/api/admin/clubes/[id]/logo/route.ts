@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 import { refrescarRankings } from '@/lib/refrescar-cache';
@@ -33,6 +34,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const logoUrl = await subirImagen(file, 'clubes', id, 400, 'inside', quitarFondo);
     await prisma.club.update({ where: { id }, data: { logoUrl } });
     if (club.logoUrl) await borrarImagen(club.logoUrl);
+    void registrarAuditoria(actorDe(session), 'club.cambiar_logo', 'Club', id, { nombre: club.nombre });
     refrescarRankings();
 
     return NextResponse.json({ logoUrl });
@@ -59,6 +61,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     if (club.logoUrl) await borrarImagen(club.logoUrl);
     await prisma.club.update({ where: { id }, data: { logoUrl: null } });
+    void registrarAuditoria(actorDe(session), 'club.quitar_logo', 'Club', id, { nombre: club.nombre });
     refrescarRankings();
 
     return NextResponse.json({ success: true });

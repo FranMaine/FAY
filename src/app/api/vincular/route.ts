@@ -115,6 +115,12 @@ export async function DELETE() {
     await prisma.solicitudVinculacion.deleteMany({
       where: { userId: session.user.id, estado: { in: ['PENDIENTE', 'APROBADA'] } },
     });
+    void registrarAuditoria(
+      { email: session.user.email || session.user.id, name: session.user.name },
+      'vinculacion.desvincular',
+      'User',
+      session.user.id
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

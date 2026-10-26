@@ -6,7 +6,7 @@ import { campeonatoSchema, campeonatoPatchSchema } from '@/lib/validators';
 import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
 import { handleApiError } from '@/lib/api-error';
 import { puedeGestionarCampeonatos } from '@/lib/permisos';
-import { registrarAuditoria } from '@/lib/auditoria';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { revalidateTag } from 'next/cache';
 
 export async function GET(
@@ -73,6 +73,11 @@ export async function PUT(
     const campeonato = await prisma.campeonato.update({
       where: { id },
       data: { ...body, ...(body.evento !== undefined ? { evento: body.evento || null } : {}) },
+    });
+
+    void registrarAuditoria(actorDe(session!), 'campeonato.editar', 'Campeonato', id, {
+      nombre: campeonato.nombre,
+      campos: Object.keys(body),
     });
 
     revalidateTag('rankings', { expire: 0 });
@@ -158,6 +163,14 @@ export async function PATCH(
         id,
         { nombre: campeonato.nombre, estadoNuevo: body.estado }
       );
+    }
+
+    const camposEditados = Object.keys(body).filter((k) => k !== 'estado');
+    if (camposEditados.length > 0) {
+      void registrarAuditoria(actorDe(session!), 'campeonato.editar', 'Campeonato', id, {
+        nombre: campeonato.nombre,
+        campos: camposEditados,
+      });
     }
 
     // Mail a las personas con cuenta vinculada que figuran en este

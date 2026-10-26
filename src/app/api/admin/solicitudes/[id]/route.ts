@@ -2,6 +2,7 @@ import { after, NextResponse } from 'next/server';
 import { SITE_URL } from '@/lib/site';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { handleApiError } from '@/lib/api-error';
 import { sendEmail, emailVinculacionAprobada } from '@/lib/email';
 
@@ -71,6 +72,14 @@ export async function PATCH(
         data: { estado: 'RECHAZADA' }
       });
     }
+
+    void registrarAuditoria(
+      actorDe(session),
+      action === 'APROBAR' ? 'vinculacion.aprobar' : 'vinculacion.rechazar',
+      'SolicitudVinculacion',
+      solicitudId,
+      { userId: solicitud.userId, regatistaId: solicitud.regatistaId }
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

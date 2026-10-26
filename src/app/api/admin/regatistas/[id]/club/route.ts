@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 import { refrescarRankings } from '@/lib/refrescar-cache';
@@ -48,6 +49,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         data: { clubId: ids[0], otrosClubes: { set: ids.slice(1).map((c) => ({ id: c })) } },
       });
       await eliminarClubesVacios(clubesAntes, actor);
+      void registrarAuditoria(actor, 'regatista.cambiar_club', 'Regatista', id, { clubIds: ids });
       refrescarRankings();
       return NextResponse.json({ ok: true });
     }
@@ -64,6 +66,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     await prisma.regatista.update({ where: { id }, data: { clubId } });
     await eliminarClubesVacios(clubesAntes, actor);
+    void registrarAuditoria(actor, 'regatista.cambiar_club', 'Regatista', id, { clubIds: clubId ? [clubId] : [] });
     refrescarRankings();
     return NextResponse.json({ ok: true });
   } catch (error) {

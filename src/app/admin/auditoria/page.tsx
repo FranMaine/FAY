@@ -17,6 +17,46 @@ interface AuditLogItem {
   createdAt: string;
 }
 
+const ETIQUETA_ACCION: Record<string, string> = {
+  "usuario.cambiar_rol": "Cambió el rol de un usuario",
+  "usuario.eliminar": "Eliminó una cuenta",
+  "usuario.eliminar_propia": "Eliminó su propia cuenta",
+  "usuario.quitar_apodo": "Quitó el apodo de un usuario",
+  "usuario.registrarse": "Creó su cuenta",
+  "perfil.cambiar_apodo": "Cambió su apodo",
+  "perfil.cambiar_avisos": "Cambió sus avisos por mail",
+  "perfil.cambiar_foto": "Cambió su foto",
+  "perfil.quitar_foto": "Quitó su foto",
+  "perfil.cambiar_password": "Cambió su contraseña",
+  "vinculacion.solicitar": "Pidió vincular su cuenta",
+  "vinculacion.aprobar": "Aprobó una vinculación",
+  "vinculacion.rechazar": "Rechazó una vinculación",
+  "vinculacion.revocar": "Revocó una vinculación",
+  "vinculacion.desvincular": "Se desvinculó de su regatista",
+  "campeonato.crear": "Creó un campeonato",
+  "campeonato.editar": "Editó un campeonato",
+  "campeonato.cambiar_estado": "Cambió el estado de un campeonato",
+  "campeonato.eliminar": "Eliminó un campeonato",
+  "campeonato.importar_resultados": "Importó resultados",
+  "campeonato.cambiar_logo": "Cambió el logo de un campeonato",
+  "campeonato.quitar_logo": "Quitó el logo de un campeonato",
+  "campeonato.avisar_regatistas": "Avisó por mail a los regatistas",
+  "regata.crear": "Cargó una regata",
+  "regata.editar_resultados": "Editó los resultados de una regata",
+  "regatista.crear": "Creó un regatista",
+  "regatista.editar": "Editó un regatista",
+  "regatista.renombrar": "Renombró un regatista",
+  "regatista.cambiar_club": "Cambió el club de un regatista",
+  "regatista.fusionar": "Fusionó regatistas",
+  "club.crear": "Creó un club",
+  "club.editar": "Editó un club",
+  "club.eliminar": "Eliminó un club",
+  "club.fusionar": "Fusionó clubes",
+  "club.auto_eliminar_vacio": "Se eliminó un club vacío",
+  "club.cambiar_logo": "Cambió el logo de un club",
+  "club.quitar_logo": "Quitó el logo de un club",
+};
+
 // Registro de auditoría de acciones administrativas sensibles (cambios de
 // rol, publicar/eliminar campeonatos, fusionar clubes -ver
 // registrarAuditoria() en src/lib/auditoria.ts). Antes no quedaba ningún
@@ -56,7 +96,7 @@ export default function AdminAuditoriaPage() {
               Auditoría
             </h1>
             <p className="text-muted-foreground text-lg">
-              Últimas {registros.length} acciones administrativas sensibles (roles, campeonatos, clubes).
+              Últimas {registros.length} acciones (cuentas, roles, perfiles, campeonatos, regatas, regatistas, clubes y vinculaciones).
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={cargar} className="gap-2">
@@ -96,7 +136,10 @@ export default function AdminAuditoriaPage() {
                           <div className="font-medium break-words">{r.actorNombre || r.actorEmail}</div>
                           {r.actorNombre && <div className="text-xs text-muted-foreground break-all">{r.actorEmail}</div>}
                         </td>
-                        <td data-label="Acción" className="fila-completa px-3 py-3 sm:px-6 font-mono text-xs [overflow-wrap:anywhere]">{r.accion}</td>
+                        <td data-label="Acción" className="fila-completa px-3 py-3 sm:px-6 [overflow-wrap:anywhere]">
+                          <div className="font-medium">{ETIQUETA_ACCION[r.accion] ?? r.accion}</div>
+                          <div className="font-mono text-xs text-muted-foreground">{r.accion}</div>
+                        </td>
                         <td data-label="Entidad" className="fila-completa px-3 py-3 sm:px-6 text-muted-foreground">
                           {r.entidad}{r.entidadId ? ` #${r.entidadId.slice(0, 8)}` : ""}
                         </td>

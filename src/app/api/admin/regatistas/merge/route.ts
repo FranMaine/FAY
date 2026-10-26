@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { regatistaMergeSchema } from '@/lib/validators';
 import { fusionarRegatistas } from '@/lib/regatista-merge';
 import { handleApiError } from '@/lib/api-error';
@@ -19,6 +20,10 @@ export async function POST(request: Request) {
     const body = regatistaMergeSchema.parse(json);
 
     const resumen = await fusionarRegatistas(body.canonicoId, body.duplicadoIds);
+    void registrarAuditoria(actorDe(session), 'regatista.fusionar', 'Regatista', body.canonicoId, {
+      duplicadoIds: body.duplicadoIds,
+      resumen,
+    });
     refrescarRankings();
     return NextResponse.json({ success: true, resumen });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
 import { cambiarPasswordSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
@@ -29,6 +30,7 @@ export async function PATCH(request: Request) {
 
     const passwordHash = await bcrypt.hash(passwordNueva, 10);
     await prisma.user.update({ where: { id: session.user.id }, data: { passwordHash } });
+    void registrarAuditoria(actorDe(session), 'perfil.cambiar_password', 'User', session.user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

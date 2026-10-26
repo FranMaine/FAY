@@ -1,6 +1,7 @@
 import { after, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
+import { registrarAuditoria } from '@/lib/auditoria';
 import bcrypt from 'bcryptjs';
 import { registroSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
@@ -76,6 +77,10 @@ export async function POST(request: Request) {
     const origin = new URL(request.url).origin;
     const link = `${origin}/verificar-email?token=${token}&email=${encodeURIComponent(email)}`;
     after(() => sendEmail({ to: email, ...emailVerificacion(link) }));
+
+    void registrarAuditoria({ email: user.email, name: user.name }, 'usuario.registrarse', 'User', user.id, {
+      email: user.email,
+    });
 
     return NextResponse.json(user, { status: 201 });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { regatistaEditSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
 import { eliminarClubesVacios } from '@/lib/club-cleanup';
@@ -48,6 +49,11 @@ export async function PUT(
         ...(clubId !== undefined ? { clubId } : {}),
       },
       include: { club: true },
+    });
+
+    void registrarAuditoria(actorDe(session), 'regatista.editar', 'Regatista', id, {
+      nombre: regatista.nombre,
+      pais: regatista.pais,
     });
 
     if (clubAntes) {

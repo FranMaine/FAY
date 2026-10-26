@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { resultadosBulkSchema } from '@/lib/validators';
 import { handleApiError } from '@/lib/api-error';
 import { puedeGestionarCampeonatos } from '@/lib/permisos';
@@ -51,6 +52,12 @@ export async function POST(
         where: { id: regata.id },
         include: { resultados: true },
       });
+    });
+
+    void registrarAuditoria(actorDe(session!), 'regata.crear', 'Regata', result?.id, {
+      campeonatoId: id,
+      numero: body.regataNumero,
+      resultados: body.resultados.length,
     });
 
     return NextResponse.json(result, { status: 201 });

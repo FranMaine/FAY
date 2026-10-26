@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 import { subirImagen, borrarImagen, ImagenInvalidaError } from '@/lib/upload-imagen';
@@ -36,6 +37,7 @@ export async function PATCH(request: Request) {
     const fotoUrl = await subirImagen(file, 'regatistas', regatista.id, 320);
     await prisma.regatista.update({ where: { id: regatista.id }, data: { fotoUrl } });
     if (regatista.fotoUrl) await borrarImagen(regatista.fotoUrl);
+    void registrarAuditoria(actorDe(session), 'perfil.cambiar_foto', 'Regatista', regatista.id, { nombre: regatista.nombre });
 
     return NextResponse.json({ fotoUrl });
   } catch (error) {
@@ -60,6 +62,7 @@ export async function DELETE() {
 
     if (regatista.fotoUrl) await borrarImagen(regatista.fotoUrl);
     await prisma.regatista.update({ where: { id: regatista.id }, data: { fotoUrl: null } });
+    void registrarAuditoria(actorDe(session), 'perfil.quitar_foto', 'Regatista', regatista.id, { nombre: regatista.nombre });
 
     return NextResponse.json({ success: true });
   } catch (error) {

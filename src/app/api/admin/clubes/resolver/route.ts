@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
     const { nombre } = bodySchema.parse(await request.json());
     const existente = await prisma.club.findFirst({ where: { nombre: { equals: nombre, mode: 'insensitive' } } });
     const club = existente ?? (await prisma.club.create({ data: { nombre } }));
+    if (!existente) void registrarAuditoria(actorDe(session), 'club.crear', 'Club', club.id, { nombre: club.nombre });
 
     return NextResponse.json({ id: club.id, nombre: club.nombre });
   } catch (error) {

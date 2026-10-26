@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
+import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 
@@ -21,7 +22,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params;
     const { nombre } = bodySchema.parse(await request.json());
 
+    const anterior = await prisma.regatista.findUnique({ where: { id }, select: { nombre: true } });
     const regatista = await prisma.regatista.update({ where: { id }, data: { nombre } });
+    void registrarAuditoria(actorDe(session), 'regatista.renombrar', 'Regatista', id, {
+      nombreAnterior: anterior?.nombre,
+      nombreNuevo: regatista.nombre,
+    });
     return NextResponse.json(regatista);
   } catch (error) {
     return handleApiError(error, 'PATCH /api/admin/regatistas/[id]');
