@@ -1,4 +1,3 @@
-import { vientoDesdeMetar, type ReporteMetar } from '@/lib/clima';
 import type { Lugar } from '@/lib/lugares';
 
 // Datos de viento por lugar, para la página /viento y /api/clima. Solo se
@@ -25,6 +24,23 @@ const TRES_HORAS_MS = 3 * 60 * 60 * 1000;
  */
 export function estaDesactualizada(lectura: LecturaViento | null, ahora: number = Date.now()): boolean {
   return lectura !== null && ahora - lectura.hora.getTime() > TRES_HORAS_MS;
+}
+
+/**
+ * La medición que se muestra como "viento ahora": la última lectura de la
+ * estación, salvo que ya esté desactualizada (ver estaDesactualizada), en
+ * cuyo caso null y quien llama cae a la estimación del modelo. La usan la
+ * página /viento y el badge del navbar: con la misma regla las dos
+ * muestran el mismo número (antes el badge descartaba lecturas de más de
+ * 90 minutos y la página no, y se veían valores distintos a la vez).
+ */
+export function vientoActual(
+  historial: LecturaViento[],
+  ahora: number = Date.now(),
+): { nudos: number; grados: number | null } | null {
+  const ultima = historial.at(-1) ?? null;
+  if (!ultima || estaDesactualizada(ultima, ahora)) return null;
+  return { nudos: Math.round(ultima.nudos), grados: ultima.grados };
 }
 
 interface ReporteMetarCompleto {
@@ -113,10 +129,11 @@ export async function obtenerClimaActual(lugar: Lugar): Promise<ClimaActual> {
   url.searchParams.set('wind_speed_unit', 'kn');
   url.searchParams.set('timezone', 'America/Argentina/Buenos_Aires');
 
-  const [resOpenMeteo, vientoReal] = await Promise.all([
+  const [resOpenMeteo, historial] = await Promise.all([
     fetch(url, { next: { revalidate: REVALIDAR_S } }),
-    obtenerVientoReal(lugar),
+    obtenerHistorialMedido(lugar),
   ]);
+  const vientoReal = vientoActual(historial);
   if (!resOpenMeteo.ok) throw new Error(`Open-Meteo respondió ${resOpenMeteo.status}`);
   const { current } = await resOpenMeteo.json();
 
@@ -124,21 +141,10 @@ export async function obtenerClimaActual(lugar: Lugar): Promise<ClimaActual> {
     lugar: { slug: lugar.slug, nombre: lugar.nombre },
     temperatura: Math.round(current.temperature_2m),
     codigoClima: current.weather_code,
-    vientoNudos: vientoReal?.vientoNudos ?? Math.round(current.wind_speed_10m),
-    vientoGrados: vientoReal?.vientoGrados ?? current.wind_direction_10m,
+    vientoNudos: vientoReal?.nudos ?? Math.round(current.wind_speed_10m),
+    // Con viento variable (VRB) la estación no informa dirección: se usa la del modelo.
+    vientoGrados: vientoReal?.grados ?? current.wind_direction_10m,
     vientoMedido: vientoReal !== null,
     actualizado: current.time,
   };
-}
-
-async function obtenerVientoReal(lugar: Lugar): Promise<{ vientoNudos: number; vientoGrados: number } | null> {
-  if (!lugar.estacion) return null;
-  try {
-    const url = `https://aviationweather.gov/api/data/metar?ids=${lugar.estacion.id}&format=json&hours=2`;
-    const res = await fetch(url, { next: { revalidate: REVALIDAR_S } });
-    if (!res.ok) return null;
-    return vientoDesdeMetar((await res.json()) as ReporteMetar[]);
-  } catch {
-    return null;
-  }
 }
