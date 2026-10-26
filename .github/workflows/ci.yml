@@ -16,6 +16,25 @@ on:
 jobs:
   verificar:
     runs-on: ubuntu-latest
+    # Base Postgres descartable solo para el build: la portada y otras
+    # páginas con `revalidate` se prerenderizan al compilar y consultan la
+    # base, así que un placeholder ya no alcanza (el build rompía con
+    # DatabaseNotReachable en "/"). Arranca vacía: las páginas tienen que
+    # poder renderizar sin datos.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -55,12 +74,15 @@ jobs:
       - name: Tests unitarios
         run: pnpm run test:run
 
-      - name: Build
-        # El build no necesita una base real: ninguna página se prerenderiza
-        # contra datos en build time (todas usan force-dynamic o revalidate),
-        # así que un placeholder alcanza -ver el mismo criterio en las
-        # verificaciones manuales de este proyecto.
+      - name: Esquema de la base de CI
         env:
-          DATABASE_URL: "__PLACEHOLDER__"
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+        run: pnpm exec prisma db push --accept-data-loss
+
+      - name: Build
+        # Contra la base vacía del servicio de arriba (ver el comentario
+        # ahí): las páginas con revalidate se prerenderizan en el build.
+        env:
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
           NEXTAUTH_SECRET: "ci-placeholder-secret-not-for-production"
         run: pnpm run build
