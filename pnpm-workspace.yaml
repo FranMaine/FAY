@@ -8,6 +8,12 @@ allowBuilds:
   "@prisma/engines": true
   "@prisma/client": true
   unrs-resolver: true
+  # Decisión explícita de NO correrles el script: sin una entrada, pnpm 11
+  # corta el install con ERR_PNPM_IGNORED_BUILDS. El de @google/genai es un
+  # "prepare" de desarrollo de su propio repo (el paquete publicado ya trae
+  # dist/) y el de protobufjs solo avisa por un esquema de versiones.
+  "@google/genai": false
+  protobufjs: false
 
 # Fuerza versiones parcheadas de dos vulnerabilidades transitivas
 # (deepmerge-ts vía @prisma/config, valibot vía @hookform/resolvers) que
