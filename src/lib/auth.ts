@@ -19,6 +19,7 @@ const HASH_FALSO = '$2b$10$Qm9a.6cn5ZcDQGG8rzu02OD6FkQlfC.0jovaXQJOhbAzimik2sCjW
 // /api/auth/providers), así que el sitio funciona igual sin configurarlo.
 const googleClientId = process.env.AUTH_GOOGLE_ID;
 const googleClientSecret = process.env.AUTH_GOOGLE_SECRET;
+const REFRESCO_ROL_MS = 60_000;
 const googleConfigurado = !!(googleClientId && googleClientSecret);
 
 // Subclase propia para poder distinguir este caso puntual del resto de
@@ -116,6 +117,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       } else if (user) {
         token.role = user.role ?? 'REGULAR';
         token.regatistaId = user.regatistaId ?? null;
+      }
+
+      // El JWT guarda el rol del momento del login: sin esto, si un admin
+      // cambia el rol de alguien (o borra su cuenta) la sesión vieja seguía
+      // con los permisos anteriores hasta cerrar sesión. Se relee de la base
+      // como mucho una vez por minuto; si la cuenta ya no existe, se corta
+      // la sesión.
+      const ahora = Date.now();
+      const leidoEn = typeof token.rolLeidoEn === 'number' ? token.rolLeidoEn : 0;
+      if (token.sub && ahora - leidoEn > REFRESCO_ROL_MS) {
+        const cuenta = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { role: true, regatistaId: true },
+        });
+        if (!cuenta) return null;
+        token.role = cuenta.role;
+        token.regatistaId = cuenta.regatistaId ?? null;
+        token.rolLeidoEn = ahora;
       }
       return token;
     },
