@@ -4,6 +4,7 @@ const prismaFalso = vi.hoisted(() => ({
   auditLog: { findFirst: vi.fn() },
   campeonato: { findUnique: vi.fn() },
   user: { findMany: vi.fn() },
+  favorito: { findMany: vi.fn() },
 }));
 const enviar = vi.hoisted(() => vi.fn());
 const auditar = vi.hoisted(() => vi.fn());
@@ -61,6 +62,30 @@ describe('avisarResultadosPublicados', () => {
     prismaFalso.user.findMany.mockResolvedValue([
       { email: 'beto@mail.com', regatistaId: 'r-beto', regatista: { nombre: 'Beto Pérez' } },
     ]);
+    prismaFalso.favorito.findMany.mockResolvedValue([]);
+  });
+
+  it('también avisa a quienes tienen a un regatista del campeonato en favoritos', async () => {
+    prismaFalso.favorito.findMany.mockResolvedValue([
+      { regatistaId: 'r-cami', user: { email: 'mama@mail.com' }, regatista: { nombre: 'Cami Ruiz' } },
+    ]);
+    const r = await avisarResultadosPublicados('c1');
+    expect(r.enviados).toBe(2);
+    const mail = enviar.mock.calls.map((c) => c[0]).find((m) => m.to === 'mama@mail.com');
+    expect(mail.subject).toContain('Cami Ruiz');
+    expect(mail.html).toContain('puesto <strong>3</strong> de 3');
+    expect(mail.html).toContain('tus favoritos');
+    const where = prismaFalso.favorito.findMany.mock.calls[0][0].where;
+    expect(where.user).toEqual({ emailVerified: { not: null }, notificarResultados: true });
+  });
+
+  it('no le manda dos veces lo mismo a quien tiene en favoritos su propio perfil vinculado', async () => {
+    prismaFalso.favorito.findMany.mockResolvedValue([
+      { regatistaId: 'r-beto', user: { email: 'beto@mail.com' }, regatista: { nombre: 'Beto Pérez' } },
+    ]);
+    const r = await avisarResultadosPublicados('c1');
+    expect(r.enviados).toBe(1);
+    expect(enviar).toHaveBeenCalledTimes(1);
   });
 
   it('le manda a cada cuenta vinculada su posición final', async () => {

@@ -6,6 +6,7 @@ import { jsonLdSeguro } from "@/lib/json-ld";
 import { getRegatistaProfile } from "@/lib/get-regatista-profile";
 import { PerfilRegatista } from "@/components/regatista/perfil-regatista";
 import { ReportarVinculacion } from "@/components/regatista/reportar-vinculacion";
+import { BotonFavorito } from "@/components/favoritos/boton-favorito";
 
 // Sin esto, el perfil queda cacheado estático para siempre después de la
 // primera visita -si esa persona corre una nueva regata, nadie ve el
@@ -60,7 +61,10 @@ export default async function RegatistaProfilePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
-      <PerfilRegatista {...data} />
+      <PerfilRegatista
+        {...data}
+        headerActions={<BotonFavorito regatistaId={regatista.id} nombre={regatista.nombre} />}
+      />
       {estaVinculado && <ReportarVinculacion regatistaId={regatista.id} nombre={regatista.nombre} />}
     </main>
   );

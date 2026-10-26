@@ -113,6 +113,7 @@ export function crearFakePrisma(seed: {
   campeonatos?: Row[];
   aliasesRegatista?: Row[];
   aliasesClub?: Row[];
+  favoritos?: Row[];
 }) {
   const club = new Tabla(seed.clubes ?? []);
   const regatistaBase = new Tabla(seed.regatistas ?? []);
@@ -122,6 +123,7 @@ export function crearFakePrisma(seed: {
   const campeonato = new Tabla(seed.campeonatos ?? []);
   const aliasRegatista = new Tabla(seed.aliasesRegatista ?? []);
   const aliasClub = new Tabla(seed.aliasesClub ?? []);
+  const favorito = new Tabla(seed.favoritos ?? []);
 
   // regatista.findUnique/findMany devuelven `otrosClubes` como objetos
   // {id} (como haría Prisma con un include/select), no como
@@ -146,5 +148,5 @@ export function crearFakePrisma(seed: {
     delete: (args: Parameters<Tabla<Row>['delete']>[0]) => regatistaBase.delete(args),
   };
 
-  return { club, regatista, resultado, solicitudVinculacion, user, campeonato, aliasRegatista, aliasClub };
+  return { club, regatista, resultado, solicitudVinculacion, user, campeonato, aliasRegatista, aliasClub, favorito };
 }

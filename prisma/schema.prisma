@@ -35,9 +35,45 @@ model User {
   aceptoTerminosEn DateTime?
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
+  // Cómo dijo que usa el sitio al crear la cuenta (o en /bienvenida): sirve
+  // para sugerirle el próximo paso (vincular su perfil, o agregar a sus
+  // familiares a favoritos). null = todavía no eligió.
+  perfilUso        PerfilUso?
+  // Cuándo pasó por la pantalla de bienvenida (/bienvenida) -null para las
+  // cuentas que todavía no la vieron: la ven una sola vez, al entrar a Mi
+  // perfil sin tener un perfil vinculado.
+  bienvenidaEn     DateTime?
   accounts         Account[]
   sessions         Session[]
   solicitudes      SolicitudVinculacion[]
+  favoritos        Favorito[]
+}
+
+enum PerfilUso {
+  // Compite: se le sugiere vincular su perfil de regatista.
+  NAVEGANTE
+  // Madre, padre o familiar de quien compite: se le sugiere agregar a
+  // favoritos a sus hijos o familiares.
+  FAMILIAR
+  // Solo mira la página.
+  ESPECTADOR
+}
+
+// Regatistas que una cuenta quiere tener a mano ("favoritos"): aparecen en
+// su inicio y le llegan los avisos por mail cuando se publica un campeonato
+// en el que figuran (ver lib/avisos-resultados.ts). A diferencia de
+// SolicitudVinculacion no requiere aprobación de nadie: no da ningún
+// permiso sobre la ficha, solo atajos y avisos.
+model Favorito {
+  id          String    @id @default(cuid())
+  userId      String
+  regatistaId String
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  regatista   Regatista @relation(fields: [regatistaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, regatistaId])
+  @@index([regatistaId])
 }
 
 enum Role {
@@ -106,6 +142,7 @@ model Regatista {
   resultados      Resultado[]
   solicitudes     SolicitudVinculacion[]
   aliases         AliasRegatista[]
+  seguidores      Favorito[]
   createdAt       DateTime               @default(now())
   updatedAt       DateTime               @updatedAt
 

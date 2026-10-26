@@ -1,8 +1,7 @@
 import { prisma } from '@/lib/db';
 import { registrarAuditoria } from '@/lib/auditoria';
 import { sendEmail, emailResultadoPublicado } from '@/lib/email';
-import { agruparPorRegatista, generarClasificacion, agruparTripulaciones } from '@/lib/scoring';
-import { maxTripulantesPorBote } from '@/lib/clases-tripulacion';
+import { posicionesFinales } from '@/lib/posiciones-campeonato';
 import { SITE_URL } from '@/lib/site';
 
 const ACCION_AVISO = 'campeonato.avisar_regatistas';
@@ -44,15 +43,7 @@ export async function avisarResultadosPublicados(campeonatoId: string): Promise<
     if (!campeonato || campeonato.estado !== 'PUBLICADO') return { enviados: 0 };
 
     // Misma clasificación que muestra la página del campeonato.
-    const clasificacion = agruparTripulaciones(
-      generarClasificacion(agruparPorRegatista(campeonato.regatas), campeonato.descartes),
-      maxTripulantesPorBote(campeonato.clase.nombre)
-    );
-    const posicionDe = new Map<string, number>();
-    for (const fila of clasificacion) {
-      const ids = fila.integrantes?.length ? fila.integrantes.map((i) => i.regatistaId) : [fila.regatistaId];
-      for (const id of ids) posicionDe.set(id, fila.posicionFinal);
-    }
+    const { posicionDe, total: totalParticipantes } = posicionesFinales(campeonato);
 
     const usuarios = await prisma.user.findMany({
       where: { regatistaId: { in: [...posicionDe.keys()] }, emailVerified: { not: null }, notificarResultados: true },
@@ -60,10 +51,25 @@ export async function avisarResultadosPublicados(campeonatoId: string): Promise<
       take: MAXIMO_AVISOS,
     });
 
+    // Quienes tienen a un regatista de este campeonato en favoritos (ver
+    // lib/favoritos.ts). Si además es su propio perfil vinculado, ya recibe el
+    // aviso de arriba: no se le manda dos veces lo mismo.
+    const yaAvisados = new Set(usuarios.map((u) => `${u.email}|${u.regatistaId}`));
+    const seguidores = (
+      await prisma.favorito.findMany({
+        where: {
+          regatistaId: { in: [...posicionDe.keys()] },
+          user: { emailVerified: { not: null }, notificarResultados: true },
+        },
+        select: { regatistaId: true, user: { select: { email: true } }, regatista: { select: { nombre: true } } },
+        take: MAXIMO_AVISOS,
+      })
+    ).filter((f) => !yaAvisados.has(`${f.user.email}|${f.regatistaId}`));
+
     // Se deja el registro ANTES de mandar (ver arriba): "como mucho una vez".
     await registrarAuditoria({ email: 'sistema', name: 'Avisos automáticos' }, ACCION_AVISO, 'Campeonato', campeonatoId, {
       nombre: campeonato.nombre,
-      destinatarios: usuarios.length,
+      destinatarios: usuarios.length + seguidores.length,
     });
 
     for (const u of usuarios) {
@@ -76,13 +82,29 @@ export async function avisarResultadosPublicados(campeonatoId: string): Promise<
           clase: campeonato.clase.nombre,
           anio: campeonato.anio,
           posicion: posicionDe.get(u.regatistaId) ?? null,
-          totalParticipantes: clasificacion.length,
+          totalParticipantes,
           urlCampeonato: `${SITE_URL}/campeonatos/${campeonato.id}`,
           urlConfiguracion: `${SITE_URL}/mi-perfil/configuracion`,
         }),
       });
     }
-    return { enviados: usuarios.length };
+    for (const f of seguidores) {
+      await sendEmail({
+        to: f.user.email,
+        ...emailResultadoPublicado({
+          nombreRegatista: f.regatista.nombre,
+          campeonato: campeonato.nombre,
+          clase: campeonato.clase.nombre,
+          anio: campeonato.anio,
+          posicion: posicionDe.get(f.regatistaId) ?? null,
+          totalParticipantes,
+          urlCampeonato: `${SITE_URL}/campeonatos/${campeonato.id}`,
+          urlConfiguracion: `${SITE_URL}/mi-perfil/configuracion`,
+          favorito: true,
+        }),
+      });
+    }
+    return { enviados: usuarios.length + seguidores.length };
   } catch (error) {
     // Un fallo acá no debe afectar a la publicación, que ya se hizo.
     console.error(`[avisos] No se pudieron mandar los avisos del campeonato ${campeonatoId}:`, error);

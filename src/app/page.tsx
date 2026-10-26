@@ -12,6 +12,7 @@ import { ClubAvatar } from "@/components/icons/club-avatar";
 import { getRankingGeneral } from "@/lib/ranking-general";
 import { PodioPortada, type PodioDeClase } from "@/components/ranking/podio-portada";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { FavoritosInicio } from "@/components/favoritos/favoritos-inicio";
 
 export const metadata: Metadata = {
   // Sin "title" acá, el template del layout raíz ("%s | Orzando") lo
@@ -180,6 +181,10 @@ export default async function LandingPage() {
           </dl>
         </section>
       </ScrollReveal>
+
+      {/* Favoritos de la cuenta (solo con sesión; se completa en el navegador
+          para que la portada siga siendo la misma, estática, para todos). */}
+      <FavoritosInicio />
 
       {/* Franja de categorías: qué clases de barco tiene cargadas el sitio. */}
       <div className="mt-14">

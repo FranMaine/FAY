@@ -143,6 +143,25 @@ describe('fusionarRegatistas', () => {
     expect((await fake.user.findUnique({ where: { id: 'u2' } }))!.regatistaId).toBe('canon');
   });
 
+  it('pasa los favoritos del duplicado al canónico (y no repite si la cuenta ya seguía a los dos)', async () => {
+    fake = crearFakePrisma({
+      regatistas: [
+        { id: 'canon', nombre: 'Juan Perez', clubId: null, otrosClubesIds: [] },
+        { id: 'dup', nombre: 'Juan Perez', clubId: null, otrosClubesIds: [] },
+      ],
+      favoritos: [
+        { id: 'f1', userId: 'u1', regatistaId: 'dup' },
+        { id: 'f2', userId: 'u2', regatistaId: 'dup' },
+        { id: 'f3', userId: 'u2', regatistaId: 'canon' },
+      ],
+    });
+
+    await fusionarRegatistas('canon', ['dup']);
+
+    const filas = await fake.favorito.findMany();
+    expect(filas.map((f) => `${f.userId}:${f.regatistaId}`).sort()).toEqual(['u1:canon', 'u2:canon']);
+  });
+
   it('deja el nombre del duplicado como alias apuntando al canónico', async () => {
     fake = crearFakePrisma({
       regatistas: [

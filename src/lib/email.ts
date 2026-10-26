@@ -157,8 +157,28 @@ export function emailResultadoPublicado(datos: {
   totalParticipantes: number;
   urlCampeonato: string;
   urlConfiguracion: string;
+  /** true: el aviso es por un regatista que la persona tiene en favoritos (no por su propio perfil). */
+  favorito?: boolean;
 }) {
   const campeonato = `${datos.campeonato} ${datos.anio}`;
+  if (datos.favorito) {
+    const lugarFavorito =
+      datos.posicion !== null
+        ? `<p style="font-size: 18px; margin: 16px 0;">Terminó en el puesto <strong>${datos.posicion}</strong> de ${datos.totalParticipantes}.</p>`
+        : '';
+    return {
+      subject: `Hay un resultado nuevo de ${datos.nombreRegatista}: ${datos.campeonato} ${datos.anio}`,
+      html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1e293b;">Hay un resultado nuevo de ${escapeHtml(datos.nombreRegatista)}</h2>
+        <p>Se publicaron los resultados de <strong>${escapeHtml(campeonato)}</strong> (${escapeHtml(datos.clase)}), y <strong>${escapeHtml(datos.nombreRegatista)}</strong> figura en ellos.</p>
+        ${lugarFavorito}
+        <p style="margin: 24px 0;"><a href="${datos.urlCampeonato}" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Ver la tabla completa</a></p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Recibís este aviso porque agregaste a ${escapeHtml(datos.nombreRegatista)} a tus favoritos de Orzando. Podés dejar de recibirlos quitándolo de tus favoritos, o desde <a href="${datos.urlConfiguracion}" style="color: #94a3b8;">la configuración de tu cuenta</a>.</p>
+      </div>
+    `,
+    };
+  }
   const lugar =
     datos.posicion !== null
       ? `<p style="font-size: 18px; margin: 16px 0;">Terminaste en el puesto <strong>${datos.posicion}</strong> de ${datos.totalParticipantes}.</p>`

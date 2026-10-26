@@ -26,6 +26,9 @@ export const registroSchema = z.object({
   // directamente no venga el campo (undefined), algo que un cliente hecho
   // a mano podría mandar de menos si se saltea el checkbox.
   aceptoTerminos: z.literal(true, { message: 'Tenés que aceptar el aviso legal y la política de privacidad' }),
+  // Cómo va a usar el sitio (paso 2 del registro) -opcional: quien no lo
+  // elige lo ve después en /bienvenida.
+  perfilUso: z.enum(['NAVEGANTE', 'FAMILIAR', 'ESPECTADOR']).optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],

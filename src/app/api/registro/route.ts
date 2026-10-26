@@ -59,6 +59,9 @@ export async function POST(request: Request) {
         // La aceptación es requerida por el schema (z.literal(true)), así
         // que si llegamos hasta acá, se aceptó ahora mismo.
         aceptoTerminosEn: new Date(),
+        // Si ya contó cómo usa el sitio, no hace falta mostrarle la
+        // pantalla de bienvenida después.
+        ...(body.perfilUso ? { perfilUso: body.perfilUso, bienvenidaEn: new Date() } : {}),
       },
       select: { id: true, name: true, email: true, role: true },
     });

@@ -13,9 +13,11 @@ import { SearchIcon, Loader2Icon, UserIcon, CheckIcon } from "lucide-react";
 import { SailingBoat } from "@/components/icons/sailing-boat";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { mensajeDeError } from "@/lib/utils";
+import { cn, mensajeDeError } from "@/lib/utils";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { GoogleButton } from "@/components/auth/google-button";
+import { BuscadorRegatistas, type RegatistaEncontrado } from "@/components/search/buscador-regatistas";
+import { OPCIONES_USO, type PerfilUso } from "@/lib/perfil-uso";
 
 const registroSchema = z.object({
   name: z.string().min(2, { message: "El nombre es muy corto" }),
@@ -49,6 +51,12 @@ export default function RegistroPage() {
   const [resultados, setResultados] = useState<ResultadoBusqueda[]>([]);
   const [buscando, setBuscando] = useState(false);
   const [seleccionado, setSeleccionado] = useState<ResultadoBusqueda | null>(null);
+
+  // Paso 2: cómo va a usar el sitio. Según la respuesta, el paso 3 le ofrece
+  // vincular su perfil (navegante) o agregar a sus familiares a favoritos.
+  const [perfilUso, setPerfilUso] = useState<PerfilUso | null>(null);
+  const [familiares, setFamiliares] = useState<RegatistaEncontrado[]>([]);
+  const pasosTotales = perfilUso === "ESPECTADOR" ? 2 : 3;
 
   const form = useForm<z.infer<typeof registroSchema>>({
     resolver: zodResolver(registroSchema),
@@ -103,6 +111,11 @@ export default function RegistroPage() {
     setStep(2);
   }
 
+  function siguienteDesdePaso2() {
+    if (perfilUso === "ESPECTADOR") void onFinalSubmit();
+    else setStep(3);
+  }
+
   async function onFinalSubmit() {
     setIsLoading(true);
     setError(null);
@@ -118,6 +131,7 @@ export default function RegistroPage() {
           password: values.password,
           confirmPassword: values.confirmPassword, // Faltaba esto para que pase la validación Zod del backend
           aceptoTerminos: values.aceptoTerminos,
+          ...(perfilUso ? { perfilUso } : {}),
           sitioWeb: trampa,
           montadoEn,
         }),
@@ -144,7 +158,7 @@ export default function RegistroPage() {
       // solicitud ahora que ya está logueado (el endpoint requiere sesión).
       // Si esto falla no bloqueamos el alta de la cuenta: puede reclamar
       // el perfil más tarde desde "Mi Perfil".
-      if (seleccionado) {
+      if (perfilUso === "NAVEGANTE" && seleccionado) {
         try {
           await fetch("/api/vincular", {
             method: "POST",
@@ -156,7 +170,23 @@ export default function RegistroPage() {
         }
       }
 
-      router.push("/mi-perfil");
+      // Familiares elegidos en el paso 3: se agregan a favoritos ahora que ya
+      // hay sesión. Si alguno falla no frena el alta (se agrega después).
+      if (perfilUso === "FAMILIAR") {
+        for (const f of familiares) {
+          try {
+            await fetch("/api/favoritos", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ regatistaId: f.id }),
+            });
+          } catch (e) {
+            console.error("No se pudo agregar a favoritos", e);
+          }
+        }
+      }
+
+      router.push(perfilUso === "FAMILIAR" ? "/favoritos" : perfilUso === "ESPECTADOR" ? "/" : "/mi-perfil");
       router.refresh();
     } catch (err) {
       setError(mensajeDeError(err));
@@ -174,7 +204,7 @@ export default function RegistroPage() {
             <SailingBoat className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
-          <CardDescription>Paso {step} de 2</CardDescription>
+          <CardDescription>Paso {step} de {pasosTotales}</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -251,6 +281,91 @@ export default function RegistroPage() {
               </div>
               <Button type="submit" className="w-full mt-2">Siguiente</Button>
             </form>
+          ) : step === 2 ? (
+            <div className="space-y-5">
+              <div className="text-center">
+                <h3 className="font-medium text-lg mb-2">¿Cómo vas a usar Orzando?</h3>
+                <p className="text-sm text-muted-foreground">Así te sugerimos lo que más te sirve. Podés cambiarlo cuando quieras.</p>
+              </div>
+              <div role="radiogroup" aria-label="Cómo vas a usar Orzando" className="space-y-2">
+                {(Object.keys(OPCIONES_USO) as PerfilUso[]).map((clave) => {
+                  const op = OPCIONES_USO[clave];
+                  const Icono = op.icono;
+                  const activo = perfilUso === clave;
+                  return (
+                    <button
+                      key={clave}
+                      type="button"
+                      role="radio"
+                      aria-checked={activo}
+                      onClick={() => setPerfilUso(clave)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-[border-color,background-color,transform] active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                        activo ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/50"
+                      )}
+                    >
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <Icono className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-medium">{op.titulo}</span>
+                        <span className="block text-xs text-muted-foreground">{op.descripcion}</span>
+                      </span>
+                      {activo && <CheckIcon className="ml-auto h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-col gap-3 pt-2">
+                <Button onClick={siguienteDesdePaso2} disabled={isLoading || perfilUso === null} className="w-full">
+                  {perfilUso === "ESPECTADOR" ? (isLoading ? "Creando..." : "Crear cuenta") : "Siguiente"}
+                </Button>
+                {perfilUso === null && (
+                  <Button variant="ghost" onClick={() => void onFinalSubmit()} disabled={isLoading} className="w-full text-muted-foreground hover:text-foreground">
+                    {isLoading ? "Creando..." : "Omitir y crear cuenta"}
+                  </Button>
+                )}
+                <Button variant="ghost" onClick={() => setStep(1)} className="w-full text-muted-foreground hover:text-foreground">
+                  Volver atrás
+                </Button>
+              </div>
+            </div>
+          ) : perfilUso === "FAMILIAR" ? (
+            <div className="space-y-5">
+              <div className="text-center">
+                <h3 className="font-medium text-lg mb-2">¿A quién querés seguir?</h3>
+                <p className="text-sm text-muted-foreground">
+                  Buscá a tus hijos o familiares: los vas a ver apenas entres y te avisamos por mail cuando haya un resultado nuevo. Podés agregar más adelante.
+                </p>
+              </div>
+              {familiares.length > 0 && (
+                <ul className="space-y-2">
+                  {familiares.map((f) => (
+                    <li key={f.id} className="flex items-center justify-between gap-3 rounded-md border border-primary/50 bg-primary/10 p-3">
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium">{f.nombre}</span>
+                        <span className="block truncate text-xs text-muted-foreground">{f.club?.nombre || "Sin club"}</span>
+                      </span>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setFamiliares((prev) => prev.filter((p) => p.id !== f.id))}>
+                        Quitar
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <BuscadorRegatistas
+                excluir={new Set(familiares.map((f) => f.id))}
+                onSelect={(r) => setFamiliares((prev) => (prev.some((p) => p.id === r.id) ? prev : [...prev, r]))}
+              />
+              <div className="flex flex-col gap-3 pt-2">
+                <Button onClick={onFinalSubmit} disabled={isLoading} className="w-full">
+                  {isLoading ? "Creando..." : familiares.length > 0 ? "Crear cuenta y agregar" : "Crear cuenta y agregar luego"}
+                </Button>
+                <Button variant="ghost" onClick={() => setStep(2)} className="w-full text-muted-foreground hover:text-foreground">
+                  Volver atrás
+                </Button>
+              </div>
+            </div>
           ) : (
             <div className="space-y-6">
               <div className="text-center">
@@ -333,7 +448,7 @@ export default function RegistroPage() {
                 <Button onClick={onFinalSubmit} disabled={isLoading} className="w-full">
                   {isLoading ? "Creando..." : seleccionado ? "Crear cuenta y vincular" : "Crear cuenta y vincular luego"}
                 </Button>
-                <Button variant="ghost" onClick={() => setStep(1)} className="w-full text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" onClick={() => setStep(2)} className="w-full text-muted-foreground hover:text-foreground">
                   Volver atrás
                 </Button>
               </div>

@@ -40,6 +40,11 @@ export default async function MiPerfilPage() {
     const solicitud = await prisma.solicitudVinculacion.findFirst({
       where: { userId: session.user.id, estado: 'PENDIENTE' }
     });
+    // Primera vez sin perfil vinculado ni pedido en curso: se le pregunta
+    // cómo usa el sitio (una sola vez) para sugerirle el próximo paso.
+    if (!solicitud && !user?.bienvenidaEn) {
+      redirect("/bienvenida");
+    }
     if (solicitud) {
       return (
         <main className="min-h-dvh bg-background p-6 md:p-10 flex items-start justify-center">

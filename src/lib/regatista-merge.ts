@@ -106,6 +106,21 @@ export async function fusionarRegatistas(canonicoId: string, duplicadoIds: strin
       }
     }
 
+    // Favoritos de cuentas que seguían al duplicado: pasan al canónico (si la
+    // misma cuenta ya seguía a los dos, queda uno solo) -si no, al borrar el
+    // duplicado se perderían en cascada.
+    const favoritosDuplicado = await prisma.favorito.findMany({ where: { regatistaId: duplicadoId } });
+    for (const f of favoritosDuplicado) {
+      const yaExiste = await prisma.favorito.findUnique({
+        where: { userId_regatistaId: { userId: f.userId, regatistaId: canonicoId } },
+      });
+      if (yaExiste) {
+        await prisma.favorito.delete({ where: { id: f.id } });
+      } else {
+        await prisma.favorito.update({ where: { id: f.id }, data: { regatistaId: canonicoId } });
+      }
+    }
+
     const usuarioVinculado = await prisma.user.findUnique({ where: { regatistaId: duplicadoId } });
     if (usuarioVinculado) {
       const canonicoYaVinculado = await prisma.user.findUnique({ where: { regatistaId: canonicoId } });

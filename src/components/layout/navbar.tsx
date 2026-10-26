@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Menu, X, Trophy, BarChart3, User, LogIn, Home, Building2, CloudSun } from 'lucide-react';
+import { Menu, X, Trophy, BarChart3, User, LogIn, Home, Building2, CloudSun, Star } from 'lucide-react';
 import { SailingBoat } from '@/components/icons/sailing-boat';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { NotificationBell } from '@/components/layout/notification-bell';
 import { ClimaBadge } from '@/components/layout/clima-badge';
+import { BuscadorGlobal } from '@/components/layout/buscador-global';
 import { useMiLugar } from '@/hooks/use-mi-lugar';
 import { urlViento } from '@/lib/lugares';
 
@@ -36,6 +37,8 @@ export function Navbar() {
     { href: '/clubes', label: 'Clubes', icon: Building2, match: '/clubes' },
     { href: '/rankings', label: 'Rankings', icon: BarChart3, match: '/rankings' },
     { href: urlViento(lugar), label: 'Clima', icon: CloudSun, match: '/viento' },
+    // Los favoritos son de cada cuenta: sin sesión no hay nada que mostrar.
+    ...(session ? [{ href: '/favoritos', label: 'Favoritos', icon: Star, match: '/favoritos' }] : []),
   ];
 
   const isAdmin = session?.user?.role === 'ADMIN';
@@ -97,6 +100,7 @@ export function Navbar() {
                   </Link>
                 );
               })}
+              <BuscadorGlobal />
               {puedeVerAdmin && (
                 <Link
                   href="/admin"
@@ -151,6 +155,7 @@ export function Navbar() {
               abrir el menú para cambiar de tema). */}
           <div className="flex items-center gap-1 md:hidden">
             {isAdmin && <NotificationBell />}
+            <BuscadorGlobal />
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
