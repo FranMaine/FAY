@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { mensajeDeError } from "@/lib/utils";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { GoogleButton } from "@/components/auth/google-button";
 
 const registroSchema = z.object({
   name: z.string().min(2, { message: "El nombre es muy corto" }),
@@ -179,6 +180,11 @@ export default function RegistroPage() {
           {error && (
             <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md mb-4 text-center fade-in-up">
               {error}
+            </div>
+          )}
+          {step === 1 && (
+            <div className="mb-4">
+              <GoogleButton conAvisoLegal />
             </div>
           )}
           {step === 1 ? (

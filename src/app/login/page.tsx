@@ -20,13 +20,19 @@ const loginSchema = z.object({
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { GoogleButton } from "@/components/auth/google-button";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const passwordRecienRestablecida = searchParams.get("reset") === "1";
+  // Auth.js vuelve a /login?error=... cuando falla el inicio de sesión con
+  // Google (la persona canceló, o Google no confirmó su email).
+  const errorDeGoogle = searchParams.get("error");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    errorDeGoogle ? "No pudimos iniciar sesión con Google. Probá de nuevo o entrá con tu email." : null,
+  );
   const [emailNoVerificado, setEmailNoVerificado] = useState<string | null>(null);
   const [reenviando, setReenviando] = useState(false);
   const [reenviado, setReenviado] = useState(false);
@@ -113,6 +119,9 @@ function LoginForm() {
               )}
             </div>
           )}
+          <div className="mb-4">
+            <GoogleButton />
+          </div>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="login-email" className="text-sm font-medium text-foreground">Email</label>

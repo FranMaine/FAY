@@ -1,15 +1,25 @@
 import NextAuth from 'next-auth';
 import { CredentialsSignin } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { prisma } from './db';
 import { permitir } from './rate-limit';
+import { usuarioDeGoogle } from './auth-google';
 
 // Hash de una clave que nadie conoce, para gastar el mismo tiempo de bcrypt
 // cuando el email no existe -sin esto, el login responde ~100 ms más rápido
 // con un email inexistente que con una clave incorrecta, y eso permite
 // averiguar qué emails tienen cuenta midiendo tiempos.
 const HASH_FALSO = '$2b$10$Qm9a.6cn5ZcDQGG8rzu02OD6FkQlfC.0jovaXQJOhbAzimik2sCjW';
+
+// "Continuar con Google" solo se ofrece si están cargadas las dos variables
+// (ver el cliente OAuth en Google Cloud Console): sin ellas, el provider no se
+// registra y los botones de login/registro no aparecen (se leen de
+// /api/auth/providers), así que el sitio funciona igual sin configurarlo.
+const googleClientId = process.env.AUTH_GOOGLE_ID;
+const googleClientSecret = process.env.AUTH_GOOGLE_SECRET;
+const googleConfigurado = !!(googleClientId && googleClientSecret);
 
 // Subclase propia para poder distinguir este caso puntual del resto de
 // credenciales inválidas -ver el `code` custom, que sí viaja hasta el
@@ -77,10 +87,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         };
       },
     }),
+    ...(googleConfigurado
+      ? [Google({ clientId: googleClientId, clientSecret: googleClientSecret })]
+      : []),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    // Con Google no hay formulario que valide nada: acá se decide si la
+    // persona entra (y se crea/vincula su cuenta). Devolver false manda a
+    // /login?error=AccessDenied.
+    async signIn({ account, profile }) {
+      if (account?.provider !== 'google') return true;
+      const resultado = await usuarioDeGoogle(account.providerAccountId, profile ?? {});
+      return resultado.ok;
+    },
+    async jwt({ token, user, account }) {
+      if (account?.provider === 'google') {
+        // El `user` que llega acá es el perfil de Google (su id no es el de
+        // nuestra base): se vuelve a buscar la cuenta por email para que el
+        // token lleve el id, el rol y el regatista de Orzando.
+        const email = (user?.email ?? token.email ?? '').toLowerCase();
+        const cuenta = email ? await prisma.user.findUnique({ where: { email } }) : null;
+        // signIn() ya la creó o la encontró: si no está, mejor cortar que
+        // dejar un token con el id de Google como si fuera de un usuario.
+        if (!cuenta) throw new Error('No se encontró la cuenta de Orzando para el inicio de sesión con Google');
+        token.sub = cuenta.id;
+        token.role = cuenta.role;
+        token.regatistaId = cuenta.regatistaId ?? null;
+      } else if (user) {
         token.role = user.role ?? 'REGULAR';
         token.regatistaId = user.regatistaId ?? null;
       }
