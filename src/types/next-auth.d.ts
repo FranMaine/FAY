@@ -22,7 +22,5 @@ declare module 'next-auth/jwt' {
   interface JWT {
     role: 'ADMIN' | 'ORGANIZADOR' | 'REGULAR';
     regatistaId: string | null;
-    /** ms epoch de la última vez que se releyó el rol desde la base. */
-    rolLeidoEn?: number;
   }
 }
