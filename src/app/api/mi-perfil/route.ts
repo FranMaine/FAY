@@ -11,8 +11,12 @@ const bodySchema = z
     apodo: z.string().trim().max(40, 'Máximo 40 caracteres').nullable().optional(),
     // Recibir por mail el aviso de campeonatos publicados en los que figura.
     notificarResultados: z.boolean().optional(),
+    // Ídem para los regatistas que tiene en favoritos.
+    notificarFavoritos: z.boolean().optional(),
   })
-  .refine((v) => v.apodo !== undefined || v.notificarResultados !== undefined, { message: 'Nada para actualizar' });
+  .refine((v) => v.apodo !== undefined || v.notificarResultados !== undefined || v.notificarFavoritos !== undefined, {
+    message: 'Nada para actualizar',
+  });
 
 // Actualiza el apodo (y la preferencia de avisos por mail) de la cuenta propia -a diferencia de Regatista.nombre
 // (el nombre "oficial" que viene de los resultados importados), esto es
@@ -25,19 +29,20 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    const { apodo, notificarResultados } = bodySchema.parse(await request.json());
+    const { apodo, notificarResultados, notificarFavoritos } = bodySchema.parse(await request.json());
 
     const antes = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { apodo: true, notificarResultados: true },
+      select: { apodo: true, notificarResultados: true, notificarFavoritos: true },
     });
     const usuario = await prisma.user.update({
       where: { id: session.user.id },
       data: {
         ...(apodo !== undefined ? { apodo: apodo || null } : {}),
         ...(notificarResultados !== undefined ? { notificarResultados } : {}),
+        ...(notificarFavoritos !== undefined ? { notificarFavoritos } : {}),
       },
-      select: { id: true, apodo: true, notificarResultados: true },
+      select: { id: true, apodo: true, notificarResultados: true, notificarFavoritos: true },
     });
     if (apodo !== undefined && (antes?.apodo ?? null) !== usuario.apodo) {
       void registrarAuditoria(actorDe(session), 'perfil.cambiar_apodo', 'User', session.user.id, {
@@ -48,6 +53,11 @@ export async function PATCH(request: Request) {
     if (notificarResultados !== undefined && antes?.notificarResultados !== usuario.notificarResultados) {
       void registrarAuditoria(actorDe(session), 'perfil.cambiar_avisos', 'User', session.user.id, {
         notificarResultados: usuario.notificarResultados,
+      });
+    }
+    if (notificarFavoritos !== undefined && antes?.notificarFavoritos !== usuario.notificarFavoritos) {
+      void registrarAuditoria(actorDe(session), 'perfil.cambiar_avisos_favoritos', 'User', session.user.id, {
+        notificarFavoritos: usuario.notificarFavoritos,
       });
     }
     return NextResponse.json(usuario);

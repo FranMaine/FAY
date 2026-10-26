@@ -76,7 +76,7 @@ describe('avisarResultadosPublicados', () => {
     expect(mail.html).toContain('puesto <strong>3</strong> de 3');
     expect(mail.html).toContain('tus favoritos');
     const where = prismaFalso.favorito.findMany.mock.calls[0][0].where;
-    expect(where.user).toEqual({ emailVerified: { not: null }, notificarResultados: true });
+    expect(where.user).toEqual({ emailVerified: { not: null }, notificarFavoritos: true });
   });
 
   it('no le manda dos veces lo mismo a quien tiene en favoritos su propio perfil vinculado', async () => {

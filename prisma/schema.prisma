@@ -26,6 +26,10 @@ model User {
   // el que figura (ver lib/avisos-resultados.ts). Se cambia en
   // /mi-perfil/configuracion.
   notificarResultados Boolean            @default(true)
+  // Lo mismo para los avisos de los regatistas que tiene en favoritos: se
+  // apaga aparte, para poder dejar de seguir los avisos de otros sin perder
+  // los de su propio perfil (y al revés).
+  notificarFavoritos  Boolean            @default(true)
   // Cuándo aceptó el Aviso Legal y la Política de Privacidad al
   // registrarse -null para cuentas creadas antes de que existiera el
   // checkbox (ver src/app/registro/page.tsx). Guardar el momento, no solo

@@ -117,7 +117,7 @@ export async function avisarResultadosPublicados(campeonatoId: string): Promise<
       await prisma.favorito.findMany({
         where: {
           regatistaId: { in: aAvisar },
-          user: { emailVerified: { not: null }, notificarResultados: true },
+          user: { emailVerified: { not: null }, notificarFavoritos: true },
         },
         select: { regatistaId: true, user: { select: { email: true } }, regatista: { select: { nombre: true } } },
         take: MAXIMO_AVISOS,

@@ -25,6 +25,7 @@ const ETIQUETA_ACCION: Record<string, string> = {
   "usuario.registrarse": "Creó su cuenta",
   "perfil.cambiar_apodo": "Cambió su apodo",
   "perfil.cambiar_avisos": "Cambió sus avisos por mail",
+  "perfil.cambiar_avisos_favoritos": "Cambió los avisos de sus favoritos",
   "perfil.cambiar_foto": "Cambió su foto",
   "perfil.quitar_foto": "Quitó su foto",
   "perfil.cambiar_password": "Cambió su contraseña",

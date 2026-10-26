@@ -17,12 +17,13 @@ import { mensajeDeError } from "@/lib/utils";
 interface ConfiguracionFormProps {
   apodoInicial: string | null;
   notificarInicial: boolean;
+  notificarFavoritosInicial: boolean;
   email: string;
   regatista: { id: string; nombre: string; fotoUrl: string | null } | null;
   tienePassword: boolean;
 }
 
-export function ConfiguracionForm({ apodoInicial, notificarInicial, email, regatista, tienePassword }: ConfiguracionFormProps) {
+export function ConfiguracionForm({ apodoInicial, notificarInicial, notificarFavoritosInicial, email, regatista, tienePassword }: ConfiguracionFormProps) {
   const router = useRouter();
 
   const [apodo, setApodo] = useState(apodoInicial || "");
@@ -31,23 +32,26 @@ export function ConfiguracionForm({ apodoInicial, notificarInicial, email, regat
   const [errorApodo, setErrorApodo] = useState<string | null>(null);
 
   const [notificar, setNotificar] = useState(notificarInicial);
+  const [notificarFavoritos, setNotificarFavoritos] = useState(notificarFavoritosInicial);
   const [guardandoAvisos, setGuardandoAvisos] = useState(false);
 
   // Se guarda al tocar el interruptor (no hay botón "Guardar"); si falla, vuelve atrás.
-  async function cambiarAvisos(valor: boolean) {
-    setNotificar(valor);
+  // Hay dos: los avisos del propio perfil y los de los favoritos.
+  async function cambiarAvisos(campo: "notificarResultados" | "notificarFavoritos", valor: boolean) {
+    const poner = campo === "notificarResultados" ? setNotificar : setNotificarFavoritos;
+    poner(valor);
     setGuardandoAvisos(true);
     try {
       const res = await fetch("/api/mi-perfil", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notificarResultados: valor }),
+        body: JSON.stringify({ [campo]: valor }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo guardar la preferencia");
       toast.success(valor ? "Vas a recibir los avisos por mail" : "Dejaste de recibir los avisos por mail");
     } catch (err) {
-      setNotificar(!valor);
+      poner(!valor);
       toast.error(mensajeDeError(err));
     } finally {
       setGuardandoAvisos(false);
@@ -207,29 +211,40 @@ export function ConfiguracionForm({ apodoInicial, notificarInicial, email, regat
         </CardContent>
       </Card>
 
-      {regatista && (
-        <Card className="bg-surface border-border">
-          <CardHeader>
-            <CardTitle>Avisos por mail</CardTitle>
-            <CardDescription>
-              Te avisamos cuando se publica un campeonato en el que figurás, con la posición en la que terminaste.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      <Card className="bg-surface border-border">
+        <CardHeader>
+          <CardTitle>Avisos por mail</CardTitle>
+          <CardDescription>
+            Te avisamos cuando se publica un campeonato (o se corrige un resultado) con la posición en la que terminó.
+            Cada aviso se apaga por separado.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {regatista && (
             <label className="flex items-center gap-3 cursor-pointer text-sm">
               <input
                 type="checkbox"
                 checked={notificar}
                 disabled={guardandoAvisos}
-                onChange={(e) => cambiarAvisos(e.target.checked)}
+                onChange={(e) => cambiarAvisos("notificarResultados", e.target.checked)}
                 className="h-4 w-4 shrink-0 accent-[var(--color-primary)]"
               />
-              <span>Quiero recibir estos avisos</span>
-              {guardandoAvisos && <Loader2Icon className="w-4 h-4 animate-spin text-muted-foreground" />}
+              <span>Los de mi perfil (campeonatos en los que figuro)</span>
             </label>
-          </CardContent>
-        </Card>
-      )}
+          )}
+          <label className="flex items-center gap-3 cursor-pointer text-sm">
+            <input
+              type="checkbox"
+              checked={notificarFavoritos}
+              disabled={guardandoAvisos}
+              onChange={(e) => cambiarAvisos("notificarFavoritos", e.target.checked)}
+              className="h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+            />
+            <span>Los de mis favoritos</span>
+            {guardandoAvisos && <Loader2Icon className="w-4 h-4 animate-spin text-muted-foreground" />}
+          </label>
+        </CardContent>
+      </Card>
 
       {regatista && (
         <Card className="bg-surface border-border">

@@ -220,7 +220,7 @@ export function emailResultadoPublicado(datos: {
         <p>Se publicaron los resultados de <strong>${escapeHtml(campeonato)}</strong> (${escapeHtml(datos.clase)}), y <strong>${escapeHtml(datos.nombreRegatista)}</strong> figura en ellos.</p>
         ${lugarFavorito}
         <p style="margin: 24px 0;"><a href="${datos.urlCampeonato}" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Ver la tabla completa</a></p>
-        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Recibís este aviso porque agregaste a ${escapeHtml(datos.nombreRegatista)} a tus favoritos de Orzando. Podés dejar de recibirlos quitándolo de tus favoritos, o desde <a href="${datos.urlConfiguracion}" style="color: #94a3b8;">la configuración de tu cuenta</a>.</p>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Recibís este aviso porque agregaste a ${escapeHtml(datos.nombreRegatista)} a tus favoritos de Orzando. Podés dejar de recibir los avisos de tus favoritos desde <a href="${datos.urlConfiguracion}" style="color: #94a3b8;">la configuración de tu cuenta</a>.</p>
       </div>
     `,
     };

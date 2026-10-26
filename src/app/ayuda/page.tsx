@@ -120,7 +120,7 @@ const SECCIONES: Seccion[] = [
       "Cuando se publica un campeonato en el que figura alguno de tus favoritos, te llega un mail con la posición.",
       "Si después se corrige una regata y le cambia el resultado o la posición, te llega un mail nuevo con cómo quedó. Lo mismo vale para tu propio perfil.",
       "Podés tener hasta 30. Para sacar a alguien, tocá la X en su tarjeta (o la estrella en su perfil).",
-      "Los avisos por mail se apagan o prenden desde la configuración de tu cuenta, y valen tanto para tu perfil como para tus favoritos.",
+      "Los avisos de tus favoritos se apagan o prenden desde la configuración de tu cuenta, aparte de los de tu propio perfil.",
     ],
     enlace: { href: "/favoritos", texto: "Ir a mis favoritos" },
   },
