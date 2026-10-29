@@ -11,12 +11,25 @@ export function ClaseMarquee() {
 
   return (
     <div className="relative overflow-hidden py-10 border-y border-border bg-surface/30 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-      {/* Pausa al pasar el mouse o enfocar adentro (WCAG 2.2.2: el movimiento
-          automático de más de 5 s tiene que poder detenerse). */}
-      <div className="marquee-track flex w-max animate-[marquee_28s_linear_infinite] hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]">
+      {/* No se frena al pasar el mouse: la franja sigue corriendo siempre. Con
+          "reducir movimiento" activado en el sistema queda quieta (ver
+          .marquee-track en globals.css). */}
+      <div className="marquee-track flex w-max animate-[marquee_28s_linear_infinite]">
         {doble.map(([slug, { label }], i) => (
           <div key={`${slug}-${i}`} aria-hidden={i >= items.length || undefined} className="flex flex-col items-center gap-2 px-8 shrink-0 w-28">
-            <Image src={`/logos-categorias/${slug}.png`} alt={label} width={56} height={56} className="w-14 h-14 object-contain" />
+            {/* Caja fija de 56 px para que todas las etiquetas queden alineadas; el
+                logo de Grumete es cuadrado y ocupa todo el cuadro (los otros son
+                más anchos que altos), así que se dibuja más chico para que pese
+                igual que el resto. */}
+            <div className="flex h-14 w-14 items-center justify-center">
+              <Image
+                src={`/logos-categorias/${slug}.png`}
+                alt={label}
+                width={56}
+                height={56}
+                className={slug === 'grumete' ? 'h-10 w-10 object-contain' : 'h-14 w-14 object-contain'}
+              />
+            </div>
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
           </div>
         ))}
