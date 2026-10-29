@@ -148,6 +148,34 @@ export function emailVinculacionRevocada(nombreRegatista: string) {
  * los resultados de un campeonato en el que figura. `posicion`/`total` pueden
  * ser null si no se pudo calcular (el mail igual sirve para avisar).
  */
+// Aviso interno (al dueño del sitio): se cargaron y publicaron solos los primeros
+// resultados del Campeonato Argentino de 420 desde la página de Barlovento.
+export function emailPrimerosResultados(datos: {
+  campeonatoId: string;
+  archivo: string;
+  participantes: number;
+  regatas: number;
+  descartes: number;
+}) {
+  const url = `${SITE_URL}/campeonatos/${datos.campeonatoId}`;
+  return {
+    subject: 'Se cargaron los resultados del Campeonato Argentino de 420',
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1e293b;">Ya están los resultados en Orzando</h2>
+        <p>Se importaron y publicaron solos los primeros resultados del <strong>Campeonato Argentino de 420 2026</strong>, desde la página de Barlovento.</p>
+        <ul style="color: #334155;">
+          <li>${datos.participantes} participantes</li>
+          <li>${datos.regatas} regatas</li>
+          <li>${datos.descartes} descarte${datos.descartes === 1 ? '' : 's'}</li>
+        </ul>
+        <p style="margin: 24px 0;"><a href="${url}" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Ver el campeonato</a></p>
+        <p style="color: #94a3b8; font-size: 12px;">Archivo: ${escapeHtml(datos.archivo)}. Revisá que las posiciones coincidan con las oficiales. Las próximas actualizaciones del archivo se cargan solas, sin más avisos a este mail.</p>
+      </div>
+    `,
+  };
+}
+
 // Aviso de que cambió el resultado o la posición de alguien en un campeonato
 // que ya estaba publicado (se corrigió una regata, cambiaron los descartes...).
 export function emailResultadoActualizado(datos: {

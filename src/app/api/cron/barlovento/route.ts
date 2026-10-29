@@ -5,6 +5,8 @@ import { permitir } from '@/lib/rate-limit';
 import { registrarAuditoria } from '@/lib/auditoria';
 import { refrescarRankings } from '@/lib/refrescar-cache';
 import { avisarResultadosPublicados } from '@/lib/avisos-resultados';
+import { sendEmail } from '@/lib/email';
+import { SITE_URL } from '@/lib/site';
 import { mensajeDeError } from '@/lib/utils';
 import { leerGridPDF } from '@/lib/extractors/pdf-grid-reader';
 import { leerGridXLSX, armarParseResult } from '@/lib/extractors/xlsx-parser';
@@ -28,6 +30,8 @@ const ACCION_FALLO = 'barlovento.fallo';
 const ENTIDAD_FALLO = 'barlovento-420';
 const ACTOR = { email: 'sistema', name: 'Importación automática (Barlovento)' };
 const MAX_BYTES = 15 * 1024 * 1024;
+// Quienes reciben el aviso de que se cargó el primer resultado del campeonato.
+const AVISAR_A = ['orzandovela@gmail.com', 'franmaine1@gmail.com'];
 
 // Lee la página del Campeonato Argentino de 420 (Club de Veleros Barlovento),
 // busca el archivo de resultados y lo importa y publica. La llama una tarea de
@@ -122,11 +126,30 @@ export async function POST(request: Request) {
       where: { id: c.id },
       data: { descartes, estado: 'PUBLICADO', fuenteUrl: PAGINA_BARLOVENTO },
     });
+    const esPrimero = !(await prisma.auditLog.findFirst({ where: { accion: ACCION, entidadId: c.id }, select: { id: true } }));
     await registrarAuditoria(ACTOR, ACCION, 'Campeonato', c.id, { nombre: c.nombre, url: archivo.url, hash, ...resumen });
     refrescarRankings();
     // Mails a quienes figuran (o tienen en favoritos): al publicar, a todos; en las
     // actualizaciones siguientes, solo a quienes les cambió algo.
     after(() => avisarResultadosPublicados(c.id));
+    // Primera carga: aviso a los administradores para que lo revisen enseguida.
+    if (esPrimero) {
+      const enlace = `${SITE_URL}/campeonatos/${c.id}`;
+      after(async () => {
+        for (const to of AVISAR_A) {
+          await sendEmail({
+            to,
+            subject: 'Se cargaron los resultados del Campeonato Argentino de 420',
+            html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+              <h2 style="color: #1e293b;">Ya están los resultados en Orzando</h2>
+              <p>Se importaron y publicaron automáticamente desde la página de Barlovento: <strong>${resumen.participantes}</strong> participantes, <strong>${resumen.regatas}</strong> regatas, <strong>${resumen.descartes}</strong> descartes.</p>
+              <p style="margin: 24px 0;"><a href="${enlace}" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block;">Revisar la tabla</a></p>
+              <p style="color: #94a3b8; font-size: 12px;">Archivo: ${archivo.url}</p>
+            </div>`,
+          });
+        }
+      });
+    }
 
     return NextResponse.json({ importado: true, campeonatoId: c.id, ...resumen, stats: resultado.stats });
   } catch (error) {
