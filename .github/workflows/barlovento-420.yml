@@ -24,6 +24,9 @@ on:
     - cron: '*/10 0-2 9 11 *'
   workflow_dispatch:
 
+# La tarea solo llama a una URL pública: no necesita ningún permiso sobre el repositorio.
+permissions: {}
+
 concurrency:
   group: barlovento-420
   cancel-in-progress: false

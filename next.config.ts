@@ -42,6 +42,9 @@ const CSP = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // No avisar en cada respuesta que el sitio usa Next.js (encabezado X-Powered-By):
+  // no aporta nada y le ahorra a quien escanea el sitio saber qué versión buscar.
+  poweredByHeader: false,
   // Sin esto, React <ViewTransition> (usado en el escudo de club, el logo
   // y el título de campeonato -ver ClubAvatar, CampeonatoCard, etc.) NO
   // funciona: renderiza sin tirar error, pero document.startViewTransition()

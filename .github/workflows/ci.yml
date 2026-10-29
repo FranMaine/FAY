@@ -13,6 +13,11 @@ on:
   pull_request:
     branches: [main]
 
+# Solo lectura del repositorio: esta tarea compila y prueba, no necesita
+# escribir nada (ni en el código ni en issues o PR).
+permissions:
+  contents: read
+
 jobs:
   verificar:
     runs-on: ubuntu-latest
