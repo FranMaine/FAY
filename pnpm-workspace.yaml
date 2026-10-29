@@ -22,3 +22,11 @@ allowBuilds:
 overrides:
   deepmerge-ts: ">=8.0.0"
   valibot: ">=1.4.2"
+  # Alertas de pnpm audit en dependencias de dependencias (zod vía
+  # @hookform/resolvers, undici vía @vercel/blob, source-map-js vía postcss,
+  # mysql2 vía la herramienta de línea de comandos de Prisma): se fuerzan las
+  # versiones corregidas dentro de la misma versión mayor.
+  zod: ">=4.6.6"
+  undici: ">=6.29.1 <7"
+  source-map-js: ">=1.2.2"
+  mysql2: ">=3.22.0"
