@@ -30,6 +30,8 @@ const ETIQUETA_ACCION: Record<string, string> = {
   "perfil.quitar_foto": "Quitó su foto",
   "perfil.cambiar_password": "Cambió su contraseña",
   "perfil.elegir_uso": "Eligió cómo usa el sitio",
+  "barlovento.importar": "Importó resultados de Barlovento (automático)",
+  "barlovento.fallo": "No se pudo importar el archivo de Barlovento",
   "favorito.agregar": "Agregó un favorito",
   "favorito.quitar": "Quitó un favorito",
   "vinculacion.solicitar": "Pidió vincular su cuenta",

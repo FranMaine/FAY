@@ -1,0 +1,41 @@
+name: Resultados Campeonato Argentino 420 (Barlovento)
+
+# Cada 10 minutos, los días de regata del Campeonato Argentino de 420 2026
+# (31 de octubre, 1, 7 y 8 de noviembre), desde las 14 h de Argentina, llama a
+# /api/cron/barlovento: lee la página del club, busca el archivo de resultados
+# y lo importa y publica en Orzando.
+#
+# Los horarios de cron van en UTC (Argentina = UTC-3): 14:00 de Argentina es
+# 17:00 UTC, y lo que pasa de medianoche cae en el día siguiente de UTC. La ruta
+# vuelve a comprobar el día y la hora de Argentina, así que un disparo de más no
+# hace nada. GitHub puede demorar las ejecuciones programadas unos minutos.
+#
+# Si encuentra un archivo y no lo puede importar con seguridad, la ruta responde
+# con error, esta tarea queda en rojo y GitHub manda un mail.
+on:
+  schedule:
+    - cron: '*/10 17-23 31 10 *'
+    - cron: '*/10 0-2 1 11 *'
+    - cron: '*/10 17-23 1 11 *'
+    - cron: '*/10 0-2 2 11 *'
+    - cron: '*/10 17-23 7 11 *'
+    - cron: '*/10 0-2 8 11 *'
+    - cron: '*/10 17-23 8 11 *'
+    - cron: '*/10 0-2 9 11 *'
+  workflow_dispatch:
+
+concurrency:
+  group: barlovento-420
+  cancel-in-progress: false
+
+jobs:
+  importar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Importar resultados
+        run: |
+          codigo=$(curl -sS -m 120 -X POST -o respuesta.json -w '%{http_code}' https://orzando.com.ar/api/cron/barlovento)
+          cat respuesta.json
+          echo
+          [ "$codigo" = "200" ] || exit 1
