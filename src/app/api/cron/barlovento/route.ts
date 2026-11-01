@@ -9,6 +9,7 @@ import { sendEmail } from '@/lib/email';
 import { SITE_URL } from '@/lib/site';
 import { mensajeDeError } from '@/lib/utils';
 import { leerGridPDF } from '@/lib/extractors/pdf-grid-reader';
+import { leerGridSailwaveHTML, mapeoSailwaveHTML } from '@/lib/extractors/sailwave-html';
 import { leerGridXLSX, armarParseResult } from '@/lib/extractors/xlsx-parser';
 import { parseSailwaveCSV, type ParseResult } from '@/lib/extractors/csv-parser';
 import { detectarColumnas } from '@/lib/extractors/column-detector';
@@ -162,6 +163,12 @@ export async function POST(request: Request) {
 async function leerResultados(buffer: Buffer, url: string): Promise<ParseResult[]> {
   const ext = new URL(url).pathname.toLowerCase().split('.').pop();
   if (ext === 'csv') return parseSailwaveCSV(buffer.toString('utf-8'));
+  if (ext === 'htm' || ext === 'html') {
+    const { header, rows } = leerGridSailwaveHTML(buffer);
+    const mapeo = mapeoSailwaveHTML(header);
+    if (!mapeo) throw new Error('La tabla de Sailwave no tiene las columnas esperadas (Rank, HelmName, R1..., Nett)');
+    return armarParseResult(header, rows, mapeo);
+  }
   const { header, rows } = ext === 'pdf' ? await leerGridPDF(buffer) : leerGridXLSX(buffer);
   const mapeo = mapeoDesdeSugerencias(detectarColumnas(header, rows));
   if (!mapeo) throw new Error('No se pudo identificar el puesto, los nombres, las regatas o el total en el archivo');
@@ -171,8 +178,12 @@ async function leerResultados(buffer: Buffer, url: string): Promise<ParseResult[
 // El campeonato de este evento en nuestra base. Se crea (en borrador, y recién
 // se publica cuando el import sale bien) la primera vez que hace falta.
 async function campeonatoDelEvento(soloLeer: boolean, crear = false) {
+  // El campeonato puede haberse creado a mano con otro nombre ("Argentino 420"):
+  // se busca por clase, año y por "argentino" en el nombre, sin importar cómo lo
+  // llamaron, para no crear uno duplicado.
   const existente = await prisma.campeonato.findFirst({
-    where: { nombre: 'Campeonato Argentino', anio: 2026, clase: { nombre: '420' } },
+    where: { nombre: { contains: 'argentino', mode: 'insensitive' }, anio: 2026, clase: { nombre: '420' } },
+    orderBy: { createdAt: 'asc' },
     select: { id: true, nombre: true },
   });
   if (existente || soloLeer || !crear) return existente;

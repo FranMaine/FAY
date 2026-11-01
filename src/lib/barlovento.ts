@@ -12,11 +12,13 @@ import type { ParseResult } from '@/lib/extractors/csv-parser';
 export const PAGINA_BARLOVENTO =
   'https://barlovento.org.ar/campeonato-argentino-420-31-de-octubre-y-1-7-y-8-de-noviembre-de-2026/';
 
-// Días de regata (fecha de Argentina) y hora desde la que se mira la página.
-export const FECHAS_DE_REGATA = ['2026-10-31', '2026-11-01', '2026-11-07', '2026-11-08'];
-export const HORA_DESDE = 14;
+// Días de regata que quedan (fecha de Argentina) y hora desde la que se mira la
+// página. El primer día (31/10) ya pasó: los resultados de ese día se cargaron
+// a mano. Si se cambia HORA_DESDE, cambiar también los cron del workflow.
+export const FECHAS_DE_REGATA = ['2026-11-01', '2026-11-07', '2026-11-08'];
+export const HORA_DESDE = 16;
 
-/** ¿Es un día de regata y ya pasaron las 14 h de Argentina (UTC-3, sin horario de verano)? */
+/** ¿Es un día de regata y ya pasó HORA_DESDE de Argentina (UTC-3, sin horario de verano)? */
 export function dentroDeVentana(ahora: Date = new Date()): boolean {
   const ar = new Date(ahora.getTime() - 3 * 60 * 60 * 1000);
   const fecha = ar.toISOString().slice(0, 10);
@@ -28,10 +30,11 @@ export interface ArchivoDeResultados {
   texto: string;
 }
 
-const EXTENSIONES = /\.(pdf|xlsx?|csv)(\?.*)?$/i;
+const EXTENSIONES = /\.(pdf|xlsx?|csv|html?)(\?.*)?$/i;
 // Documentos del evento que NO son resultados (aviso, instrucciones, etc.).
 const NO_ES_RESULTADO = /aviso|\bavr\b|avr[_-]|instrucc|\bir[-_ ]|invitaci|circular|enmienda|programa|protesta|inscrip|formulario|autoriz|seguro|medici|planilla de|reglamento/i;
-const ES_RESULTADO = /resultad|clasific|posicion|general|overall|sailwave|ranking|results?|\bres[-_ ]/i;
+// "Provisorios" es como Barlovento llama a los resultados del día (archivo .htm de Sailwave).
+const ES_RESULTADO = /resultad|clasific|posicion|general|overall|sailwave|ranking|results?|\bres[-_ ]|provisori|provisional|definitiv|\bfinal/i;
 // Enlaces a otros sitios donde suelen publicarse resultados.
 const SITIO_EXTERNO = /manage2sail|sailwave\.com|racingrules|regatta|sail-?results|docs\.google|drive\.google/i;
 
@@ -84,6 +87,17 @@ export function buscarArchivosDeResultados(
  */
 export function elegirArchivoGeneral(archivos: ArchivoDeResultados[]): ArchivoDeResultados | null {
   if (archivos.length === 1) return archivos[0];
+
+  // Los archivos de Sailwave del club se llaman ARG420_AAAAMMDD_N.htm (día y
+  // versión) y cada uno trae la tabla general ACUMULADA hasta ese día: el
+  // último reemplaza a los anteriores. Si todos traen fecha en el nombre, gana
+  // el de fecha y versión más altas.
+  const conFecha = archivos.map((a) => ({ a, m: /(\d{8})(?:[_-]v?(\d+))?/.exec(decodeURIComponent(a.url.split('/').pop() ?? '')) }));
+  if (conFecha.every((x) => x.m)) {
+    const clave = (x: (typeof conFecha)[number]) => Number(x.m![1]) * 1000 + Number(x.m![2] ?? 0);
+    const ordenados = [...conFecha].sort((x, y) => clave(y) - clave(x));
+    if (clave(ordenados[0]) !== clave(ordenados[1])) return ordenados[0].a;
+  }
   const generales = archivos.filter((a) => /general|overall|final|acumulad|clasificaci/i.test(`${a.url} ${a.texto}`));
   return generales.length === 1 ? generales[0] : null;
 }

@@ -14,21 +14,22 @@ import type { ColumnaSugerida } from '../extractors/column-detector';
 const ar = (iso: string) => new Date(`${iso}-03:00`);
 
 describe('dentroDeVentana', () => {
-  it('abre a las 14 h de Argentina en un día de regata', () => {
-    expect(dentroDeVentana(ar('2026-10-31T13:59:00'))).toBe(false);
-    expect(dentroDeVentana(ar('2026-10-31T14:00:00'))).toBe(true);
+  it('abre a las 16 h de Argentina en un día de regata', () => {
+    expect(dentroDeVentana(ar('2026-11-01T15:59:00'))).toBe(false);
+    expect(dentroDeVentana(ar('2026-11-01T16:00:00'))).toBe(true);
     expect(dentroDeVentana(ar('2026-11-01T23:50:00'))).toBe(true);
   });
 
   it('sigue abierta pasada la medianoche UTC (todavía es de noche en Argentina)', () => {
-    expect(dentroDeVentana(new Date('2026-11-01T01:30:00Z'))).toBe(true); // 22:30 del 31/10 en Argentina
+    expect(dentroDeVentana(new Date('2026-11-02T01:30:00Z'))).toBe(true); // 22:30 del 1/11 en Argentina
   });
 
-  it('está cerrada los días sin regata y en otros años', () => {
-    expect(dentroDeVentana(ar('2026-11-02T15:00:00'))).toBe(false);
-    expect(dentroDeVentana(ar('2026-11-07T15:00:00'))).toBe(true);
-    expect(dentroDeVentana(ar('2026-11-08T15:00:00'))).toBe(true);
-    expect(dentroDeVentana(ar('2027-10-31T15:00:00'))).toBe(false);
+  it('está cerrada los días sin regata (el 31/10 ya pasó) y en otros años', () => {
+    expect(dentroDeVentana(ar('2026-10-31T17:00:00'))).toBe(false);
+    expect(dentroDeVentana(ar('2026-11-02T17:00:00'))).toBe(false);
+    expect(dentroDeVentana(ar('2026-11-07T17:00:00'))).toBe(true);
+    expect(dentroDeVentana(ar('2026-11-08T17:00:00'))).toBe(true);
+    expect(dentroDeVentana(ar('2027-11-01T17:00:00'))).toBe(false);
   });
 });
 
@@ -54,6 +55,35 @@ describe('buscarArchivosDeResultados', () => {
   it('no repite un mismo enlace', () => {
     const doble = `${HTML}<a href="/wp-content/uploads/2026/11/Resultados-General-420.pdf">Resultados</a>`;
     expect(buscarArchivosDeResultados(doble).archivos).toHaveLength(1);
+  });
+});
+
+describe('la página real de Barlovento (1/11/2026)', () => {
+  const REAL = `
+    <a href="http://barlovento.org.ar/wp-content/uploads/2026/10/AvR_ARG4202026_02-1.pdf">Aviso de Regata</a>
+    <a href="http://barlovento.org.ar/wp-content/uploads/2026/10/AvR_ARG4202026_02_MN1.pdf">Aviso de Regata MN1</a>
+    <a href="http://barlovento.org.ar/wp-content/uploads/2026/10/IR-ARG420-2026-05a.pdf">Instrucciones de Regata</a>
+    <a href="http://barlovento.org.ar/wp-content/uploads/2026/11/IR-ARG420-2026-07.pdf">Instrucciones de Regata MN1</a>
+    <a href="http://barlovento.org.ar/wp-content/uploads/2026/10/Protestas_20261031_001.pdf">Audiencias Programadas</a>
+    <a href="http://barlovento.org.ar/wp-content/uploads/2026/10/ARG420_20261031_2.htm">Provisorios 31/10/2026</a>
+    <a href="http://barlovento.org.ar/wp-content/uploads/2026/10/Registro_Regla42.pdf">Registro Regla 42</a>
+    <a href="https://barlovento.org.ar/wp-content/uploads/2026/10/SARigging-Logos-2.png"><img src="x"></a>`;
+
+  it('toma los Provisorios (.htm) y deja afuera aviso, instrucciones, audiencias y regla 42', () => {
+    const { archivos } = buscarArchivosDeResultados(REAL);
+    expect(archivos.map((a) => a.url)).toEqual(['https://barlovento.org.ar/wp-content/uploads/2026/10/ARG420_20261031_2.htm']);
+  });
+
+  it('cuando salga el del día siguiente, elige el más nuevo', () => {
+    const conDos = REAL + '<a href="http://barlovento.org.ar/wp-content/uploads/2026/11/ARG420_20261101_1.htm">Provisorios 01/11/2026</a>';
+    const { archivos } = buscarArchivosDeResultados(conDos);
+    expect(archivos).toHaveLength(2);
+    expect(elegirArchivoGeneral(archivos)?.url).toContain('ARG420_20261101_1.htm');
+  });
+
+  it('con la misma fecha elige la versión más alta', () => {
+    const v = (n: number) => ({ url: `https://x/ARG420_20261101_${n}.htm`, texto: '' });
+    expect(elegirArchivoGeneral([v(1), v(3), v(2)])?.url).toContain('_3.htm');
   });
 });
 
