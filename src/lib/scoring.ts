@@ -354,6 +354,12 @@ export function agruparTripulaciones(
   const tieneResultadoReal = (c: ClasificacionRegatista) =>
     c.resultados.some((r) => !esPenalidad(r.observacion));
 
+  const firmaDeBote = (c: ClasificacionRegatista) => {
+    const extra = Object.entries(c.datosExtra ?? {}).filter(([, v]) => String(v).trim() !== '');
+    if (extra.length === 0 || c.resultados.length === 0) return null;
+    return JSON.stringify([c.club, ...extra.sort(([a], [b]) => a.localeCompare(b))]);
+  };
+
   const procesados = new Set<string>();
   const agrupado: ClasificacionRegatista[] = [];
 
@@ -361,9 +367,15 @@ export function agruparTripulaciones(
     if (procesados.has(c.regatistaId)) continue;
 
     const suFirma = c.resultados.length > 0 && tieneResultadoReal(c) ? firma(c) : null;
+    // Quien tiene todo penalidades no se puede distinguir por el puntaje, pero si
+    // el archivo trae datos propios del bote (número de vela, nombre del barco...)
+    // y son idénticos, es el mismo bote (ej: dos DNC del mismo 420).
+    const suBote = suFirma === null ? firmaDeBote(c) : null;
     const companeros = suFirma
       ? clasificacion.filter((otro) => !procesados.has(otro.regatistaId) && firma(otro) === suFirma)
-      : [c];
+      : suBote
+        ? clasificacion.filter((otro) => !procesados.has(otro.regatistaId) && !tieneResultadoReal(otro) && firma(otro) === firma(c) && firmaDeBote(otro) === suBote)
+        : [c];
 
     companeros.forEach((g) => procesados.add(g.regatistaId));
 

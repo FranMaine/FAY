@@ -293,6 +293,18 @@ describe('agruparTripulaciones', () => {
     expect(result.every((r) => !r.integrantes)).toBe(true);
   });
 
+  it('groups all-penalty sailors when the file says they share the boat (same sail number)', () => {
+    const dnc = [1, 2].map((n) => ({ regataNumero: n, puesto: 32, puntos: 32, descartado: false, observacion: 'DNC' }));
+    const bote = { SailNo: '83', Boat: 'Turron' };
+    const a = fila({ regatistaId: 'a', club: 'YCA', posicionFinal: 31, resultados: dnc, datosExtra: bote });
+    const b = fila({ regatistaId: 'b', club: 'YCA', posicionFinal: 31, resultados: dnc, datosExtra: bote });
+    const otro = fila({ regatistaId: 'c', club: 'YCA', posicionFinal: 31, resultados: dnc, datosExtra: { SailNo: '99', Boat: 'Otro' } });
+
+    const result = agruparTripulaciones([a, b, otro], 2);
+    expect(result).toHaveLength(2);
+    expect(result.find((r) => r.integrantes)?.integrantes).toHaveLength(2);
+  });
+
   // Bug real (Gran Prix del Litoral, Optimist): 12 regatistas empatados con el
   // mismo puntaje en todas las regatas se juntaban en UNA fila de 12 nombres,
   // que ensanchaba la tabla y escondía las regatas y el neto.
