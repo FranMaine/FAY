@@ -37,12 +37,35 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Mientras no haya elegido a mano, el sitio sigue al sistema también en
+  // vivo (por ejemplo cuando el celular pasa a modo oscuro de noche).
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    function alCambiarSistema(e: MediaQueryListEvent) {
+      try {
+        if (localStorage.getItem(STORAGE_KEY)) return;
+      } catch {
+        // sin localStorage no hay elección guardada: sigue al sistema.
+      }
+      document.documentElement.classList.toggle("dark", e.matches);
+      setIsDark(e.matches);
+    }
+    media.addEventListener("change", alCambiarSistema);
+    return () => media.removeEventListener("change", alCambiarSistema);
+  }, []);
+
   function toggle() {
     const next = !isDark;
     setIsDark(next);
     document.documentElement.classList.toggle("dark", next);
     try {
-      localStorage.setItem(STORAGE_KEY, next ? "dark" : "light");
+      // Si lo que eligió coincide con el sistema, se borra la elección y
+      // vuelve a seguir al sistema automáticamente.
+      if (next === window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        localStorage.setItem(STORAGE_KEY, next ? "dark" : "light");
+      }
     } catch {
       // localStorage puede fallar (modo privado, cuota llena, etc.) -el
       // toggle visual igual funciona para esta visita, simplemente no
