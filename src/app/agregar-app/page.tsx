@@ -15,6 +15,8 @@ interface Paso {
   icono?: LucideIcon;
   // En los menús de iOS el ícono va a la derecha del texto.
   iconoAlFinal?: boolean;
+  // Muestra el ícono de la app de Orzando (el que queda en la pantalla de inicio).
+  iconoDeLaApp?: boolean;
   // Texto del elemento que hay que tocar, tal como aparece en el celular.
   etiquetaEnPantalla: string;
 }
@@ -42,12 +44,13 @@ const PASOS_IPHONE: Paso[] = [
   {
     titulo: "Tocá \"Agregar\"",
     detalle: "Arriba a la derecha. Vas a ver el nombre \"Orzando\" y su ícono.",
+    iconoDeLaApp: true,
     etiquetaEnPantalla: "Agregar",
   },
   {
     titulo: "Abrila desde el ícono",
     detalle: "Listo: Orzando queda en tu pantalla de inicio.",
-    icono: Smartphone,
+    iconoDeLaApp: true,
     etiquetaEnPantalla: "Orzando",
   },
 ];
@@ -74,12 +77,13 @@ const PASOS_ANDROID: Paso[] = [
   {
     titulo: "Confirmá con \"Instalar\"",
     detalle: "Aparece un cartel \"Instalar aplicación\": tocá Instalar abajo a la derecha.",
+    iconoDeLaApp: true,
     etiquetaEnPantalla: "Instalar",
   },
   {
     titulo: "Abrila desde el ícono",
     detalle: "La vas a encontrar en la pantalla de inicio o en el cajón de aplicaciones.",
-    icono: Smartphone,
+    iconoDeLaApp: true,
     etiquetaEnPantalla: "Orzando",
   },
 ];
@@ -100,8 +104,9 @@ function Pasos({ pasos }: { pasos: Paso[] }) {
                 <p className="text-sm text-muted-foreground">{paso.detalle}</p>
               </div>
               <div className="flex items-center gap-3 rounded-xl border border-dashed border-primary/50 bg-primary/5 px-3 py-2.5">
+                {paso.iconoDeLaApp && <img src="/apple-icon.png" alt="" width={24} height={24} className="h-6 w-6 shrink-0 rounded-md" />}
                 {Icono && !paso.iconoAlFinal && <Icono className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
-                <span className={cn("truncate text-sm font-medium", Icono ? "text-foreground" : "text-primary")}>{paso.etiquetaEnPantalla}</span>
+                <span className={cn("truncate text-sm font-medium", Icono || paso.iconoDeLaApp ? "text-foreground" : "text-primary")}>{paso.etiquetaEnPantalla}</span>
                 {Icono && paso.iconoAlFinal && <Icono className="ml-auto h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
               </div>
             </div>
