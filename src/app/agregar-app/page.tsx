@@ -21,54 +21,66 @@ interface Paso {
 
 const PASOS_IPHONE: Paso[] = [
   {
-    titulo: "Abrí Orzando en Safari",
-    detalle: "Tiene que ser Safari. Chrome en iPhone no muestra esta opción.",
+    titulo: "Abrí el link en Safari",
+    detalle: "Tiene que ser Safari. Si lo tocás desde WhatsApp u otra app, elegí \"Abrir en Safari\".",
     icono: Compass,
     etiquetaEnPantalla: "orzando.com.ar",
   },
   {
-    titulo: "Tocá el botón Compartir",
-    detalle: "Es el cuadrado con una flecha hacia arriba, en la barra de abajo.",
+    titulo: "Tocá Compartir",
+    detalle: "Es el cuadradito con la flecha hacia arriba, abajo en el centro. Si no lo ves, tocá los tres puntos ··· de la barra de abajo.",
     icono: Share,
     etiquetaEnPantalla: "Compartir",
   },
   {
-    titulo: "Elegí Agregar a inicio",
-    detalle: "Bajá en la lista de opciones hasta encontrarla.",
+    titulo: "Elegí \"Agregar a Inicio\"",
+    detalle: "Deslizá la lista hacia arriba hasta encontrarla, tiene un cuadradito con un +.",
     icono: SquarePlus,
     iconoAlFinal: true,
     etiquetaEnPantalla: "Agregar a Inicio",
   },
   {
-    titulo: "Confirmá con Agregar",
-    detalle: "Arriba a la derecha. El ícono de Orzando queda en tu pantalla de inicio.",
+    titulo: "Tocá \"Agregar\"",
+    detalle: "Arriba a la derecha. Vas a ver el nombre \"Orzando\" y su ícono.",
     etiquetaEnPantalla: "Agregar",
+  },
+  {
+    titulo: "Abrila desde el ícono",
+    detalle: "Listo: Orzando queda en tu pantalla de inicio.",
+    icono: Smartphone,
+    etiquetaEnPantalla: "Orzando",
   },
 ];
 
 const PASOS_ANDROID: Paso[] = [
   {
-    titulo: "Abrí Orzando en Chrome",
-    detalle: "Chrome es el navegador que viene por defecto en la mayoría de los Android.",
+    titulo: "Abrí el link en Chrome",
+    detalle: "Si lo abrís desde WhatsApp, tocá los tres puntos y elegí \"Abrir en Chrome\".",
     icono: Globe,
     etiquetaEnPantalla: "orzando.com.ar",
   },
   {
-    titulo: "Tocá los tres puntos",
-    detalle: "Están arriba a la derecha, en el menú del navegador.",
+    titulo: "Tocá el menú",
+    detalle: "Son los tres puntos de arriba a la derecha.",
     icono: EllipsisVertical,
     etiquetaEnPantalla: "Menú",
   },
   {
-    titulo: "Elegí Instalar app",
-    detalle: "Puede aparecer como Agregar a pantalla principal, según el celular.",
+    titulo: "Elegí \"Instalar\"",
+    detalle: "En algunos celulares dice \"Instalar y crear acceso directo...\": es lo mismo.",
     icono: Download,
-    etiquetaEnPantalla: "Instalar app",
+    etiquetaEnPantalla: "Instalar",
   },
   {
-    titulo: "Confirmá con Instalar",
-    detalle: "Orzando queda en tu cajón de apps y en la pantalla principal.",
+    titulo: "Confirmá con \"Instalar\"",
+    detalle: "Aparece un cartel \"Instalar aplicación\": tocá Instalar abajo a la derecha.",
     etiquetaEnPantalla: "Instalar",
+  },
+  {
+    titulo: "Abrila desde el ícono",
+    detalle: "La vas a encontrar en la pantalla de inicio o en el cajón de aplicaciones.",
+    icono: Smartphone,
+    etiquetaEnPantalla: "Orzando",
   },
 ];
 
