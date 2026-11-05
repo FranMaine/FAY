@@ -72,6 +72,18 @@ export default function AdminCampeonatosPage() {
   // es una lista corta de eventos en vez de la lista larga de siempre.
   const [abiertas, setAbiertas] = useState<Set<string>>(new Set());
 
+  // Filtros de la lista. Un evento se muestra si AL MENOS UNA de sus categorías
+  // cumple los filtros (y siempre con todas sus categorías adentro): así
+  // acciones como "Publicar evento" o "Personalizar" siguen actuando sobre el
+  // evento entero y no sobre un recorte invisible.
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroAnio, setFiltroAnio] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<"" | "PUBLICADO" | "BORRADOR">("");
+  const [filtroClase, setFiltroClase] = useState("");
+  const [filtroSede, setFiltroSede] = useState(""); // "" = todas, "__sin" = sin sede, o id del club
+  const [filtroLogo, setFiltroLogo] = useState<"" | "con" | "sin">("");
+  const [filtroFechas, setFiltroFechas] = useState<"" | "con" | "sin">("");
+
   // Subir/quitar el logo de un evento directo desde esta lista, sin tener
   // que entrar a cada campeonato individual -se aplica a TODOS los
   // campeonatos del grupo, así queda consistente sin importar cuál se
@@ -135,6 +147,42 @@ export default function AdminCampeonatosPage() {
   }, []);
 
   const grupos = useMemo(() => agruparPorEvento(campeonatos), [campeonatos]);
+
+  const aniosDisponibles = useMemo(() => [...new Set(campeonatos.map((c) => c.anio))].sort((a, b) => b - a), [campeonatos]);
+  const sedesDisponibles = useMemo(() => {
+    const ids = new Set(campeonatos.map((c) => c.sedeId).filter((x): x is string => !!x));
+    return clubes.filter((c) => ids.has(c.id)).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [campeonatos, clubes]);
+  const hayFiltros = busqueda.trim() !== "" || filtroAnio !== "" || filtroEstado !== "" || filtroClase !== "" || filtroSede !== "" || filtroLogo !== "" || filtroFechas !== "";
+
+  const gruposVisibles = useMemo(() => {
+    const q = busqueda.trim().toLowerCase();
+    const coincide = (c: Campeonato, nombreGrupo: string) => {
+      if (q && !`${nombreGrupo} ${c.nombre} ${c.clase?.nombre ?? ""}`.toLowerCase().includes(q)) return false;
+      if (filtroAnio && String(c.anio) !== filtroAnio) return false;
+      if (filtroEstado && c.estado !== filtroEstado) return false;
+      if (filtroClase && c.clase?.id !== filtroClase) return false;
+      if (filtroSede === "__sin" ? !!c.sedeId : filtroSede && c.sedeId !== filtroSede) return false;
+      if (filtroFechas === "con" && !c.fechaInicio) return false;
+      if (filtroFechas === "sin" && c.fechaInicio) return false;
+      return true;
+    };
+    return grupos.filter((g) => {
+      if (filtroLogo === "con" && !g.logoUrl) return false;
+      if (filtroLogo === "sin" && g.logoUrl) return false;
+      return g.items.some((c) => coincide(c, g.nombre));
+    });
+  }, [grupos, busqueda, filtroAnio, filtroEstado, filtroClase, filtroSede, filtroLogo, filtroFechas]);
+
+  function limpiarFiltros() {
+    setBusqueda("");
+    setFiltroAnio("");
+    setFiltroEstado("");
+    setFiltroClase("");
+    setFiltroSede("");
+    setFiltroLogo("");
+    setFiltroFechas("");
+  }
 
   function toggle(clave: string) {
     setAbiertas((prev) => {
@@ -409,6 +457,92 @@ export default function AdminCampeonatosPage() {
           </Button>
         </header>
 
+        <section aria-label="Filtros" className="space-y-3 rounded-2xl border border-border bg-surface p-4">
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs text-muted-foreground">
+              Buscar
+              <input
+                type="search"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Evento, campeonato o clase…"
+                className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:border-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+              Año
+              <select value={filtroAnio} onChange={(e) => setFiltroAnio(e.target.value)} className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:border-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                <option value="">Todos</option>
+                {aniosDisponibles.map((a) => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+              Estado
+              <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value as typeof filtroEstado)} className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:border-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                <option value="">Todos</option>
+                <option value="BORRADOR">Borrador</option>
+                <option value="PUBLICADO">Publicado</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+              Clase
+              <select value={filtroClase} onChange={(e) => setFiltroClase(e.target.value)} className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:border-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                <option value="">Todas</option>
+                {clases.map((c) => (
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+              Sede
+              <select value={filtroSede} onChange={(e) => setFiltroSede(e.target.value)} className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:border-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                <option value="">Todas</option>
+                <option value="__sin">Sin sede</option>
+                {sedesDisponibles.map((c) => (
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+              Logo
+              <select value={filtroLogo} onChange={(e) => setFiltroLogo(e.target.value as typeof filtroLogo)} className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:border-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                <option value="">Todos</option>
+                <option value="con">Con logo</option>
+                <option value="sin">Sin logo</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+              Fechas
+              <select value={filtroFechas} onChange={(e) => setFiltroFechas(e.target.value as typeof filtroFechas)} className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:border-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                <option value="">Todas</option>
+                <option value="con">Con fecha</option>
+                <option value="sin">Sin fecha</option>
+              </select>
+            </label>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+            <p aria-live="polite">
+              {isLoading ? "Cargando…" : `${gruposVisibles.length} ${gruposVisibles.length === 1 ? "evento" : "eventos"} de ${grupos.length}`}
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setAbiertas(abiertas.size > 0 ? new Set() : new Set(gruposVisibles.map((g) => `${g.nombre.trim().toLowerCase()}__${g.anio}`)))}
+                className="text-primary hover:underline"
+              >
+                {abiertas.size > 0 ? "Cerrar todos" : "Abrir todos"}
+              </button>
+              {hayFiltros && (
+                <button type="button" onClick={limpiarFiltros} className="text-primary hover:underline">
+                  Limpiar filtros
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="tabla-apilada w-full text-sm text-left">
@@ -426,14 +560,23 @@ export default function AdminCampeonatosPage() {
                       <Loader2Icon className="w-6 h-6 animate-spin text-primary mx-auto" />
                     </td>
                   </tr>
-                ) : grupos.length === 0 ? (
+                ) : gruposVisibles.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="px-6 py-10 text-center text-muted-foreground">
-                      Todavía no hay campeonatos cargados.
+                      {hayFiltros ? (
+                        <>
+                          Ningún evento coincide con los filtros.{" "}
+                          <button type="button" onClick={limpiarFiltros} className="text-primary hover:underline">
+                            Limpiar filtros
+                          </button>
+                        </>
+                      ) : (
+                        "Todavía no hay campeonatos cargados."
+                      )}
                     </td>
                   </tr>
                 ) : (
-                  grupos.map((grupo) => {
+                  gruposVisibles.map((grupo) => {
                     const clave = `${grupo.nombre.trim().toLowerCase()}__${grupo.anio}`;
                     // Un evento con una sola clase no necesita el gesto de
                     // "abrir la carpeta" -se muestra directo, como una fila
