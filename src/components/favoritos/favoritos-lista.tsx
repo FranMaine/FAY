@@ -132,7 +132,7 @@ export function FavoritosLista() {
         <StarIcon className="mx-auto mb-3 h-8 w-8 text-muted-foreground" aria-hidden="true" />
         <p className="font-medium">Todavía no agregaste a nadie.</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Buscá a tus hijos, a tu equipo o a quien quieras seguir, y tocá <strong>Agregar</strong>.
+          Buscá a tus hijos, a tu equipo o a quien quieras seguir, y tocá <strong>Agregar más</strong>.
         </p>
       </div>
     );

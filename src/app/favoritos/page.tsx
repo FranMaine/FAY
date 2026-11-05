@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { FavoritosLista } from "@/components/favoritos/favoritos-lista";
-import { AgregarFavoritos } from "@/components/favoritos/agregar-favoritos";
+import { FavoritosPantalla } from "@/components/favoritos/favoritos-pantalla";
 
 // Página privada (depende de la cuenta): sin sentido indexarla.
 export const metadata: Metadata = {
@@ -25,19 +24,7 @@ export default async function FavoritosPage() {
           </p>
         </header>
 
-        <section aria-labelledby="agregar-titulo" className="space-y-3 rounded-2xl border border-border bg-surface p-5">
-          <h2 id="agregar-titulo" className="text-lg font-semibold">
-            Agregar a alguien
-          </h2>
-          <AgregarFavoritos />
-        </section>
-
-        <section aria-labelledby="lista-titulo" className="space-y-3">
-          <h2 id="lista-titulo" className="text-lg font-semibold">
-            Tu lista
-          </h2>
-          <FavoritosLista />
-        </section>
+        <FavoritosPantalla />
       </div>
     </main>
   );
