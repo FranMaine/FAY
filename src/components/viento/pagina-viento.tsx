@@ -2,6 +2,9 @@ import { ArrowUpIcon, WindIcon, MapPinIcon } from 'lucide-react';
 import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { GraficoViento, horaLocal } from '@/components/viento/grafico-viento';
 import { SelectorLugar } from '@/components/viento/selector-lugar';
+import { MapaVientoClubes, type ClubEnMapa } from '@/components/viento/mapa-viento-clubes';
+import { prisma } from '@/lib/db';
+import { UBICACION_CLUBES } from '@/lib/clubes-ubicacion';
 import { direccionViento, intensidadViento } from '@/lib/clima';
 import { LUGARES, distanciaKm, type Lugar } from '@/lib/lugares';
 import { obtenerHistorialMedido, obtenerPronostico, estaDesactualizada } from '@/lib/viento';
@@ -57,8 +60,28 @@ function Brujula({ grados }: { grados: number | null }) {
 
 // Cuerpo de /viento y /viento/[lugar]: lo único que cambia entre ellas es
 // el lugar.
+// Clubes con ubicación conocida, para marcarlos en el mapa.
+async function clubesParaElMapa(): Promise<ClubEnMapa[]> {
+  const clubes = await prisma.club.findMany({ select: { id: true, nombre: true, nombreCompleto: true } });
+  return clubes.flatMap((c) => {
+    const sigla = c.nombre.trim().toUpperCase();
+    const ubicacion = UBICACION_CLUBES[sigla];
+    return ubicacion ? [{ id: c.id, sigla, nombre: c.nombreCompleto || c.nombre, latitud: ubicacion[0], longitud: ubicacion[1] }] : [];
+  });
+}
+
+// Si la base no responde, los marcadores salen igual (solo con la sigla, sin enlace a la ficha).
+function clubesSinBase(): ClubEnMapa[] {
+  return Object.entries(UBICACION_CLUBES).map(([sigla, [latitud, longitud]]) => ({ sigla, nombre: sigla, latitud, longitud }));
+}
+
 export async function PaginaViento({ lugar }: { lugar: Lugar }) {
-  const [historial, pronostico] = await Promise.all([obtenerHistorialMedido(lugar), obtenerPronostico(lugar)]);
+  const claveWindy = process.env.NEXT_PUBLIC_WINDY_KEY;
+  const [historial, pronostico, clubesMapa] = await Promise.all([
+    obtenerHistorialMedido(lugar),
+    obtenerPronostico(lugar),
+    claveWindy ? clubesParaElMapa().catch(() => clubesSinBase()) : Promise.resolve([]),
+  ]);
 
   const { estacion } = lugar;
   const medido = historial.at(-1) ?? null;
@@ -157,13 +180,17 @@ export async function PaginaViento({ lugar }: { lugar: Lugar }) {
         <ScrollReveal delay={160}>
           <section className="rounded-2xl border border-border bg-surface p-5 md:p-6">
             <h2 className="text-lg font-bold">Mapa de viento</h2>
-            <p className="mb-4 text-sm text-muted-foreground">Las flechas muestran hacia dónde va el viento; el color, su fuerza.</p>
-            <iframe
-              title={`Mapa de viento de Windy centrado en ${lugar.nombre}`}
-              src={urlMapaWindy(lugar)}
-              loading="lazy"
-              className="h-[420px] w-full rounded-xl border border-border"
-            />
+            <p className="mb-4 text-sm text-muted-foreground">Las flechas muestran hacia dónde va el viento; el color, su fuerza. Tocá un club para ver su ficha.</p>
+            {claveWindy ? (
+              <MapaVientoClubes clave={claveWindy} latitud={lugar.latitud} longitud={lugar.longitud} clubes={clubesMapa} />
+            ) : (
+              <iframe
+                title={`Mapa de viento de Windy centrado en ${lugar.nombre}`}
+                src={urlMapaWindy(lugar)}
+                loading="lazy"
+                className="h-[420px] w-full rounded-xl border border-border"
+              />
+            )}
           </section>
         </ScrollReveal>
 

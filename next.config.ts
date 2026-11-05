@@ -21,6 +21,8 @@ const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 //   preview al subir un logo. Los logos de Apple/Android de /agregar-app
 //   son locales (/public/brands), sin depender de una CDN externa.
 // - frame-src: solo el embed oficial de Windy (mapa de viento de /viento).
+// - script/style/img/connect de *.windy.com y unpkg.com: el mapa de /viento usa la
+//   API de Windy (que carga Leaflet 1.4.0 desde unpkg) para marcar los clubes.
 // - connect-src 'self': el clima (Open-Meteo/aviationweather) se pide desde
 //   el servidor (/api/clima), no desde el navegador.
 // - Si se suman analítica o publicidad (ver el aviso de cookies), hay que
@@ -29,12 +31,13 @@ const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365;
 //   websockets que este CSP bloquearía.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
+  "script-src 'self' 'unsafe-inline' https://unpkg.com https://*.windy.com",
+  "style-src 'self' 'unsafe-inline' https://*.windy.com https://unpkg.com",
+  "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://*.windy.com https://unpkg.com",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  "connect-src 'self' https://*.windy.com",
   "frame-src https://embed.windy.com",
+  "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
