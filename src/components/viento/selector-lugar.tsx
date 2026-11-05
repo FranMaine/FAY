@@ -20,7 +20,15 @@ export function SelectorLugar({ actual, lugares }: SelectorLugarProps) {
       <span className="text-muted-foreground">Lugar</span>
       <select
         value={actual}
-        onChange={(e) => router.replace(urlViento(e.target.value))}
+        onChange={(e) => {
+          // Elegir a mano un lugar: /viento ya no te manda al de tu club en esta visita.
+          try {
+            sessionStorage.setItem('viento-lugar-manual', '1');
+          } catch {
+            // sin sessionStorage solo se pierde ese recuerdo
+          }
+          router.replace(urlViento(e.target.value));
+        }}
         className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground transition-colors hover:border-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
       >
         {lugares.map((l) => (

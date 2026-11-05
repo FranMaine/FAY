@@ -13,5 +13,6 @@ export const metadata: Metadata = {
 export const revalidate = 600;
 
 export default function VientoPage() {
-  return <PaginaViento lugar={LUGAR_PREDETERMINADO} />;
+  // /viento sin lugar: si la persona tiene un club con otro lugar, la lleva ahí.
+  return <PaginaViento lugar={LUGAR_PREDETERMINADO} irAMiLugar />;
 }

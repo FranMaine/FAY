@@ -3,6 +3,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal';
 import { GraficoViento, horaLocal } from '@/components/viento/grafico-viento';
 import { SelectorLugar } from '@/components/viento/selector-lugar';
 import { MapaVientoClubes, type ClubEnMapa } from '@/components/viento/mapa-viento-clubes';
+import { IrAMiLugar } from '@/components/viento/ir-a-mi-lugar';
 import { prisma } from '@/lib/db';
 import { UBICACION_CLUBES } from '@/lib/clubes-ubicacion';
 import { direccionViento, intensidadViento } from '@/lib/clima';
@@ -62,11 +63,13 @@ function Brujula({ grados }: { grados: number | null }) {
 // el lugar.
 // Clubes con ubicación conocida, para marcarlos en el mapa.
 async function clubesParaElMapa(): Promise<ClubEnMapa[]> {
-  const clubes = await prisma.club.findMany({ select: { id: true, nombre: true, nombreCompleto: true } });
+  const clubes = await prisma.club.findMany({ select: { id: true, nombre: true, nombreCompleto: true, logoUrl: true } });
   return clubes.flatMap((c) => {
     const sigla = c.nombre.trim().toUpperCase();
     const ubicacion = UBICACION_CLUBES[sigla];
-    return ubicacion ? [{ id: c.id, sigla, nombre: c.nombreCompleto || c.nombre, latitud: ubicacion[0], longitud: ubicacion[1] }] : [];
+    return ubicacion
+      ? [{ id: c.id, sigla, nombre: c.nombreCompleto || c.nombre, logoUrl: c.logoUrl, latitud: ubicacion[0], longitud: ubicacion[1] }]
+      : [];
   });
 }
 
@@ -75,7 +78,7 @@ function clubesSinBase(): ClubEnMapa[] {
   return Object.entries(UBICACION_CLUBES).map(([sigla, [latitud, longitud]]) => ({ sigla, nombre: sigla, latitud, longitud }));
 }
 
-export async function PaginaViento({ lugar }: { lugar: Lugar }) {
+export async function PaginaViento({ lugar, irAMiLugar = false }: { lugar: Lugar; irAMiLugar?: boolean }) {
   const claveWindy = process.env.NEXT_PUBLIC_WINDY_KEY;
   const [historial, pronostico, clubesMapa] = await Promise.all([
     obtenerHistorialMedido(lugar),
@@ -97,6 +100,7 @@ export async function PaginaViento({ lugar }: { lugar: Lugar }) {
 
   return (
     <main className="min-h-dvh bg-background p-6 text-foreground md:p-10">
+      {irAMiLugar && <IrAMiLugar actual={lugar.slug} />}
       <div className="mx-auto max-w-5xl space-y-8">
         <div className="flex justify-end">
           <SelectorLugar actual={lugar.slug} lugares={LUGARES.map(({ slug, nombre }) => ({ slug, nombre }))} />
@@ -182,7 +186,7 @@ export async function PaginaViento({ lugar }: { lugar: Lugar }) {
             <h2 className="text-lg font-bold">Mapa de viento</h2>
             <p className="mb-4 text-sm text-muted-foreground">Las flechas muestran hacia dónde va el viento; el color, su fuerza. Tocá un club para ver su ficha.</p>
             {claveWindy ? (
-              <MapaVientoClubes clave={claveWindy} latitud={lugar.latitud} longitud={lugar.longitud} clubes={clubesMapa} />
+              <MapaVientoClubes clave={claveWindy} latitud={lugar.latitud} longitud={lugar.longitud} lugarSlug={lugar.slug} clubes={clubesMapa} />
             ) : (
               <iframe
                 title={`Mapa de viento de Windy centrado en ${lugar.nombre}`}
