@@ -44,25 +44,25 @@ export function calcularLogrosPersonales(
   const cron = cronologico(historial);
 
   // 1. Debut
-  out.push({ id: "debut", detalle: etiquetaCampeonato(cron[0]) });
+  out.push({ id: "debut", detalle: etiquetaCampeonato(cron[0]), campeonatoId: cron[0].campeonatoId });
 
   // 2. Primeros puntos
   const primerosPuntos = cron.find((h) => h.posicion <= 10);
-  if (primerosPuntos) out.push({ id: "primeros-puntos", detalle: etiquetaCampeonato(primerosPuntos) });
+  if (primerosPuntos) out.push({ id: "primeros-puntos", detalle: etiquetaCampeonato(primerosPuntos), campeonatoId: primerosPuntos.campeonatoId });
 
   // 3. Primer podio
   const primerPodio = cron.find((h) => h.posicion <= 3);
-  if (primerPodio) out.push({ id: "primer-podio", detalle: etiquetaCampeonato(primerPodio) });
+  if (primerPodio) out.push({ id: "primer-podio", detalle: etiquetaCampeonato(primerPodio), campeonatoId: primerPodio.campeonatoId });
 
   // 4. Primera victoria
   const primeraVictoria = cron.find((h) => h.posicion === 1);
-  if (primeraVictoria) out.push({ id: "primera-victoria", detalle: etiquetaCampeonato(primeraVictoria) });
+  if (primeraVictoria) out.push({ id: "primera-victoria", detalle: etiquetaCampeonato(primeraVictoria), campeonatoId: primeraVictoria.campeonatoId });
 
   // 6. Mejora constante: 3 campeonatos seguidos (cronológicamente) donde
   // la posición mejoró respecto al anterior.
   for (let i = 2; i < cron.length; i++) {
     if (cron[i].posicion < cron[i - 1].posicion && cron[i - 1].posicion < cron[i - 2].posicion) {
-      out.push({ id: "mejora-constante", detalle: etiquetaCampeonato(cron[i]) });
+      out.push({ id: "mejora-constante", detalle: etiquetaCampeonato(cron[i]), campeonatoId: cron[i].campeonatoId });
       break;
     }
   }
@@ -78,7 +78,7 @@ export function calcularLogrosPersonales(
       max = Math.max(max, racha);
     }
     if (max >= 3) {
-      out.push({ id: "racha-podios", detalle: etiquetaCampeonato(h) });
+      out.push({ id: "racha-podios", detalle: etiquetaCampeonato(h), campeonatoId: h.campeonatoId });
       break;
     }
   }
@@ -89,7 +89,7 @@ export function calcularLogrosPersonales(
     if (h.posicion > 3 || h.resultados.length === 0) continue;
     const primera = [...h.resultados].sort((a, b) => a.regataNumero - b.regataNumero)[0];
     if (primera.puesto > 10) {
-      out.push({ id: "remontada", detalle: etiquetaCampeonato(h) });
+      out.push({ id: "remontada", detalle: etiquetaCampeonato(h), campeonatoId: h.campeonatoId });
       break;
     }
   }
@@ -156,14 +156,14 @@ export function calcularLogrosPersonales(
       h.diferenciaSegundo !== null && h.diferenciaSegundo >= UMBRAL_MARGEN_AMPLIO
   );
   if (margenAmplio) {
-    out.push({ id: "margen-amplio", detalle: `+${margenAmplio.diferenciaSegundo} pts sobre el 2°` });
+    out.push({ id: "margen-amplio", detalle: `+${margenAmplio.diferenciaSegundo} pts sobre el 2°`, campeonatoId: margenAmplio.campeonatoId });
   }
 
   // 21. Imbatible: ganó TODAS las regatas de un campeonato (2+ regatas).
   const imbatible = historial.find(
     (h) => h.resultados.length >= 2 && h.resultados.every((r) => r.puesto === 1)
   );
-  if (imbatible) out.push({ id: "imbatible", detalle: etiquetaCampeonato(imbatible) });
+  if (imbatible) out.push({ id: "imbatible", detalle: etiquetaCampeonato(imbatible), campeonatoId: imbatible.campeonatoId });
 
   return out;
 }

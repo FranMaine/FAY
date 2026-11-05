@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
 import { LOGROS, type LogroDef, type LogroDesbloqueado } from "@/lib/logros-catalogo";
@@ -65,7 +66,18 @@ export function LogrosSection({ logros }: LogrosSectionProps) {
             </div>
             {detalle ? (
               <p className="text-sm font-medium text-primary">
-                {detalle.detalle ? `Conseguida en ${detalle.detalle}` : "¡Conseguida!"}
+                {!detalle.detalle ? (
+                  "¡Conseguida!"
+                ) : detalle.campeonatoId ? (
+                  <>
+                    Conseguida en{" "}
+                    <Link href={`/campeonatos/${detalle.campeonatoId}`} className="underline underline-offset-2 hover:text-primary/80">
+                      {detalle.detalle}
+                    </Link>
+                  </>
+                ) : (
+                  `Conseguida en ${detalle.detalle}`
+                )}
               </p>
             ) : (
               <p className="text-sm text-muted-foreground italic">Todavía no la desbloqueó</p>

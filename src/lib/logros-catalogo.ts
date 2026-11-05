@@ -66,4 +66,6 @@ export interface LogroRegatistaInfo {
 export interface LogroDesbloqueado {
   id: string;
   detalle: string;
+  // Campeonato en el que se consiguió, para linkearlo (no todos los logros tienen uno).
+  campeonatoId?: string;
 }
