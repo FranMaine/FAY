@@ -8,7 +8,7 @@ import { prisma } from '@/lib/db';
 import { UBICACION_CLUBES } from '@/lib/clubes-ubicacion';
 import { direccionViento, intensidadViento } from '@/lib/clima';
 import { LUGARES, distanciaKm, type Lugar } from '@/lib/lugares';
-import { obtenerHistorialMedido, obtenerPronostico, estaDesactualizada } from '@/lib/viento';
+import { obtenerHistorialMedido, obtenerPronostico, estaDesactualizada, obtenerVientoDePuntos } from '@/lib/viento';
 
 // Mapa de viento de Windy (su embed oficial, gratis y sin clave), centrado
 // en el lugar y en nudos. Va en un <iframe>: el CSP lo permite en
@@ -78,12 +78,19 @@ function clubesSinBase(): ClubEnMapa[] {
   return Object.entries(UBICACION_CLUBES).map(([sigla, [latitud, longitud]]) => ({ sigla, nombre: sigla, latitud, longitud }));
 }
 
+// Los clubes del mapa, cada uno con el viento actual del modelo en su ubicación.
+async function clubesConViento(): Promise<ClubEnMapa[]> {
+  const clubes = await clubesParaElMapa().catch(() => clubesSinBase());
+  const vientos = await obtenerVientoDePuntos(clubes);
+  return clubes.map((c, i) => ({ ...c, viento: vientos[i] }));
+}
+
 export async function PaginaViento({ lugar, irAMiLugar = false }: { lugar: Lugar; irAMiLugar?: boolean }) {
   const claveWindy = process.env.NEXT_PUBLIC_WINDY_KEY;
   const [historial, pronostico, clubesMapa] = await Promise.all([
     obtenerHistorialMedido(lugar),
     obtenerPronostico(lugar),
-    claveWindy ? clubesParaElMapa().catch(() => clubesSinBase()) : Promise.resolve([]),
+    claveWindy ? clubesConViento() : Promise.resolve([]),
   ]);
 
   const { estacion } = lugar;
@@ -184,7 +191,7 @@ export async function PaginaViento({ lugar, irAMiLugar = false }: { lugar: Lugar
         <ScrollReveal delay={160}>
           <section className="rounded-2xl border border-border bg-surface p-5 md:p-6">
             <h2 className="text-lg font-bold">Mapa de viento</h2>
-            <p className="mb-4 text-sm text-muted-foreground">Las flechas muestran hacia dónde va el viento; el color, su fuerza. Tocá un club para ver su ficha.</p>
+            <p className="mb-4 text-sm text-muted-foreground">Las flechas muestran hacia dónde va el viento; el color, su fuerza. Tocá un club para ver su ficha, o cualquier punto del mapa para ver el viento ahí.</p>
             {claveWindy ? (
               <MapaVientoClubes clave={claveWindy} latitud={lugar.latitud} longitud={lugar.longitud} lugarSlug={lugar.slug} clubes={clubesMapa} />
             ) : (

@@ -148,3 +148,38 @@ export async function obtenerClimaActual(lugar: Lugar): Promise<ClimaActual> {
     actualizado: current.time,
   };
 }
+
+export interface VientoPunto {
+  nudos: number;
+  /** Grados de dónde sopla (convención meteorológica). */
+  grados: number;
+}
+
+/**
+ * Viento actual del modelo en varios puntos (por ejemplo los clubes del mapa de
+ * /viento), en una sola consulta a Open-Meteo. Devuelve un valor por punto, en el
+ * mismo orden, o null donde no hubo dato; si falla todo, una lista de nulls.
+ */
+export async function obtenerVientoDePuntos(puntos: { latitud: number; longitud: number }[]): Promise<(VientoPunto | null)[]> {
+  const vacio = puntos.map(() => null);
+  if (puntos.length === 0) return vacio;
+  try {
+    const url = new URL('https://api.open-meteo.com/v1/forecast');
+    url.searchParams.set('latitude', puntos.map((p) => p.latitud.toFixed(3)).join(','));
+    url.searchParams.set('longitude', puntos.map((p) => p.longitud.toFixed(3)).join(','));
+    url.searchParams.set('current', 'wind_speed_10m,wind_direction_10m');
+    url.searchParams.set('wind_speed_unit', 'kn');
+    const res = await fetch(url, { next: { revalidate: REVALIDAR_S } });
+    if (!res.ok) return vacio;
+    const json = await res.json();
+    // Con un solo punto Open-Meteo devuelve un objeto; con varios, una lista.
+    const lista: { current?: { wind_speed_10m?: number; wind_direction_10m?: number } }[] = Array.isArray(json) ? json : [json];
+    return puntos.map((_, i) => {
+      const c = lista[i]?.current;
+      if (typeof c?.wind_speed_10m !== 'number' || typeof c?.wind_direction_10m !== 'number') return null;
+      return { nudos: Math.round(c.wind_speed_10m), grados: c.wind_direction_10m };
+    });
+  } catch {
+    return vacio;
+  }
+}

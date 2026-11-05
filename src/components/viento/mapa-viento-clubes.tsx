@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { direccionViento } from "@/lib/clima";
 
 export interface ClubEnMapa {
   // Sin id (si la base no respondió) el marcador sale igual, pero sin enlace a la ficha.
@@ -11,6 +12,8 @@ export interface ClubEnMapa {
   logoUrl?: string | null;
   latitud: number;
   longitud: number;
+  // Viento actual del modelo en el club: se muestra bajo el escudo.
+  viento?: { nudos: number; grados: number } | null;
 }
 
 interface Props {
@@ -30,7 +33,16 @@ interface Props {
 const LEAFLET = "https://unpkg.com/leaflet@1.4.0/dist/leaflet.js";
 const WINDY = "https://api.windy.com/assets/map-forecast/libBoot.js";
 
-type WindyMap = { setView: (ll: [number, number], z: number) => void };
+type WindyMap = {
+  setView: (ll: [number, number], z: number) => void;
+  on: (evento: string, fn: (e: { latlng: { lat: number; lng: number } }) => void) => void;
+};
+type WindyPicker = {
+  open: (ll: { lat: number; lon: number }) => void;
+  on: (evento: string, fn: () => void) => void;
+  getParams: () => { lat: number; lon: number; values: number[] | null; overlay?: string } | null;
+};
+type WindyUtils = { wind2obj: (v: number[]) => { wind: number; dir: number } };
 type Marcador = {
   bindPopup: (el: HTMLElement) => Marcador;
   addTo: (m: unknown) => Marcador;
@@ -43,7 +55,8 @@ type Leaflet = {
 declare global {
   interface Window {
     L?: Leaflet;
-    windyInit?: (opts: object, cb: (api: { map: WindyMap; store?: { set: (k: string, v: string) => void } }) => void) => void;
+    W?: { picker?: WindyPicker };
+    windyInit?: (opts: object, cb: (api: { map: WindyMap; picker?: WindyPicker; utils?: WindyUtils; store?: { set: (k: string, v: string) => void } }) => void) => void;
   }
 }
 
@@ -86,14 +99,17 @@ function popupDelClub(club: ClubEnMapa): HTMLElement {
 const TAMANO = 34;
 
 // Escudo redondo con borde blanco; si no hay escudo (o no carga), la sigla en un
-// círculo azul. Se arma con elementos del DOM (no con HTML en texto) para no
-// meter nunca texto del club como código.
-function iconoDelClub(club: ClubEnMapa): HTMLElement {
-  const marco = document.createElement("div");
-  marco.title = club.nombre;
-  marco.style.cssText = `width:${TAMANO}px;height:${TAMANO}px;margin:-${TAMANO / 2}px 0 0 -${TAMANO / 2}px;border-radius:9999px;border:2px solid #fff;background:#2563eb;box-shadow:0 1px 5px rgba(0,0,0,.55);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;font:700 10px system-ui;transition:transform .15s`;
+// círculo azul. Debajo, el viento actual del modelo en ese punto. Se arma con
+// elementos del DOM (no con HTML en texto) para no meter nunca texto del club
+// como código.
+function iconoDelClub(club: ClubEnMapa): { raiz: HTMLElement; circulo: HTMLElement } {
+  const raiz = document.createElement("div");
+  raiz.style.cssText = `position:relative;width:${TAMANO}px;height:${TAMANO}px;margin:-${TAMANO / 2}px 0 0 -${TAMANO / 2}px`;
+  const circulo = document.createElement("div");
+  circulo.title = club.nombre;
+  circulo.style.cssText = `width:100%;height:100%;border-radius:9999px;border:2px solid #fff;background:#2563eb;box-shadow:0 1px 5px rgba(0,0,0,.55);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;font:700 10px system-ui;transition:transform .15s`;
   const poner = (texto: string) => {
-    marco.replaceChildren(document.createTextNode(texto));
+    circulo.replaceChildren(document.createTextNode(texto));
   };
   if (club.logoUrl) {
     const img = document.createElement("img");
@@ -101,19 +117,31 @@ function iconoDelClub(club: ClubEnMapa): HTMLElement {
     img.alt = "";
     img.style.cssText = "width:100%;height:100%;object-fit:contain;background:#fff";
     img.addEventListener("error", () => poner(club.sigla));
-    marco.append(img);
+    circulo.append(img);
   } else {
     poner(club.sigla);
   }
-  return marco;
+  raiz.append(circulo);
+
+  if (club.viento) {
+    const etiqueta = document.createElement("div");
+    etiqueta.title = `Viento en ${club.nombre}: del ${direccionViento(club.viento.grados)}, ${club.viento.nudos} kn (estimado del modelo)`;
+    etiqueta.style.cssText = "position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:3px;display:flex;align-items:center;gap:3px;white-space:nowrap;padding:1px 6px;border-radius:9999px;background:rgba(15,23,42,.88);color:#fff;font:700 10px system-ui;box-shadow:0 1px 3px rgba(0,0,0,.5);pointer-events:none";
+    // La flecha apunta hacia donde VA el viento, como en el resto del sitio.
+    const flecha = document.createElement("span");
+    flecha.textContent = "↑";
+    flecha.style.cssText = `display:inline-block;transform:rotate(${club.viento.grados + 180}deg);line-height:1`;
+    etiqueta.append(flecha, document.createTextNode(`${club.viento.nudos} kn`));
+    raiz.append(etiqueta);
+  }
+  return { raiz, circulo };
 }
 
-function resaltar(marco: HTMLElement) {
-  marco.style.borderColor = "#f59e0b";
-  marco.style.boxShadow = "0 0 0 3px rgba(245,158,11,.55), 0 1px 6px rgba(0,0,0,.6)";
-  marco.style.transform = "scale(1.25)";
-  marco.style.zIndex = "1000";
-  marco.parentElement?.style.setProperty("z-index", "1000");
+function resaltar(circulo: HTMLElement, raiz: HTMLElement) {
+  circulo.style.borderColor = "#f59e0b";
+  circulo.style.boxShadow = "0 0 0 3px rgba(245,158,11,.55), 0 1px 6px rgba(0,0,0,.6)";
+  circulo.style.transform = "scale(1.25)";
+  raiz.parentElement?.style.setProperty("z-index", "1000");
 }
 
 export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }: Props) {
@@ -135,7 +163,7 @@ export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }
         await cargarScript(WINDY);
         if (cancelado || !window.windyInit || !window.L) return;
         const L = window.L;
-        window.windyInit({ key: clave, lat, lon, zoom: 9 }, ({ map, store }) => {
+        window.windyInit({ key: clave, lat, lon, zoom: 9 }, ({ map, store, picker }) => {
           if (cancelado) return;
           mapaRef.current = map;
           try {
@@ -143,23 +171,27 @@ export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }
           } catch {
             // si la API cambia estos nombres, queda el viento por defecto
           }
-          const marcos = new Map<string, { marco: HTMLElement; club: ClubEnMapa }>();
+          // Tocar cualquier punto del mapa pone un pin con el viento de ahí (el panel
+          // del pin es de Windy). Tocar un club abre su ficha, no el pin.
+          const pin = picker ?? window.W?.picker;
+          if (pin) map.on("click", (e) => pin.open({ lat: e.latlng.lat, lon: e.latlng.lng }));
+          const marcos = new Map<string, { circulo: HTMLElement; raiz: HTMLElement; club: ClubEnMapa }>();
           for (const club of lista) {
-            const marco = iconoDelClub(club);
+            const { raiz, circulo } = iconoDelClub(club);
             // Leaflet 1.4 solo acepta texto en `html` (un elemento se vería como
             // "[object HTMLDivElement]"): el ícono se crea vacío y el escudo se
             // agrega al elemento del marcador una vez puesto en el mapa.
             const marcador = L.marker([club.latitud, club.longitud], { icon: L.divIcon({ className: "", html: "", iconSize: [0, 0] }) })
               .bindPopup(popupDelClub(club))
               .addTo(map);
-            marcador.getElement()?.append(marco);
-            marcos.set(club.sigla, { marco, club });
+            marcador.getElement()?.append(raiz);
+            marcos.set(club.sigla, { circulo, raiz, club });
           }
           void miClub.then((mio) => {
             if (cancelado || !mio?.club) return;
             const propio = marcos.get(mio.club.toUpperCase());
             if (!propio) return;
-            resaltar(propio.marco);
+            resaltar(propio.circulo, propio.raiz);
             if (mio.slug === slugPagina) map.setView([propio.club.latitud, propio.club.longitud], 11);
           });
         });
