@@ -146,9 +146,13 @@ export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }
           const marcos = new Map<string, { marco: HTMLElement; club: ClubEnMapa }>();
           for (const club of lista) {
             const marco = iconoDelClub(club);
-            L.marker([club.latitud, club.longitud], { icon: L.divIcon({ className: "", html: marco, iconSize: [0, 0] }) })
+            // Leaflet 1.4 solo acepta texto en `html` (un elemento se vería como
+            // "[object HTMLDivElement]"): el ícono se crea vacío y el escudo se
+            // agrega al elemento del marcador una vez puesto en el mapa.
+            const marcador = L.marker([club.latitud, club.longitud], { icon: L.divIcon({ className: "", html: "", iconSize: [0, 0] }) })
               .bindPopup(popupDelClub(club))
               .addTo(map);
+            marcador.getElement()?.append(marco);
             marcos.set(club.sigla, { marco, club });
           }
           void miClub.then((mio) => {
