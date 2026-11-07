@@ -33,9 +33,15 @@ interface Props {
 const LEAFLET = "https://unpkg.com/leaflet@1.4.0/dist/leaflet.js";
 const WINDY = "https://api.windy.com/assets/map-forecast/libBoot.js";
 
+type Punto = { x: number; y: number };
+type LatLng = { lat: number; lng: number };
+type Capa = { addTo: (m: unknown) => Capa };
 type WindyMap = {
   setView: (ll: [number, number], z: number) => void;
-  on: (evento: string, fn: (e: { latlng: { lat: number; lng: number } }) => void) => void;
+  on: (evento: string, fn: (e: { latlng: LatLng }) => void) => void;
+  latLngToContainerPoint: (ll: [number, number]) => Punto;
+  containerPointToLatLng: (p: [number, number]) => LatLng;
+  removeLayer: (capa: unknown) => void;
 };
 type WindyPicker = {
   open: (ll: { lat: number; lon: number }) => void;
@@ -47,10 +53,13 @@ type Marcador = {
   bindPopup: (el: HTMLElement) => Marcador;
   addTo: (m: unknown) => Marcador;
   getElement: () => HTMLElement | undefined;
+  setLatLng: (ll: [number, number]) => Marcador;
 };
 type Leaflet = {
   divIcon: (o: object) => unknown;
   marker: (ll: [number, number], o: object) => Marcador;
+  polyline: (ll: [number, number][], o: object) => Capa;
+  circleMarker: (ll: [number, number], o: object) => Capa;
 };
 declare global {
   interface Window {
@@ -176,6 +185,48 @@ export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }
           const pin = picker ?? window.W?.picker;
           if (pin) map.on("click", (e) => pin.open({ lat: e.latlng.lat, lon: e.latlng.lng }));
           const marcos = new Map<string, { circulo: HTMLElement; raiz: HTMLElement; club: ClubEnMapa }>();
+          const marcadores: { marcador: Marcador; club: ClubEnMapa }[] = [];
+          let extras: unknown[] = [];
+
+          // En zonas con muchos clubes juntos (San Isidro) los escudos se pisan aun con
+          // el zoom al máximo: los que quedan a menos de DIST px se abren en abanico
+          // alrededor de su centro y una línea fina marca la ubicación real de cada uno.
+          const separar = () => {
+            for (const e of extras) map.removeLayer(e);
+            extras = [];
+            const DIST = 44;
+            const pts = marcadores.map((m) => map.latLngToContainerPoint([m.club.latitud, m.club.longitud]));
+            const usado = new Set<number>();
+            marcadores.forEach((m, i) => {
+              if (usado.has(i)) return;
+              const grupo = [i];
+              usado.add(i);
+              for (let j = i + 1; j < marcadores.length; j++) {
+                if (usado.has(j)) continue;
+                if (grupo.some((g) => Math.hypot(pts[g].x - pts[j].x, pts[g].y - pts[j].y) < DIST)) {
+                  grupo.push(j);
+                  usado.add(j);
+                }
+              }
+              if (grupo.length === 1) {
+                m.marcador.setLatLng([m.club.latitud, m.club.longitud]);
+                return;
+              }
+              const cx = grupo.reduce((a, g) => a + pts[g].x, 0) / grupo.length;
+              const cy = grupo.reduce((a, g) => a + pts[g].y, 0) / grupo.length;
+              const radio = Math.max(48, grupo.length * 15);
+              const centro = map.containerPointToLatLng([cx, cy]);
+              extras.push(L.circleMarker([centro.lat, centro.lng], { radius: 3, weight: 1, color: "#fff", fillColor: "#0f172a", fillOpacity: 1, interactive: false }).addTo(map));
+              grupo.forEach((g, k) => {
+                const ang = -Math.PI / 2 + (k * 2 * Math.PI) / grupo.length;
+                const destino = map.containerPointToLatLng([cx + radio * Math.cos(ang), cy + radio * Math.sin(ang)]);
+                const mk = marcadores[g];
+                mk.marcador.setLatLng([destino.lat, destino.lng]);
+                extras.push(L.polyline([[centro.lat, centro.lng], [destino.lat, destino.lng]], { color: "#0f172a", weight: 1.5, opacity: 0.7, interactive: false }).addTo(map));
+              });
+            });
+          };
+
           for (const club of lista) {
             const { raiz, circulo } = iconoDelClub(club);
             // Leaflet 1.4 solo acepta texto en `html` (un elemento se vería como
@@ -186,7 +237,10 @@ export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }
               .addTo(map);
             marcador.getElement()?.append(raiz);
             marcos.set(club.sigla, { circulo, raiz, club });
+            marcadores.push({ marcador, club });
           }
+          separar();
+          map.on("zoomend", separar);
           void miClub.then((mio) => {
             if (cancelado || !mio?.club) return;
             const propio = marcos.get(mio.club.toUpperCase());
