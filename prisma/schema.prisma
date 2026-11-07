@@ -51,6 +51,7 @@ model User {
   sessions         Session[]
   solicitudes      SolicitudVinculacion[]
   favoritos        Favorito[]
+  mensajes         MensajeContacto[]
 }
 
 enum PerfilUso {
@@ -390,6 +391,16 @@ model MensajeContacto {
   mensaje   String   @db.Text
   leido     Boolean  @default(false)
   createdAt DateTime @default(now())
+  // Cuenta de quien escribió (si estaba logueada al enviar, o si su email
+  // coincide con una cuenta verificada al responder): así la respuesta le
+  // llega también dentro de la app (/mi-perfil/mensajes), además del mail.
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Respuesta del admin (una por mensaje) y si la persona ya la vio en la app.
+  respuesta     String?   @db.Text
+  respondidoEn  DateTime?
+  respuestaLeida Boolean  @default(true)
 
   @@index([createdAt])
+  @@index([userId])
 }

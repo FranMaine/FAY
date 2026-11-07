@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { NotificationBell } from '@/components/layout/notification-bell';
+import { MensajesBell } from '@/components/layout/mensajes-bell';
 import { ClimaBadge } from '@/components/layout/clima-badge';
 import { BuscadorGlobal } from '@/components/layout/buscador-global';
 import { useMiLugar } from '@/hooks/use-mi-lugar';
@@ -116,6 +117,7 @@ export function Navbar() {
                 </Link>
               )}
               {isAdmin && <NotificationBell />}
+              {session && <MensajesBell />}
             </div>
             <div className="flex items-center gap-2 border-l border-border pl-6">
               {session ? (
@@ -157,6 +159,7 @@ export function Navbar() {
               abrir el menú para cambiar de tema). */}
           <div className="flex items-center gap-1 md:hidden">
             {isAdmin && <NotificationBell />}
+            {session && <MensajesBell />}
             <BuscadorGlobal />
             <ThemeToggle />
             <button

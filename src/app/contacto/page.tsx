@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { CheckCircle2Icon, Loader2Icon, MailIcon, SendIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +11,21 @@ import { mensajeDeError } from "@/lib/utils";
 import { EMAIL_PUBLICO } from "@/lib/site";
 
 export default function ContactoPage() {
+  const { data: session } = useSession();
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [asunto, setAsunto] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [trampa, setTrampa] = useState("");
   const [montadoEn] = useState(() => Date.now());
+
+  // Con la sesión iniciada se completan solos nombre y mail (se pueden cambiar).
+  useEffect(() => {
+    if (!session?.user) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNombre((n) => n || session.user.name || "");
+    setEmail((e) => e || session.user.email || "");
+  }, [session]);
 
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
@@ -58,6 +69,11 @@ export default function ContactoPage() {
                 <CheckCircle2Icon className="w-12 h-12 text-primary" />
                 <p className="font-medium text-lg">¡Mensaje enviado!</p>
                 <p className="text-muted-foreground text-sm">Te vamos a responder al email que dejaste.</p>
+                {session && (
+                  <p className="text-muted-foreground text-sm">
+                    También vas a ver la respuesta en <Link href="/mi-perfil/mensajes" className="text-primary hover:underline">Mis mensajes</Link>.
+                  </p>
+                )}
               </div>
             ) : (
               <form onSubmit={onSubmit} className="space-y-4">

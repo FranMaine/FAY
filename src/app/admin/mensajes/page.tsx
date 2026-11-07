@@ -15,6 +15,9 @@ interface MensajeItem {
   mensaje: string;
   leido: boolean;
   createdAt: string;
+  userId: string | null;
+  respuesta: string | null;
+  respondidoEn: string | null;
 }
 
 export default function AdminMensajesPage() {
@@ -22,6 +25,9 @@ export default function AdminMensajesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandido, setExpandido] = useState<string | null>(null);
+  const [borrador, setBorrador] = useState<Record<string, string>>({});
+  const [enviando, setEnviando] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
 
   const cargar = async () => {
     setIsLoading(true);
@@ -56,6 +62,30 @@ export default function AdminMensajesPage() {
     setMensajes((prev) => prev.filter((m) => m.id !== id));
   }
 
+  async function responder(id: string) {
+    const texto = (borrador[id] ?? "").trim();
+    if (texto.length < 2) return;
+    setEnviando(id);
+    setError(null);
+    setAviso(null);
+    try {
+      const res = await fetch(`/api/admin/mensajes/${id}/responder`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ respuesta: texto }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudo enviar la respuesta");
+      setMensajes((prev) => prev.map((m) => (m.id === id ? { ...m, ...data.mensaje, leido: true } : m)));
+      setBorrador((prev) => ({ ...prev, [id]: "" }));
+      setAviso(data.enApp ? "Respuesta enviada por mail y a su cuenta de la app." : "Respuesta enviada por mail (no tiene cuenta en la app).");
+    } catch (err) {
+      setError(mensajeDeError(err));
+    } finally {
+      setEnviando(null);
+    }
+  }
+
   const sinLeer = mensajes.filter((m) => !m.leido).length;
 
   return (
@@ -76,6 +106,7 @@ export default function AdminMensajesPage() {
           </Button>
         </header>
 
+        {aviso && <div role="status" className="bg-primary/10 border border-primary/40 text-primary text-sm p-3 rounded-md">{aviso}</div>}
         {error && <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>}
 
         {isLoading ? (
@@ -98,6 +129,7 @@ export default function AdminMensajesPage() {
                       <div className="flex items-center gap-2">
                         {!m.leido && <CircleIcon className="w-2 h-2 fill-primary text-primary shrink-0" />}
                         <p className="font-semibold truncate">{m.asunto}</p>
+                        {m.respuesta && <span className="text-[10px] uppercase tracking-wide text-primary shrink-0">Respondido</span>}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {m.nombre} · {m.email} · {new Date(m.createdAt).toLocaleString("es-AR")}
@@ -118,7 +150,35 @@ export default function AdminMensajesPage() {
                     </div>
                   </div>
                   {expandido === m.id && (
-                    <p className="text-sm text-foreground whitespace-pre-wrap border-t border-border pt-2 mt-2">{m.mensaje}</p>
+                    <div className="border-t border-border pt-2 mt-2 space-y-3">
+                      <p className="text-sm text-foreground whitespace-pre-wrap">{m.mensaje}</p>
+                      {m.respuesta && (
+                        <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 space-y-1">
+                          <p className="text-xs font-medium text-primary">
+                            Respondido{m.respondidoEn ? ` · ${new Date(m.respondidoEn).toLocaleString("es-AR")}` : ""}
+                          </p>
+                          <p className="text-sm whitespace-pre-wrap">{m.respuesta}</p>
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        <textarea
+                          value={borrador[m.id] ?? ""}
+                          onChange={(e) => setBorrador((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                          rows={3}
+                          maxLength={4000}
+                          placeholder={m.respuesta ? "Escribir otra respuesta…" : "Escribí tu respuesta…"}
+                          className="w-full rounded-md border border-border bg-background p-2 text-sm"
+                        />
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs text-muted-foreground">
+                            Le llega por mail a {m.email}{m.userId ? " y a su cuenta de la app" : " (y a su cuenta de la app, si tiene una con ese mail)"}.
+                          </p>
+                          <Button type="button" size="sm" disabled={enviando === m.id || (borrador[m.id] ?? "").trim().length < 2} onClick={() => responder(m.id)}>
+                            {enviando === m.id ? "Enviando…" : "Responder"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </CardContent>
               </Card>

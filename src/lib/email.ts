@@ -114,6 +114,22 @@ export function emailNuevoMensajeContacto(datos: { nombre: string; email: string
   };
 }
 
+export function emailRespuestaContacto(datos: { nombre: string; asunto: string; mensajeOriginal: string; respuesta: string; urlApp: string | null }) {
+  return {
+    subject: `Respuesta a tu mensaje: ${datos.asunto}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1e293b;">Hola ${escapeHtml(datos.nombre)}, te respondimos</h2>
+        <p style="white-space: pre-wrap; background: #eff6ff; padding: 12px; border-radius: 8px;">${escapeHtml(datos.respuesta)}</p>
+        <p style="color: #64748b; font-size: 13px;">Tu mensaje original (${escapeHtml(datos.asunto)}):</p>
+        <p style="white-space: pre-wrap; color: #64748b; font-size: 13px; border-left: 3px solid #e2e8f0; padding-left: 10px;">${escapeHtml(datos.mensajeOriginal)}</p>
+        ${datos.urlApp ? `<p><a href="${datos.urlApp}" style="color: #2563eb;">Ver la respuesta en Orzando</a></p>` : ''}
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">Orzando</p>
+      </div>
+    `,
+  };
+}
+
 export function emailVinculacionAprobada(nombreRegatista: string, urlPerfil: string) {
   return {
     subject: 'Tu perfil de regatista fue vinculado',

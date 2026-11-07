@@ -6,6 +6,7 @@ import { permitir, ipDeRequest } from '@/lib/rate-limit';
 import { pareceSpam } from '@/lib/spam-guard';
 import { sendEmail, emailNuevoMensajeContacto } from '@/lib/email';
 import { EMAIL_AVISOS } from '@/lib/site';
+import { auth } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -26,7 +27,10 @@ export async function POST(request: Request) {
 
     const { nombre, email, asunto, mensaje } = contactoSchema.parse(json);
 
-    await prisma.mensajeContacto.create({ data: { nombre, email, asunto, mensaje } });
+    // Si escribe con la sesión iniciada, el mensaje queda atado a su cuenta:
+    // la respuesta le llega también dentro de la app.
+    const session = await auth();
+    await prisma.mensajeContacto.create({ data: { nombre, email, asunto, mensaje, userId: session?.user?.id ?? null } });
 
     // Aviso por mail a la casilla de la web -mejor esfuerzo, ver sendEmail:
     // si RESEND_API_KEY no está configurada o el envío falla, el mensaje ya
