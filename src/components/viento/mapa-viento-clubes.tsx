@@ -102,6 +102,12 @@ function popupDelClub(club: ClubEnMapa): HTMLElement {
     enlace.style.cssText = "display:block;margin-top:4px;color:#2563eb;text-decoration:underline";
     caja.append(enlace);
   }
+  if (club.viento) {
+    const viento = document.createElement("div");
+    viento.style.cssText = "margin-top:6px;font-size:12px";
+    viento.textContent = `Viento: ${club.viento.nudos} kn del ${direccionViento(club.viento.grados)} (estimado del modelo)`;
+    caja.insertBefore(viento, caja.children[1] ?? null);
+  }
   return caja;
 }
 
@@ -188,49 +194,50 @@ export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }
           const marcadores: { marcador: Marcador; club: ClubEnMapa }[] = [];
           let extras: unknown[] = [];
 
-          // En zonas con muchos clubes juntos (San Isidro) los escudos se pisan aun con
-          // el zoom al máximo: los que quedan a menos de DIST px se abren en abanico
-          // alrededor de su centro y una línea fina marca la ubicación real de cada uno.
+          // Los escudos (con su viento debajo) no deben pisarse nunca, a ningún zoom:
+          // se parte de la posición real en pantalla y se empujan de a pares, por el
+          // eje de menor solapamiento, hasta que no quede ningún par solapado. Los
+          // que se corren quedan unidos por una línea fina a su ubicación real.
           const separar = () => {
             for (const e of extras) map.removeLayer(e);
             extras = [];
-            const DIST = 36;
-            const pts = marcadores.map((m) => map.latLngToContainerPoint([m.club.latitud, m.club.longitud]));
-            const usado = new Set<number>();
-            marcadores.forEach((m, i) => {
-              if (usado.has(i)) return;
-              // Solo los que están cerca de la "semilla" (no en cadena): así no se arma
-              // un abanico gigante con todos los clubes de una zona al alejar el zoom.
-              const grupo = [i];
-              usado.add(i);
-              for (let j = i + 1; j < marcadores.length; j++) {
-                if (usado.has(j)) continue;
-                if (Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y) < DIST) {
-                  grupo.push(j);
-                  usado.add(j);
+            const ANCHO = 64; // ancho de la etiqueta del viento (más ancha que el escudo)
+            const ALTO = 58; // escudo + etiqueta debajo
+            const real = marcadores.map((m) => map.latLngToContainerPoint([m.club.latitud, m.club.longitud]));
+            const pos = real.map((p, i) => ({ x: p.x + (i % 2 ? 0.01 : -0.01), y: p.y }));
+            for (let it = 0; it < 400; it++) {
+              let movido = false;
+              for (let i = 0; i < pos.length; i++) {
+                for (let j = i + 1; j < pos.length; j++) {
+                  const dx = pos[j].x - pos[i].x;
+                  const dy = pos[j].y - pos[i].y;
+                  const ox = ANCHO - Math.abs(dx);
+                  const oy = ALTO - Math.abs(dy);
+                  if (ox <= 0 || oy <= 0) continue;
+                  movido = true;
+                  if (ox < oy) {
+                    const d = (ox / 2 + 0.5) * (dx >= 0 ? 1 : -1);
+                    pos[i].x -= d;
+                    pos[j].x += d;
+                  } else {
+                    const d = (oy / 2 + 0.5) * (dy >= 0 ? 1 : -1);
+                    pos[i].y -= d;
+                    pos[j].y += d;
+                  }
                 }
               }
-              if (grupo.length === 1) {
+              if (!movido) break;
+            }
+            marcadores.forEach((m, i) => {
+              const corrido = Math.hypot(pos[i].x - real[i].x, pos[i].y - real[i].y) > 6;
+              if (!corrido) {
                 m.marcador.setLatLng([m.club.latitud, m.club.longitud]);
                 return;
               }
-              const cx = grupo.reduce((a, g) => a + pts[g].x, 0) / grupo.length;
-              const cy = grupo.reduce((a, g) => a + pts[g].y, 0) / grupo.length;
-              const centro = map.containerPointToLatLng([cx, cy]);
-              extras.push(L.circleMarker([centro.lat, centro.lng], { radius: 3, weight: 1, color: "#fff", fillColor: "#0f172a", fillOpacity: 1, interactive: false }).addTo(map));
-              // Hasta 6 en un anillo; si son más, un segundo anillo por fuera.
-              const interior = Math.min(grupo.length, 6);
-              grupo.forEach((g, k) => {
-                const enInterior = k < interior;
-                const n = enInterior ? interior : grupo.length - interior;
-                const idx = enInterior ? k : k - interior;
-                const radio = enInterior ? Math.max(46, interior * 14) : Math.max(46, interior * 14) + 52;
-                const ang = -Math.PI / 2 + (idx * 2 * Math.PI) / n + (enInterior ? 0 : Math.PI / n);
-                const destino = map.containerPointToLatLng([cx + radio * Math.cos(ang), cy + radio * Math.sin(ang)]);
-                const mk = marcadores[g];
-                mk.marcador.setLatLng([destino.lat, destino.lng]);
-                extras.push(L.polyline([[centro.lat, centro.lng], [destino.lat, destino.lng]], { color: "#0f172a", weight: 1.5, opacity: 0.7, interactive: false }).addTo(map));
-              });
+              const destino = map.containerPointToLatLng([pos[i].x, pos[i].y]);
+              m.marcador.setLatLng([destino.lat, destino.lng]);
+              extras.push(L.polyline([[m.club.latitud, m.club.longitud], [destino.lat, destino.lng]], { color: "#0f172a", weight: 1.5, opacity: 0.7, interactive: false }).addTo(map));
+              extras.push(L.circleMarker([m.club.latitud, m.club.longitud], { radius: 3, weight: 1, color: "#fff", fillColor: "#0f172a", fillOpacity: 1, interactive: false }).addTo(map));
             });
           };
 
