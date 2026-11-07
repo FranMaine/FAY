@@ -383,24 +383,57 @@ model AuditLog {
 // mensaje queda guardado acá (y /admin/mensajes lo lista) además de
 // intentar notificar por mail a la casilla de la web (EMAIL_AVISOS) si RESEND_API_KEY está
 // configurada.
+enum EstadoChat {
+  ABIERTO
+  CERRADO
+}
+
+enum AutorChat {
+  ADMIN
+  USUARIO
+}
+
+// Conversación nacida en /contacto: el mensaje inicial + una cadena de
+// respuestas (MensajeContactoEntrada) entre la persona y el admin. Sigue
+// abierta -las dos partes pueden escribir- hasta que el admin la cierra a
+// mano. Cada conversación tiene un `token` privado que va en el link del
+// mail (/contacto/chat/<token>): así también pueden seguirla las personas
+// sin cuenta. Si estaba logueada (o su mail coincide con una cuenta
+// verificada) queda atada a `userId` y la ve en /mi-perfil/mensajes.
 model MensajeContacto {
   id        String   @id @default(cuid())
   nombre    String
   email     String
   asunto    String
   mensaje   String   @db.Text
+  // Hay algo nuevo del usuario que el admin no vio (false) o ya lo leyó.
   leido     Boolean  @default(false)
   createdAt DateTime @default(now())
-  // Cuenta de quien escribió (si estaba logueada al enviar, o si su email
-  // coincide con una cuenta verificada al responder): así la respuesta le
-  // llega también dentro de la app (/mi-perfil/mensajes), además del mail.
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  // Respuesta del admin (una por mensaje) y si la persona ya la vio en la app.
+  // Hay una respuesta del admin que la persona todavía no vio (false).
+  respuestaLeida Boolean @default(true)
+  token     String?  @unique
+  estado    EstadoChat @default(ABIERTO)
+  cerradoEn DateTime?
+  ultimaActividad DateTime @default(now())
+  entradas  MensajeContactoEntrada[]
+  // Legado: antes la respuesta era una sola y vivía acá. Las existentes se
+  // pasaron a `entradas`; estas columnas ya no se usan.
   respuesta     String?   @db.Text
   respondidoEn  DateTime?
-  respuestaLeida Boolean  @default(true)
 
   @@index([createdAt])
   @@index([userId])
+}
+
+model MensajeContactoEntrada {
+  id        String   @id @default(cuid())
+  mensajeId String
+  mensaje   MensajeContacto @relation(fields: [mensajeId], references: [id], onDelete: Cascade)
+  autor     AutorChat
+  texto     String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([mensajeId, createdAt])
 }

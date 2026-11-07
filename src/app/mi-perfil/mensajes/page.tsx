@@ -2,25 +2,27 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Loader2Icon, MailIcon, MessageSquareReplyIcon } from "lucide-react";
+import { ChevronRightIcon, CircleIcon, Loader2Icon, LockIcon, MailIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { mensajeDeError } from "@/lib/utils";
+import { cn, mensajeDeError } from "@/lib/utils";
 
-interface Item {
+interface Conversacion {
   id: string;
+  token: string;
   asunto: string;
   mensaje: string;
   createdAt: string;
-  respuesta: string | null;
-  respondidoEn: string | null;
+  estado: "ABIERTO" | "CERRADO";
   respuestaLeida: boolean;
+  ultimaActividad: string;
+  entradas: { autor: "ADMIN" | "USUARIO"; texto: string; createdAt: string }[];
 }
 
-// Mensajes que la persona mandó por /contacto con su cuenta, y la respuesta
-// del equipo (que además le llegó por mail). Al abrir la pantalla las
-// respuestas se marcan como vistas y se apaga el globito de la barra.
+// Conversaciones que la persona abrió por /contacto con su cuenta. Cada una
+// abre su chat (/contacto/chat/<token>), donde puede seguir respondiendo
+// hasta que el equipo la cierra.
 export default function MisMensajesPage() {
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, setItems] = useState<Conversacion[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +32,6 @@ export default function MisMensajesPage() {
         const res = await fetch("/api/mis-mensajes");
         if (!res.ok) throw new Error("No se pudieron cargar tus mensajes");
         setItems(await res.json());
-        void fetch("/api/mis-mensajes", { method: "PATCH" }).then(() => window.dispatchEvent(new Event("mensajes-leidos")));
       } catch (err) {
         setError(mensajeDeError(err));
       } finally {
@@ -46,7 +47,7 @@ export default function MisMensajesPage() {
           <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
             <MailIcon className="w-7 h-7 text-primary" /> Mis mensajes
           </h1>
-          <p className="text-muted-foreground">Lo que nos escribiste y lo que te respondimos.</p>
+          <p className="text-muted-foreground">Tus conversaciones con el equipo de Orzando.</p>
         </header>
 
         {error && <div role="alert" className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">{error}</div>}
@@ -61,29 +62,32 @@ export default function MisMensajesPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {items.map((m) => (
-              <Card key={m.id} className="bg-surface border-border">
-                <CardContent className="p-4 space-y-3">
-                  <div>
-                    <p className="font-semibold">{m.asunto}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(m.createdAt).toLocaleString("es-AR")}</p>
-                  </div>
-                  <p className="text-sm whitespace-pre-wrap text-muted-foreground">{m.mensaje}</p>
-                  {m.respuesta ? (
-                    <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 space-y-1">
-                      <p className="text-xs font-medium text-primary flex items-center gap-1.5">
-                        <MessageSquareReplyIcon className="w-3.5 h-3.5" /> Respuesta
-                        {m.respondidoEn ? ` · ${new Date(m.respondidoEn).toLocaleString("es-AR")}` : ""}
-                      </p>
-                      <p className="text-sm whitespace-pre-wrap">{m.respuesta}</p>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">Todavía sin respuesta.</p>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-3">
+            {items.map((c) => {
+              const ultima = c.entradas[0];
+              return (
+                <Link key={c.id} href={`/contacto/chat/${c.token}`} className="block">
+                  <Card className={cn("bg-surface border-border hover:bg-surface-hover transition-colors", !c.respuestaLeida && "border-primary/50")}>
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          {!c.respuestaLeida && <CircleIcon className="w-2 h-2 fill-primary text-primary shrink-0" />}
+                          <p className="font-semibold truncate">{c.asunto}</p>
+                          {c.estado === "CERRADO" && (
+                            <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground shrink-0"><LockIcon className="w-3 h-3" /> Cerrada</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {ultima ? `${ultima.autor === "ADMIN" ? "Orzando" : "Vos"}: ${ultima.texto}` : `Vos: ${c.mensaje}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{new Date(c.ultimaActividad).toLocaleString("es-AR")}</p>
+                      </div>
+                      <ChevronRightIcon className="w-5 h-5 text-muted-foreground shrink-0" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

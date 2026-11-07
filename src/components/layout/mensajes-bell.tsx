@@ -25,12 +25,11 @@ export function MensajesBell() {
     }
     cargar();
     const intervalo = setInterval(cargar, POLL_MS);
-    const alLeer = () => setSinLeer(0);
-    window.addEventListener("mensajes-leidos", alLeer);
+    window.addEventListener("mensajes-leidos", cargar);
     return () => {
       cancelado = true;
       clearInterval(intervalo);
-      window.removeEventListener("mensajes-leidos", alLeer);
+      window.removeEventListener("mensajes-leidos", cargar);
     };
   }, []);
 

@@ -29,6 +29,7 @@ export default function ContactoPage() {
 
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
@@ -43,6 +44,7 @@ export default function ContactoPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "No se pudo enviar el mensaje");
+      setToken(typeof data.token === "string" ? data.token : null);
       setEnviado(true);
     } catch (err) {
       setError(mensajeDeError(err));
@@ -68,13 +70,13 @@ export default function ContactoPage() {
               <div className="flex flex-col items-center text-center gap-3 py-8">
                 <CheckCircle2Icon className="w-12 h-12 text-primary" />
                 <p className="font-medium text-lg">¡Mensaje enviado!</p>
-                <p className="text-muted-foreground text-sm">Te vamos a responder al email que dejaste.</p>
-                {session && (
-                  <p className="text-muted-foreground text-sm">
-                    También vas a ver la respuesta en <Link href="/mi-perfil/mensajes" className="text-primary hover:underline">Mis mensajes</Link>.
-                  </p>
+                <p className="text-muted-foreground text-sm">Te vamos a responder al email que dejaste. La conversación queda abierta: podés seguirla y contestar desde el link que te mandamos por mail.</p>
+                {token && (
+                  <Link href={`/contacto/chat/${token}`} className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+                    Abrir la conversación
+                  </Link>
                 )}
-              </div>
+                </div>
             ) : (
               <form onSubmit={onSubmit} className="space-y-4">
                 {/* Campo trampa anti-spam -ver src/lib/spam-guard.ts */}

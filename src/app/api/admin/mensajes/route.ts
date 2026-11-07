@@ -11,8 +11,13 @@ export async function GET() {
     }
 
     const mensajes = await prisma.mensajeContacto.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { ultimaActividad: 'desc' },
       take: 200,
+      select: {
+        id: true, nombre: true, email: true, asunto: true, mensaje: true, leido: true, createdAt: true,
+        userId: true, estado: true, cerradoEn: true, ultimaActividad: true,
+        entradas: { orderBy: { createdAt: 'asc' }, select: { id: true, autor: true, texto: true, createdAt: true } },
+      },
     });
     return NextResponse.json(mensajes);
   } catch (error) {
