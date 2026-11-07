@@ -194,16 +194,18 @@ export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }
           const separar = () => {
             for (const e of extras) map.removeLayer(e);
             extras = [];
-            const DIST = 44;
+            const DIST = 36;
             const pts = marcadores.map((m) => map.latLngToContainerPoint([m.club.latitud, m.club.longitud]));
             const usado = new Set<number>();
             marcadores.forEach((m, i) => {
               if (usado.has(i)) return;
+              // Solo los que están cerca de la "semilla" (no en cadena): así no se arma
+              // un abanico gigante con todos los clubes de una zona al alejar el zoom.
               const grupo = [i];
               usado.add(i);
               for (let j = i + 1; j < marcadores.length; j++) {
                 if (usado.has(j)) continue;
-                if (grupo.some((g) => Math.hypot(pts[g].x - pts[j].x, pts[g].y - pts[j].y) < DIST)) {
+                if (Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y) < DIST) {
                   grupo.push(j);
                   usado.add(j);
                 }
@@ -214,11 +216,16 @@ export function MapaVientoClubes({ clave, latitud, longitud, lugarSlug, clubes }
               }
               const cx = grupo.reduce((a, g) => a + pts[g].x, 0) / grupo.length;
               const cy = grupo.reduce((a, g) => a + pts[g].y, 0) / grupo.length;
-              const radio = Math.max(48, grupo.length * 15);
               const centro = map.containerPointToLatLng([cx, cy]);
               extras.push(L.circleMarker([centro.lat, centro.lng], { radius: 3, weight: 1, color: "#fff", fillColor: "#0f172a", fillOpacity: 1, interactive: false }).addTo(map));
+              // Hasta 6 en un anillo; si son más, un segundo anillo por fuera.
+              const interior = Math.min(grupo.length, 6);
               grupo.forEach((g, k) => {
-                const ang = -Math.PI / 2 + (k * 2 * Math.PI) / grupo.length;
+                const enInterior = k < interior;
+                const n = enInterior ? interior : grupo.length - interior;
+                const idx = enInterior ? k : k - interior;
+                const radio = enInterior ? Math.max(46, interior * 14) : Math.max(46, interior * 14) + 52;
+                const ang = -Math.PI / 2 + (idx * 2 * Math.PI) / n + (enInterior ? 0 : Math.PI / n);
                 const destino = map.containerPointToLatLng([cx + radio * Math.cos(ang), cy + radio * Math.sin(ang)]);
                 const mk = marcadores[g];
                 mk.marcador.setLatLng([destino.lat, destino.lng]);
