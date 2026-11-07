@@ -3,11 +3,18 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+    }
+
+    // `?resumen=1`: solo cuántas conversaciones tienen novedades sin leer
+    // (mensaje nuevo o respuesta de la persona), para la campanita del admin.
+    if (new URL(request.url).searchParams.get('resumen')) {
+      const sinLeer = await prisma.mensajeContacto.count({ where: { leido: false } });
+      return NextResponse.json({ sinLeer });
     }
 
     const mensajes = await prisma.mensajeContacto.findMany({
