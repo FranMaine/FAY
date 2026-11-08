@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { after, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { permitir } from '@/lib/rate-limit';
 import { registrarAuditoria } from '@/lib/auditoria';
@@ -53,7 +54,17 @@ export async function POST(request: Request) {
     if (!(await permitir('cron-barlovento', 8, 60 * 1000))) {
       return NextResponse.json({ error: 'Demasiados pedidos' }, { status: 429 });
     }
-    if (!prueba && !dentroDeVentana()) {
+    // ?forzar=1 (solo con la sesión de un admin) se salta la ventana de días y
+    // horas: sirve para correrla a mano cuando ya están los resultados y todavía
+    // no arrancó la tarea programada. El resto es igual (e idempotente).
+    const forzar = new URL(request.url).searchParams.get('forzar') === '1';
+    if (forzar) {
+      const session = await auth();
+      if (!session || session.user.role !== 'ADMIN') {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
+      }
+    }
+    if (!prueba && !forzar && !dentroDeVentana()) {
       return NextResponse.json({ saltado: 'Fuera de los días y horarios de regata' });
     }
 
