@@ -27,6 +27,10 @@ import { jsonLdSeguro } from "@/lib/json-ld";
 // refrescarSitio en src/lib/refrescar-cache.ts), así que esto solo cubre datos
 // modificados por fuera del sitio.
 export const revalidate = 3600;
+// Sin ninguna página prearmada: solo habilita que cada una se arme al primer pedido y se guarde (ISR).
+export function generateStaticParams() {
+  return [];
+}
 
 type Props = {
   params: Promise<{ id: string }>;

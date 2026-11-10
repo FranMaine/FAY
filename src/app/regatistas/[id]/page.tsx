@@ -10,12 +10,16 @@ import { BotonFavorito } from "@/components/favoritos/boton-favorito";
 
 // Sin esto, el perfil queda cacheado estático para siempre después de la
 // primera visita -si esa persona corre una nueva regata, nadie ve el
-// resultado nuevo en su perfil hasta el próximo deploy. ISR de 60s, igual
+// resultado nuevo en su perfil hasta el próximo deploy. ISR, igual
 // que el resto de las páginas que muestran datos que cambian.
 // Tope de seguridad de 1 hora: los cambios del admin las renuevan al instante (ver
 // refrescarSitio en src/lib/refrescar-cache.ts), así que esto solo cubre datos
 // modificados por fuera del sitio.
 export const revalidate = 3600;
+// Sin ninguna página prearmada: solo habilita que cada una se arme al primer pedido y se guarde (ISR).
+export function generateStaticParams() {
+  return [];
+}
 
 type Props = { params: Promise<{ id: string }> };
 
