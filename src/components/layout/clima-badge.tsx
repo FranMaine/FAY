@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { intervaloVisible } from '@/lib/intervalo-visible';
 import Link from 'next/link';
 import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, Sun, Wind, type LucideIcon } from 'lucide-react';
 import { categoriaClima, ETIQUETA_CLIMA, direccionViento, type CategoriaClima } from '@/lib/clima';
@@ -50,10 +51,10 @@ export function ClimaBadge({ slug, compacto = false }: { slug: string; compacto?
       }
     }
     cargar();
-    const intervalo = setInterval(cargar, REFRESCO_MS);
+    const detener = intervaloVisible(cargar, REFRESCO_MS);
     return () => {
       cancelado = true;
-      clearInterval(intervalo);
+      detener();
     };
   }, [slug]);
 

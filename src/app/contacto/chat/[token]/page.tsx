@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BurbujasChat, type EntradaChat } from "@/components/contacto/burbujas-chat";
 import { mensajeDeError } from "@/lib/utils";
+import { intervaloVisible } from "@/lib/intervalo-visible";
 
 interface Conversacion {
   nombre: string;
@@ -53,8 +54,7 @@ export default function ChatContactoPage({ params }: { params: Promise<{ token: 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     cargar();
-    const intervalo = setInterval(cargar, REFRESCO_MS);
-    return () => clearInterval(intervalo);
+    return intervaloVisible(cargar, REFRESCO_MS);
   }, [cargar]);
 
   useEffect(() => {

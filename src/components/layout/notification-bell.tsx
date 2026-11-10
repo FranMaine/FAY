@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { BellIcon, MailIcon, UserCheckIcon } from "lucide-react";
+import { intervaloVisible } from "@/lib/intervalo-visible";
 
 const POLL_MS = 60_000;
 
@@ -49,10 +50,10 @@ export function NotificationBell() {
     cargar();
     // Refresca sola cada un minuto -así un admin que deja la pestaña
     // abierta ve aparecer una solicitud o un mensaje nuevo sin recargar.
-    const interval = setInterval(cargar, POLL_MS);
+    const detener = intervaloVisible(cargar, POLL_MS);
     return () => {
       cancelado = true;
-      clearInterval(interval);
+      detener();
     };
   }, []);
 

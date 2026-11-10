@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { MailIcon } from "lucide-react";
+import { intervaloVisible } from "@/lib/intervalo-visible";
 
 const POLL_MS = 120_000;
 
@@ -24,11 +25,11 @@ export function MensajesBell() {
       }
     }
     cargar();
-    const intervalo = setInterval(cargar, POLL_MS);
+    const detener = intervaloVisible(cargar, POLL_MS);
     window.addEventListener("mensajes-leidos", cargar);
     return () => {
       cancelado = true;
-      clearInterval(intervalo);
+      detener();
       window.removeEventListener("mensajes-leidos", cargar);
     };
   }, []);

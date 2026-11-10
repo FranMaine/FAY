@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCwIcon, XIcon } from "lucide-react";
+import { intervaloVisible } from "@/lib/intervalo-visible";
 
 const INTERVALO_CHEQUEO_MS = 5 * 60 * 1000;
 
@@ -40,15 +41,7 @@ export function UpdateBanner({ version }: { version: string | null }) {
     }
 
     chequear();
-    const intervalo = setInterval(chequear, INTERVALO_CHEQUEO_MS);
-    function alVolverVisible() {
-      if (document.visibilityState === "visible") chequear();
-    }
-    document.addEventListener("visibilitychange", alVolverVisible);
-    return () => {
-      clearInterval(intervalo);
-      document.removeEventListener("visibilitychange", alVolverVisible);
-    };
+    return intervaloVisible(chequear, INTERVALO_CHEQUEO_MS);
   }, [version]);
 
   if (!versionNueva) return null;
