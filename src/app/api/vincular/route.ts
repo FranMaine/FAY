@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-error';
@@ -122,6 +123,7 @@ export async function DELETE() {
       session.user.id
     );
 
+    refrescarSitio();
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'DELETE /api/vincular');

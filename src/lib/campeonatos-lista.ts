@@ -23,7 +23,7 @@ async function leerFiltrosBase() {
 
 // Clases y años disponibles para los selectores de filtro.
 export const getFiltrosBase = unstable_cache(leerFiltrosBase, ["filtros-base"], {
-  revalidate: 300,
+  revalidate: 3600,
   tags: ["rankings"],
 });
 
@@ -100,6 +100,6 @@ async function leerListaCampeonatos(claseId: string, anio: number): Promise<Camp
 
 // Campeonatos publicados de una clase ("ALL" = todas) y año (0 = todos).
 export const getListaCampeonatos = unstable_cache(leerListaCampeonatos, ["lista-campeonatos"], {
-  revalidate: 300,
+  revalidate: 3600,
   tags: ["rankings"],
 });

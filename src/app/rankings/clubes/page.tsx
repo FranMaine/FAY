@@ -17,7 +17,10 @@ export const metadata: Metadata = {
   description: "Ranking Nacional de clubes por clase de vela, en base al desempeño acumulado de sus regatistas en los campeonatos de vela de Argentina.",
 };
 
-export const revalidate = 60;
+// Tope de seguridad de 1 hora: los cambios del admin las renuevan al instante (ver
+// refrescarSitio en src/lib/refrescar-cache.ts), así que esto solo cubre datos
+// modificados por fuera del sitio.
+export const revalidate = 3600;
 
 async function calcularRankingDeClubes(claseId: string, anio: number) {
   const [campeonatos, clubes] = await Promise.all([

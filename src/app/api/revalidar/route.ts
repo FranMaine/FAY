@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
-import { refrescarRankings } from '@/lib/refrescar-cache';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 
 // Limpia el caché de rankings, clubes y campeonatos desde afuera del sitio
 // (ej: scripts/fusionar-duplicados.ts, que escribe directo en la base y por
@@ -18,6 +18,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  refrescarRankings();
+  refrescarSitio();
   return NextResponse.json({ ok: true });
 }

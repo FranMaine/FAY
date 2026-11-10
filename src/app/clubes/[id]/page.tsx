@@ -16,7 +16,10 @@ import { slugificar } from "@/lib/slug";
 // Mismo criterio que /campeonatos/[id] y /regatistas/[id]: sin esto la
 // página queda cacheada estática para siempre, y un resultado nuevo
 // cargado por un admin no se vería acá hasta el próximo deploy.
-export const revalidate = 60;
+// Tope de seguridad de 1 hora: los cambios del admin las renuevan al instante (ver
+// refrescarSitio en src/lib/refrescar-cache.ts), así que esto solo cubre datos
+// modificados por fuera del sitio.
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ id: string }> };
 

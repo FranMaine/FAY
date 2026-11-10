@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { auth } from '@/lib/auth';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
@@ -39,6 +40,7 @@ export async function PATCH(request: Request) {
     if (regatista.fotoUrl) await borrarImagen(regatista.fotoUrl);
     void registrarAuditoria(actorDe(session), 'perfil.cambiar_foto', 'Regatista', regatista.id, { nombre: regatista.nombre });
 
+    refrescarSitio();
     return NextResponse.json({ fotoUrl });
   } catch (error) {
     if (error instanceof ImagenInvalidaError) {
@@ -64,6 +66,7 @@ export async function DELETE() {
     await prisma.regatista.update({ where: { id: regatista.id }, data: { fotoUrl: null } });
     void registrarAuditoria(actorDe(session), 'perfil.quitar_foto', 'Regatista', regatista.id, { nombre: regatista.nombre });
 
+    refrescarSitio();
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'DELETE /api/mi-perfil/foto');

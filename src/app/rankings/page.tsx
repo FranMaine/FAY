@@ -12,7 +12,10 @@ export const metadata: Metadata = {
   description: "Ranking Nacional anual por clase de vela, con el desempeño acumulado de cada regatista en los campeonatos de vela de Argentina.",
 };
 
-export const revalidate = 60; // Revalidar cada 60 segundos
+// Tope de seguridad de 1 hora: los cambios del admin las renuevan al instante (ver
+// refrescarSitio en src/lib/refrescar-cache.ts), así que esto solo cubre datos
+// modificados por fuera del sitio.
+export const revalidate = 3600;
 
 export default async function RankingsPage({
   searchParams

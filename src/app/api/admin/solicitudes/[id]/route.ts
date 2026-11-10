@@ -1,4 +1,5 @@
 import { after, NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { SITE_URL } from '@/lib/site';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
@@ -81,6 +82,7 @@ export async function PATCH(
       { userId: solicitud.userId, regatistaId: solicitud.regatistaId }
     );
 
+    if (action === 'APROBAR') refrescarSitio();
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'PATCH /api/admin/solicitudes/[id]');

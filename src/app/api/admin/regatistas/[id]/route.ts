@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
@@ -28,6 +29,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       nombreAnterior: anterior?.nombre,
       nombreNuevo: regatista.nombre,
     });
+    refrescarSitio();
     return NextResponse.json(regatista);
   } catch (error) {
     return handleApiError(error, 'PATCH /api/admin/regatistas/[id]');

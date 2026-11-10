@@ -1,4 +1,5 @@
 import { after, NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { prisma } from '@/lib/db';
 import { avisarResultadosPublicados } from '@/lib/avisos-resultados';
 import { auth } from '@/lib/auth';
@@ -7,7 +8,6 @@ import { generarClasificacion, agruparPorRegatista } from '@/lib/scoring';
 import { handleApiError } from '@/lib/api-error';
 import { puedeGestionarCampeonatos } from '@/lib/permisos';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
-import { revalidateTag } from 'next/cache';
 
 export async function GET(
   request: Request,
@@ -83,7 +83,7 @@ export async function PUT(
     // Si cambió algo que mueve posiciones (descartes...), avisa a quienes les afecte.
     if (campeonato.estado === 'PUBLICADO') after(() => avisarResultadosPublicados(id));
 
-    revalidateTag('rankings', { expire: 0 });
+    refrescarSitio();
     return NextResponse.json(campeonato);
   } catch (error) {
     return handleApiError(error, 'PUT /api/campeonatos/[id]');
@@ -113,7 +113,7 @@ export async function DELETE(
       { nombre: borrado.nombre, anio: borrado.anio }
     );
 
-    revalidateTag('rankings', { expire: 0 });
+    refrescarSitio();
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'DELETE /api/campeonatos/[id]');
@@ -184,7 +184,7 @@ export async function PATCH(
       after(() => avisarResultadosPublicados(id));
     }
 
-    revalidateTag('rankings', { expire: 0 });
+    refrescarSitio();
     return NextResponse.json(campeonato);
   } catch (error) {
     return handleApiError(error, 'PATCH /api/campeonatos/[id]');

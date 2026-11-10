@@ -50,7 +50,7 @@ export async function calcularRankingGeneral(claseId: string, anio: number) {
 // Con "Todos los años" (ver ranking-filters.tsx), este cálculo recorre y
 // reprocesa TODOS los campeonatos publicados de esa clase desde siempre
 // -crece con el histórico, no con el tráfico. En vez de depender solo del
-// `revalidate` de la página (60s, sigue vigente como red de contención),
+// `revalidate` de la página (1 hora, el tope de seguridad),
 // esto cachea el resultado más tiempo (1h) y lo invalida al toque cuando
 // algo que puede cambiar un ranking realmente pasa (publicar/despublicar/
 // editar un campeonato, cargar resultados) vía revalidateTag("rankings")

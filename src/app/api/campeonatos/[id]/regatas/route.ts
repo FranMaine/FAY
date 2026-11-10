@@ -1,4 +1,5 @@
 import { after, NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { avisarResultadosPublicados } from '@/lib/avisos-resultados';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
@@ -64,6 +65,7 @@ export async function POST(
     // Una regata nueva en un campeonato ya publicado cambia las posiciones.
     after(() => avisarResultadosPublicados(id));
 
+    refrescarSitio();
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     return handleApiError(error, 'POST /api/campeonatos/[id]/regatas');

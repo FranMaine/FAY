@@ -1,4 +1,5 @@
 import { after, NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { avisarResultadosPublicados } from '@/lib/avisos-resultados';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
@@ -7,7 +8,6 @@ import { regataResultadosSchema } from '@/lib/validators';
 import { splitNombreTripulacion, splitClubPorTripulante, normalizarNombre } from '@/lib/nombres';
 import { handleApiError } from '@/lib/api-error';
 import { puedeGestionarCampeonatos } from '@/lib/permisos';
-import { revalidateTag } from 'next/cache';
 
 // Reemplaza el set de resultados de una regata existente: crea/actualiza los
 // enviados y borra los que ya no vienen en el body (así "Guardar" en el
@@ -149,7 +149,7 @@ export async function PUT(
     // Corregir una regata de un campeonato ya publicado puede mover posiciones.
     after(() => avisarResultadosPublicados(regataExistente.campeonatoId));
 
-    revalidateTag('rankings', { expire: 0 });
+    refrescarSitio();
     return NextResponse.json(regata);
   } catch (error) {
     return handleApiError(error, 'PUT /api/regatas/[id]');

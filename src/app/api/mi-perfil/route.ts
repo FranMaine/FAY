@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
@@ -60,6 +61,7 @@ export async function PATCH(request: Request) {
         notificarFavoritos: usuario.notificarFavoritos,
       });
     }
+    if (apodo !== undefined && (antes?.apodo ?? null) !== usuario.apodo) refrescarSitio();
     return NextResponse.json(usuario);
   } catch (error) {
     return handleApiError(error, 'PATCH /api/mi-perfil');
@@ -89,6 +91,7 @@ export async function DELETE() {
       rol: cuenta?.role,
       teniaRegatista: !!cuenta?.regatistaId,
     });
+    refrescarSitio();
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'DELETE /api/mi-perfil');

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
@@ -60,6 +61,7 @@ export async function PUT(
       await eliminarClubesVacios([clubAntes], { email: session.user.email || session.user.id, name: session.user.name });
     }
 
+    refrescarSitio();
     return NextResponse.json(regatista);
   } catch (error) {
     return handleApiError(error, 'PUT /api/regatistas/[id]');

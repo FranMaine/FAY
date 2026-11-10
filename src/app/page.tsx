@@ -26,11 +26,12 @@ export const metadata: Metadata = {
 // deploy -los números de "Regatistas"/"Campeonatos" y la lista de últimos
 // resultados quedan congelados con los datos de ese momento, sin
 // actualizarse hasta el próximo deploy, aunque se cargue un campeonato
-// nuevo un minuto después. ISR de 60s (igual que /rankings y el resto de
-// las páginas públicas con datos que cambian): se re-genera como mucho una
-// vez por minuto en vez de pegarle a la base en CADA visita, que es lo que
-// hacía "force-dynamic" en la página más visitada del sitio.
-export const revalidate = 60;
+// nuevo un minuto después. ISR de 1 hora (igual que el resto de las páginas
+// públicas con datos que cambian), renovada al instante por refrescarSitio()
+// cuando el admin cambia algo: se re-genera solo cuando hace falta en vez de
+// pegarle a la base en CADA visita, que es lo que hacía "force-dynamic" en la
+// página más visitada del sitio.
+export const revalidate = 3600;
 
 // Obtener los últimos 3 campeonatos para la home. Solo mostramos los que
 // están PUBLICADOS -antes esto no filtraba, así que cualquier borrador

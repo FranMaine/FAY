@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
@@ -76,6 +77,7 @@ export async function POST(request: Request) {
 
     void registrarAuditoria(actorDe(session), 'regatista.crear', 'Regatista', regatista.id, { nombre: regatista.nombre });
 
+    refrescarSitio();
     return NextResponse.json(regatista, { status: 201 });
   } catch (error) {
     return handleApiError(error, 'POST /api/regatistas');

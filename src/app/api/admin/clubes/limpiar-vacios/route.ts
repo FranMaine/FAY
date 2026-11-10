@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { handleApiError } from '@/lib/api-error';
@@ -27,6 +28,7 @@ export async function POST() {
       { email: session.user.email || session.user.id, name: session.user.name }
     );
 
+    if (borrados.length > 0) refrescarSitio();
     return NextResponse.json({ borrados: borrados.length });
   } catch (error) {
     return handleApiError(error, 'POST /api/admin/clubes/limpiar-vacios');

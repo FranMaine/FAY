@@ -23,7 +23,10 @@ import { jsonLdSeguro } from "@/lib/json-ld";
 // los dos mundos: la mayoría de las visitas sigue sirviendo desde caché
 // (rápido, sin pegarle a la base en cada request), pero nunca queda
 // desactualizada por más de un minuto.
-export const revalidate = 60;
+// Tope de seguridad de 1 hora: los cambios del admin las renuevan al instante (ver
+// refrescarSitio en src/lib/refrescar-cache.ts), así que esto solo cubre datos
+// modificados por fuera del sitio.
+export const revalidate = 3600;
 
 type Props = {
   params: Promise<{ id: string }>;

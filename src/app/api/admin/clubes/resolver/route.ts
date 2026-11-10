@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     const club = existente ?? (await prisma.club.create({ data: { nombre } }));
     if (!existente) void registrarAuditoria(actorDe(session), 'club.crear', 'Club', club.id, { nombre: club.nombre });
 
+    if (!existente) refrescarSitio();
     return NextResponse.json({ id: club.id, nombre: club.nombre });
   } catch (error) {
     return handleApiError(error, 'POST /api/admin/clubes/resolver');

@@ -12,7 +12,10 @@ import { BotonFavorito } from "@/components/favoritos/boton-favorito";
 // primera visita -si esa persona corre una nueva regata, nadie ve el
 // resultado nuevo en su perfil hasta el próximo deploy. ISR de 60s, igual
 // que el resto de las páginas que muestran datos que cambian.
-export const revalidate = 60;
+// Tope de seguridad de 1 hora: los cambios del admin las renuevan al instante (ver
+// refrescarSitio en src/lib/refrescar-cache.ts), así que esto solo cubre datos
+// modificados por fuera del sitio.
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ id: string }> };
 

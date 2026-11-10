@@ -11,7 +11,10 @@ import { CLUB_ALIASES } from "@/lib/club-aliases";
 
 // Mismo criterio que /clubes/[id]: sin esto la página queda cacheada
 // estática para siempre.
-export const revalidate = 60;
+// Tope de seguridad de 1 hora: los cambios del admin las renuevan al instante (ver
+// refrescarSitio en src/lib/refrescar-cache.ts), así que esto solo cubre datos
+// modificados por fuera del sitio.
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ id: string; clase: string }> };
 

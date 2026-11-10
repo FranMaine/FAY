@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
@@ -50,7 +50,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         id,
         { email: antes.email, apodoAnterior: antes.apodo }
       );
-      revalidatePath('/regatistas/[id]', 'page');
+      refrescarSitio();
       return NextResponse.json(actualizado);
     }
 

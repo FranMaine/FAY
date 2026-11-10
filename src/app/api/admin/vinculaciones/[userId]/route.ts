@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { after } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
@@ -45,6 +46,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
       after(() => sendEmail({ to: usuario.email, ...emailVinculacionRevocada(usuario.regatista!.nombre) }));
     }
 
+    refrescarSitio();
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'DELETE /api/admin/vinculaciones/[userId]');

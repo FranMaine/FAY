@@ -1,4 +1,5 @@
 import { after, NextResponse } from "next/server";
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { avisarResultadosPublicados } from "@/lib/avisos-resultados";
 import { auth } from "@/lib/auth";
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
@@ -87,6 +88,7 @@ export async function POST(
     // Reimportar resultados de un campeonato ya publicado puede mover posiciones.
     after(() => avisarResultadosPublicados(campeonatoId));
 
+    refrescarSitio();
     return NextResponse.json(result);
   } catch (error) {
     console.error("[IMPORT_ERROR]", error);

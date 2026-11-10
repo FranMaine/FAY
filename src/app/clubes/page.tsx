@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 // esta página no tiene ningún parámetro -sin forzar esto, "next build"
 // intenta pre-renderizarla UNA vez con la base disponible en ese momento
 // y la deja estática para siempre. force-dynamic la recalcula en cada
-// request en su lugar (el dato se cachea aparte, abajo, por 2 minutos).
+// request en su lugar (el dato se cachea aparte, abajo, hasta 1 hora).
 export const dynamic = 'force-dynamic';
 
 async function leerClubes() {
@@ -29,10 +29,10 @@ async function leerClubes() {
     .sort((a, b) => b.regatistasCount - a.regatistasCount || a.nombre.localeCompare(b.nombre));
 }
 
-// Cacheado 2 minutos (y se limpia al toque con revalidateTag('rankings')): la
+// Cacheado hasta 1 hora (y se limpia al toque con refrescarSitio()): la
 // página es force-dynamic, así que sin esto cada visita recorría la tabla de
 // clubes con sus conteos.
-const getClubes = unstable_cache(leerClubes, ['clubes-lista'], { revalidate: 120, tags: ['rankings'] });
+const getClubes = unstable_cache(leerClubes, ['clubes-lista'], { revalidate: 3600, tags: ['rankings'] });
 
 export default async function ClubesPage() {
   const clubes = await getClubes();

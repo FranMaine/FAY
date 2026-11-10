@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { Prisma, EstadoCampeonato } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { auth } from '@/lib/auth';
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
       anio: campeonato.anio,
     });
 
+    refrescarSitio();
     return NextResponse.json(campeonato, { status: 201 });
   } catch (error) {
     return handleApiError(error, 'POST /api/campeonatos');

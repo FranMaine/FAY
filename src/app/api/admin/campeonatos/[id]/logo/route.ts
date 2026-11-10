@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { refrescarSitio } from '@/lib/refrescar-cache';
 import { auth } from '@/lib/auth';
 import { registrarAuditoria, actorDe } from '@/lib/auditoria';
 import { prisma } from '@/lib/db';
@@ -38,6 +39,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (campeonato.logoUrl) await borrarImagen(campeonato.logoUrl);
     void registrarAuditoria(actorDe(session), 'campeonato.cambiar_logo', 'Campeonato', id, { nombre: campeonato.nombre });
 
+    refrescarSitio();
     return NextResponse.json({ logoUrl });
   } catch (error) {
     if (error instanceof ImagenInvalidaError) {
@@ -64,6 +66,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     await prisma.campeonato.update({ where: { id }, data: { logoUrl: null } });
     void registrarAuditoria(actorDe(session), 'campeonato.quitar_logo', 'Campeonato', id, { nombre: campeonato.nombre });
 
+    refrescarSitio();
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error, 'DELETE /api/admin/campeonatos/[id]/logo');
